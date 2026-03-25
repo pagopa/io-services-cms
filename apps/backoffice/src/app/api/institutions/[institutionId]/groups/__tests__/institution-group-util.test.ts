@@ -131,7 +131,7 @@ describe("institutionGroupsUtil", () => {
     );
     expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
     expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
-    expect(mocks.isAdmin).not.toHaveBeenCalledOnce();
+    expect(mocks.isAdmin).not.toHaveBeenCalled();
     expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
     expect(mocks.parseQueryParam).toHaveBeenCalledWith(
       nextRequest,

@@ -3,49 +3,50 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
 import {
-  ApiKeyNotFoundError,
-  SubscriptionOwnershipError
+  SubscriptionNotFoundError,
+  SubscriptionOwnershipError,
 } from "../../../../../../lib/be/errors";
 import { GET } from "../route";
 
 const backofficeUserMock = {
   parameters: { userId: "userId" },
-  permissions: {}
+  permissions: {},
 } as BackOfficeUser;
 
 const {
   userAuthzMock,
   isGroupAllowedMock,
   retrieveManageSubscriptionApiKeysMock,
-  withJWTAuthHandlerMock
+  withJWTAuthHandlerMock,
 } = vi.hoisted(() => ({
   isGroupAllowedMock: vi.fn(() => true),
   userAuthzMock: vi.fn(() => ({
-    isGroupAllowed: isGroupAllowedMock
+    isGroupAllowed: isGroupAllowedMock,
   })),
   retrieveManageSubscriptionApiKeysMock: vi.fn(),
   withJWTAuthHandlerMock: vi.fn(
     (
       handler: (
         nextRequest: NextRequest,
-        context: { backofficeUser: BackOfficeUser; params: any }
-      ) => Promise<NextResponse> | Promise<Response>
-    ) => async (nextRequest: NextRequest, { params }: { params: {} }) =>
-      handler(nextRequest, {
-        backofficeUser: backofficeUserMock,
-        params
-      })
-  )
+        context: { backofficeUser: BackOfficeUser; params: any },
+      ) => Promise<NextResponse> | Promise<Response>,
+    ) =>
+      async (nextRequest: NextRequest, { params }: { params: {} }) =>
+        handler(nextRequest, {
+          backofficeUser: backofficeUserMock,
+          params,
+        }),
+  ),
 }));
 
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock
+  withJWTAuthHandler: withJWTAuthHandlerMock,
 }));
 vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock
+  userAuthz: userAuthzMock,
 }));
 vi.mock("@/lib/be/subscriptions/business", () => ({
-  retrieveManageSubscriptionApiKeys: retrieveManageSubscriptionApiKeysMock
+  retrieveManageSubscriptionApiKeys: retrieveManageSubscriptionApiKeysMock,
 }));
 
 afterEach(() => {
@@ -63,14 +64,14 @@ describe("getManageSubscriptionKeys", () => {
 
     // when
     const result = await GET(nextRequest, {
-      params: { subscriptionId }
+      params: { subscriptionId },
     });
 
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
     expect(jsonBody.detail).toEqual(
-      "Requested subscription is out of your scope"
+      "Requested subscription is out of your scope",
     );
     expect(userAuthzMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
@@ -87,12 +88,12 @@ describe("getManageSubscriptionKeys", () => {
     isGroupAllowedMock.mockReturnValueOnce(true);
     const expectedResponse = { foo: "bar" };
     retrieveManageSubscriptionApiKeysMock.mockResolvedValueOnce(
-      expectedResponse
+      expectedResponse,
     );
 
     // when
     const result = await GET(nextRequest, {
-      params: { subscriptionId }
+      params: { subscriptionId },
     });
 
     // then
@@ -106,15 +107,15 @@ describe("getManageSubscriptionKeys", () => {
     expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
     expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
-      subscriptionId
+      subscriptionId,
     );
   });
 
   it.each`
-    scenario                        | expectedStatusCode | error                                                    | expectedTitle               | expectedDetail
-    ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"ManageKeyRetrieveError"} | ${"Something went wrong"}
-    ${"ApiKeyNotFoundError"}        | ${404}             | ${new ApiKeyNotFoundError()}                             | ${"ApiKeyNotFoundError"}    | ${"the API does not exists"}
-    ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}              | ${"You can only handle subscriptions that you own"}
+    scenario                        | expectedStatusCode | error                                                    | expectedTitle                  | expectedDetail
+    ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"ManageKeyRetrieveError"}    | ${"Something went wrong"}
+    ${"SubscriptionNotFoundError"}  | ${404}             | ${new SubscriptionNotFoundError()}                       | ${"SubscriptionNotFoundError"} | ${"Subscription does not exist"}
+    ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}                 | ${"You can only handle subscriptions that you own"}
   `(
     "should return an error response when retrieveManageSubscriptionApiKeys rejects with ",
     async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {
@@ -127,7 +128,7 @@ describe("getManageSubscriptionKeys", () => {
 
       // when
       const result = await GET(nextRequest, {
-        params: { subscriptionId }
+        params: { subscriptionId },
       });
 
       // then
@@ -142,8 +143,8 @@ describe("getManageSubscriptionKeys", () => {
       expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
       expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
         backofficeUserMock.parameters.userId,
-        subscriptionId
+        subscriptionId,
       );
-    }
+    },
   );
 });

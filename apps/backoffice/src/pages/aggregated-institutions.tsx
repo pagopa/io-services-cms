@@ -111,17 +111,20 @@ export default function AggregatedInstitutions() {
         });
 
       if (E.isRight(response)) {
-        updateAggregatedInstitutionListItemById(aggregateId, {
-          ...response.right.value,
-        });
-      } else {
-        getGenericErrorNotification();
-        updateAggregatedInstitutionListItemById(aggregateId, {
-          isVisible: true,
-          primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-          secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-        });
+        const maybeValue = SubscriptionKeys.decode(response.right.value);
+        if (E.isRight(maybeValue)) {
+          updateAggregatedInstitutionListItemById(aggregateId, {
+            ...maybeValue.right,
+          });
+          return;
+        }
       }
+      getGenericErrorNotification();
+      updateAggregatedInstitutionListItemById(aggregateId, {
+        isVisible: true,
+        primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+        secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+      });
     },
     [getGenericErrorNotification, updateAggregatedInstitutionListItemById],
   );

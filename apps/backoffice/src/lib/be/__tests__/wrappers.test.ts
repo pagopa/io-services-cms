@@ -105,7 +105,7 @@ describe("withJWTAuthHandler", () => {
       }),
     );
     expect(result.status).toBe(200);
-    expect(retrieveInstitutionGroups).not.toHaveBeenCalledOnce();
+    expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
   });
 
   it.each`
@@ -142,7 +142,7 @@ describe("withJWTAuthHandler", () => {
         }),
       );
       expect(result.status).toBe(200);
-      expect(retrieveInstitutionGroups).not.toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
     },
   );
 

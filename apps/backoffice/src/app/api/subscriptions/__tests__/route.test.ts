@@ -423,7 +423,7 @@ describe("Subscription API", () => {
       expect(result.status).toBe(403);
       const jsonBody = await result.json();
       expect(jsonBody.detail).toEqual("Role not authorized");
-      expect(mocks.getManageSubscriptions).not.toHaveBeenCalledOnce();
+      expect(mocks.getManageSubscriptions).not.toHaveBeenCalled();
     });
 
     it("should return an error response when getManageSubscriptions fails", async () => {
