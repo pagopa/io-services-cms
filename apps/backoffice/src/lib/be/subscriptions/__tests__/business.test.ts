@@ -519,7 +519,7 @@ describe("Manage Keys", () => {
     });
   });
 
-  describe("retrieveInstitutionAggregateManageSubscriptionsKeys", async () => {
+  describe("retrieveInstitutionAggregateManageSubscriptionsKeys", () => {
     it("should return an error when getInstitutionGroups respond with an error", async () => {
       // given
       const aggregateId = "aggregateId";
