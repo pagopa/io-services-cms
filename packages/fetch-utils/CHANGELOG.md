@@ -1,5 +1,11 @@
 # @io-services-cms/fetch-utils
 
+## 1.0.4
+
+### Patch Changes
+
+- adc31a1c: Align Prettier version across apps and packages
+
 ## 1.0.3
 
 ### Patch Changes

@@ -14,8 +14,8 @@ import {
   aMockServicePublication,
   aMockServiceTopics,
   anInfoVersion,
+  getMockAggregatedInstitutionPagination,
   getMockBulkPatchService,
-  getMockDelegatedInstitutionPagination,
   getMockGroupUnboundedServices,
   getMockManageSubscription,
   getMockManageSubscriptions,
@@ -27,13 +27,13 @@ import {
   getMockServicesMigrationLatestStatus,
   getMockServicesMigrationStatusDetails,
 } from "../data/backend-data";
+import { getMockInstitutionGroups } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
 import {
   aMockCurrentUserAuthorizedInstitution,
   getMockInstitution,
   getMockUserAuthorizedInstitution,
 } from "../data/selfcare-data";
-import { getMockInstitutionGroups } from "../data/backend-data";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -792,7 +792,7 @@ export const buildHandlers = () => {
       return resultArray[0];
     }),
     http.get(
-      `${baseURL}/institutions/:institutionId/delegations`,
+      `${baseURL}/institutions/:institutionId/aggregates`,
       ({ request }) => {
         const url = new URL(request.url);
         const limit = url.searchParams.get("limit");
@@ -802,7 +802,7 @@ export const buildHandlers = () => {
         const resultArray = [
           new HttpResponse(
             JSON.stringify(
-              getGetDelegatedInstitutionPagination200Response(
+              getGetAggregatedInstitutionPagination200Response(
                 limit as string,
                 offset as string,
                 search as string,
@@ -824,6 +824,24 @@ export const buildHandlers = () => {
           new HttpResponse(null, {
             status: 500,
           }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
+    http.get(
+      `${baseURL}/institutions/current/aggregates/:aggregateId/subscriptions/manage/keys`,
+      () => {
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify(getGetAggregateManageSubscriptionKeys200Response()),
+            { status: 200 },
+          ),
+          new HttpResponse(null, { status: 401 }),
+          new HttpResponse(null, { status: 403 }),
+          new HttpResponse(null, { status: 404 }),
+          new HttpResponse(null, { status: 429 }),
+          new HttpResponse(null, { status: 500 }),
         ];
 
         return resultArray[0];
@@ -1253,12 +1271,16 @@ export function getInstitutionGroups200Response(institutionId: string) {
   return getMockInstitutionGroups(institutionId);
 }
 
-export function getGetDelegatedInstitutionPagination200Response(
+export function getGetAggregatedInstitutionPagination200Response(
   limit: string,
   offset: string,
   search: string,
 ) {
-  return getMockDelegatedInstitutionPagination(+limit, +offset, search);
+  return getMockAggregatedInstitutionPagination(+limit, +offset, search);
+}
+
+export function getGetAggregateManageSubscriptionKeys200Response() {
+  return getMockServiceKeys();
 }
 
 export function getGetManageSubscriptions200Response(

@@ -35,7 +35,7 @@
     "view": "View"
   },
   "copied": "Copied",
-  "delegated-institution": {
+  "aggregated-institution": {
     "actions": {
       "hide": "Hide API Key",
       "show": "Show API Key",
@@ -365,7 +365,7 @@
     "operator": "Operator"
   },
   "routes": {
-    "delegated-institutions": {
+    "aggregated-institutions": {
       "title": "Your institutions",
       "description": "View and manage institutions for the App IO product. To operate on one of these, click on the related table row context menu.",
       "empty": "There are no delegated institutions.",

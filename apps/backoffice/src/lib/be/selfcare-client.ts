@@ -49,6 +49,7 @@ export interface SelfcareClient {
     size?: number,
     page?: number,
     state?: GroupFilter,
+    parentInstitutionId?: string,
   ) => TE.TaskEither<Error, PageOfUserGroupResource>;
   getInstitutionProducts: (
     institutionId: string,
@@ -72,6 +73,7 @@ const Config = t.intersection([
 const institutionsApi = "/institutions";
 const usersApi = "/users";
 const groupsApi = "/user-groups";
+const delegationsApi = "/delegations";
 let selfcareConfig: Config;
 let selfcareClient: SelfcareClient;
 
@@ -169,10 +171,11 @@ const buildSelfcareClient = (): SelfcareClient => {
     );
 
   const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = (
-    institutionId: string,
-    size?: number,
-    page?: number,
-    state: GroupFilter = StateEnum.ACTIVE,
+    institutionId,
+    size?,
+    page?,
+    state = StateEnum.ACTIVE,
+    parentInstitutionId?,
   ) =>
     pipe(
       TE.tryCatch(
@@ -181,6 +184,7 @@ const buildSelfcareClient = (): SelfcareClient => {
             params: {
               institutionId,
               page,
+              parentInstitutionId,
               size,
               status: state === "*" ? undefined : state,
             },
@@ -229,17 +233,15 @@ const buildSelfcareClient = (): SelfcareClient => {
       pipe(
         TE.tryCatch(
           () =>
-            axiosInstance.get(
-              `${institutionsApi}/${institutionId}/delegations/delegations-with-pagination`,
-              {
-                params: {
-                  page,
-                  search,
-                  size,
-                  sort: "ASC",
-                },
+            axiosInstance.get(`${delegationsApi}/delegations-with-pagination`, {
+              params: {
+                brokerId: institutionId,
+                order: "ASC",
+                page,
+                search,
+                size,
               },
-            ),
+            }),
           flow(
             E.fromPredicate(
               axios.isAxiosError,

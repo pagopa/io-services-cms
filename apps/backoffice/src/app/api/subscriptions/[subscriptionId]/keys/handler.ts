@@ -2,7 +2,7 @@ import { ResponseError } from "@/generated/api/ResponseError";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { userAuthz } from "@/lib/be/authz";
 import {
-  ApiKeyNotFoundError,
+  SubscriptionNotFoundError,
   SubscriptionOwnershipError,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
@@ -43,8 +43,8 @@ export const getManageSubscriptionKeysHandler = async (
     );
     return sanitizedNextResponseJson(subscriptionKeysResponse);
   } catch (error) {
-    if (error instanceof ApiKeyNotFoundError) {
-      return handleNotFoundErrorResponse("ApiKeyNotFoundError", error);
+    if (error instanceof SubscriptionNotFoundError) {
+      return handleNotFoundErrorResponse(error.name, error);
     } else if (error instanceof SubscriptionOwnershipError) {
       return handleForbiddenErrorResponse(
         "You can only handle subscriptions that you own",

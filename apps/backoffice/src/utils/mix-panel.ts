@@ -71,7 +71,7 @@ interface MixPanelEventsStructure {
   readonly IO_BO_BULK_GROUP_ASSIGNMENT_END: { result: TechEventResult };
   readonly IO_BO_BULK_GROUP_ASSIGNMENT_ABORT: Record<string, never>;
 
-  readonly IO_BO_DELEGATED_INSTITUTIONS_PAGE: Record<string, never>;
+  readonly IO_BO_AGGREGATED_INSTITUTIONS_PAGE: Record<string, never>;
   readonly IO_BO_EA_MANAGE_KEY_SHOW: { aggregatedId: string };
   readonly IO_BO_EA_MANAGE_KEY_COPY: {
     aggregatedId: string;
@@ -371,10 +371,10 @@ export const trackBulkGroupAssignmentAbortEvent = () => {
   logToMixpanel("IO_BO_BULK_GROUP_ASSIGNMENT_ABORT", "UX", {}, "action");
 };
 
-// delegated-institutions page events for aggregator institutions (EA)
+// aggregated-institutions page events for aggregator institutions (EA)
 
-export const trackDelegatedInstitutionsPageEvent = () => {
-  logToMixpanel("IO_BO_DELEGATED_INSTITUTIONS_PAGE", "UX", {}, "screen_view");
+export const trackAggregatedInstitutionsPageEvent = () => {
+  logToMixpanel("IO_BO_AGGREGATED_INSTITUTIONS_PAGE", "UX", {}, "screen_view");
 };
 
 export const trackEaManageKeyShowEvent = (aggregatedId: string) => {

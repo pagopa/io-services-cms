@@ -97,7 +97,7 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
   }, [props.pagination]);
 
   return (
-    <Box bgcolor={BG_COLOR} paddingX={3} paddingY={3}>
+    <Box bgcolor={BG_COLOR} data-testid="table-view" paddingX={3} paddingY={3}>
       <TableContainer component={Paper}>
         <Table aria-label="table-view" size="small" sx={{ minWidth: 650 }}>
           <TableHead style={{ backgroundColor: BG_COLOR }}>

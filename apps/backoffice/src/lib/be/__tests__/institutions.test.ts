@@ -1,3 +1,4 @@
+import { faker } from "@faker-js/faker/locale/it";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { UserInstitutions } from "../../../lib/be/selfcare-client";
@@ -8,18 +9,18 @@ import { DelegationWithPaginationResponse } from "../../../generated/selfcare/De
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import {
   StatusEnum,
-  UserGroupResource
+  UserGroupResource,
 } from "../../../generated/selfcare/UserGroupResource";
 import { InstitutionProducts } from "../../../lib/be/selfcare-client";
 import { GroupNotFoundError } from "../errors";
 import {
-  getDelegatedInstitutions,
   getUserInstitutionProducts,
   groupExists,
   retrieveInstitution,
+  retrieveInstitutionAggregates,
   retrieveInstitutionGroups,
   retrieveUnboundInstitutionGroups,
-  retrieveUserAuthorizedInstitutions
+  retrieveUserAuthorizedInstitutions,
 } from "../institutions/business";
 
 const mocks: {
@@ -28,7 +29,11 @@ const mocks: {
   aSelfcareUserId: string;
   institutionGroup: UserGroupResource;
   institutionGroups: PageOfUserGroupResource;
-  institutionDelegations: DelegationWithPaginationResponse;
+  institutionDelegations: (
+    limit: number,
+    offset: number,
+    totalElements: number,
+  ) => DelegationWithPaginationResponse;
 } = vi.hoisted(() => ({
   institution: { id: "institutionId" },
   userInstitutions: [
@@ -43,10 +48,10 @@ const mocks: {
           productId: "prod-io",
           status: "ACTIVE",
           productRole: "admin",
-          role: "SUB_DELEGATE"
-        }
-      ]
-    }
+          role: "SUB_DELEGATE",
+        },
+      ],
+    },
   ],
   aSelfcareUserId: "aSelfcareUserId",
   institutionGroup: {
@@ -55,7 +60,7 @@ const mocks: {
     institutionId: "institutionGroupsInstID",
     name: "institutionGroupsName",
     productId: "institutionGroupsProdID",
-    status: "ACTIVE" as StatusEnum
+    status: "ACTIVE" as StatusEnum,
   },
   institutionGroups: {
     content: [
@@ -65,7 +70,7 @@ const mocks: {
         institutionId: "institutionGroupsInstID",
         name: "institutionGroupsName",
         productId: "institutionGroupsProdID",
-        status: "ACTIVE" as StatusEnum
+        status: "ACTIVE" as StatusEnum,
       },
       {
         description: "institutionGroupsDescription2",
@@ -73,32 +78,30 @@ const mocks: {
         institutionId: "institutionGroupsInstID2",
         name: "institutionGroupsName2",
         productId: "institutionGroupsProdID2",
-        status: "DELETED" as StatusEnum
-      }
+        status: "DELETED" as StatusEnum,
+      },
     ],
     number: 0,
     size: 0,
     totalElements: 0,
-    totalPages: 0
+    totalPages: 0,
   },
-  institutionDelegations: {
-    delegations: [
-      {
-        institutionId: "institutionGroupsInstID",
-        institutionName: "institutionGroupsName"
-      },
-      {
-        institutionId: "institutionGroupsInstID2",
-        institutionName: "institutionGroupsName2"
-      }
-    ],
+  institutionDelegations: (
+    limit: number,
+    offset: number,
+    totalElements: number,
+  ) => ({
+    delegations: Array.from({ length: limit }, (_, index) => ({
+      institutionId: `institutionGroupsInstID${index + 1}`,
+      institutionName: `institutionGroupsName${index + 1}`,
+    })),
     pageInfo: {
-      page: 0,
-      size: 0,
-      totalElements: 0,
-      totalPages: 0
-    }
-  }
+      pageNo: Math.floor(offset / limit),
+      pageSize: limit,
+      totalElements: totalElements,
+      totalPages: Math.ceil(totalElements / limit),
+    },
+  }),
 }));
 
 const {
@@ -108,7 +111,7 @@ const {
   getManageSubscriptionsMock,
   getGroupMock,
   getInstitutionDelegationsMock,
-  getInstitutionProductsMock
+  getInstitutionProductsMock,
 } = vi.hoisted(() => ({
   getUserAuthorizedInstitutionsMock: vi.fn(),
   getInstitutionByIdMock: vi.fn(),
@@ -116,10 +119,10 @@ const {
   getManageSubscriptionsMock: vi.fn(),
   getGroupMock: vi.fn(),
   getInstitutionDelegationsMock: vi.fn(),
-  getInstitutionProductsMock: vi.fn()
+  getInstitutionProductsMock: vi.fn(),
 }));
 
-vi.mock("@/lib/be/institutions/selfcare", async importOriginal => {
+vi.mock("@/lib/be/institutions/selfcare", async (importOriginal) => {
   const mod = await importOriginal();
   return {
     ...(mod as any),
@@ -128,12 +131,12 @@ vi.mock("@/lib/be/institutions/selfcare", async importOriginal => {
     getInstitutionGroups: getInstitutionGroupsMock,
     getGroup: getGroupMock,
     getInstitutionDelegations: getInstitutionDelegationsMock,
-    getInstitutionProducts: getInstitutionProductsMock
+    getInstitutionProducts: getInstitutionProductsMock,
   };
 });
 
 vi.mock("@/lib/be/subscriptions/business", () => ({
-  getManageSubscriptions: getManageSubscriptionsMock
+  getManageSubscriptions: getManageSubscriptionsMock,
 }));
 
 afterEach(() => {
@@ -145,25 +148,27 @@ describe("Institutions", () => {
     it("should return the institutions found", async () => {
       // given
       getUserAuthorizedInstitutionsMock.mockResolvedValueOnce(
-        mocks.userInstitutions
+        mocks.userInstitutions,
       );
 
       // when
       const result = await retrieveUserAuthorizedInstitutions(
-        mocks.aSelfcareUserId
+        mocks.aSelfcareUserId,
       );
 
       // then
       expect(getUserAuthorizedInstitutionsMock).toHaveBeenCalledWith(
-        mocks.aSelfcareUserId
+        mocks.aSelfcareUserId,
       );
       expect(result).toEqual({
-        authorizedInstitutions: mocks.userInstitutions.map(userInstitution => ({
-          id: userInstitution.institutionId,
-          name: userInstitution.institutionDescription,
-          role: userInstitution.products?.[0].productRole,
-          logo_url: `https://selfcare.pagopa.it/institutions/${userInstitution.institutionId}/logo.png`
-        }))
+        authorizedInstitutions: mocks.userInstitutions.map(
+          (userInstitution) => ({
+            id: userInstitution.institutionId,
+            name: userInstitution.institutionDescription,
+            role: userInstitution.products?.[0].productRole,
+            logo_url: `https://selfcare.pagopa.it/institutions/${userInstitution.institutionId}/logo.png`,
+          }),
+        ),
       });
     });
 
@@ -174,10 +179,10 @@ describe("Institutions", () => {
 
       // when and then
       await expect(
-        retrieveUserAuthorizedInstitutions(mocks.aSelfcareUserId)
+        retrieveUserAuthorizedInstitutions(mocks.aSelfcareUserId),
       ).rejects.toThrowError(error);
       expect(getUserAuthorizedInstitutionsMock).toHaveBeenCalledWith(
-        mocks.aSelfcareUserId
+        mocks.aSelfcareUserId,
       );
     });
   });
@@ -202,7 +207,7 @@ describe("Institutions", () => {
 
       // when and then
       await expect(
-        retrieveInstitution(mocks.institution.id as string)
+        retrieveInstitution(mocks.institution.id as string),
       ).rejects.toThrowError(error);
       expect(getInstitutionByIdMock).toHaveBeenCalledWith(mocks.institution.id);
     });
@@ -215,7 +220,7 @@ describe("Institutions", () => {
       getInstitutionGroupsMock
         .mockResolvedValueOnce({
           ...mocks.institutionGroups,
-          totalPages: 1
+          totalPages: 1,
         })
         .mockResolvedValueOnce(mocks.institutionGroups);
 
@@ -229,26 +234,26 @@ describe("Institutions", () => {
         institutionId,
         1000,
         0,
-        undefined
+        undefined,
       );
       expect(getInstitutionGroupsMock).toHaveBeenNthCalledWith(
         2,
         institutionId,
         1000,
         1,
-        undefined
+        undefined,
       );
       expect(result).toStrictEqual([
-        ...(mocks.institutionGroups.content?.map(userGroupResources => ({
+        ...(mocks.institutionGroups.content?.map((userGroupResources) => ({
           id: userGroupResources.id,
           name: userGroupResources.name,
-          state: userGroupResources.status
+          state: userGroupResources.status,
         })) as any[]),
-        ...(mocks.institutionGroups.content?.map(userGroupResources => ({
+        ...(mocks.institutionGroups.content?.map((userGroupResources) => ({
           id: userGroupResources.id,
           name: userGroupResources.name,
-          state: userGroupResources.status
-        })) as any[])
+          state: userGroupResources.status,
+        })) as any[]),
       ]);
     });
 
@@ -260,14 +265,14 @@ describe("Institutions", () => {
       // when and then
       await expect(
         retrieveInstitutionGroups(
-          (mocks.institutionGroups.content as any[])[0].institutionId
-        )
+          (mocks.institutionGroups.content as any[])[0].institutionId,
+        ),
       ).rejects.toThrowError(error);
       expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
         (mocks.institutionGroups.content as any[])[0].institutionId,
         1000,
         0,
-        undefined
+        undefined,
       );
     });
   });
@@ -281,7 +286,7 @@ describe("Institutions", () => {
 
       // when and then
       await expect(() =>
-        groupExists(institutionId, groupId)
+        groupExists(institutionId, groupId),
       ).rejects.toThrowError(errorMessage);
       expect(getGroupMock).toHaveBeenCalledOnce();
       expect(getGroupMock).toHaveBeenCalledWith(groupId, institutionId);
@@ -330,19 +335,19 @@ describe("Institutions", () => {
 
       // when and then
       await expect(() =>
-        retrieveUnboundInstitutionGroups(apimUserId, institutionId)
+        retrieveUnboundInstitutionGroups(apimUserId, institutionId),
       ).rejects.toThrowError(error);
       expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getManageSubscriptionsMock).toHaveBeenCalledWith(
         "MANAGE_GROUP",
-        apimUserId
+        apimUserId,
       );
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
       expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
         institutionId,
         1000,
         0,
-        undefined
+        undefined,
       );
     });
 
@@ -356,92 +361,100 @@ describe("Institutions", () => {
             (mocks.institutionGroups.content as any[])[1].id
           }`,
           name: "name",
-          state: "active"
-        }
+          state: "active",
+        },
       ]);
       getInstitutionGroupsMock.mockResolvedValueOnce(mocks.institutionGroups);
 
       // when and then
       const res = await retrieveUnboundInstitutionGroups(
         apimUserId,
-        institutionId
+        institutionId,
       );
       expect(res).toStrictEqual([
         {
           id: (mocks.institutionGroups.content as any[])[0].id,
           name: (mocks.institutionGroups.content as any[])[0].name,
-          state: (mocks.institutionGroups.content as any[])[0].status
-        }
+          state: (mocks.institutionGroups.content as any[])[0].status,
+        },
       ]);
       expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
       expect(getManageSubscriptionsMock).toHaveBeenCalledWith(
         "MANAGE_GROUP",
-        apimUserId
+        apimUserId,
       );
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
       expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
         institutionId,
         1000,
         0,
-        undefined
+        undefined,
       );
     });
   });
 
-  describe("getDelegatedInstitutions", () => {
+  describe("retrieveInstitutionAggregates", () => {
     const institutionId = "institutionId";
-    const size = 5;
-    const page = 1;
+    const limit = 5;
+    const offset = 5;
     const search = "search";
+    const totalElements = 10;
     it("should return the delegated institutions for the given institution", async () => {
       // given
-      getInstitutionDelegationsMock.mockResolvedValueOnce({
-        ...mocks.institutionDelegations
-      });
+      const mockedInstitutionDelegations = mocks.institutionDelegations(
+        limit,
+        offset,
+        totalElements,
+      );
+      getInstitutionDelegationsMock.mockResolvedValueOnce(
+        mockedInstitutionDelegations,
+      );
 
       // when
-      const result = await getDelegatedInstitutions(
+      const result = await retrieveInstitutionAggregates(
         institutionId,
-        size,
-        page,
-        search
+        limit,
+        offset,
+        search,
       );
 
       // then
       expect(result).toStrictEqual({
-        value: mocks.institutionDelegations.delegations?.map(delegation => ({
+        value: mockedInstitutionDelegations.delegations?.map((delegation) => ({
           id: delegation.institutionId,
-          name: delegation.institutionName
+          name: delegation.institutionName,
         })),
         pagination: {
-          count: mocks.institutionDelegations.pageInfo?.totalElements ?? 0,
-          limit: mocks.institutionDelegations.pageInfo?.pageSize ?? 0,
-          offset: mocks.institutionDelegations.pageInfo?.pageNo ?? 0
-        }
+          count: mockedInstitutionDelegations.pageInfo?.totalElements ?? 0,
+          limit: mockedInstitutionDelegations.pageInfo?.pageSize ?? 0,
+          offset:
+            (mockedInstitutionDelegations.pageInfo?.pageNo ?? 0) *
+            (mockedInstitutionDelegations.pageInfo?.pageSize ?? 0),
+        },
       });
       expect(getInstitutionDelegationsMock).toHaveBeenCalledOnce();
       expect(getInstitutionDelegationsMock).toHaveBeenCalledWith(
         institutionId,
-        size,
-        page,
-        search
+        limit,
+        Math.floor(offset / limit),
+        search,
       );
     });
 
-    it("should rejects when getInstitutionDelegations return an error response", async () => {
+    it("should rejects when retrieveInstitutionAggregates return an error response", async () => {
       // given
       const error = new Error("errorMessage");
       getInstitutionDelegationsMock.mockRejectedValueOnce(error);
 
       // when and then
       await expect(
-        getDelegatedInstitutions(institutionId, size, page, search)
+        retrieveInstitutionAggregates(institutionId, limit, offset, search),
       ).rejects.toThrowError(error);
       expect(getInstitutionDelegationsMock).toHaveBeenCalledWith(
         institutionId,
-        size,
-        page,
-        search
+        limit,
+        Math.floor(offset / limit),
+        search,
       );
     });
   });
@@ -457,19 +470,19 @@ describe("Institutions", () => {
 
       // when and then
       await expect(
-        getUserInstitutionProducts(institutionId, userId)
+        getUserInstitutionProducts(institutionId, userId),
       ).rejects.toThrowError(error);
       expect(getInstitutionProductsMock).toHaveBeenCalledWith(
         institutionId,
-        userId
+        userId,
       );
     });
 
     it("should return the institution products for the given institution and user", async () => {
       // given
-      const institutionProducts = (getMockInstitutionProducts(
-        "id1"
-      ) as unknown) as InstitutionProducts;
+      const institutionProducts = getMockInstitutionProducts(
+        "id1",
+      ) as unknown as InstitutionProducts;
       getInstitutionProductsMock.mockResolvedValueOnce(institutionProducts);
 
       // when
@@ -477,15 +490,15 @@ describe("Institutions", () => {
 
       // then
       expect(result).toStrictEqual({
-        products: institutionProducts.map(product => ({
+        products: institutionProducts.map((product) => ({
           id: product.id,
-          title: product.title
-        }))
+          title: product.title,
+        })),
       });
       expect(getInstitutionProductsMock).toHaveBeenCalledOnce();
       expect(getInstitutionProductsMock).toHaveBeenCalledWith(
         institutionId,
-        userId
+        userId,
       );
     });
   });

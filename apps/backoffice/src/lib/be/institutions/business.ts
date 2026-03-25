@@ -1,4 +1,4 @@
-import { DelegatedInstitutionPagination } from "@/generated/api/DelegatedInstitutionPagination";
+import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
 import { Group, StateEnum } from "@/generated/api/Group";
 import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
@@ -194,23 +194,24 @@ export const getGroup = async (
   return toGroup(selfcareGroup);
 };
 
-export const getDelegatedInstitutions = async (
+export const retrieveInstitutionAggregates = async (
   institutionId: string,
-  size?: number,
-  page?: number,
+  limit: number,
+  offset: number,
   search?: string,
-): Promise<DelegatedInstitutionPagination> => {
+): Promise<AggregatedInstitutionPagination> => {
   const apiResult = await getInstitutionDelegations(
     institutionId,
-    size,
-    page,
+    limit,
+    Math.floor(offset / limit),
     search,
   );
   return {
     pagination: {
       count: apiResult.pageInfo?.totalElements ?? 0,
       limit: apiResult.pageInfo?.pageSize ?? 0,
-      offset: apiResult.pageInfo?.pageNo ?? 0,
+      offset:
+        (apiResult.pageInfo?.pageNo ?? 0) * (apiResult.pageInfo?.pageSize ?? 0),
     },
     value: (apiResult.delegations ?? []).map((delegation) => ({
       id: delegation.institutionId,

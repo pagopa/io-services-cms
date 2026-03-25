@@ -43,7 +43,7 @@ const mocks = vi.hoisted(() => {
   const getUser = vi.fn(() => userMock);
   return {
     getUser,
-    getDelegatedInstitutions: vi.fn(),
+    retrieveInstitutionAggregates: vi.fn(),
     parseBody: vi.fn(),
     parseQueryParam: vi.fn(),
     parseLimitQueryParam: vi.fn(),
@@ -76,7 +76,7 @@ vi.mock("@/lib/be/req-res-utils", async () => {
 });
 
 vi.mock("@/lib/be/institutions/business", () => ({
-  getDelegatedInstitutions: mocks.getDelegatedInstitutions,
+  retrieveInstitutionAggregates: mocks.retrieveInstitutionAggregates,
 }));
 vi.mock("@/lib/be/wrappers", () => ({
   withJWTAuthHandler: mocks.withJWTAuthHandler,
@@ -103,7 +103,7 @@ describe("Institution's Delegations API", () => {
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledWith(request);
       expect(mocks.parseOffsetQueryParam).not.toHaveBeenCalled();
       expect(mocks.parseQueryParam).not.toHaveBeenCalled();
-      expect(mocks.getDelegatedInstitutions).not.toHaveBeenCalled();
+      expect(mocks.retrieveInstitutionAggregates).not.toHaveBeenCalled();
     });
 
     it("should return an error response when offset query param is not valid", async () => {
@@ -123,13 +123,13 @@ describe("Institution's Delegations API", () => {
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledWith(request);
       expect(mocks.parseQueryParam).not.toHaveBeenCalled();
-      expect(mocks.getDelegatedInstitutions).not.toHaveBeenCalled();
+      expect(mocks.retrieveInstitutionAggregates).not.toHaveBeenCalled();
     });
 
     it("should return an error response when search query param is not valid", async () => {
       // given
       const limit = 10;
-      const offset = 5;
+      const offset = 10;
       mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
       mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
       mocks.parseQueryParam.mockReturnValueOnce(E.left(void 0));
@@ -155,13 +155,38 @@ describe("Institution's Delegations API", () => {
           name: t.union([NonEmptyString, t.null]).name,
         }),
       );
-      expect(mocks.getDelegatedInstitutions).not.toHaveBeenCalled();
+      expect(mocks.retrieveInstitutionAggregates).not.toHaveBeenCalled();
     });
 
-    it("should return an error response when getDelegatedInstitutions fails", async () => {
+    it("should return an error response when offset query param is not a multiple of limit query param", async () => {
       // given
       const limit = 10;
       const offset = 5;
+      mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
+      mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
+      mocks.parseQueryParam.mockReturnValueOnce(E.right(null));
+      const request = new NextRequest("http://localhost");
+
+      // when
+      const result = await GET(request, {});
+
+      // then
+      expect(result.status).toBe(400);
+      const responseBody = await result.json();
+      expect(responseBody.title).toEqual("Bad Request");
+      expect(responseBody.detail).toEqual(
+        `'offset' query param must be a multiple of 'limit' query param`,
+      );
+      expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
+      expect(mocks.retrieveInstitutionAggregates).not.toHaveBeenCalled();
+    });
+
+    it("should return an error response when retrieveInstitutionAggregates fails", async () => {
+      // given
+      const limit = 10;
+      const offset = 10;
       const institutionId = "institutionId";
       const request = new NextRequest(
         `http://localhost?limit=${limit}&offset=${offset}`,
@@ -170,7 +195,7 @@ describe("Institution's Delegations API", () => {
       mocks.parseOffsetQueryParam.mockReturnValueOnce(E.right(offset));
       mocks.parseQueryParam.mockReturnValueOnce(E.right(null));
       const errorMessage = "error message";
-      mocks.getDelegatedInstitutions.mockRejectedValueOnce(
+      mocks.retrieveInstitutionAggregates.mockRejectedValueOnce(
         new ManagedInternalError(errorMessage),
       );
 
@@ -180,13 +205,13 @@ describe("Institution's Delegations API", () => {
       // then
       expect(result.status).toBe(500);
       const responseBody = await result.json();
-      expect(responseBody.title).toEqual("InstitutionDelegationsRetrieveError");
+      expect(responseBody.title).toEqual("InstitutionAggregatesRetrieveError");
       expect(responseBody.detail).toEqual(errorMessage);
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
-      expect(mocks.getDelegatedInstitutions).toHaveBeenCalledOnce();
-      expect(mocks.getDelegatedInstitutions).toHaveBeenCalledWith(
+      expect(mocks.retrieveInstitutionAggregates).toHaveBeenCalledOnce();
+      expect(mocks.retrieveInstitutionAggregates).toHaveBeenCalledWith(
         institutionId,
         limit,
         offset,
@@ -199,11 +224,11 @@ describe("Institution's Delegations API", () => {
       ${"search param is not set"} | ${null}      | ${undefined}
       ${"search param is set"}     | ${"foo"}     | ${"foo"}
     `(
-      "should return the delegated institutions when getDelegatedInstitutions do not fails and $scenario",
+      "should return the delegated institutions when retrieveInstitutionAggregates do not fails and $scenario",
       async ({ actualSearch, expectedSearch }) => {
         // given
         const limit = 10;
-        const offset = 5;
+        const offset = 10;
         const institutionId = "institutionId";
         const request = new NextRequest("http://localhost");
         mocks.parseLimitQueryParam.mockReturnValueOnce(E.right(limit));
@@ -217,7 +242,7 @@ describe("Institution's Delegations API", () => {
             offset,
           },
         };
-        mocks.getDelegatedInstitutions.mockResolvedValueOnce(
+        mocks.retrieveInstitutionAggregates.mockResolvedValueOnce(
           expectedDelegations,
         );
 
@@ -231,8 +256,8 @@ describe("Institution's Delegations API", () => {
         expect(mocks.parseQueryParam).toHaveBeenCalledOnce();
         expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
         expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
-        expect(mocks.getDelegatedInstitutions).toHaveBeenCalledOnce();
-        expect(mocks.getDelegatedInstitutions).toHaveBeenCalledWith(
+        expect(mocks.retrieveInstitutionAggregates).toHaveBeenCalledOnce();
+        expect(mocks.retrieveInstitutionAggregates).toHaveBeenCalledWith(
           institutionId,
           limit,
           offset,

@@ -10,7 +10,7 @@ import {
   TableView,
   TableViewColumn,
 } from "@/components/table-view";
-import { DelegatedInstitutionPagination } from "@/generated/api/DelegatedInstitutionPagination";
+import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch, { client } from "@/hooks/use-fetch";
@@ -18,7 +18,7 @@ import { AppLayout, PageLayout } from "@/layouts";
 import { authOptions } from "@/lib/auth/auth-options";
 import { isAdmin } from "@/utils/auth-util";
 import {
-  trackDelegatedInstitutionsPageEvent,
+  trackAggregatedInstitutionsPageEvent,
   trackEaManageKeyCopyEvent,
   trackEaManageKeyRegenerateEvent,
   trackEaManageKeyShowEvent,
@@ -37,19 +37,19 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
 import { ReactElement, useEffect, useState } from "react";
 
-const pageTitleLocaleKey = "routes.delegated-institutions.title";
-const pageDescriptionLocaleKey = "routes.delegated-institutions.description";
+const pageTitleLocaleKey = "routes.aggregated-institutions.title";
+const pageDescriptionLocaleKey = "routes.aggregated-institutions.description";
 
 const DEFAULT_PAGE_LIMIT = 10;
 
-export enum DelegatedInstitutionContextMenuActions {
+export enum AggregatedInstitutionContextMenuActions {
   hide = "hide",
   regeneratePk = "regeneratePk",
   regenerateSk = "regenerateSk",
   show = "show",
 }
 
-interface DelegatedInstitutionListItem {
+interface AggregatedInstitutionListItem {
   id: string;
   isLoading: boolean;
   isVisible: boolean;
@@ -58,20 +58,20 @@ interface DelegatedInstitutionListItem {
   secondary_key?: string;
 }
 
-const delegatedInstitutionPlaceholder: DelegatedInstitutionListItem = {
+const aggregatedInstitutionPlaceholder: AggregatedInstitutionListItem = {
   id: "",
   isLoading: false,
   isVisible: false,
   name: "",
 };
 
-export default function DelegatedInstitutions() {
+export default function AggregatedInstitutions() {
   const { t } = useTranslation();
   const { data: session } = useSession();
   const showDialog = useDialog();
   const { enqueueSnackbar } = useSnackbar();
 
-  const tableViewColumns: TableViewColumn<DelegatedInstitutionListItem>[] = [
+  const tableViewColumns: TableViewColumn<AggregatedInstitutionListItem>[] = [
     {
       alignment: "left",
       cellTemplate: (di) => (
@@ -79,7 +79,7 @@ export default function DelegatedInstitutions() {
           {di.name}
         </Typography>
       ),
-      label: "routes.delegated-institutions.tableHeader.name",
+      label: "routes.aggregated-institutions.tableHeader.name",
       name: "name",
     },
     {
@@ -94,12 +94,12 @@ export default function DelegatedInstitutions() {
               trackEaManageKeyCopyEvent(di.id, "primary")
             }
             onRequestCopyToClipboard={() =>
-              handleGetManageSubscriptionKeys(di.id)
+              handleRetrieveManageSubscriptionKeys(di.id)
             }
           />
         </Box>
       ),
-      label: "routes.delegated-institutions.tableHeader.primaryKey",
+      label: "routes.aggregated-institutions.tableHeader.primaryKey",
       name: "primary_key",
     },
     {
@@ -114,12 +114,12 @@ export default function DelegatedInstitutions() {
               trackEaManageKeyCopyEvent(di.id, "secondary")
             }
             onRequestCopyToClipboard={() =>
-              handleGetManageSubscriptionKeys(di.id)
+              handleRetrieveManageSubscriptionKeys(di.id)
             }
           />
         </Box>
       ),
-      label: "routes.delegated-institutions.tableHeader.secondaryKey",
+      label: "routes.aggregated-institutions.tableHeader.secondaryKey",
       name: "secondary_key",
     },
   ];
@@ -129,23 +129,24 @@ export default function DelegatedInstitutions() {
     error: dipError,
     fetchData: dipFetchData,
     loading: dipLoading,
-  } = useFetch<DelegatedInstitutionPagination>();
-  const [delegatedInstitutions, setDelegatedInstitutions] =
-    useState<DelegatedInstitutionListItem[]>();
+  } = useFetch<AggregatedInstitutionPagination>();
+  const [aggregatedInstitutions, setAggregatedInstitutions] =
+    useState<AggregatedInstitutionListItem[]>();
   const [pagination, setPagination] = useState({
     count: 0,
     limit: DEFAULT_PAGE_LIMIT,
     offset: 0,
   });
-  const [noDelegatedInstitutions, setNoDelegatedInstitutions] = useState(false);
+  const [noAggregatedInstitutions, setNoAggregatedInstitutions] =
+    useState(false);
   const [currentSearchByInstitutionName, setCurrentSearchByInstitutionName] =
     useState<string>();
 
-  const updateDelegatedInstitutionListItemById = (
+  const updateAggregatedInstitutionListItemById = (
     id: string,
-    updatedItem: Partial<DelegatedInstitutionListItem>,
+    updatedItem: Partial<AggregatedInstitutionListItem>,
   ) => {
-    setDelegatedInstitutions((prev) =>
+    setAggregatedInstitutions((prev) =>
       prev?.map((item) =>
         item.id === id ? { ...item, ...updatedItem } : item,
       ),
@@ -161,34 +162,40 @@ export default function DelegatedInstitutions() {
       }),
     );
 
-  const handleGetManageSubscriptionKeys = async (subscriptionId: string) => {
-    const maybeResponse = await client.getManageSubscriptionKeys({
-      subscriptionId,
-    });
-    if (E.isRight(maybeResponse)) {
-      updateDelegatedInstitutionListItemById(subscriptionId, {
-        ...maybeResponse.right.value,
+  const handleRetrieveManageSubscriptionKeys = async (aggregateId: string) => {
+    const response =
+      await client.retrieveInstitutionAggregateManageSubscriptionsKeys({
+        aggregateId,
       });
-    } else {
-      getGenericErrorNotification();
-      updateDelegatedInstitutionListItemById(subscriptionId, {
-        isVisible: true,
-        primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-        secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
-      });
+
+    if (E.isRight(response)) {
+      const maybeValue = SubscriptionKeys.decode(response.right.value);
+      if (E.isRight(maybeValue)) {
+        updateAggregatedInstitutionListItemById(aggregateId, {
+          ...maybeValue.right,
+        });
+        return;
+      }
     }
+    getGenericErrorNotification();
+    updateAggregatedInstitutionListItemById(aggregateId, {
+      isVisible: true,
+      primary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+      secondary_key: INVALID_API_KEY_VALUE_PLACEHOLDER,
+    });
   };
 
   const handleRegenerateKey = async (
     subscriptionId: string,
     keyType: SubscriptionKeyTypeEnum,
   ) => {
-    const maybeResponse = await client.regenerateManageSubscriptionKey({
+    const response = await client.regenerateManageSubscriptionKey({
       keyType,
       subscriptionId,
     });
-    if (E.isRight(maybeResponse)) {
-      const maybeValue = SubscriptionKeys.decode(maybeResponse.right.value);
+
+    if (E.isRight(response)) {
+      const maybeValue = SubscriptionKeys.decode(response.right.value);
       if (E.isRight(maybeValue)) {
         enqueueSnackbar(
           buildSnackbarItem({
@@ -197,8 +204,8 @@ export default function DelegatedInstitutions() {
             title: t("notifications.success"),
           }),
         );
-        updateDelegatedInstitutionListItemById(subscriptionId, {
-          ...maybeResponse.right.value,
+        updateAggregatedInstitutionListItemById(subscriptionId, {
+          ...response.right.value,
         });
         trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
       } else {
@@ -225,25 +232,25 @@ export default function DelegatedInstitutions() {
 
   /** handle actions click: open confirmation modal and on confirm click, perform bff call action */
   const handleConfirmationModal = async (options: {
-    action: DelegatedInstitutionContextMenuActions;
+    action: AggregatedInstitutionContextMenuActions;
     institutionId: string;
   }) => {
-    const raiseClickEvent = await showDialog({
+    const isConfirmed = await showDialog({
       confirmButtonLabel: t(
-        `delegated-institution.${options.action}.modal.button`,
+        `aggregated-institution.${options.action}.modal.button`,
       ),
-      message: t(`delegated-institution.${options.action}.modal.description`),
-      title: t(`delegated-institution.${options.action}.modal.title`),
+      message: t(`aggregated-institution.${options.action}.modal.description`),
+      title: t(`aggregated-institution.${options.action}.modal.title`),
     });
-    if (raiseClickEvent) {
+    if (isConfirmed) {
       switch (options.action) {
-        case DelegatedInstitutionContextMenuActions.regeneratePk:
+        case AggregatedInstitutionContextMenuActions.regeneratePk:
           await handleRegenerateKey(
             options.institutionId,
             SubscriptionKeyTypeEnum.primary,
           );
           break;
-        case DelegatedInstitutionContextMenuActions.regenerateSk:
+        case AggregatedInstitutionContextMenuActions.regenerateSk:
           await handleRegenerateKey(
             options.institutionId,
             SubscriptionKeyTypeEnum.secondary,
@@ -256,79 +263,77 @@ export default function DelegatedInstitutions() {
     }
   };
 
-  /** Returns a list of `TableRowMenuAction` depending on delegated institution status */
-  const getDelegatedInstitutionMenu = (
-    di: DelegatedInstitutionListItem,
+  /** Returns a list of `TableRowMenuAction` depending on aggregated institution status */
+  const getAggregatedInstitutionMenu = (
+    di: AggregatedInstitutionListItem,
   ): TableRowMenuAction[] => {
-    const result: TableRowMenuAction[] = [];
+    const isUserAdmin = isAdmin(session);
 
-    if (di.isVisible) {
-      result.push({
-        hasBottomDivider: isAdmin(session),
-        icon: <VisibilityOff color="primary" fontSize="inherit" />,
-        label: `delegated-institution.actions.${DelegatedInstitutionContextMenuActions.hide}`,
-        onClick: () =>
-          updateDelegatedInstitutionListItemById(di.id, {
-            isVisible: false,
-          }),
-      });
-    } else {
-      result.push({
-        hasBottomDivider: isAdmin(session),
-        icon: <Visibility color="primary" fontSize="inherit" />,
-        label: `delegated-institution.actions.${DelegatedInstitutionContextMenuActions.show}`,
-        onClick: async () => {
-          if (isNullUndefinedOrEmpty(di.primary_key)) {
-            updateDelegatedInstitutionListItemById(di.id, {
-              isLoading: true,
+    const visibilityAction: TableRowMenuAction = di.isVisible
+      ? {
+          hasBottomDivider: isUserAdmin,
+          icon: <VisibilityOff color="primary" fontSize="inherit" />,
+          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.hide}`,
+          onClick: () =>
+            updateAggregatedInstitutionListItemById(di.id, {
+              isVisible: false,
+            }),
+        }
+      : {
+          hasBottomDivider: isUserAdmin,
+          icon: <Visibility color="primary" fontSize="inherit" />,
+          label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.show}`,
+          onClick: async () => {
+            if (isNullUndefinedOrEmpty(di.primary_key)) {
+              updateAggregatedInstitutionListItemById(di.id, {
+                isLoading: true,
+              });
+              await handleRetrieveManageSubscriptionKeys(di.id);
+            }
+            updateAggregatedInstitutionListItemById(di.id, {
+              isLoading: false,
+              isVisible: true,
             });
-            await handleGetManageSubscriptionKeys(di.id);
-          }
-          updateDelegatedInstitutionListItemById(di.id, {
-            isLoading: false,
-            isVisible: true,
-          });
-          trackEaManageKeyShowEvent(di.id);
-        },
-      });
-    }
+            trackEaManageKeyShowEvent(di.id);
+          },
+        };
 
-    if (isAdmin(session)) {
-      result.push(
-        {
-          icon: <Sync color="primary" fontSize="inherit" />,
-          label: `delegated-institution.actions.${DelegatedInstitutionContextMenuActions.regeneratePk}`,
-          onClick: () =>
-            handleConfirmationModal({
-              action: DelegatedInstitutionContextMenuActions.regeneratePk,
-              institutionId: di.id,
-            }),
-        },
-        {
-          icon: <Sync color="primary" fontSize="inherit" />,
-          label: `delegated-institution.actions.${DelegatedInstitutionContextMenuActions.regenerateSk}`,
-          onClick: () =>
-            handleConfirmationModal({
-              action: DelegatedInstitutionContextMenuActions.regenerateSk,
-              institutionId: di.id,
-            }),
-        },
-      );
-    }
+    const adminActions: TableRowMenuAction[] = isUserAdmin
+      ? [
+          {
+            icon: <Sync color="primary" fontSize="inherit" />,
+            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regeneratePk}`,
+            onClick: () =>
+              handleConfirmationModal({
+                action: AggregatedInstitutionContextMenuActions.regeneratePk,
+                institutionId: di.id,
+              }),
+          },
+          {
+            icon: <Sync color="primary" fontSize="inherit" />,
+            label: `aggregated-institution.actions.${AggregatedInstitutionContextMenuActions.regenerateSk}`,
+            onClick: () =>
+              handleConfirmationModal({
+                action: AggregatedInstitutionContextMenuActions.regenerateSk,
+                institutionId: di.id,
+              }),
+          },
+        ]
+      : [];
 
-    return result;
+    return [visibilityAction, ...adminActions];
   };
 
-  const getDelegatedInstitutions = () => {
+  const retrieveInstitutionAggregates = () => {
     dipFetchData(
-      "getDelegatedInstitutions",
+      "retrieveInstitutionAggregates",
       {
         institutionId: session?.user?.institution.id as string,
         limit: pagination.limit,
         offset: pagination.offset,
         search: currentSearchByInstitutionName,
       },
-      DelegatedInstitutionPagination,
+      AggregatedInstitutionPagination,
       {
         notify: "errors",
       },
@@ -349,42 +354,42 @@ export default function DelegatedInstitutions() {
 
   // fetch services when table pagination or search by institution name change
   useEffect(() => {
-    getDelegatedInstitutions();
+    retrieveInstitutionAggregates();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination, currentSearchByInstitutionName]);
 
-  // make some checks and adjustments on delegated institutions fetch result
+  // make some checks and adjustments on aggregated institutions fetch result
   useEffect(() => {
-    const maybeDipData = DelegatedInstitutionPagination.decode(dipData);
+    const maybeDipData = AggregatedInstitutionPagination.decode(dipData);
     if (E.isRight(maybeDipData)) {
-      // check fetch result (if no delegated institutions, an EmptyState component will be displayed)
+      // check fetch result (if no aggregated institutions, an EmptyState component will be displayed)
       if (
         maybeDipData.right.value.length === 0 &&
         !currentSearchByInstitutionName // no active search by institution name in progress
       )
-        setNoDelegatedInstitutions(true);
-      // check pagination data and build a full pagination.count array of delegated institutions
+        setNoAggregatedInstitutions(true);
+      // check pagination data and build a full pagination.count array of aggregated institutions
       // filling empty items with some placeholders (in order to have a working paginated MUI Table)
       if (
         maybeDipData.right.pagination.offset !== undefined &&
         maybeDipData.right.pagination.limit
       ) {
-        const delegatedInstitutionsPlaceholders = Array(
+        const aggregatedInstitutionsPlaceholders = Array(
           maybeDipData.right.pagination.count,
-        ).fill(delegatedInstitutionPlaceholder);
-        delegatedInstitutionsPlaceholders.splice(
+        ).fill(aggregatedInstitutionPlaceholder);
+        aggregatedInstitutionsPlaceholders.splice(
           maybeDipData.right.pagination.offset,
           maybeDipData.right.value.length,
           ...maybeDipData.right.value,
         );
-        setDelegatedInstitutions(delegatedInstitutionsPlaceholders);
+        setAggregatedInstitutions(aggregatedInstitutionsPlaceholders);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dipData]);
 
   useEffect(() => {
-    trackDelegatedInstitutionsPageEvent();
+    trackAggregatedInstitutionsPageEvent();
   }, []);
 
   return (
@@ -393,11 +398,11 @@ export default function DelegatedInstitutions() {
         description={pageDescriptionLocaleKey}
         title={pageTitleLocaleKey}
       />
-      {noDelegatedInstitutions ? (
+      {noAggregatedInstitutions ? (
         <EmptyStateLayer
           ctaLabel=""
           ctaRoute=""
-          emptyStateLabel="routes.delegated-institutions.empty"
+          emptyStateLabel="routes.aggregated-institutions.empty"
         />
       ) : (
         <>
@@ -411,8 +416,8 @@ export default function DelegatedInstitutions() {
             onPageChange={handlePageChange}
             onRowsPerPageChange={handleRowsPerPageChange}
             pagination={pagination}
-            rowMenu={getDelegatedInstitutionMenu}
-            rows={delegatedInstitutions ?? (dipError ? [] : undefined)}
+            rowMenu={getAggregatedInstitutionMenu}
+            rows={aggregatedInstitutions ?? (dipError ? [] : undefined)}
           />
         </>
       )}
@@ -444,7 +449,7 @@ export async function getServerSideProps(context: any) {
   };
 }
 
-DelegatedInstitutions.getLayout = function getLayout(page: ReactElement) {
+AggregatedInstitutions.getLayout = function getLayout(page: ReactElement) {
   return (
     <AppLayout>
       <PageLayout>{page}</PageLayout>

@@ -1,17 +1,17 @@
 import * as E from "fp-ts/lib/Either";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
+import { TypeEnum } from "../../../generated/selfcare/DelegationResponse";
 import { DelegationWithPaginationResponse } from "../../../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import { ProductResource } from "../../../generated/selfcare/ProductResource";
 import { StatusEnum } from "../../../generated/selfcare/UserGroupResource";
-import { TypeEnum } from "../../../generated/selfcare/DelegationResponse";
 import {
   getSelfcareClient,
   resetInstance,
   UserInstitutions,
 } from "../selfcare-client";
-import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -20,7 +20,11 @@ const mocks: {
   institutionGroups: PageOfUserGroupResource;
   delegations: DelegationWithPaginationResponse;
 } = {
-  institution: { id: "institutionId", origin: "IPA", originId: "originId" } as InstitutionResponse,
+  institution: {
+    id: "institutionId",
+    origin: "IPA",
+    originId: "originId",
+  } as InstitutionResponse,
   userInstitutions: [
     {
       institutionId: "institutionId1",
@@ -276,44 +280,66 @@ describe("Selfcare Client", () => {
   });
 
   describe("getInstitutionGroups", () => {
-    it("should return the groups found for the institution", async () => {
-      getMock.mockResolvedValueOnce({
-        status: 200,
-        data: mocks.institutionGroups,
-      });
+    it.each`
+      givenParams                                                                                 | expectedParams
+      ${{ state: undefined, size: undefined, page: undefined, parentInstitutionId: undefined }}   | ${{ status: "ACTIVE", size: undefined, page: undefined, parentInstitutionId: undefined }}
+      ${{ state: "SUSPENDED", size: undefined, page: undefined, parentInstitutionId: undefined }} | ${{ status: "SUSPENDED", size: undefined, page: undefined, parentInstitutionId: undefined }}
+      ${{ state: "*", size: 5, page: 1, parentInstitutionId: "pInstId" }}                         | ${{ status: undefined, size: 5, page: 1, parentInstitutionId: "pInstId" }}
+    `(
+      "should call selfcare with the correct params when called with $givenParams",
+      async ({ givenParams, expectedParams }) => {
+        // given
+        const institutionId = mocks.institutionGroups.content[0].institutionId;
+        getMock.mockResolvedValueOnce({
+          status: 200,
+          data: mocks.institutionGroups,
+        });
 
-      const result = await getSelfcareClient().getInstitutionGroups(
-        mocks.institutionGroups.content[0].institutionId as string,
-      )();
+        // when
+        const result = await getSelfcareClient().getInstitutionGroups(
+          institutionId,
+          givenParams.size,
+          givenParams.page,
+          givenParams.state,
+          givenParams.parentInstitutionId,
+        )();
 
-      expect(getMock).toHaveBeenCalledWith("/user-groups", {
-        params: {
-          institutionId: mocks.institutionGroups.content[0].institutionId,
-          status: "ACTIVE",
-        },
-      });
-      expect(isAxiosError).not.toHaveBeenCalled();
-      expect(E.isRight(result)).toBeTruthy();
-      if (E.isRight(result)) {
-        expect(result.right).toEqual(mocks.institutionGroups);
-      }
-      commonExpectation();
-    });
+        // then
+        expect(getMock).toHaveBeenCalledWith("/user-groups", {
+          params: {
+            institutionId,
+            status: expectedParams.status,
+            size: expectedParams.size,
+            page: expectedParams.page,
+            parentInstitutionId: expectedParams.parentInstitutionId,
+          },
+        });
+        expect(isAxiosError).not.toHaveBeenCalled();
+        expect(E.isRight(result)).toBeTruthy();
+        if (E.isRight(result)) {
+          expect(result.right).toEqual(mocks.institutionGroups);
+        }
+        commonExpectation();
+      },
+    );
 
     it("should return an error when received an error from selfcare", async () => {
+      // given
+      const institutionId = mocks.institutionGroups.content[0].institutionId;
       getMock.mockRejectedValueOnce({
         message: "Received 404 response",
         response: { status: 404 },
       });
       isAxiosError.mockReturnValueOnce(true);
 
-      const result = await getSelfcareClient().getInstitutionGroups(
-        mocks.institutionGroups.content[0].institutionId as string,
-      )();
+      // when
+      const result =
+        await getSelfcareClient().getInstitutionGroups(institutionId)();
 
+      // then
       expect(getMock).toHaveBeenCalledWith("/user-groups", {
         params: {
-          institutionId: mocks.institutionGroups.content[0].institutionId,
+          institutionId,
           status: "ACTIVE",
         },
       });
@@ -323,15 +349,18 @@ describe("Selfcare Client", () => {
     });
 
     it("should return an error when received a bad response from selfcare", async () => {
+      // given
+      const institutionId = mocks.institutionGroups.content[0].institutionId;
       getMock.mockResolvedValueOnce({ status: 200, data: "" });
 
-      const result = await getSelfcareClient().getInstitutionGroups(
-        mocks.institutionGroups.content[0].institutionId as string,
-      )();
+      // when
+      const result =
+        await getSelfcareClient().getInstitutionGroups(institutionId)();
 
+      // then
       expect(getMock).toHaveBeenCalledWith("/user-groups", {
         params: {
-          institutionId: mocks.institutionGroups.content[0].institutionId,
+          institutionId,
           status: "ACTIVE",
         },
       });
@@ -343,7 +372,7 @@ describe("Selfcare Client", () => {
 
   describe("getDelegations", () => {
     const institutionId = "instId";
-    const endpoint = `/institutions/${institutionId}/delegations/delegations-with-pagination`;
+    const endpoint = `/delegations/delegations-with-pagination`;
 
     it("should return the delegated institutions for the given institution", async () => {
       // given
@@ -367,10 +396,11 @@ describe("Selfcare Client", () => {
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
         params: {
+          brokerId: institutionId,
           size,
           page,
           search,
-          sort: "ASC",
+          order: "ASC",
         },
       });
       expect(isAxiosError).not.toHaveBeenCalled();
@@ -396,10 +426,11 @@ describe("Selfcare Client", () => {
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
         params: {
+          brokerId: institutionId,
           size: undefined,
           page: undefined,
           search: undefined,
-          sort: "ASC",
+          order: "ASC",
         },
       });
       expect(isAxiosError).toHaveBeenCalled();
@@ -418,10 +449,11 @@ describe("Selfcare Client", () => {
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
         params: {
+          brokerId: institutionId,
           size: undefined,
           page: undefined,
           search: undefined,
-          sort: "ASC",
+          order: "ASC",
         },
       });
       expect(isAxiosError).not.toHaveBeenCalled();
@@ -486,7 +518,7 @@ describe("Selfcare Client", () => {
       const institutionProducts = getMockInstitutionProducts(
         "institutionId",
       ) as unknown as ProductResource[];
-      
+
       getMock.mockResolvedValueOnce({
         status: 200,
         data: institutionProducts,
