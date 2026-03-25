@@ -55,7 +55,7 @@ describe("Selfcare Institutions", () => {
       ${"with a generic error"}                         | ${"error"}                       | ${false}            | ${() => "Error calling selfcare getGroup API"}
       ${"with an axios error different from not found"} | ${{ response: { status: 404 } }} | ${true}             | ${(groupId) => `Group having id '${groupId}' does not exists`}
     `(
-      "should rejct when getGroup fail $scenario",
+      "should reject when getGroup fail $scenario",
       async ({ error, isAxiosErrorMockRes, expectedErrorFn }) => {
         // given
         const groupId = "groupId" as NonEmptyString;
@@ -74,7 +74,7 @@ describe("Selfcare Institutions", () => {
       },
     );
 
-    it("should rejct when group is found but from different instutution", async () => {
+    it("should reject when group is found but from different instutution", async () => {
       // given
       const groupId = "groupId" as NonEmptyString;
       const institutionId = "institutionId";
@@ -111,7 +111,7 @@ describe("Selfcare Institutions", () => {
   describe("getInstitutionDelegations", () => {
     const institutionId = "institutionId";
     const error = "error";
-    it("should rejct when getInstitutionDelegations fail", async () => {
+    it("should reject when getInstitutionDelegations fail", async () => {
       // given
       mocks.getInstitutionDelegations.mockReturnValueOnce(TE.left(error));
 
@@ -158,7 +158,7 @@ describe("Selfcare Institutions", () => {
     const userId = "userId";
     const error = "error";
 
-    it("should rejct when getInstitutionProducts fail", async () => {
+    it("should reject when getInstitutionProducts fail", async () => {
       // given
       mocks.getInstitutionProducts.mockReturnValueOnce(TE.left(error));
 
@@ -202,7 +202,7 @@ describe("Selfcare Institutions", () => {
     const institutionId = "institutionId";
     const error = "error";
 
-    it("should rejct when getInstitutionGroups fail", async () => {
+    it("should reject when getInstitutionGroups fail", async () => {
       // given
       mocks.getInstitutionGroups.mockReturnValueOnce(TE.left(error));
 
