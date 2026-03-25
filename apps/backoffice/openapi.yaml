@@ -1056,7 +1056,7 @@ paths:
   /institutions/current/aggregates/{aggregateId}/subscriptions/manage/keys:
     get:
       tags:
-        - subscriptions
+        - manage-subscriptions
       summary: Retrieve aggregate's manage group subscription keys
       description: Retrieve manage group subscription keys for the given aggregate allowed to use by the current aggregator
       operationId: retrieveInstitutionAggregateManageSubscriptionsKeys
@@ -1087,7 +1087,7 @@ paths:
   /institutions/current/aggregates/{aggregateId}/subscriptions/manage/keys/{keyType}:
     put:
       tags:
-        - subscriptions
+        - manage-subscriptions
       summary: Regenerate aggregate's manage group subscription key
       description: Regenerate manage group subscription key for the given aggregate allowed to use by the current aggregator
       operationId: regenerateInstitutionAggregateManageSubscriptionsKey
