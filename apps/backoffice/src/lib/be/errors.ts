@@ -45,7 +45,7 @@ export class ManagedInternalError extends Error {
 
 export class SubscriptionNotFoundError extends ManagedInternalError {
   constructor(additionalDetails?: string) {
-    super("Subscription does not exists", additionalDetails);
+    super("Subscription does not exist", additionalDetails);
     this.name = "SubscriptionNotFoundError";
   }
 }

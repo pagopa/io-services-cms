@@ -114,7 +114,7 @@ describe("getManageSubscriptionKeys", () => {
   it.each`
     scenario                        | expectedStatusCode | error                                                    | expectedTitle                  | expectedDetail
     ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"ManageKeyRetrieveError"}    | ${"Something went wrong"}
-    ${"SubscriptionNotFoundError"}  | ${404}             | ${new SubscriptionNotFoundError()}                       | ${"SubscriptionNotFoundError"} | ${"Subscription does not exists"}
+    ${"SubscriptionNotFoundError"}  | ${404}             | ${new SubscriptionNotFoundError()}                       | ${"SubscriptionNotFoundError"} | ${"Subscription does not exist"}
     ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}                 | ${"You can only handle subscriptions that you own"}
   `(
     "should return an error response when retrieveManageSubscriptionApiKeys rejects with ",
