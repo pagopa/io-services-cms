@@ -349,3 +349,47 @@ ServiceTopic:
   required:
     - id
     - name
+ActivationPayload:
+  type: object
+  properties:
+    status:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - PENDING
+    fiscal_code:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
+  required:
+    - fiscal_code
+    - status
+Activation:
+  type: object
+  properties:
+    service_id:
+      type: string
+      description: |-
+        The ID of the Service. Equals the subscriptionId of a registered
+        API user.
+    fiscal_code:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
+    status:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+        - PENDING
+    modified_at:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/Timestamp'
+  required:
+    - service_id
+    - fiscal_code
+    - status
+    - modified_at
+FiscalCodePayload:
+  type: object
+  properties:
+    fiscal_code:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/FiscalCode'
+  required:
+    - fiscal_code
