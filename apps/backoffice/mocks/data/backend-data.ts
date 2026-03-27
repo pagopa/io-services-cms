@@ -256,7 +256,6 @@ export const getMockServiceKeys = () => ({
   secondary_key: faker.string.alphanumeric(32),
 });
 
-// Defined outside the function to simulate persistence across GET/PUT calls for aggregate manage-subscription keys
 const aggregateManageSubscriptionKeysMap = new Map<string, SubscriptionKeys>();
 
 export const getAggregateManageSubscriptionKeys = (
