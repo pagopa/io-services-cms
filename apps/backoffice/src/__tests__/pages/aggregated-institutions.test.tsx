@@ -19,7 +19,7 @@ const {
   mockFetchData,
   mockUseFetch,
   mockGetManageSubscriptionKeys,
-  mockRegenerateManageSubscriptionKey,
+  mockRegenerateInstitutionAggregateManageSubscriptionsKey,
   mockShowDialog,
   mockEnqueueSnackbar,
   mockIsAdmin,
@@ -34,7 +34,7 @@ const {
     loading: false,
   }));
   const mockGetManageSubscriptionKeys = vi.fn();
-  const mockRegenerateManageSubscriptionKey = vi.fn();
+  const mockRegenerateInstitutionAggregateManageSubscriptionsKey = vi.fn();
   const mockShowDialog = vi.fn();
   const mockEnqueueSnackbar = vi.fn();
   const mockIsAdmin = vi.fn(() => false);
@@ -44,7 +44,7 @@ const {
     mockFetchData,
     mockUseFetch,
     mockGetManageSubscriptionKeys,
-    mockRegenerateManageSubscriptionKey,
+    mockRegenerateInstitutionAggregateManageSubscriptionsKey,
     mockShowDialog,
     mockEnqueueSnackbar,
     mockIsAdmin,
@@ -60,7 +60,8 @@ vi.mock("@/hooks/use-fetch", () => ({
   client: {
     retrieveInstitutionAggregateManageSubscriptionsKeys:
       mockGetManageSubscriptionKeys,
-    regenerateManageSubscriptionKey: mockRegenerateManageSubscriptionKey,
+    regenerateInstitutionAggregateManageSubscriptionsKey:
+      mockRegenerateInstitutionAggregateManageSubscriptionsKey,
   },
 }));
 
@@ -480,12 +481,14 @@ describe("[AggregatedInstitutions] Page", () => {
           }),
         ),
       );
-      expect(mockRegenerateManageSubscriptionKey).not.toHaveBeenCalled();
+      expect(
+        mockRegenerateInstitutionAggregateManageSubscriptionsKey,
+      ).not.toHaveBeenCalled();
     });
 
-    it("should call regenerateManageSubscriptionKey when user confirms", async () => {
+    it("should call regenerateInstitutionAggregateManageSubscriptionsKey when user confirms", async () => {
       mockShowDialog.mockResolvedValue(true); // user confirms
-      mockRegenerateManageSubscriptionKey.mockResolvedValue(
+      mockRegenerateInstitutionAggregateManageSubscriptionsKey.mockResolvedValue(
         E.right({
           status: 200,
           value: { primary_key: "new-pk", secondary_key: "old-sk" },
@@ -495,16 +498,18 @@ describe("[AggregatedInstitutions] Page", () => {
       await triggerRegenerateKey("primary");
 
       await waitFor(() =>
-        expect(mockRegenerateManageSubscriptionKey).toHaveBeenCalledWith({
-          subscriptionId: "agg-1",
+        expect(
+          mockRegenerateInstitutionAggregateManageSubscriptionsKey,
+        ).toHaveBeenCalledWith({
+          aggregateId: "agg-1",
           keyType: "primary",
         }),
       );
     });
 
-    it("should call regenerateManageSubscriptionKey with secondary key type", async () => {
+    it("should call regenerateInstitutionAggregateManageSubscriptionsKey with secondary key type", async () => {
       mockShowDialog.mockResolvedValue(true);
-      mockRegenerateManageSubscriptionKey.mockResolvedValue(
+      mockRegenerateInstitutionAggregateManageSubscriptionsKey.mockResolvedValue(
         E.right({
           status: 200,
           value: { primary_key: "old-pk", secondary_key: "new-sk" },
@@ -514,8 +519,10 @@ describe("[AggregatedInstitutions] Page", () => {
       await triggerRegenerateKey("secondary");
 
       await waitFor(() =>
-        expect(mockRegenerateManageSubscriptionKey).toHaveBeenCalledWith({
-          subscriptionId: "agg-1",
+        expect(
+          mockRegenerateInstitutionAggregateManageSubscriptionsKey,
+        ).toHaveBeenCalledWith({
+          aggregateId: "agg-1",
           keyType: "secondary",
         }),
       );

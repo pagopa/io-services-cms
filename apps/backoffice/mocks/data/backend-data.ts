@@ -10,6 +10,9 @@ import { faker } from "@faker-js/faker/locale/it";
 import packageJson from "../../package.json";
 import { getMockManageSubscriptionGroup } from "./apim-data";
 
+import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
+
 const MAX_ARRAY_LENGTH = 20;
 
 export const anInfoVersion = {
@@ -252,6 +255,42 @@ export const getMockServiceKeys = () => ({
   primary_key: faker.string.alphanumeric(32),
   secondary_key: faker.string.alphanumeric(32),
 });
+
+// Defined outside the function to simulate persistence across GET/PUT calls for aggregate manage-subscription keys
+const aggregateManageSubscriptionKeysMap = new Map<string, SubscriptionKeys>();
+
+export const getAggregateManageSubscriptionKeys = (
+  aggregateId: string,
+): SubscriptionKeys => {
+  const keys = aggregateManageSubscriptionKeysMap.get(aggregateId);
+  if (keys) {
+    return keys;
+  }
+
+  const newKeys = getMockServiceKeys();
+  aggregateManageSubscriptionKeysMap.set(aggregateId, newKeys);
+  return newKeys;
+};
+
+export const regenerateInstitutionAggregateManageSubscriptionsKey = (
+  aggregateId: string,
+  keyType: SubscriptionKeyTypeEnum,
+): SubscriptionKeys => {
+  const current = getAggregateManageSubscriptionKeys(aggregateId);
+
+  const keyToUpdate =
+    keyType === SubscriptionKeyTypeEnum.primary
+      ? "primary_key"
+      : "secondary_key";
+
+  const updated = {
+    ...current,
+    [keyToUpdate]: faker.string.alphanumeric(32),
+  };
+
+  aggregateManageSubscriptionKeysMap.set(aggregateId, updated);
+  return updated;
+};
 
 export const aMockManageKeysCIDRs: SubscriptionCIDRs = {
   cidrs: [
