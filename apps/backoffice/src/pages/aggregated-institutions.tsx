@@ -163,13 +163,13 @@ export default function AggregatedInstitutions() {
     );
 
   const handleRetrieveManageSubscriptionKeys = async (aggregateId: string) => {
-    const response =
+    const maybeResponse =
       await client.retrieveInstitutionAggregateManageSubscriptionsKeys({
         aggregateId,
       });
 
-    if (E.isRight(response)) {
-      const maybeValue = SubscriptionKeys.decode(response.right.value);
+    if (E.isRight(maybeResponse)) {
+      const maybeValue = SubscriptionKeys.decode(maybeResponse.right.value);
       if (E.isRight(maybeValue)) {
         updateAggregatedInstitutionListItemById(aggregateId, {
           ...maybeValue.right,
@@ -186,16 +186,17 @@ export default function AggregatedInstitutions() {
   };
 
   const handleRegenerateKey = async (
-    subscriptionId: string,
+    aggregateId: string,
     keyType: SubscriptionKeyTypeEnum,
   ) => {
-    const response = await client.regenerateManageSubscriptionKey({
-      keyType,
-      subscriptionId,
-    });
+    const maybeResponse =
+      await client.regenerateInstitutionAggregateManageSubscriptionsKey({
+        aggregateId,
+        keyType,
+      });
 
-    if (E.isRight(response)) {
-      const maybeValue = SubscriptionKeys.decode(response.right.value);
+    if (E.isRight(maybeResponse)) {
+      const maybeValue = SubscriptionKeys.decode(maybeResponse.right.value);
       if (E.isRight(maybeValue)) {
         enqueueSnackbar(
           buildSnackbarItem({
@@ -204,16 +205,14 @@ export default function AggregatedInstitutions() {
             title: t("notifications.success"),
           }),
         );
-        updateAggregatedInstitutionListItemById(subscriptionId, {
-          ...response.right.value,
+        updateAggregatedInstitutionListItemById(aggregateId, {
+          ...maybeResponse.right.value,
         });
-        trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
-      } else {
-        getGenericErrorNotification();
+        trackEaManageKeyRegenerateEvent(aggregateId, keyType);
+        return;
       }
-    } else {
-      getGenericErrorNotification();
     }
+    getGenericErrorNotification();
   };
 
   const handlePageChange = (pageIndex: number) =>
