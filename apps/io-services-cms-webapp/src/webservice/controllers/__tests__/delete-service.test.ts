@@ -23,6 +23,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../../config";
 import { WebServerDependencies, createWebServer } from "../../index";
 
+vi.mock("../../../utils/cosmos-legacy", () => ({
+  cosmosdbInstance: {
+    container: vi.fn(() => ({})),
+  },
+}));
+
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
 const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(

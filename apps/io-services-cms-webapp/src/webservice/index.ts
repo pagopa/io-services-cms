@@ -1,9 +1,14 @@
+import { ContainerClient } from "@azure/storage-blob";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   ServiceHistory,
   ServiceLifecycle,
   ServicePublication,
 } from "@io-services-cms/models";
+import {
+  SERVICE_COLLECTION_NAME,
+  ServiceModel,
+} from "@pagopa/io-functions-commons/dist/src/models/service";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { secureExpressApp } from "@pagopa/io-functions-commons/dist/src/utils/express";
 import { wrapRequestHandler } from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
@@ -15,6 +20,7 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig } from "../config";
 import { TelemetryClient } from "../utils/applicationinsight";
 import { CosmosHelper, CosmosPagedHelper } from "../utils/cosmos-helper";
+import { cosmosdbInstance } from "../utils/cosmos-legacy";
 import { ServiceTopicDao } from "../utils/service-topic-dao";
 import {
   applyRequestMiddelwares as applyCheckServiceDuplicationInternalRequestMiddelwares,
@@ -32,6 +38,10 @@ import {
   applyRequestMiddelwares as applyEditServiceRequestMiddelwares,
   makeEditServiceHandler,
 } from "./controllers/edit-service";
+import {
+  applyRequestMiddelwares as applyGetServiceActivationRequestMiddlewares,
+  makeGetServiceActivationsHandler,
+} from "./controllers/get-service-activation";
 import {
   applyRequestMiddelwares as applyGetServiceHistoryRequestMiddelwares,
   makeGetServiceHistoryHandler,
@@ -89,14 +99,23 @@ import {
   applyRequestMiddelwares as applyUploadServiceLogoRequestMiddelwares,
   makeUploadServiceLogoHandler,
 } from "./controllers/upload-service-logo";
+import {
+  applyRequestMiddelwares as applyUpsertServiceActivationRequestMiddlewares,
+  makeUpsertServiceActivationHandler,
+} from "./controllers/upsert-service-activation";
 
 const serviceLifecyclePath = "/services/:serviceId";
 const servicePublicationPath = "/services/:serviceId/release";
 
+const serviceModel = new ServiceModel(
+  cosmosdbInstance.container(SERVICE_COLLECTION_NAME),
+);
+
 export interface WebServerDependencies {
+  activationsContainerClient: ContainerClient;
   apimService: ApimUtils.ApimService;
+  assetBlobService: BlobService;
   basePath: string;
-  blobService: BlobService;
   config: IConfig;
   fsmLifecycleClientCreator: ServiceLifecycle.FsmClientCreator;
   fsmPublicationClient: ServicePublication.FsmClient;
@@ -110,9 +129,10 @@ export interface WebServerDependencies {
 
 // eslint-disable-next-line max-lines-per-function
 export const createWebServer = ({
+  activationsContainerClient,
   apimService,
+  assetBlobService,
   basePath,
-  blobService,
   config,
   fsmLifecycleClientCreator,
   fsmPublicationClient,
@@ -359,11 +379,33 @@ export const createWebServer = ({
     pipe(
       makeUploadServiceLogoHandler({
         apimService,
-        blobService,
+        assetBlobService,
         fsmLifecycleClientCreator,
         telemetryClient,
       }),
       applyUploadServiceLogoRequestMiddelwares(config, subscriptionCIDRsModel),
+    ),
+  );
+
+  router.post(
+    "/activations",
+    pipe(
+      makeGetServiceActivationsHandler({
+        activationsContainerClient,
+        telemetryClient,
+      }),
+      applyGetServiceActivationRequestMiddlewares(serviceModel),
+    ),
+  );
+
+  router.put(
+    "/activations",
+    pipe(
+      makeUpsertServiceActivationHandler({
+        activationsContainerClient,
+        telemetryClient,
+      }),
+      applyUpsertServiceActivationRequestMiddlewares(serviceModel),
     ),
   );
 
