@@ -16,12 +16,8 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
-const BG_COLOR = "#EEEEEE";
-
 /** Renders a MUI `Table` for aggregated institutions with server-side pagination */
-export function AggregatedInstitutionTableView<T>({
-  ...props
-}: TableViewProps<T>) {
+export function AggregatedInstitutionTableView<T>(props: TableViewProps<T>) {
   const { t } = useTranslation();
   const page = Math.floor(props.pagination.offset / props.pagination.limit);
   const rowsPerPage = props.pagination.limit;
@@ -48,10 +44,10 @@ export function AggregatedInstitutionTableView<T>({
     }`;
 
   return (
-    <Box bgcolor={BG_COLOR} data-testid="table-view" paddingX={3} paddingY={3}>
+    <Box bgcolor="grey.200" data-testid="table-view" paddingX={3} paddingY={3}>
       <TableContainer component={Paper}>
         <Table aria-label="table-view" size="small" sx={{ minWidth: 650 }}>
-          <TableHead style={{ backgroundColor: BG_COLOR }}>
+          <TableHead sx={{ backgroundColor: "grey.200" }}>
             <TableRow>
               {props.columns.map((col, thColIndex) => (
                 <TableCell align={col.alignment} key={`th-col-${thColIndex}`}>
@@ -67,7 +63,6 @@ export function AggregatedInstitutionTableView<T>({
                 <TableRow
                   key={`tb-row-${tbRowIndex}`}
                   sx={{
-                    "&:hover": { backgroundColor: "action.hover" },
                     "&:last-child td, &:last-child th": {
                       border: 0,
                     },
