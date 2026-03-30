@@ -1,3 +1,6 @@
+import { LoaderSkeleton } from "@/components/loaders";
+import { TableRowMenu } from "@/components/table-view/table-row-menu";
+import { TableViewProps } from "@/components/table-view/table-view";
 import {
   Box,
   CircularProgress,
@@ -12,10 +15,6 @@ import {
   TableRow,
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
-
-import { LoaderSkeleton } from "../loaders";
-import { TableRowMenu } from "../table-view/table-row-menu";
-import { TableViewProps } from "../table-view/table-view";
 
 const BG_COLOR = "#EEEEEE";
 
