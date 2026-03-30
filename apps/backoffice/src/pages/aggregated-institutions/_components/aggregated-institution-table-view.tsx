@@ -16,7 +16,23 @@ import {
 } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
-/** Renders a MUI `Table` for aggregated institutions with server-side pagination */
+/**
+ * This component is a temporary duplicate of `src/components/table-view/table-view.tsx`.
+ *
+ * It was introduced to support server-side (backend-driven) pagination for the aggregated
+ * institutions table, avoiding regressions on the other screens that rely on the original
+ * `TableView` component, which manages pagination client-side.
+ *
+ * Key differences from `TableView`:
+ * - `page` and `rowsPerPage` are derived directly from `props.pagination` (no local state).
+ * - Rows are rendered as-is without client-side slicing, since the backend already returns
+ *   the correct page of data.
+ * - `TablePagination.count` uses `props.pagination.count` (total from the server) instead
+ *   of `props.rows.length`.
+ *
+ * TODO: Evaluate whether this component can replace `TableView` entirely, or whether
+ * `TableView` should be extended to support an optional server-side pagination mode.
+ */
 export function AggregatedInstitutionTableView<T>(props: TableViewProps<T>) {
   const { t } = useTranslation();
   const page = Math.floor(props.pagination.offset / props.pagination.limit);
