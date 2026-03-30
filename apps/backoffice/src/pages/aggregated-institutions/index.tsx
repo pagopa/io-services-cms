@@ -63,7 +63,6 @@ export default function AggregatedInstitutions() {
   const { enqueueSnackbar } = useSnackbar();
 
   const {
-    data: dipData,
     error: dipError,
     fetchData: dipFetchData,
     loading: dipLoading,
@@ -367,35 +366,35 @@ export default function AggregatedInstitutions() {
       },
       AggregatedInstitutionPagination,
       { notify: "errors" },
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination, currentSearchByInstitutionName]);
-
-  // Process fetch results
-  useEffect(() => {
-    const maybeDipData = AggregatedInstitutionPagination.decode(dipData);
-    if (E.isRight(maybeDipData)) {
-      if (
-        maybeDipData.right.value.length === 0 &&
-        !currentSearchByInstitutionName
-      )
-        setNoAggregatedInstitutions(true);
-      if (
-        maybeDipData.right.pagination.offset !== undefined &&
-        maybeDipData.right.pagination.limit
-      ) {
-        setAggregatedInstitutions(
-          maybeDipData.right.value.map((item) => ({
-            ...item,
-            isLoading: false,
-            isVisible: false,
-          })),
-        );
-        setTotalCount(maybeDipData.right.pagination.count);
+    ).then(({ data }) => {
+      const maybeDipData = AggregatedInstitutionPagination.decode(data);
+      if (E.isRight(maybeDipData)) {
+        if (
+          maybeDipData.right.value.length === 0 &&
+          !currentSearchByInstitutionName
+        )
+          setNoAggregatedInstitutions(true);
+        if (
+          maybeDipData.right.pagination.offset !== undefined &&
+          maybeDipData.right.pagination.limit
+        ) {
+          setAggregatedInstitutions(
+            maybeDipData.right.value.map((item) => ({
+              ...item,
+              isLoading: false,
+              isVisible: false,
+            })),
+          );
+          setTotalCount(maybeDipData.right.pagination.count);
+        }
       }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dipData]);
+    });
+  }, [
+    pagination,
+    currentSearchByInstitutionName,
+    dipFetchData,
+    session?.user?.institution.id,
+  ]);
 
   useEffect(() => {
     trackAggregatedInstitutionsPageEvent();
