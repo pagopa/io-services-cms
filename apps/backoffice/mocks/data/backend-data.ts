@@ -1,6 +1,8 @@
 /* eslint-disable no-useless-escape */
 import { Cidr } from "@/generated/api/Cidr";
 import { SubscriptionCIDRs } from "@/generated/api/SubscriptionCIDRs";
+import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import {
   SubscriptionType,
   SubscriptionTypeEnum,
@@ -9,9 +11,6 @@ import { faker } from "@faker-js/faker/locale/it";
 
 import packageJson from "../../package.json";
 import { getMockManageSubscriptionGroup } from "./apim-data";
-
-import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
-import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 
 const MAX_ARRAY_LENGTH = 20;
 
