@@ -1,4 +1,4 @@
-import { InvocationContext } from "@azure/functions";
+import { InvocationContext, StorageQueueHandler } from "@azure/functions";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -55,13 +55,13 @@ export const log = (
  * @returns
  */
 export const withJsonInput =
-  (
+  <T>(
     handler: (
       context: InvocationContext,
       ...parsedInputs: readonly Json[]
     ) => Promise<unknown>,
-  ) =>
-  (input: unknown, context: InvocationContext): Promise<unknown> =>
+  ): StorageQueueHandler<T> =>
+  (input, context) =>
     pipe(
       [input],
       RA.map((input) =>
