@@ -206,7 +206,7 @@ export default function AggregatedInstitutions() {
           }),
         );
         updateAggregatedInstitutionListItemById(aggregateId, {
-          ...maybeResponse.right.value,
+          ...maybeValue.right,
         });
         trackEaManageKeyRegenerateEvent(aggregateId, keyType);
         return;
