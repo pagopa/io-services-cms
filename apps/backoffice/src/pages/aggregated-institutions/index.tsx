@@ -1,4 +1,5 @@
 /* eslint-disable max-lines-per-function */
+import { AggregatedInstitutionTableView } from "@/components/aggregated-institutions/aggregated-institution-table-view";
 import { ApiKeyValueAsync } from "@/components/api-keys/api-key-value-async";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
@@ -32,8 +33,6 @@ import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useSnackbar } from "notistack";
 import { ReactElement, useCallback, useEffect, useMemo, useState } from "react";
-
-import { AggregatedInstitutionTableView } from "./_components/aggregated-institution-table-view";
 
 const pageTitleLocaleKey = "routes.aggregated-institutions.title";
 const pageDescriptionLocaleKey = "routes.aggregated-institutions.description";
