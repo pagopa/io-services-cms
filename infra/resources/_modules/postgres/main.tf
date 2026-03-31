@@ -1,3 +1,8 @@
+ephemeral "random_password" "password" {
+  length  = 16
+  special = true
+}
+
 module "cms_postgres_flexible_server" {
   source  = "pagopa-dx/azure-postgres-server/azurerm"
   version = "~> 1"
@@ -19,10 +24,10 @@ module "cms_postgres_flexible_server" {
   db_version = "16"
   storage_mb = 32768
 
-  administrator_credentials = {
-    name     = local.postgres_admin_username
-    password = var.cms_pgres_admin_pwd
-  }
+  admin_username         = "pgadminusr"
+  admin_password         = ephemeral.random_password.password.result
+  admin_password_version = 1
+  key_vault_id           = var.key_vault_id
 
   ### backup
   backup_retention_days = 7

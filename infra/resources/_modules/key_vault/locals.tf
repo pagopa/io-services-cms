@@ -5,7 +5,6 @@ locals {
       jira_token                                       = "JIRA-TOKEN"
       legacy_cosmosdb_connectionstring                 = "legacy-cosmosdb-connectionstring"
       legacy_cosmosdb_key                              = "legacy-cosmosdb-key"
-      cms_pgres_admin_pwd                              = "pgres-flex-admin-pwd"
       cms_pgres_reviewer_usr_pwd                       = "pgres-flex-reviewer-usr-pwd"
       selfcare_api_key                                 = "SELFCARE-API-KEY"
       serviceid_quality_check_exclusion_list           = "SERVICEID-QUALITY-CHECK-EXCLUSION-LIST"
