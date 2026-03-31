@@ -769,19 +769,6 @@ app.http("PatchService", {
   route: "services/{serviceId}",
 });
 
-app.http("PatchServiceWorkaround", {
-  authLevel: "anonymous",
-  handler: applyPatchServiceRequestMiddelwares(config)(
-    makePatchServiceHandler({
-      apimService,
-      fsmLifecycleClientCreator,
-      telemetryClient,
-    }),
-  ),
-  methods: ["PUT"],
-  route: "services/{serviceId}/patch",
-});
-
 app.http("DeleteService", {
   authLevel: "anonymous",
   handler: applyDeleteServiceRequestMiddelwares(
