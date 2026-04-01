@@ -92,12 +92,11 @@ variable "cms_fn_principal_id" {
 }
 
 
-###########################
-#  Azure KeyVault Secrets #
-###########################
+###################
+#  Azure KeyVault #
+###################
 
-variable "cms_pgres_admin_pwd" {
+variable "key_vault_id" {
   type        = string
-  description = "Postgres Password for CMS Admin User"
-  sensitive   = true
+  description = "ID of the Azure KeyVault"
 }

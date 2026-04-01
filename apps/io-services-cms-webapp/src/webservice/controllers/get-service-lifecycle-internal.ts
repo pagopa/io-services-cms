@@ -1,6 +1,7 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
+import { wrapHandlerV4 } from "@pagopa/io-functions-commons/dist/src/utils/azure-functions-v4-express-adapter";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -8,10 +9,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler,
-} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import { IResponseSuccessJson } from "@pagopa/ts-commons/lib/responses";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -33,7 +30,7 @@ type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>;
 
 type GetServiceLifecycleInternalHandler = (
-  context: Context,
+  context: InvocationContext,
   auth: IAzureApiAuthorization,
   serviceId: ServiceLifecycle.definitions.ServiceId,
 ) => Promise<HandlerResponseTypes>;
@@ -73,19 +70,14 @@ export const makeGetServiceLifecycleInternalHandler =
 
 export const applyRequestMiddelwares = (
   handler: GetServiceLifecycleInternalHandler,
-): ReturnType<typeof wrapRequestHandler> => {
-  const middlewaresWrap = withRequestMiddlewares(
+): ReturnType<typeof wrapHandlerV4> => {
+  const middlewares = [
     // extract the Azure functions context
     ContextMiddleware(),
     // only allow requests by users belonging to certain groups
     AzureApiAuthMiddleware(new Set([UserGroup.ApiServiceWrite])),
     // extract the service id from the path variables
     RequiredParamMiddleware("serviceId", NonEmptyString),
-  );
-  return wrapRequestHandler(
-    middlewaresWrap(
-      // eslint-disable-next-line max-params
-      handler,
-    ),
-  );
+  ] as const;
+  return wrapHandlerV4(middlewares, handler);
 };

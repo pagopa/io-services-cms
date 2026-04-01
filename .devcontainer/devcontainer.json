@@ -4,7 +4,6 @@
   "service": "devcontainer",
   "workspaceFolder": "/workspace",
   "containerEnv": {
-    "COMPOSE_PROFILES": "${localEnv:COMPOSE_PROFILES}",
     "ARM_SUBSCRIPTION_ID": "${localEnv:ARM_SUBSCRIPTION_ID}"
   },
   "features": {
@@ -36,7 +35,8 @@
   },
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [
-    1234 // Cosmos DB Emulator web interface
+    1234, // Cosmos DB Emulator web interface
+    7071 // Azure Functions Core Tools default port
   ],
   "customizations": {
     "vscode": {

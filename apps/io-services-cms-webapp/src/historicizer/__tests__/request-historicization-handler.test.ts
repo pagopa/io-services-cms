@@ -1,20 +1,15 @@
-import { Context } from "@azure/functions";
 import { DateUtils, Queue, ServiceHistory } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import { Json } from "io-ts-types";
 import { assert, describe, expect, it } from "vitest";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 import {
   handleQueueItem,
   toServiceHistory,
 } from "../request-historicization-handler";
 
-const createContext = () =>
-  ({
-    bindings: {},
-    executionContext: { functionName: "funcname" },
-    log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+const createContext = () => makeInvocationContext("funcname").context;
 
 const atimestamp = DateUtils.unixTimestamp();
 const aGenericItemType = {
@@ -67,8 +62,9 @@ describe("Service Historicization Handler", () => {
 
       await handleQueueItem(context, item)();
 
-      expect(context.bindings.serviceHistoryDocument).toBe(
-        JSON.stringify(toServiceHistory(expected)),
+      expect(context.extraOutputs.set).toHaveBeenCalledWith(
+        "serviceHistoryDocument",
+        toServiceHistory(expected),
       );
     },
   );

@@ -1,7 +1,8 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { wrapHandlerV4 } from "@pagopa/io-functions-commons/dist/src/utils/azure-functions-v4-express-adapter";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -11,10 +12,6 @@ import { ClientIpMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { RequiredBodyPayloadMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_body_payload";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler,
-} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   IResponseSuccessJson,
   ResponseSuccessJson,
@@ -54,7 +51,7 @@ interface Dependencies {
 }
 
 type EditServiceHandler = (
-  context: Context,
+  context: InvocationContext,
   auth: IAzureApiAuthorization,
   serviceId: ServiceLifecycle.definitions.ServiceId,
   servicePayload: ServiceRequestPayload,
@@ -116,8 +113,8 @@ export const makeEditServiceHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: EditServiceHandler): ReturnType<typeof wrapRequestHandler> => {
-    const middlewaresWrap = withRequestMiddlewares(
+  (handler: EditServiceHandler): ReturnType<typeof wrapHandlerV4> => {
+    const middlewares = [
       // extract the client IP from the request
       ClientIpMiddleware,
       // check manage key
@@ -134,20 +131,18 @@ export const applyRequestMiddelwares =
       // validate the reuqest body to be in the expected shape
       RequiredBodyPayloadMiddleware(ServiceRequestPayload),
       SelfcareUserGroupsMiddleware(),
-    );
-    return wrapRequestHandler(
-      middlewaresWrap((...args) =>
-        pipe(
-          args,
-          ([clientIp, userAttributesManage, ...rest]) =>
-            pipe(
-              checkSourceIp(clientIp, userAttributesManage.authorizedCIDRs),
-              E.map((_) => rest),
-            ),
-          TE.fromEither,
-          TE.chainW((args) => handler(...args)),
-          TE.toUnion,
-        )(),
-      ),
+    ] as const;
+    return wrapHandlerV4(middlewares, (...args) =>
+      pipe(
+        args,
+        ([clientIp, userAttributesManage, ...rest]) =>
+          pipe(
+            checkSourceIp(clientIp, userAttributesManage.authorizedCIDRs),
+            E.map((_) => rest),
+          ),
+        TE.fromEither,
+        TE.chainW((args) => handler(...args)),
+        TE.toUnion,
+      )(),
     );
   };

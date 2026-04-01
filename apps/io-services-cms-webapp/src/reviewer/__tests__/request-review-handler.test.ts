@@ -1,4 +1,3 @@
-import { Context } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -16,6 +15,7 @@ import { Delegate, JiraIssueStatusFilter } from "../../utils/jira-proxy";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import { createRequestReviewHandler } from "../request-review-handler";
 import { PG_PK_UNIQUE_VIOLATION_CODE } from "../../lib/clients/pg-client";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -25,12 +25,7 @@ afterEach(() => {
 const isFirstReview = true;
 const isNotFirstReview = false;
 
-const createContext = () =>
-  ({
-    bindings: {},
-    executionContext: { functionName: "funcname" },
-    log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+const createContext = () => makeInvocationContext("funcname").context;
 
 const aJiraIssue: JiraIssue = {
   id: "aJiraIssueId" as NonEmptyString,
@@ -230,7 +225,7 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    const result = await handler(JSON.stringify(aService), context);
 
     expect(
       mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId,
@@ -266,7 +261,7 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    const result = await handler(JSON.stringify(aService), context);
 
     expect(
       mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId,
@@ -302,7 +297,7 @@ describe("Service Review Handler", () => {
       mockConfig,
     );
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    const result = await handler(JSON.stringify(aService), context);
 
     expect(
       mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId,
@@ -352,7 +347,7 @@ describe("Service Review Handler", () => {
       mockConfig,
     );
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    const result = await handler(JSON.stringify(aService), context);
 
     expect(
       mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId,
@@ -390,7 +385,7 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    const result = await handler(JSON.stringify(aService), context);
 
     expect(
       mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId,
@@ -424,7 +419,7 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    const result = await handler(JSON.stringify(aService), context);
 
     expect(
       mockJiraProxy.getPendingAndRejectedJiraIssueByServiceId,
@@ -456,7 +451,7 @@ describe("Service Review Handler", () => {
 
     const context = createContext();
     try {
-      await handler(context, JSON.stringify(aService));
+      await handler(JSON.stringify(aService), context);
     } catch (error) {
       expect(error).toBeDefined();
     }
@@ -489,7 +484,7 @@ describe("Service Review Handler", () => {
 
     const context = createContext();
     try {
-      await handler(context, JSON.stringify(aService));
+      await handler(JSON.stringify(aService), context);
     } catch (error) {
       expect(error).toBeDefined();
     }
@@ -524,7 +519,7 @@ describe("Service Review Handler", () => {
 
     const context = createContext();
     try {
-      await handler(context, JSON.stringify(aService));
+      await handler(JSON.stringify(aService), context);
     } catch (error) {
       expect(error).toBeDefined();
     }
@@ -574,7 +569,7 @@ describe("Service Review Handler", () => {
 
     const context = createContext();
     try {
-      await handler(context, JSON.stringify(aService));
+      await handler(JSON.stringify(aService), context);
     } catch (error) {
       expect(error).toBeDefined();
     }
@@ -622,7 +617,7 @@ describe("Service Review Handler", () => {
     );
 
     const context = createContext();
-    const result = await handler(context, JSON.stringify(aService));
+    const result = await handler(JSON.stringify(aService), context);
 
     expect(
       mainMockJiraProxy.getPendingAndRejectedJiraIssueByServiceId,
@@ -658,7 +653,7 @@ describe("Service Review Handler", () => {
 
     const context = createContext();
     try {
-      await handler(context, JSON.stringify(aService));
+      await handler(JSON.stringify(aService), context);
     } catch (error) {
       expect(error).toBeDefined();
     }

@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { Queue } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { ServiceModel } from "@pagopa/io-functions-commons/dist/src/models/service";
@@ -13,7 +13,7 @@ import { QueuePermanentError } from "../utils/errors";
 import { parseIncomingMessage } from "../utils/queue-utils";
 
 export const handleQueueItem = (
-  _context: Context,
+  _context: InvocationContext,
   queueItem: Json,
   legacyServiceModel: ServiceModel,
 ) =>
@@ -30,7 +30,7 @@ export const handleQueueItem = (
               pipe(
                 { kind: "INewService" as const, ...item },
                 (x) => {
-                  _context.log.info(`create param:", ${JSON.stringify(x)}`);
+                  _context.info(`create param:", ${JSON.stringify(x)}`);
                   return x;
                 },
                 (x) =>
@@ -56,7 +56,7 @@ export const handleQueueItem = (
                   },
                 },
                 (x) => {
-                  _context.log.info(`update param: ${JSON.stringify(x)}`);
+                  _context.info(`update param: ${JSON.stringify(x)}`);
                   return x;
                 },
                 (x) => legacyServiceModel.update(x),
@@ -68,16 +68,16 @@ export const handleQueueItem = (
     ),
     TE.getOrElseW((e) => {
       if (e instanceof QueuePermanentError) {
-        _context.log.error(`Permanent error: ${e.message}`);
+        _context.error(`Permanent error: ${e.message}`);
         return TE.right(void 0);
       } else if (e instanceof Error) {
-        _context.log.error(
+        _context.error(
           `An Error has occurred while persisting data, the reason was => ${e.message}`,
           e,
         );
         throw e;
       } else {
-        _context.log.error(
+        _context.error(
           `An ${
             e.kind
           } has occurred while persisting data, the reason was => ${JSON.stringify(
