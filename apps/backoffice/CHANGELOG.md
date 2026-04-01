@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.32.1
+
+### Patch Changes
+
+- 90a92785: add regenerateInstitutionAggregateManageSubscriptionsKey API definition
+
 ## 1.32.0
 
 ### Minor Changes
