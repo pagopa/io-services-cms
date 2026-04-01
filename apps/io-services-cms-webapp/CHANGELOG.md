@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.0.0
+
+### Major Changes
+
+- 73d9dd9b: upgrade Az Fn to PMv4 and upgrade node version to 22
+
 ## 1.42.12
 
 ### Patch Changes
