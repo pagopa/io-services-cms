@@ -43,7 +43,7 @@
     "@io-services-cms/external-clients": "workspace:^",
     "@io-services-cms/fetch-utils": "workspace:^",
     "@io-services-cms/models": "workspace:^",
-    "@pagopa/io-functions-commons": "^30.0.0",
+    "@pagopa/io-functions-commons": "catalog:",
     "@pagopa/ts-commons": "^13.1.1",
     "adf-to-md": "^1.2.1",
     "applicationinsights": "^2.9.5",

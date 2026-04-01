@@ -6,6 +6,9 @@ settings:
 
 catalogs:
   default:
+    '@pagopa/io-functions-commons':
+      specifier: ^30.0.0
+      version: 30.0.0
     prettier:
       specifier: ^3.5.3
       version: 3.5.3
@@ -326,7 +329,7 @@ importers:
         specifier: workspace:^
         version: link:../../packages/io-services-cms-models
       '@pagopa/io-functions-commons':
-        specifier: ^30.0.0
+        specifier: 'catalog:'
         version: 30.0.0(@azure/functions@4.11.2)(@pagopa/ts-commons@13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5)))(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/ts-commons':
         specifier: ^13.1.1
@@ -408,8 +411,8 @@ importers:
         specifier: ^4.13.0
         version: 4.13.0
       '@pagopa/io-functions-commons':
-        specifier: ^29.1.2
-        version: 29.1.2(@azure/functions@4.11.2)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+        specifier: 'catalog:'
+        version: 30.0.0(@azure/functions@4.11.2)(@pagopa/ts-commons@13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5)))(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/ts-commons':
         specifier: ^13.1.1
         version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
@@ -467,8 +470,8 @@ importers:
         specifier: ^4.0.0
         version: 4.0.0
       '@pagopa/io-functions-commons':
-        specifier: ^29.1.2
-        version: 29.1.2(@azure/functions@4.11.2)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+        specifier: 'catalog:'
+        version: 30.0.0(@azure/functions@4.11.2)(@pagopa/ts-commons@13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5)))(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/ts-commons':
         specifier: ^13.1.1
         version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
