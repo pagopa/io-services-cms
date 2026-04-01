@@ -5,6 +5,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { JiraIssue } from "../../lib/clients/jira-client";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import {
   IssueItemPair,
@@ -195,13 +196,7 @@ const mainMockJiraProxy = {
   getPendingJiraIssueByServiceId: vi.fn(),
 };
 
-const mockContext = {
-  log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
-    warn: vi.fn((_) => console.warn(_)),
-  },
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 describe("[Service Review Checker Handler] buildIssueItemPairs", () => {
   it("should build THREE IssueItemPairs given 3 jira issues, an APPROVED one, a REJECTED one and an Approvata one", async () => {

@@ -1,4 +1,3 @@
-import { Context } from "@azure/functions";
 import { Queue } from "@io-services-cms/models";
 import { MaxAllowedAmount } from "@io-services-cms/models/service-lifecycle/definitions";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
@@ -26,13 +25,9 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { Json } from "io-ts-types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleQueueItem } from "../request-sync-legacy-handler";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 
-const createContext = () =>
-  ({
-    bindings: {},
-    executionContext: { functionName: "funcname" },
-    log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+const createContext = () => makeInvocationContext("funcname").context;
 
 const anOrganizationFiscalCode = "12345678901" as OrganizationFiscalCode;
 

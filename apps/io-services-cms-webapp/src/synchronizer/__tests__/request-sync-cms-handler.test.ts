@@ -1,4 +1,3 @@
-import { Context } from "@azure/functions";
 import {
   DateUtils,
   Queue,
@@ -12,13 +11,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
 import { SYNC_FROM_LEGACY } from "../../utils/synchronizer";
 import { handleQueueItem } from "../request-sync-cms-handler";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 
-const createContext = () =>
-  ({
-    bindings: {},
-    executionContext: { functionName: "funcname" },
-    log: { ...console, verbose: console.log },
-  }) as unknown as Context;
+const createContext = () => makeInvocationContext("funcname").context;
 
 const aBaseServiceLifecycleItem = {
   id: "aServiceLifecycleId",

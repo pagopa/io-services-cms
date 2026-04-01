@@ -54,12 +54,6 @@ variable "bo_auth_session_secret_rotation_id" {
   description = "You can renew the backoffice auth session secret by using a new, never-used-before value (hint: use the current timestamp)"
 }
 
-variable "postgres_admin_credentials_rotation_id" {
-  type        = string
-  default     = "1682602957131"
-  description = "You can renew admin credentials for PostgrsSQL by using a new, never-used-before value (hint: use the current timestamp)"
-}
-
 variable "postgres_reviewer_usr_credentials_rotation_id" {
   type        = string
   default     = "1682602957131"

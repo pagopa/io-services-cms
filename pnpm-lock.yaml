@@ -167,7 +167,7 @@ importers:
         version: 0.3.0(@opentelemetry/api@1.9.0)
       '@pagopa/io-functions-commons':
         specifier: ^29.1.2
-        version: 29.1.2(@azure/functions@4.4.0)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+        version: 29.1.2(@azure/functions@4.11.2)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/mui-italia':
         specifier: ^1.0.1
         version: 1.0.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
@@ -305,8 +305,8 @@ importers:
         specifier: ^5.12.2
         version: 5.12.2
       '@azure/functions':
-        specifier: ^3.5.1
-        version: 3.5.1
+        specifier: ^4.11.2
+        version: 4.11.2
       '@azure/identity':
         specifier: ^4.13.0
         version: 4.13.0
@@ -325,12 +325,9 @@ importers:
       '@io-services-cms/models':
         specifier: workspace:^
         version: link:../../packages/io-services-cms-models
-      '@pagopa/express-azure-functions':
-        specifier: ^4.0.1
-        version: 4.0.1(express@4.18.2)
       '@pagopa/io-functions-commons':
-        specifier: ^29.1.2
-        version: 29.1.2(@azure/functions@3.5.1)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+        specifier: ^30.0.0
+        version: 30.0.0(@azure/functions@4.11.2)(@pagopa/ts-commons@13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5)))(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/ts-commons':
         specifier: ^13.1.1
         version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
@@ -346,15 +343,6 @@ importers:
       azure-storage:
         specifier: ^2.10.5
         version: 2.10.7
-      body-parser:
-        specifier: ^1.20.4
-        version: 1.20.4
-      dotenv-cli:
-        specifier: ^7.2.1
-        version: 7.4.1
-      express:
-        specifier: ^4.18.2
-        version: 4.18.2
       fp-ts:
         specifier: ^2.16.5
         version: 2.16.5
@@ -392,12 +380,6 @@ importers:
       '@pagopa/openapi-codegen-ts':
         specifier: ^13.1.0
         version: 13.1.0(chokidar@3.6.0)
-      '@types/body-parser':
-        specifier: ^1.19.6
-        version: 1.19.6
-      '@types/express':
-        specifier: ^4.17.17
-        version: 4.17.21
       '@types/lodash':
         specifier: ^4.14.202
         version: 4.14.202
@@ -407,9 +389,6 @@ importers:
       '@types/pg-cursor':
         specifier: ^2.7.0
         version: 2.7.0
-      '@types/supertest':
-        specifier: ^2.0.12
-        version: 2.0.12
       '@types/upng-js':
         specifier: ^2.1.1
         version: 2.1.3
@@ -419,9 +398,6 @@ importers:
       prettier:
         specifier: 'catalog:'
         version: 3.5.3
-      supertest:
-        specifier: ^6.3.3
-        version: 6.3.4
 
   packages/external-clients:
     dependencies:
@@ -433,7 +409,7 @@ importers:
         version: 4.13.0
       '@pagopa/io-functions-commons':
         specifier: ^29.1.2
-        version: 29.1.2(@azure/functions@4.4.0)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+        version: 29.1.2(@azure/functions@4.11.2)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/ts-commons':
         specifier: ^13.1.1
         version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
@@ -492,7 +468,7 @@ importers:
         version: 4.0.0
       '@pagopa/io-functions-commons':
         specifier: ^29.1.2
-        version: 29.1.2(@azure/functions@4.4.0)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+        version: 29.1.2(@azure/functions@4.11.2)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       '@pagopa/ts-commons':
         specifier: ^13.1.1
         version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
@@ -633,8 +609,16 @@ packages:
     resolution: {integrity: sha512-5YO7QnOAxfgv76JTpemDeQBaGrR01eCTrM4GlVeMCc5skOrShJ7CTYU2d8fSU5Ak3lNjObTDABtSqzxxmeOwSw==}
     engines: {node: '>=18.0.0'}
 
+  '@azure/functions-extensions-base@0.2.0':
+    resolution: {integrity: sha512-ncCkHBNQYJa93dBIh+toH0v1iSgCzSo9tr94s6SMBe7DPWREkaWh8cq33A5P4rPSFX1g5W+3SPvIzDr/6/VOWQ==}
+    engines: {node: '>=18.0'}
+
   '@azure/functions@3.5.1':
     resolution: {integrity: sha512-6UltvJiuVpvHSwLcK/Zc6NfUwlkDLOFFx97BHCJzlWNsfiWwzwmTsxJXg4kE/LemKTHxPpfoPE+kOJ8hAdiKFQ==}
+
+  '@azure/functions@4.11.2':
+    resolution: {integrity: sha512-U7qpPo0pUxDfdP3Q8gO5GLtust94nh8+RtIUvEKE4qU9yuDhL2vU1zzanuzkaV2j/TFv+EEmN8QDtchAgpeffw==}
+    engines: {node: '>=20.0'}
 
   '@azure/functions@4.4.0':
     resolution: {integrity: sha512-debidWolFTsfapsK53ftzLtXJc3dbYYPc9UqJoEm1GAj1lS7jFMARQnbfTQPDqBIhuJxLZ9D8WVvhIEV7Hifzw==}
@@ -2436,11 +2420,6 @@ packages:
     peerDependencies:
       eslint: ^8.57.0
 
-  '@pagopa/express-azure-functions@4.0.1':
-    resolution: {integrity: sha512-2gSMQ6nCz5z5RdSgE0P5uoVBoxQqUeZr8bUUVyXjEqA/Z1PVDofbDbYJG6aPnDhfHO8aEXLDJOG8eUqjYB4Qsg==}
-    peerDependencies:
-      express: ^4.17.2
-
   '@pagopa/handler-kit-azure-func@2.0.3':
     resolution: {integrity: sha512-W1VGw5keVkN3yFiW2MWHKRpzbAT7+keGNRvG5BrKZRDHkOV4NLWCh8ksnW/ELQbau5T8zUQ1Wv5+zTF0ZWiu8g==}
 
@@ -2451,6 +2430,15 @@ packages:
     resolution: {integrity: sha512-bI4zoC+/9apyZ7SWgjQe7iKrUxONC7Sn5fPja6uK/KT7Bb/hZlUwuWkxkweexk9YVTJiyWv696KlgzQox5aGgw==}
     peerDependencies:
       '@azure/functions': ^3.2.0
+      express: ^4.15.3
+      fp-ts: ^2.16.5
+      io-ts: ^2.2.21
+
+  '@pagopa/io-functions-commons@30.0.0':
+    resolution: {integrity: sha512-7MVfQpi74TuQo+iFDZQ/l8/0uQtXT1JUrEBbGWUfGRkemYZhjib/4FHqfcAoa8heF5fCw+YPKu4MOROhOxYMJA==}
+    peerDependencies:
+      '@azure/functions': ^4.11.2
+      '@pagopa/ts-commons': ^13.1.1
       express: ^4.15.3
       fp-ts: ^2.16.5
       io-ts: ^2.2.21
@@ -2786,9 +2774,6 @@ packages:
   '@types/body-parser@1.19.2':
     resolution: {integrity: sha512-ALYone6pm6QmwZoAgeyNksccT9Q4AWZQ6PvfwR37GT6r6FWUPguq6sUmNGSMV2Wr761oQoBxwGGa6DR5o1DC9g==}
 
-  '@types/body-parser@1.19.6':
-    resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
-
   '@types/bunyan@1.8.9':
     resolution: {integrity: sha512-ZqS9JGpBxVOvsawzmVt30sP++gSQMTejCkIAQ3VdadOcRE8izTyW66hufvwLeH+YEGP6Js2AW7Gz+RMyvrEbmw==}
 
@@ -2800,9 +2785,6 @@ packages:
 
   '@types/cookie@0.4.1':
     resolution: {integrity: sha512-XW/Aa8APYr6jSVVA1y/DEIZX0/GMKLEVekNG727R8cs56ahETkRAy/3DR7+fJyh7oUgGwNQaRfXCun0+KbWY7Q==}
-
-  '@types/cookiejar@2.1.2':
-    resolution: {integrity: sha512-t73xJJrvdTjXrn4jLS9VSGRbz0nUY3cl2DMGDU48lKl+HR9dbbjW2A9r3g40VA++mQpy6uuHg33gy7du2BKpog==}
 
   '@types/css-font-loading-module@0.0.7':
     resolution: {integrity: sha512-nl09VhutdjINdWyXxHWN/w9zlNCfr60JUqJbd24YXUuCwgeL0TpFSdElCwb6cxfB6ybE19Gjj4g0jsgkXxKv1Q==}
@@ -2944,12 +2926,6 @@ packages:
 
   '@types/statuses@2.0.4':
     resolution: {integrity: sha512-eqNDvZsCNY49OAXB0Firg/Sc2BgoWsntsLUdybGFOhAfCD6QJ2n9HXUIHGqt5qjrxmMv4wS8WLAw43ZkKcJ8Pw==}
-
-  '@types/superagent@4.1.17':
-    resolution: {integrity: sha512-FFK/rRjNy24U6J1BvQkaNWu2ohOIF/kxRQXRsbT141YQODcOcZjzlcc4DGdI2SkTa0rhmF+X14zu6ICjCGIg+w==}
-
-  '@types/supertest@2.0.12':
-    resolution: {integrity: sha512-X3HPWTwXRerBZS7Mo1k6vMVR1Z6zmJcDVn5O/31whe0tnjE4te6ZJSJGq1RiqHPjzPdMTfjCFogDJmwng9xHaQ==}
 
   '@types/tough-cookie@4.0.2':
     resolution: {integrity: sha512-Q5vtl1W5ue16D+nIaW8JWebSSraJVlK+EthKn7e7UcD4KWsaSJ8BqGPXNaPghgtcn/fhvrN17Tv8ksUsQpiplw==}
@@ -3517,10 +3493,6 @@ packages:
     resolution: {integrity: sha512-jWi7abTbYwajOytWCQc37VulmWiRae5RyTpaCyDcS5/lMdtwSz5lOpDE67srw/HYe35f1z3fDQw+3txg7gNtWw==}
     engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
 
-  body-parser@1.20.4:
-    resolution: {integrity: sha512-ZTgYYLMOXY9qKU/57FAo8F+HA2dGX7bqGc71txDRC1rS4frdFI5R7NhluHxH6M0YItAP0sHB4uqAOcYKxO6uGA==}
-    engines: {node: '>= 0.8', npm: 1.2.8000 || >= 1.4.16}
-
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
@@ -3864,6 +3836,10 @@ packages:
     resolution: {integrity: sha512-U71cyTamuh1CRNCfpGY6to28lxvNwPG4Guz/EVjgf3Jmzv0vlDp1atT9eS5dDjMYHucpHbWns6Lwf3BKz6svdw==}
     engines: {node: '>= 0.6'}
 
+  cookie@0.7.2:
+    resolution: {integrity: sha512-yki5XnKuf750l50uGTllt6kKILY4nQ1eNIQatoXEByZ5dWgnKqbnqmTrBE5B4N7lrMJKQ2ytWMiTO2o0v6Ew/w==}
+    engines: {node: '>= 0.6'}
+
   cookiejar@2.1.4:
     resolution: {integrity: sha512-LDx6oHrK+PhzLKJU9j5S7/Y3jM/mUHvD/DeI1WQmJn652iPC5Y4TBzC9l+5OMOXlyTTA+SmVUPm0HQUwpD5Jqw==}
 
@@ -4158,18 +4134,6 @@ packages:
 
   dot-case@3.0.4:
     resolution: {integrity: sha512-Kv5nKlh6yRrdrGvxeJ2e5y2eRUpkUosIW4A2AS38zwSz27zu7ufDwQPi5Jhs3XAlGNetl3bmnGhQsMtkKJnj3w==}
-
-  dotenv-cli@7.4.1:
-    resolution: {integrity: sha512-fE1aywjRrWGxV3miaiUr3d2zC/VAiuzEGghi+QzgIA9fEf/M5hLMaRSXb4IxbUAwGmaLi0IozdZddnVU96acag==}
-    hasBin: true
-
-  dotenv-expand@10.0.0:
-    resolution: {integrity: sha512-GopVGCpVS1UKH75VKHGuQFqS1Gusej0z4FyQkPdwjil2gNIv+LNsqBlboOzpJFZKVT95GkCyWJbBSdFEFUWI2A==}
-    engines: {node: '>=12'}
-
-  dotenv@16.4.5:
-    resolution: {integrity: sha512-ZmdL2rui+eB2YwhsWzjInR8LldtZHGDoQ1ugH85ppHKwpUHL7j7rN0Ti9NCnGiQbhaZ11FpR+7ao1dNsmduNUg==}
-    engines: {node: '>=12'}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -4956,10 +4920,6 @@ packages:
 
   http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
-    engines: {node: '>= 0.8'}
-
-  http-errors@2.0.1:
-    resolution: {integrity: sha512-4FbRdAX+bSdmo4AUFuS0WNiPz8NgFt+r8ThgNWmlrjQjt1Q7ZR9+zTlce2859x4KSXrwIsaeTqDoKQmtP8pLmQ==}
     engines: {node: '>= 0.8'}
 
   http-proxy-agent@5.0.0:
@@ -6499,10 +6459,6 @@ packages:
 
   raw-body@2.5.1:
     resolution: {integrity: sha512-qqJBtEyVgS0ZmPGdCFPWJ3FreoqvG4MVQln/kCgF7Olq95IbOp0/BWyMwbdtn4VTvkM8Y7khCQ2Xgk/tcrCXig==}
-    engines: {node: '>= 0.8'}
-
-  raw-body@2.5.3:
-    resolution: {integrity: sha512-s4VSOf6yN0rvbRZGxs8Om5CWj6seneMwK3oDb4lWDH0UPhWcxwOWw5+qk24bxq87szX1ydrwylIOp2uG1ojUpA==}
     engines: {node: '>= 0.8'}
 
   react-dom@18.2.0:
@@ -8231,11 +8187,18 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@azure/functions-extensions-base@0.2.0': {}
+
   '@azure/functions@3.5.1':
     dependencies:
       iconv-lite: 0.6.3
       long: 4.0.0
       uuid: 8.3.2
+
+  '@azure/functions@4.11.2':
+    dependencies:
+      '@azure/functions-extensions-base': 0.2.0
+      cookie: 0.7.2
 
   '@azure/functions@4.4.0':
     dependencies:
@@ -10343,10 +10306,6 @@ snapshots:
       - vitest
       - vue-eslint-parser
 
-  '@pagopa/express-azure-functions@4.0.1(express@4.18.2)':
-    dependencies:
-      express: 4.18.2
-
   '@pagopa/handler-kit-azure-func@2.0.3(postcss@8.5.3)(typescript@5.2.2)':
     dependencies:
       '@azure/functions': 4.4.0
@@ -10376,11 +10335,11 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pagopa/io-functions-commons@29.1.2(@azure/functions@3.5.1)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))':
+  '@pagopa/io-functions-commons@29.1.2(@azure/functions@4.11.2)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))':
     dependencies:
       '@azure/cosmos': 4.0.0
       '@azure/data-tables': 13.2.2
-      '@azure/functions': 3.5.1
+      '@azure/functions': 4.11.2
       '@pagopa/ts-commons': 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       applicationinsights: 2.9.5
       azure-storage: 2.10.7
@@ -10412,6 +10371,37 @@ snapshots:
       '@azure/cosmos': 4.0.0
       '@azure/data-tables': 13.2.2
       '@azure/functions': 4.4.0
+      '@pagopa/ts-commons': 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
+      applicationinsights: 2.9.5
+      azure-storage: 2.10.7
+      cidr-matcher: 2.1.1
+      express: 4.18.2
+      fp-ts: 2.16.5
+      helmet: 4.6.0
+      helmet-csp: 2.10.0
+      io-ts: 2.2.21(fp-ts@2.16.5)
+      node-fetch: 2.6.9
+      nodemailer: 6.9.13
+      nodemailer-sendgrid: 1.0.3
+      referrer-policy: 1.2.0
+      rehype-stringify: 3.0.0
+      remark-frontmatter: 2.0.0
+      remark-parse: 5.0.0
+      remark-rehype: 3.0.2
+      request-ip: 3.3.0
+      ulid: 2.3.0
+      unified: 9.2.2
+      winston: 3.8.2
+    transitivePeerDependencies:
+      - applicationinsights-native-metrics
+      - encoding
+      - supports-color
+
+  '@pagopa/io-functions-commons@30.0.0(@azure/functions@4.11.2)(@pagopa/ts-commons@13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5)))(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))':
+    dependencies:
+      '@azure/cosmos': 4.0.0
+      '@azure/data-tables': 13.2.2
+      '@azure/functions': 4.11.2
       '@pagopa/ts-commons': 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       applicationinsights: 2.9.5
       azure-storage: 2.10.7
@@ -10796,11 +10786,6 @@ snapshots:
       '@types/connect': 3.4.35
       '@types/node': 20.10.8
 
-  '@types/body-parser@1.19.6':
-    dependencies:
-      '@types/connect': 3.4.35
-      '@types/node': 20.10.8
-
   '@types/bunyan@1.8.9':
     dependencies:
       '@types/node': 20.10.8
@@ -10812,8 +10797,6 @@ snapshots:
       '@types/node': 20.10.8
 
   '@types/cookie@0.4.1': {}
-
-  '@types/cookiejar@2.1.2': {}
 
   '@types/css-font-loading-module@0.0.7': {}
 
@@ -10974,15 +10957,6 @@ snapshots:
   '@types/shimmer@1.0.5': {}
 
   '@types/statuses@2.0.4': {}
-
-  '@types/superagent@4.1.17':
-    dependencies:
-      '@types/cookiejar': 2.1.2
-      '@types/node': 20.10.8
-
-  '@types/supertest@2.0.12':
-    dependencies:
-      '@types/superagent': 4.1.17
 
   '@types/tough-cookie@4.0.2': {}
 
@@ -11719,23 +11693,6 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  body-parser@1.20.4:
-    dependencies:
-      bytes: 3.1.2
-      content-type: 1.0.5
-      debug: 2.6.9
-      depd: 2.0.0
-      destroy: 1.2.0
-      http-errors: 2.0.1
-      iconv-lite: 0.4.24
-      on-finished: 2.4.1
-      qs: 6.14.0
-      raw-body: 2.5.3
-      type-is: 1.6.18
-      unpipe: 1.0.0
-    transitivePeerDependencies:
-      - supports-color
-
   boolbase@1.0.0: {}
 
   bowser@2.9.0: {}
@@ -12062,6 +12019,8 @@ snapshots:
 
   cookie@0.6.0: {}
 
+  cookie@0.7.2: {}
+
   cookiejar@2.1.4: {}
 
   core-js-compat@3.37.1:
@@ -12370,17 +12329,6 @@ snapshots:
     dependencies:
       no-case: 3.0.4
       tslib: 2.8.1
-
-  dotenv-cli@7.4.1:
-    dependencies:
-      cross-spawn: 7.0.6
-      dotenv: 16.4.5
-      dotenv-expand: 10.0.0
-      minimist: 1.2.8
-
-  dotenv-expand@10.0.0: {}
-
-  dotenv@16.4.5: {}
 
   dunder-proto@1.0.1:
     dependencies:
@@ -13410,14 +13358,6 @@ snapshots:
       inherits: 2.0.4
       setprototypeof: 1.2.0
       statuses: 2.0.1
-      toidentifier: 1.0.1
-
-  http-errors@2.0.1:
-    dependencies:
-      depd: 2.0.0
-      inherits: 2.0.4
-      setprototypeof: 1.2.0
-      statuses: 2.0.2
       toidentifier: 1.0.1
 
   http-proxy-agent@5.0.0:
@@ -15050,13 +14990,6 @@ snapshots:
     dependencies:
       bytes: 3.1.2
       http-errors: 2.0.0
-      iconv-lite: 0.4.24
-      unpipe: 1.0.0
-
-  raw-body@2.5.3:
-    dependencies:
-      bytes: 3.1.2
-      http-errors: 2.0.1
       iconv-lite: 0.4.24
       unpipe: 1.0.0
 

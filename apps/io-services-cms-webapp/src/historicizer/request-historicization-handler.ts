@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import {
   DateUtils,
   Queue,
@@ -43,19 +43,20 @@ export const toServiceHistory = ({
   serviceId: service.id,
 });
 
-export const handleQueueItem = (context: Context, queueItem: Json) =>
+export const handleQueueItem = (context: InvocationContext, queueItem: Json) =>
   pipe(
     queueItem,
     parseIncomingMessage(Queue.RequestHistoricizationItem),
     TE.fromEither,
     TE.map((service) => {
-      context.bindings.serviceHistoryDocument = JSON.stringify(
+      context.extraOutputs.set(
+        "serviceHistoryDocument",
         toServiceHistory(service),
       );
     }),
     TE.getOrElseW((e) => {
       if (e instanceof QueuePermanentError) {
-        context.log.error(`Permanent error: ${e.message}`);
+        context.error(`Permanent error: ${e.message}`);
         return T.of(void 0);
       }
       throw e;

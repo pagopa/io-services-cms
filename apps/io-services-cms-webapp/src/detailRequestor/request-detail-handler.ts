@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { Queue, ServiceDetail } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as B from "fp-ts/boolean";
@@ -79,7 +79,7 @@ const shouldUpsertServiceDetails =
     );
 
 export const handleQueueItem = (
-  context: Context,
+  context: InvocationContext,
   serviceDetailCosmosHelper: CosmosHelper,
   queueItem: Json,
 ) =>
@@ -95,9 +95,10 @@ export const handleQueueItem = (
             () => void 0,
             () =>
               pipe(
-                (context.bindings.serviceDetailDocument = JSON.stringify(
+                context.extraOutputs.set(
+                  "serviceDetailDocument",
                   toServiceDetail(service),
-                )),
+                ),
               ),
           ),
         ),
@@ -106,7 +107,7 @@ export const handleQueueItem = (
     ),
     TE.getOrElse((e) => {
       if (e instanceof QueuePermanentError) {
-        context.log.error(`Permanent error: ${e.message}`);
+        context.error(`Permanent error: ${e.message}`);
         return T.of(void 0);
       }
       throw e;

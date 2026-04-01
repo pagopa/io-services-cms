@@ -5,6 +5,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { QueryResult } from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
 import { JiraIssue } from "../../lib/clients/jira-client";
 import { ServiceReviewRowDataTable } from "../../utils/service-review-dao";
 import {
@@ -18,13 +19,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const mockContext = {
-  log: {
-    error: vi.fn((_) => console.error(_)),
-    info: vi.fn((_) => console.info(_)),
-    warn: vi.fn((_) => console.warn(_)),
-  },
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const aService = {
   id: "s1",
