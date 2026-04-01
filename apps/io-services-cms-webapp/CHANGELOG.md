@@ -1,5 +1,14 @@
 # io-services-cms-webapp
 
+## 2.0.1
+
+### Patch Changes
+
+- e5411807: upgrade @pagopa/io-functions-commons version to v30.0.0
+- Updated dependencies [e5411807]
+  - @io-services-cms/models@1.29.0
+  - @io-services-cms/external-clients@1.9.0
+
 ## 2.0.0
 
 ### Major Changes

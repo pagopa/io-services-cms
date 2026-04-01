@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.9.0
+
+### Minor Changes
+
+- e5411807: upgrade @pagopa/io-functions-commons version to v30.0.0
+
 ## 1.8.8
 
 ### Patch Changes
