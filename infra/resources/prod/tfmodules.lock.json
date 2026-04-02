@@ -18,10 +18,10 @@
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-event-hub/azurerm/0.2.0"
   },
   "function_app.app_be_fn": {
-    "hash": "df3f3bc0271d19115b3430a732b96d5818173aa0a5be97986b0d614cbf6f74cc",
-    "version": "2.0.2",
+    "hash": "d31ce9fad7a8c180762b175b691cbb3b114c2caf3dca7f28da754c9f9bac20b3",
+    "version": "5.0.2",
     "name": "azure_function_app",
-    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-function-app/azurerm/2.0.2"
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-function-app/azurerm/5.0.2"
   },
   "cms_function_app.cms_storage_account": {
     "hash": "5a369299255aaa17f1dd7222c971889beeb0ad9f729f8483bf1a6a9268bbd845",

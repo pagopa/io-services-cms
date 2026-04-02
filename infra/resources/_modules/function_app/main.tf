@@ -9,7 +9,7 @@ locals {
 
 module "app_be_fn" {
   source  = "pagopa-dx/azure-function-app/azurerm"
-  version = "~> 2.0"
+  version = "~> 5.0"
 
   environment = {
     prefix          = var.prefix
@@ -32,12 +32,12 @@ module "app_be_fn" {
     resource_group_name = var.virtual_network.resource_group_name
   }
 
-  action_group_id = var.error_action_group_id
+  action_group_ids = [var.error_action_group_id]
 
   app_settings      = local.app_be.app_settings
   slot_app_settings = local.app_be.app_settings
 
-  tier = local.app_be.tier
+  use_case = local.app_be.use_case
 
   application_insights_connection_string = data.azurerm_application_insights.ai_common.connection_string
 
