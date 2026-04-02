@@ -2,30 +2,6 @@
 # SNET definition
 #
 
-module "app_snet" {
-  source               = "github.com/pagopa/terraform-azurerm-v4.git//subnet?ref=v7.18.1"
-  name                 = "${local.project}-${local.application_basename}-snet"
-  address_prefixes     = var.subnets_cidrs.api
-  resource_group_name  = var.io_common.resource_group_name
-  virtual_network_name = var.io_common.vnet_name
-
-  private_endpoint_network_policies             = "Enabled"
-  private_link_service_network_policies_enabled = true
-
-  service_endpoints = [
-    "Microsoft.Web",
-    "Microsoft.AzureCosmosDB",
-    "Microsoft.Storage",
-  ]
-
-  delegation = {
-    name = "default"
-    service_delegation = {
-      name    = "Microsoft.Web/serverFarms"
-      actions = ["Microsoft.Network/virtualNetworks/subnets/action"]
-    }
-  }
-}
 
 #
 # Cosmos Private Endpoint
