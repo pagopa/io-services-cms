@@ -7,7 +7,6 @@ import { ROUTES } from "@/lib/routes";
 import { fetchWithUpperCaseHttpMethod } from "@/utils/wrapper-fetch";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
 import * as iots from "io-ts";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "next-i18next";
@@ -214,8 +213,7 @@ const useFetch = <RC>() => {
       setOptions(options);
       setData(undefined); // reset data
       setLoading(true); // set loading state
-      let fetchData: (DataReference & RC) | undefined;
-      let fetchError: UseFetchError | undefined;
+
       try {
         const enhancedCodec = iots.intersection([responseCodec, DataReference]);
 
@@ -224,8 +222,8 @@ const useFetch = <RC>() => {
         });
 
         if (E.isLeft(result)) {
-          fetchError = {
-            kind: "validationError" as UseFetchErrorStatusType,
+          const fetchError: UseFetchError = {
+            kind: "validationError",
             message: readableReport(result.left),
           };
           setUseFetchError(fetchError.kind, fetchError.message);
@@ -253,33 +251,30 @@ const useFetch = <RC>() => {
           );
 
           switch (httpResponseClassType) {
-            case "successful":
+            case "successful": {
               // 2XX successful response status code
-              pipe(
-                enhancedCodec.decode({
-                  ...response.value,
-                  _referenceId: options?.referenceId,
-                }),
-                E.fold(
-                  (e) => {
-                    fetchError = {
-                      kind: "validationError",
-                      message: readableReport(e),
-                    };
-                    setUseFetchError(fetchError.kind, fetchError.message);
-                  },
-                  (decoded) => {
-                    fetchData = decoded;
-                    setData(decoded);
-                  },
-                ),
-              );
-              if (fetchError) return { error: fetchError, success: false };
-              return { data: fetchData, success: true };
+              const maybeDecoded = enhancedCodec.decode({
+                ...response.value,
+                _referenceId: options?.referenceId,
+              });
+
+              if (E.isLeft(maybeDecoded)) {
+                const fetchError: UseFetchError = {
+                  kind: "validationError",
+                  message: readableReport(maybeDecoded.left),
+                };
+
+                setUseFetchError(fetchError.kind, fetchError.message);
+                return { error: fetchError, success: false };
+              }
+              setData(maybeDecoded.right);
+
+              return { data: maybeDecoded.right, success: true };
+            }
             case "clientError":
-            case "serverError":
-              fetchError = {
-                kind: "httpError" as UseFetchErrorStatusType,
+            case "serverError": {
+              const fetchError: UseFetchError = {
+                kind: "httpError",
                 message: httpResponseClassType,
                 status: response.status,
               };
@@ -289,6 +284,7 @@ const useFetch = <RC>() => {
                 fetchError.status,
               );
               return { error: fetchError, success: false };
+            }
             default:
               return {
                 error: {
@@ -301,8 +297,8 @@ const useFetch = <RC>() => {
           }
         }
       } catch (err) {
-        fetchError = {
-          kind: "exceptionError" as UseFetchErrorStatusType,
+        const fetchError: UseFetchError = {
+          kind: "exceptionError",
           message: (err as Error).message,
         };
         setUseFetchError(fetchError.kind, fetchError.message);
