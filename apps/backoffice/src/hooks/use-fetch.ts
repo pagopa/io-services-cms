@@ -7,12 +7,11 @@ import { ROUTES } from "@/lib/routes";
 import { fetchWithUpperCaseHttpMethod } from "@/utils/wrapper-fetch";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
-import { pipe } from "fp-ts/lib/function";
 import * as iots from "io-ts";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "next-i18next";
 import { useSnackbar } from "notistack";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 /** Custom error type for `useFetch` */
 export interface UseFetchError {
@@ -200,117 +199,117 @@ const useFetch = <RC>() => {
    * @param responseCodec io-ts expected response codec
    * @param options optional params
    * @returns */
-  const fetchData = async <T extends keyof ClientOperations>(
-    operationId: T,
-    requestParams: ExtractRequestParams<T>,
-    responseCodec: iots.Type<RC>,
-    options?: UseFetchOptions,
-  ): Promise<{
-    data?: DataReference & RC;
-    error?: UseFetchError;
-    success: boolean;
-  }> => {
-    setOptions(options);
-    setData(undefined); // reset data
-    setLoading(true); // set loading state
-    let fetchData: (DataReference & RC) | undefined;
-    let fetchError: UseFetchError | undefined;
-    try {
-      const enhancedCodec = iots.intersection([responseCodec, DataReference]);
+  const fetchData = useCallback(
+    async <T extends keyof ClientOperations>(
+      operationId: T,
+      requestParams: ExtractRequestParams<T>,
+      responseCodec: iots.Type<RC>,
+      options?: UseFetchOptions,
+    ): Promise<{
+      data?: DataReference & RC;
+      error?: UseFetchError;
+      success: boolean;
+    }> => {
+      setOptions(options);
+      setData(undefined); // reset data
+      setLoading(true); // set loading state
 
-      const result = await client[operationId]({
-        ...(requestParams as any),
-      });
+      try {
+        const enhancedCodec = iots.intersection([responseCodec, DataReference]);
 
-      if (E.isLeft(result)) {
-        fetchError = {
-          kind: "validationError" as UseFetchErrorStatusType,
-          message: readableReport(result.left),
-        };
-        setUseFetchError(fetchError.kind, fetchError.message);
-        return { error: fetchError, success: false };
-      } else {
-        // Get client http response
-        const response = result.right;
+        const result = await client[operationId]({
+          ...(requestParams as any),
+        });
 
-        // Check 401 Unauthorized
-        if (response.status === 401) {
-          push(ROUTES.AUTH.LOGOUT);
-          return {
-            error: {
-              kind: "httpError",
-              message: "401 Unauthorized",
-              status: 401,
-            },
-            success: false,
+        if (E.isLeft(result)) {
+          const fetchError: UseFetchError = {
+            kind: "validationError",
+            message: readableReport(result.left),
           };
-        }
+          setUseFetchError(fetchError.kind, fetchError.message);
+          return { error: fetchError, success: false };
+        } else {
+          // Get client http response
+          const response = result.right;
 
-        /** Set a response class type based on http response status code */
-        const httpResponseClassType = manageHttpResponseStatusCode(
-          response.status,
-        );
-
-        switch (httpResponseClassType) {
-          case "successful":
-            // 2XX successful response status code
-            pipe(
-              enhancedCodec.decode({
-                ...response.value,
-                _referenceId: options?.referenceId,
-              }),
-              E.fold(
-                (e) => {
-                  fetchError = {
-                    kind: "validationError",
-                    message: readableReport(e),
-                  };
-                  setUseFetchError(fetchError.kind, fetchError.message);
-                },
-                (decoded) => {
-                  fetchData = decoded;
-                  setData(decoded);
-                },
-              ),
-            );
-            if (fetchError) return { error: fetchError, success: false };
-            return { data: fetchData, success: true };
-          case "clientError":
-          case "serverError":
-            fetchError = {
-              kind: "httpError" as UseFetchErrorStatusType,
-              message: httpResponseClassType,
-              status: response.status,
-            };
-            setUseFetchError(
-              fetchError.kind,
-              fetchError.message,
-              fetchError.status,
-            );
-            return { error: fetchError, success: false };
-          default:
+          // Check 401 Unauthorized
+          if (response.status === 401) {
+            push(ROUTES.AUTH.LOGOUT);
             return {
               error: {
-                kind: "httpError" as UseFetchErrorStatusType,
-                message: httpResponseClassType,
-                status: response.status,
+                kind: "httpError",
+                message: "401 Unauthorized",
+                status: 401,
               },
               success: false,
             };
+          }
+
+          /** Set a response class type based on http response status code */
+          const httpResponseClassType = manageHttpResponseStatusCode(
+            response.status,
+          );
+
+          switch (httpResponseClassType) {
+            case "successful": {
+              // 2XX successful response status code
+              const maybeDecoded = enhancedCodec.decode({
+                ...response.value,
+                _referenceId: options?.referenceId,
+              });
+
+              if (E.isLeft(maybeDecoded)) {
+                const fetchError: UseFetchError = {
+                  kind: "validationError",
+                  message: readableReport(maybeDecoded.left),
+                };
+
+                setUseFetchError(fetchError.kind, fetchError.message);
+                return { error: fetchError, success: false };
+              }
+              setData(maybeDecoded.right);
+
+              return { data: maybeDecoded.right, success: true };
+            }
+            case "clientError":
+            case "serverError": {
+              const fetchError: UseFetchError = {
+                kind: "httpError",
+                message: httpResponseClassType,
+                status: response.status,
+              };
+              setUseFetchError(
+                fetchError.kind,
+                fetchError.message,
+                fetchError.status,
+              );
+              return { error: fetchError, success: false };
+            }
+            default:
+              return {
+                error: {
+                  kind: "httpError" as UseFetchErrorStatusType,
+                  message: httpResponseClassType,
+                  status: response.status,
+                },
+                success: false,
+              };
+          }
         }
+      } catch (err) {
+        const fetchError: UseFetchError = {
+          kind: "exceptionError",
+          message: (err as Error).message,
+        };
+        setUseFetchError(fetchError.kind, fetchError.message);
+        return { error: fetchError, success: false };
+      } finally {
+        setLoading(false); // reset loading state
+        setFetchTaskCounter((prev) => prev + 1);
       }
-    } catch (err) {
-      fetchError = {
-        kind: "exceptionError" as UseFetchErrorStatusType,
-        message: (err as Error).message,
-      };
-      setUseFetchError(fetchError.kind, fetchError.message);
-      return { error: fetchError, success: false };
-    } finally {
-      setLoading(false); // reset loading state
-      setFetchTaskCounter(() => fetchTaskCounter + 1);
-    }
-  };
+    },
+    [push],
+  );
 
   useEffect(() => {
     if (options) manageOptions();
