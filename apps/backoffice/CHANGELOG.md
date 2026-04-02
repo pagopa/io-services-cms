@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 1.33.0
+
+### Minor Changes
+
+- 74ee00bb: Added `AggregatedInstitutionTableView` component with server-side pagination
+
 ## 1.32.2
 
 ### Patch Changes
