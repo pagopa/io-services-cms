@@ -1,0 +1,4 @@
+.next
+coverage
+src/generated
+openapi-selfcare.json
