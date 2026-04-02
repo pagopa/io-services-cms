@@ -25,7 +25,7 @@ AZ_SUBSCRIPTION=$3
 AZ_POSTGRES_RESOURCE_NAME="io-p-services-cms-private-pgflex"
 # KeyVault info to fetch server credentials
 KV_NAME="io-p-services-cms-kv"
-KV_DB_ADMIN_PASSWORD_KEY="pgres-flex-admin-pwd"
+KV_DB_ADMIN_PASSWORD_KEY="io-p-itn-svc-cms-psql-01-admin-password"
 KV_DB_USER_APP_PASSWORD_KEY="pgres-flex-reviewer-usr-pwd"
 KV_DB_READONLY_USER_PASSWORD_KEY="pgres-flex-readonly-usr-pwd"
 DB_ADMIN_USER="pgadminusr"
