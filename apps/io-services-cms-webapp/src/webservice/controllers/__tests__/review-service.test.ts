@@ -1,16 +1,11 @@
 import { Container } from "@azure/cosmos";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import {
-  ServiceLifecycle,
-  ServicePublication,
-  stores,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import {
   RetrievedSubscriptionCIDRs,
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
@@ -19,22 +14,20 @@ import {
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { mockHttpRequest } from "../../../__mocks__/request.mock";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 import { IConfig } from "../../../config";
 import { ReviewRequest } from "../../../generated/api/ReviewRequest";
-import { WebServerDependencies, createWebServer } from "../../index";
+import {
+  applyRequestMiddelwares,
+  makeReviewServiceHandler,
+} from "../review-service";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
 const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
   serviceLifecycleStore,
-);
-
-const servicePublicationStore =
-  stores.createMemoryStore<ServicePublication.ItemType>();
-const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore,
 );
 
 const aManageSubscriptionId = "MANAGE-123";
@@ -119,56 +112,75 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {
-  log: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-} as any;
-
-const mockBlobService = {
-  createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
-} as any;
-
-const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right([])),
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 afterEach(() => {
   vi.restoreAllMocks();
 });
 
 describe("ReviewService", () => {
-  const app = createWebServer({
-    basePath: "api",
-    apimService: mockApimService,
-    config: mockConfig,
-    fsmLifecycleClientCreator,
-    fsmPublicationClient,
+  const handler = applyRequestMiddelwares(
+    mockConfig,
     subscriptionCIDRsModel,
-    telemetryClient: mockAppinsights,
-    blobService: mockBlobService,
-    serviceTopicDao: mockServiceTopicDao,
-  } as unknown as WebServerDependencies);
+  )(
+    makeReviewServiceHandler({
+      apimService: mockApimService,
+      fsmLifecycleClientCreator,
+      telemetryClient: mockAppinsights,
+    }),
+  );
 
-  setAppContext(app, mockContext);
-
-  const payload: ReviewRequest = {
+  const defaultPayload: ReviewRequest = {
     auto_publish: true,
   };
 
-  it("should fail when cannot find requested service", async () => {
-    const response = await request(app)
-      .put("/api/services/s1/review")
-      .send(payload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+  const makeRequest = ({
+    serviceId,
+    requestPayload,
+    subscriptionId = aManageSubscriptionId,
+    userGroups = UserGroup.ApiServiceWrite,
+    userId = anUserId,
+  }: {
+    serviceId: string;
+    requestPayload?: ReviewRequest;
+    subscriptionId?: string;
+    userGroups?: string;
+    userId?: string;
+  }) =>
+    mockHttpRequest({
+      ...(requestPayload !== undefined
+        ? {
+            body: { string: JSON.stringify(requestPayload) },
+            headers: {
+              "content-type": "application/json",
+              "x-forwarded-for": "127.0.0.1",
+              "x-subscription-id": subscriptionId,
+              "x-user-email": "example@email.com",
+              "x-user-groups": userGroups,
+              "x-user-id": userId,
+            },
+          }
+        : {
+            headers: {
+              "x-forwarded-for": "127.0.0.1",
+              "x-subscription-id": subscriptionId,
+              "x-user-email": "example@email.com",
+              "x-user-groups": userGroups,
+              "x-user-id": userId,
+            },
+          }),
+      method: "PUT",
+      params: { serviceId },
+    });
 
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(404);
+  it("should fail when cannot find requested service", async () => {
+    const response = await handler(
+      makeRequest({ requestPayload: defaultPayload, serviceId: "s1" }),
+      mockContext,
+    );
+
+    expect(mockContext.warn).toHaveBeenCalledOnce();
+    expect(response.status).toBe(404);
   });
 
   it("should fail when requested operation in not allowed (transition's preconditions fails)", async () => {
@@ -177,28 +189,26 @@ describe("ReviewService", () => {
       fsm: { state: "approved" },
     })();
 
-    const response = await request(app)
-      .put("/api/services/s1/review")
-      .send(payload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await handler(
+      makeRequest({ requestPayload: defaultPayload, serviceId: "s1" }),
+      mockContext,
+    );
 
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(409);
+    expect(mockContext.warn).toHaveBeenCalledOnce();
+    expect(response.status).toBe(409);
   });
 
   it("should not allow the operation without right group", async () => {
-    const response = await request(app)
-      .put("/api/services/s1/review")
-      .send(payload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await handler(
+      makeRequest({
+        requestPayload: defaultPayload,
+        serviceId: "s1",
+        userGroups: "OtherGroup",
+      }),
+      mockContext,
+    );
 
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
 
   const serviceToSubmit: ServiceLifecycle.ItemType = {
@@ -209,13 +219,10 @@ describe("ReviewService", () => {
   it("should submit a service", async () => {
     await serviceLifecycleStore.save("s1", serviceToSubmit)();
 
-    const response = await request(app)
-      .put("/api/services/s1/review")
-      .send(payload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await handler(
+      makeRequest({ requestPayload: defaultPayload, serviceId: "s1" }),
+      mockContext,
+    );
 
     const serviceAfterApply = await serviceLifecycleStore.fetch("s1")();
 
@@ -234,20 +241,27 @@ describe("ReviewService", () => {
       expect(finalValue.fsm.state).toBe("submitted");
     }
 
-    expect(mockContext.log.error).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(204);
+    expect(mockContext.error).not.toHaveBeenCalled();
+    expect(response.status).toBe(204);
   });
 
   it("should fail on no body payload", async () => {
     await serviceLifecycleStore.save("s2", serviceToSubmit)();
 
-    const response = await request(app)
-      .put("/api/services/s2/review")
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await handler(
+      mockHttpRequest({
+        headers: {
+          "x-forwarded-for": "127.0.0.1",
+          "x-subscription-id": aManageSubscriptionId,
+          "x-user-email": "example@email.com",
+          "x-user-groups": UserGroup.ApiServiceWrite,
+          "x-user-id": anUserId,
+        },
+        method: "PUT",
+        params: { serviceId: "s2" },
+      }),
+      mockContext,
+    );
 
     const serviceAfterApply = await serviceLifecycleStore.fetch("s2")();
 
@@ -265,37 +279,40 @@ describe("ReviewService", () => {
       expect(finalValue.fsm.state).toBe("draft");
     }
 
-    expect(response.statusCode).toBe(400);
+    expect(response.status).toBe(400);
   });
 
   it("should not allow the operation without right userId", async () => {
     const aDifferentManageSubscriptionId = "MANAGE-456";
     const aDifferentUserId = "456";
 
-    const response = await request(app)
-      .put("/api/services/s1/review")
-      .send(payload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", aDifferentUserId)
-      .set("x-subscription-id", aDifferentManageSubscriptionId);
+    const response = await handler(
+      makeRequest({
+        requestPayload: defaultPayload,
+        serviceId: "s1",
+        subscriptionId: aDifferentManageSubscriptionId,
+        userId: aDifferentUserId,
+      }),
+      mockContext,
+    );
 
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(403);
+    expect(mockContext.warn).toHaveBeenCalledOnce();
+    expect(response.status).toBe(403);
   });
 
   it("should not allow the operation without manageKey", async () => {
     const aNotManageSubscriptionId = "NOT-MANAGE-123";
 
-    const response = await request(app)
-      .put("/api/services/s1/review")
-      .send(payload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aNotManageSubscriptionId);
+    const response = await handler(
+      makeRequest({
+        requestPayload: defaultPayload,
+        serviceId: "s1",
+        subscriptionId: aNotManageSubscriptionId,
+      }),
+      mockContext,
+    );
 
     expect(mockApimService.getSubscription).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
 });

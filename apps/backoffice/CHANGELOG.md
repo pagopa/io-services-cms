@@ -1,5 +1,25 @@
 # io-services-cms-backoffice
 
+## 1.33.0
+
+### Minor Changes
+
+- 74ee00bb: Added `AggregatedInstitutionTableView` component with server-side pagination
+
+## 1.32.2
+
+### Patch Changes
+
+- Updated dependencies [e5411807]
+  - @io-services-cms/models@1.29.0
+  - @io-services-cms/external-clients@1.9.0
+
+## 1.32.1
+
+### Patch Changes
+
+- 90a92785: add regenerateInstitutionAggregateManageSubscriptionsKey API definition
+
 ## 1.32.0
 
 ### Minor Changes

@@ -1,26 +1,25 @@
 import { Container } from "@azure/cosmos";
 import { ApimUtils } from "@io-services-cms/external-clients";
-import {
-  ServiceLifecycle,
-  ServicePublication,
-  stores,
-} from "@io-services-cms/models";
+import { ServiceLifecycle, stores } from "@io-services-cms/models";
 import {
   RetrievedSubscriptionCIDRs,
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import { UserGroup } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/azure_api_auth";
-import { setAppContext } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 import {
   IPatternStringTag,
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
-import request from "supertest";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { mockHttpRequest } from "../../../__mocks__/request.mock";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 import { IConfig } from "../../../config";
-import { WebServerDependencies, createWebServer } from "../../index";
+import {
+  applyRequestMiddelwares,
+  makeUploadServiceLogoHandler,
+} from "../upload-service-logo";
 
 const serviceLifecycleStore =
   stores.createMemoryStore<ServiceLifecycle.ItemType>();
@@ -28,15 +27,8 @@ const fsmLifecycleClientCreator = ServiceLifecycle.getFsmClient(
   serviceLifecycleStore,
 );
 
-const servicePublicationStore =
-  stores.createMemoryStore<ServicePublication.ItemType>();
-const fsmPublicationClient = ServicePublication.getFsmClient(
-  servicePublicationStore,
-);
-
 const aManageSubscriptionId = "MANAGE-123";
 const anUserId = "123";
-const ownerId = `/an/owner/${anUserId}`;
 
 const mockApimService = {
   getSubscription: vi.fn(() =>
@@ -90,20 +82,10 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {
-  log: {
-    error: vi.fn(),
-    warn: vi.fn(),
-    info: vi.fn(),
-  },
-} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const mockBlobService = {
   createBlockBlobFromText: vi.fn((_, __, ___, cb) => cb(null, "any")),
-} as any;
-
-const mockServiceTopicDao = {
-  findAllNotDeletedTopics: vi.fn(() => TE.right([])),
 } as any;
 
 const aValidLogoPayload = {
@@ -127,78 +109,88 @@ afterEach(() => {
 });
 
 describe("uploadServiceLogo", () => {
-  const app = createWebServer({
-    basePath: "api",
-    apimService: mockApimService,
-    config: mockConfig,
-    fsmLifecycleClientCreator,
-    fsmPublicationClient,
-    subscriptionCIDRsModel,
-    telemetryClient: mockAppinsights,
-    blobService: mockBlobService,
-    serviceTopicDao: mockServiceTopicDao,
-  } as unknown as WebServerDependencies);
+  const handler = applyRequestMiddelwares(mockConfig, subscriptionCIDRsModel)(
+    makeUploadServiceLogoHandler({
+      apimService: mockApimService,
+      blobService: mockBlobService,
+      fsmLifecycleClientCreator,
+      telemetryClient: mockAppinsights,
+    }),
+  );
 
-  setAppContext(app, mockContext);
+  const makeRequest = ({
+    payload = aValidLogoPayload,
+    serviceId = "s4",
+    subscriptionId = aManageSubscriptionId,
+    userId = anUserId,
+    userGroups = UserGroup.ApiServiceWrite,
+  }: {
+    payload?: typeof aValidLogoPayload;
+    serviceId?: string;
+    subscriptionId?: string;
+    userId?: string;
+    userGroups?: string;
+  } = {}) =>
+    handler(
+      mockHttpRequest({
+        body: { string: JSON.stringify(payload) },
+        headers: {
+          "content-type": "application/json",
+          "x-forwarded-for": "127.0.0.1",
+          "x-subscription-id": subscriptionId,
+          "x-user-email": "example@email.com",
+          "x-user-groups": userGroups,
+          "x-user-id": userId,
+        },
+        method: "PUT",
+        params: { serviceId },
+      }),
+      mockContext,
+    );
 
   it("should return a validation error response if the request payload is invalid", async () => {
-    const response = await request(app)
-      .put("/api/services/s1/logo")
-      .send(anInvalidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({
+      payload: anInvalidLogoPayload,
+      serviceId: "s1",
+    });
 
-    expect(mockContext.log.warn).toHaveBeenCalled();
-    expect(response.statusCode).toBe(400);
-    expect(response.body.detail).toBe(
+    expect(mockContext.warn).toHaveBeenCalled();
+    expect(response.status).toBe(400);
+    expect(response.jsonBody.detail).toBe(
       "Fail decoding provided image, the reason is: The input is not a PNG file!",
     );
-    expect(response.body.status).toBe(400);
-    expect(response.body.title).toBe("Image not valid");
+    expect(response.jsonBody.status).toBe(400);
+    expect(response.jsonBody.title).toBe("Image not valid");
   });
 
   it("should return a success response if the request payload is valid", async () => {
-    const response = await request(app)
-      .put("/api/services/s4/logo")
-      .send(aValidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
-    expect(response.statusCode).toBe(204);
+    expect(response.status).toBe(204);
   });
 
   it("should not allow the operation without right userId", async () => {
     const aDifferentManageSubscriptionId = "MANAGE-456";
     const aDifferentUserId = "456";
 
-    const response = await request(app)
-      .put("/api/services/s4/logo")
-      .send(aValidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", aDifferentUserId)
-      .set("x-subscription-id", aDifferentManageSubscriptionId);
+    const response = await makeRequest({
+      subscriptionId: aDifferentManageSubscriptionId,
+      userId: aDifferentUserId,
+    });
 
-    expect(mockContext.log.warn).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(403);
+    expect(mockContext.warn).toHaveBeenCalledOnce();
+    expect(response.status).toBe(403);
   });
+
   it("should not allow the operation without manageKey", async () => {
     const aNotManageSubscriptionId = "NOT-MANAGE-123";
 
-    const response = await request(app)
-      .put("/api/services/s4/logo")
-      .send(aValidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aNotManageSubscriptionId);
+    const response = await makeRequest({
+      subscriptionId: aNotManageSubscriptionId,
+    });
 
     expect(mockApimService.getSubscription).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
 
   it("should edit a service if cidrs array contains 0.0.0.0/0", async () => {
@@ -216,16 +208,10 @@ describe("uploadServiceLogo", () => {
       }),
     );
 
-    const response = await request(app)
-      .put("/api/services/s4/logo")
-      .send(aValidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
-    expect(response.statusCode).toBe(204);
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.status).toBe(204);
+    expect(mockContext.error).not.toHaveBeenCalled();
   });
 
   it("should edit a service if cidrs array contains only the IP address of the host", async () => {
@@ -243,16 +229,10 @@ describe("uploadServiceLogo", () => {
       }),
     );
 
-    const response = await request(app)
-      .put("/api/services/s4/logo")
-      .send(aValidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
-    expect(response.statusCode).toBe(204);
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.status).toBe(204);
+    expect(mockContext.error).not.toHaveBeenCalled();
   });
 
   it("should not edit a service if cidrs array doesn't contains the IP address of the host", async () => {
@@ -270,15 +250,9 @@ describe("uploadServiceLogo", () => {
       }),
     );
 
-    const response = await request(app)
-      .put("/api/services/s4/logo")
-      .send(aValidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
   });
 
   it("should edit a service if cidrs array contains the IP address of the host", async () => {
@@ -300,16 +274,10 @@ describe("uploadServiceLogo", () => {
       }),
     );
 
-    const response = await request(app)
-      .put("/api/services/s4/logo")
-      .send(aValidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest();
 
-    expect(response.statusCode).toBe(204);
-    expect(mockContext.log.error).not.toHaveBeenCalled();
+    expect(response.status).toBe(204);
+    expect(mockContext.error).not.toHaveBeenCalled();
   });
 
   it("should return an internal error response if blob write fails", async () => {
@@ -317,15 +285,9 @@ describe("uploadServiceLogo", () => {
       (_, __, ___, cb) => cb(new Error("any"), null),
     );
 
-    const response = await request(app)
-      .put("/api/services/s1/logo")
-      .send(aValidLogoPayload)
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", UserGroup.ApiServiceWrite)
-      .set("x-user-id", anUserId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ serviceId: "s1" });
 
-    expect(mockContext.log.error).toHaveBeenCalledOnce();
-    expect(response.statusCode).toBe(500);
+    expect(mockContext.error).toHaveBeenCalledOnce();
+    expect(response.status).toBe(500);
   });
 });

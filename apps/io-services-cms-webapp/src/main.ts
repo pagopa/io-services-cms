@@ -1,5 +1,10 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
-import { AzureFunction } from "@azure/functions";
+import {
+  ExponentialBackoffRetryOptions,
+  InvocationContext,
+  app,
+  output,
+} from "@azure/functions";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
 import { ApimUtils } from "@io-services-cms/external-clients";
@@ -20,6 +25,7 @@ import {
   SUBSCRIPTION_CIDRS_COLLECTION_NAME,
   SubscriptionCIDRsModel,
 } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { wrapHandlerV4 } from "@pagopa/io-functions-commons/dist/src/utils/azure-functions-v4-express-adapter";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { createBlobService } from "azure-storage";
 import * as O from "fp-ts/Option";
@@ -39,10 +45,7 @@ import { createRequestServicesHistoryIngestionRetryHandler } from "./ingestion/r
 import { createRequestServicesLifecycleIngestionRetryHandler } from "./ingestion/request-services-lifecycle-ingestion-retry-handler";
 import { createRequestServicesPublicationIngestionRetryHandler } from "./ingestion/request-services-publication-ingestion-retry-handler";
 import { createServiceTopicIngestorHandler } from "./ingestion/service-topic-ingestor-handler";
-import {
-  expressToAzureFunction,
-  toAzureFunctionHandler,
-} from "./lib/azure/adapters";
+import { toAzureFunctionHandler } from "./lib/azure/adapters";
 import {
   getAppBackendCosmosDatabase,
   getCmsCosmosDatabase,
@@ -88,10 +91,79 @@ import { handler as onIngestionServiceLifecycleChangeHandler } from "./watchers/
 import { handler as onIngestionServicePublicationChangeHandler } from "./watchers/on-service-ingestion-publication-change";
 import { handler as onServiceLifecycleChangeHandler } from "./watchers/on-service-lifecycle-change";
 import { handler as onServicePublicationChangeHandler } from "./watchers/on-service-publication-change";
-import { createWebServer } from "./webservice";
-
-// eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-unused-vars
-const BASE_PATH = require("../host.json").extensions.http.routePrefix;
+import {
+  applyRequestMiddelwares as applyCheckServiceDuplicationInternalRequestMiddelwares,
+  makeCheckServiceDuplicationInternalHandler,
+} from "./webservice/controllers/check-service-duplication-internal";
+import {
+  applyRequestMiddelwares as applyCreateServiceRequestMiddelwares,
+  makeCreateServiceHandler,
+} from "./webservice/controllers/create-service";
+import {
+  applyRequestMiddelwares as applyDeleteServiceRequestMiddelwares,
+  makeDeleteServiceHandler,
+} from "./webservice/controllers/delete-service";
+import {
+  applyRequestMiddelwares as applyEditServiceRequestMiddelwares,
+  makeEditServiceHandler,
+} from "./webservice/controllers/edit-service";
+import {
+  applyRequestMiddelwares as applyGetServiceHistoryRequestMiddelwares,
+  makeGetServiceHistoryHandler,
+} from "./webservice/controllers/get-service-history";
+import {
+  applyRequestMiddelwares as applyGetServiceKeysRequestMiddelwares,
+  makeGetServiceKeysHandler,
+} from "./webservice/controllers/get-service-keys";
+import {
+  applyRequestMiddelwares as applyGetServiceLifecycleRequestMiddelwares,
+  makeGetServiceLifecycleHandler,
+} from "./webservice/controllers/get-service-lifecycle";
+import {
+  applyRequestMiddelwares as applyGetServiceLifecycleInternalRequestMiddelwares,
+  makeGetServiceLifecycleInternalHandler,
+} from "./webservice/controllers/get-service-lifecycle-internal";
+import {
+  applyRequestMiddelwares as applyGetPublicationStatusServiceRequestMiddelwares,
+  makeGetServicePublicationHandler,
+} from "./webservice/controllers/get-service-publication";
+import {
+  applyRequestMiddelwares as applyGetPublicationServiceInternalRequestMiddelwares,
+  makeGetServicePublicationInternalHandler,
+} from "./webservice/controllers/get-service-publication-internal";
+import {
+  applyRequestMiddelwares as applyGetServiceTopicsRequestMiddelwares,
+  makeGetServiceTopicsHandler,
+} from "./webservice/controllers/get-service-topics";
+import {
+  applyRequestMiddelwares as applyGetServicesRequestMiddelwares,
+  makeGetServicesHandler,
+} from "./webservice/controllers/get-services";
+import { makeInfoHandler } from "./webservice/controllers/info";
+import {
+  applyRequestMiddelwares as applyPatchServiceRequestMiddelwares,
+  makePatchServiceHandler,
+} from "./webservice/controllers/patch-service";
+import {
+  applyRequestMiddelwares as applyPublishServiceRequestMiddelwares,
+  makePublishServiceHandler,
+} from "./webservice/controllers/publish-service";
+import {
+  applyRequestMiddelwares as applyRegenerateServiceKeysRequestMiddelwares,
+  makeRegenerateServiceKeysHandler,
+} from "./webservice/controllers/regenerate-service-keys";
+import {
+  applyRequestMiddelwares as applyReviewServiceRequestMiddelwares,
+  makeReviewServiceHandler,
+} from "./webservice/controllers/review-service";
+import {
+  applyRequestMiddelwares as applyUnpublishServiceRequestMiddelwares,
+  makeUnpublishServiceHandler,
+} from "./webservice/controllers/unpublish-service";
+import {
+  applyRequestMiddelwares as applyUploadServiceLogoRequestMiddelwares,
+  makeUploadServiceLogoHandler,
+} from "./webservice/controllers/upload-service-logo";
 
 // the application global configuration
 const config = getConfigOrThrow();
@@ -215,25 +287,26 @@ const blobServiceClient = new BlobServiceClient(
   new DefaultAzureCredential(),
 );
 
-// entrypoint for all http functions
-export const httpEntryPoint = pipe(
-  {
-    apimService,
-    basePath: BASE_PATH,
-    blobService,
-    config,
-    fsmLifecycleClientCreator,
-    fsmPublicationClient,
-    serviceHistoryPagedHelper,
-    serviceLifecycleCosmosHelper,
-    servicePublicationCosmosHelper,
-    serviceTopicDao: getServiceTopicDao(config),
-    subscriptionCIDRsModel,
-    telemetryClient,
-  },
-  createWebServer,
-  expressToAzureFunction,
-);
+const eventHubRetryPolicy: ExponentialBackoffRetryOptions = {
+  maxRetryCount: 3,
+  maximumInterval: { minutes: 1 },
+  minimumInterval: { seconds: 1 },
+  strategy: "exponentialBackoff" as const,
+};
+
+const changeFeedFiveSecondsRetryPolicy: ExponentialBackoffRetryOptions = {
+  maxRetryCount: 10,
+  maximumInterval: { minutes: 1 },
+  minimumInterval: { seconds: 5 },
+  strategy: "exponentialBackoff" as const,
+};
+
+const changeFeedTenSecondsRetryPolicy: ExponentialBackoffRetryOptions = {
+  maxRetryCount: 10,
+  maximumInterval: { minutes: 1 },
+  minimumInterval: { seconds: 10 },
+  strategy: "exponentialBackoff" as const,
+};
 
 export const createRequestReviewEntryPoint = createRequestReviewHandler(
   getServiceReviewDao(config),
@@ -421,15 +494,18 @@ export const onServiceDetailLifecycleChangeEntryPoint = pipe(
   toAzureFunctionHandler,
 );
 
-export const onSelfcareGroupChangeEntryPoint: AzureFunction = (context, args) =>
+export const onSelfcareGroupChangeEntryPoint = (
+  args: unknown,
+  context: InvocationContext,
+) =>
   pipe(
     { apimService, serviceLifecycleStore },
     makeOnSelfcareGroupChangeHandler,
     processBatchOf(GroupChangeEvent),
     RTE.orElseW((e) =>
       pipe(
-        context.executionContext.retryContext?.maxRetryCount ===
-          context.executionContext.retryContext?.retryCount,
+        context.retryContext?.maxRetryCount ===
+          context.retryContext?.retryCount,
         B.fold(
           () => RTE.left(e),
           () => {
@@ -438,18 +514,21 @@ export const onSelfcareGroupChangeEntryPoint: AzureFunction = (context, args) =>
               e instanceof Error ? e.message : "Something went wrong",
               "warn",
             );
-            context.bindings.syncGroupPoisonQueue = JSON.stringify(args);
+            context.extraOutputs.set(
+              "syncGroupPoisonQueue",
+              JSON.stringify(args),
+            );
             return RTE.right([]);
           },
         ),
       ),
     ),
     toAzureFunctionHandler,
-  )(context, args);
+  )(args, context);
 
-export const activationsSyncFromLegacyEntryPoint: AzureFunction = (
-  context,
-  args,
+export const activationsSyncFromLegacyEntryPoint = (
+  args: unknown,
+  context: InvocationContext,
 ) =>
   pipe(
     {
@@ -461,8 +540,8 @@ export const activationsSyncFromLegacyEntryPoint: AzureFunction = (
     processBatchOf(Activations.LegacyCosmosResource),
     RTE.orElseW((e) =>
       pipe(
-        context.executionContext.retryContext?.maxRetryCount ===
-          context.executionContext.retryContext?.retryCount,
+        context.retryContext?.maxRetryCount ===
+          context.retryContext?.retryCount,
         B.fold(
           () => RTE.left(e),
           () => {
@@ -473,15 +552,17 @@ export const activationsSyncFromLegacyEntryPoint: AzureFunction = (
                 : "Something went wrong! Exeeded maxRetryCount, so items will be sent to poison queue",
               "warn",
             );
-            context.bindings.activationsSyncFromLegacyPoisonQueue =
-              JSON.stringify(args);
+            context.extraOutputs.set(
+              "activationsSyncFromLegacyPoisonQueue",
+              JSON.stringify(args),
+            );
             return RTE.right([]);
           },
         ),
       ),
     ),
     toAzureFunctionHandler,
-  )(context, args);
+  )(args, context);
 
 //Ingestion Service Publication
 export const onIngestionServicePublicationChangeEntryPoint = pipe(
@@ -561,3 +642,648 @@ export const createRequestServicesHistoryIngestionRetryEntryPoint =
   createRequestServicesHistoryIngestionRetryHandler(
     serviceHistoryEventHubProducer,
   );
+
+app.http("Info", {
+  authLevel: "anonymous",
+  handler: wrapHandlerV4([], makeInfoHandler()),
+  methods: ["GET"],
+  route: "info",
+});
+
+app.http("CreateService", {
+  authLevel: "anonymous",
+  handler: applyCreateServiceRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeCreateServiceHandler({
+      apimService,
+      config,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["POST"],
+  route: "services",
+});
+
+app.http("GetServices", {
+  authLevel: "anonymous",
+  handler: applyGetServicesRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeGetServicesHandler({
+      apimService,
+      config,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["GET"],
+  route: "services",
+});
+
+app.http("GetServiceTopics", {
+  authLevel: "anonymous",
+  handler: applyGetServiceTopicsRequestMiddelwares(
+    makeGetServiceTopicsHandler({
+      serviceTopicDao: getServiceTopicDao(config),
+    }),
+  ),
+  methods: ["GET"],
+  route: "services/topics",
+});
+
+app.http("CheckServiceDuplicationInternal", {
+  authLevel: "anonymous",
+  handler: applyCheckServiceDuplicationInternalRequestMiddelwares(
+    makeCheckServiceDuplicationInternalHandler({
+      serviceLifecycleCosmosHelper,
+      servicePublicationCosmosHelper,
+      telemetryClient,
+    }),
+  ),
+  methods: ["GET"],
+  route: "internal/services/duplicates",
+});
+
+app.http("GetServiceLifecycleInternal", {
+  authLevel: "anonymous",
+  handler: applyGetServiceLifecycleInternalRequestMiddelwares(
+    makeGetServiceLifecycleInternalHandler({
+      apimService,
+      config,
+      fsmLifecycleClient: fsmLifecycleClientCreator(),
+      telemetryClient,
+    }),
+  ),
+  methods: ["GET"],
+  route: "internal/services/{serviceId:regex(^(?!duplicates$).*$)}",
+});
+
+app.http("GetServiceLifecycle", {
+  authLevel: "anonymous",
+  handler: applyGetServiceLifecycleRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeGetServiceLifecycleHandler({
+      apimService,
+      config,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["GET"],
+  route: "services/{serviceId:regex(^(?!topics$).*$)}",
+});
+
+app.http("EditService", {
+  authLevel: "anonymous",
+  handler: applyEditServiceRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeEditServiceHandler({
+      apimService,
+      config,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["PUT"],
+  route: "services/{serviceId}",
+});
+
+app.http("PatchService", {
+  authLevel: "anonymous",
+  handler: applyPatchServiceRequestMiddelwares(config)(
+    makePatchServiceHandler({
+      apimService,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["PATCH"],
+  route: "services/{serviceId}",
+});
+
+app.http("DeleteService", {
+  authLevel: "anonymous",
+  handler: applyDeleteServiceRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeDeleteServiceHandler({
+      apimService,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["DELETE"],
+  route: "services/{serviceId}",
+});
+
+app.http("GetServiceHistory", {
+  authLevel: "anonymous",
+  handler: applyGetServiceHistoryRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeGetServiceHistoryHandler({
+      apimService,
+      config,
+      fsmLifecycleClientCreator,
+      serviceHistoryPagedHelper,
+      telemetryClient,
+    }),
+  ),
+  methods: ["GET"],
+  route: "services/{serviceId}/history",
+});
+
+app.http("ReviewService", {
+  authLevel: "anonymous",
+  handler: applyReviewServiceRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeReviewServiceHandler({
+      apimService,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["PUT"],
+  route: "services/{serviceId}/review",
+});
+
+app.http("PublishService", {
+  authLevel: "anonymous",
+  handler: applyPublishServiceRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makePublishServiceHandler({
+      apimService,
+      fsmLifecycleClientCreator,
+      fsmPublicationClient,
+      telemetryClient,
+    }),
+  ),
+  methods: ["POST"],
+  route: "services/{serviceId}/release",
+});
+
+app.http("GetServicePublication", {
+  authLevel: "anonymous",
+  handler: applyGetPublicationStatusServiceRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeGetServicePublicationHandler({
+      apimService,
+      config,
+      fsmLifecycleClientCreator,
+      fsmPublicationClient,
+      telemetryClient,
+    }),
+  ),
+  methods: ["GET"],
+  route: "services/{serviceId}/release",
+});
+
+app.http("GetServicePublicationInternal", {
+  authLevel: "anonymous",
+  handler: applyGetPublicationServiceInternalRequestMiddelwares(
+    makeGetServicePublicationInternalHandler({
+      apimService,
+      config,
+      fsmPublicationClient,
+      telemetryClient,
+    }),
+  ),
+  methods: ["GET"],
+  route: "internal/services/{serviceId}/release",
+});
+
+app.http("UnpublishService", {
+  authLevel: "anonymous",
+  handler: applyUnpublishServiceRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeUnpublishServiceHandler({
+      apimService,
+      fsmLifecycleClientCreator,
+      fsmPublicationClient,
+      telemetryClient,
+    }),
+  ),
+  methods: ["DELETE"],
+  route: "services/{serviceId}/release",
+});
+
+app.http("GetServiceKeys", {
+  authLevel: "anonymous",
+  handler: applyGetServiceKeysRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeGetServiceKeysHandler({
+      apimService,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["GET"],
+  route: "services/{serviceId}/keys",
+});
+
+app.http("RegenerateServiceKeys", {
+  authLevel: "anonymous",
+  handler: applyRegenerateServiceKeysRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeRegenerateServiceKeysHandler({
+      apimService,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["PUT"],
+  route: "services/{serviceId}/keys/{keyType}",
+});
+
+app.http("UploadServiceLogo", {
+  authLevel: "anonymous",
+  handler: applyUploadServiceLogoRequestMiddelwares(
+    config,
+    subscriptionCIDRsModel,
+  )(
+    makeUploadServiceLogoHandler({
+      apimService,
+      blobService,
+      fsmLifecycleClientCreator,
+      telemetryClient,
+    }),
+  ),
+  methods: ["PUT"],
+  route: "services/{serviceId}/logo",
+});
+
+app.storageQueue("OnRequestReview", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: createRequestReviewEntryPoint,
+  queueName: "%REQUEST_REVIEW_QUEUE%",
+});
+
+app.storageQueue("OnRequestPublication", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: createRequestPublicationEntryPoint,
+  queueName: "%REQUEST_PUBLICATION_QUEUE%",
+});
+
+app.storageQueue("OnRequestDeletion", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: createRequestDeletionEntryPoint,
+  queueName: "%REQUEST_DELETION_QUEUE%",
+});
+
+app.storageQueue("OnRequestSyncCms", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: onRequestSyncCmsEntryPoint,
+  queueName: "%REQUEST_SYNC_CMS_QUEUE%",
+});
+
+app.storageQueue("OnRequestSyncLegacy", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: onRequestSyncLegacyEntryPoint,
+  queueName: "%REQUEST_SYNC_LEGACY_QUEUE%",
+});
+
+app.storageQueue("OnRequestHistoricization", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  extraOutputs: [
+    output.generic({
+      connection: "COSMOSDB_CONNECTIONSTRING",
+      containerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
+      createIfNotExists: false,
+      databaseName: "%COSMOSDB_NAME%",
+      name: "serviceHistoryDocument",
+      type: "cosmosDB",
+    }),
+  ],
+  handler: createRequestHistoricizationEntryPoint,
+  queueName: "%REQUEST_HISTORICIZATION_QUEUE%",
+});
+
+app.storageQueue("OnRequestDetail", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  extraOutputs: [
+    output.generic({
+      connection: "COSMOSDB_CONNECTIONSTRING",
+      containerName: "%COSMOSDB_CONTAINER_SERVICES_DETAILS%",
+      createIfNotExists: false,
+      databaseName: "%COSMOSDB_APP_BE_NAME%",
+      name: "serviceDetailDocument",
+      type: "cosmosDB",
+    }),
+  ],
+  handler: createRequestDetailEntryPoint,
+  queueName: "%REQUEST_DETAIL_QUEUE%",
+});
+
+app.storageQueue("OnRequestReviewLegacy", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: createRequestReviewLegacyEntryPoint,
+  queueName: "%REQUEST_REVIEW_LEGACY_QUEUE%",
+});
+
+app.storageQueue("OnRequestValidation", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestReview",
+      queueName: "%REQUEST_REVIEW_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onRequestValidationEntryPoint,
+  queueName: "%REQUEST_VALIDATION_QUEUE%",
+});
+
+app.storageQueue("OnRequestServicesPublicationIngestionRetry", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: createRequestServicesPublicationIngestionRetryEntryPoint,
+  queueName: "%REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE%",
+});
+
+app.storageQueue("OnRequestServicesLifecycleIngestionRetry", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: createRequestServicesLifecycleIngestionRetryEntryPoint,
+  queueName: "%REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE%",
+});
+
+app.storageQueue("OnRequestServicesHistoryIngestionRetry", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: createRequestServicesHistoryIngestionRetryEntryPoint,
+  queueName: "%REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE%",
+});
+
+app.cosmosDB("ServiceLifecycleWatcher", {
+  connection: "COSMOSDB_CONNECTIONSTRING",
+  containerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestDeletion",
+      queueName: "%REQUEST_DELETION_QUEUE%",
+      type: "queue",
+    }),
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestReview",
+      queueName: "%REQUEST_VALIDATION_QUEUE%",
+      type: "queue",
+    }),
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestPublication",
+      queueName: "%REQUEST_PUBLICATION_QUEUE%",
+      type: "queue",
+    }),
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestHistoricization",
+      queueName: "%REQUEST_HISTORICIZATION_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onServiceLifecycleChangeEntryPoint,
+  leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%-lease",
+  maxItemsPerInvocation: 30,
+  retry: changeFeedFiveSecondsRetryPolicy,
+  startFromBeginning: true,
+});
+
+app.cosmosDB("ServicePublicationWatcher", {
+  connection: "COSMOSDB_CONNECTIONSTRING",
+  containerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestHistoricization",
+      queueName: "%REQUEST_HISTORICIZATION_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onServicePublicationChangeEntryPoint,
+  leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-lease",
+  maxItemsPerInvocation: 30,
+  retry: changeFeedFiveSecondsRetryPolicy,
+  startFromBeginning: true,
+});
+
+app.cosmosDB("LegacyServiceWatcher", {
+  connection: "LEGACY_COSMOSDB_CONNECTIONSTRING",
+  containerName: "%LEGACY_COSMOSDB_CONTAINER_SERVICES%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%LEGACY_COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestSyncCms",
+      queueName: "%REQUEST_SYNC_CMS_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onLegacyServiceChangeEntryPoint,
+  leaseContainerName: "%LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE%",
+  maxItemsPerInvocation: 10,
+  retry: changeFeedTenSecondsRetryPolicy,
+  startFromBeginning: true,
+});
+
+app.cosmosDB("ServiceHistoryWatcher", {
+  connection: "COSMOSDB_CONNECTIONSTRING",
+  containerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestSyncLegacy",
+      queueName: "%REQUEST_SYNC_LEGACY_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onServiceHistoryChangeEntryPoint,
+  leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%-lease",
+  maxItemsPerInvocation: 30,
+  retry: changeFeedFiveSecondsRetryPolicy,
+  startFromBeginning: true,
+});
+
+app.cosmosDB("ServiceDetailPublicationWatcher", {
+  connection: "COSMOSDB_CONNECTIONSTRING",
+  containerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestDetailPublication",
+      queueName: "%REQUEST_DETAIL_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onServiceDetailPublicationChangeEntryPoint,
+  leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-details-lease",
+  maxItemsPerInvocation: 30,
+  retry: changeFeedFiveSecondsRetryPolicy,
+  startFromBeginning: true,
+});
+
+app.cosmosDB("ServiceDetailLifecycleWatcher", {
+  connection: "COSMOSDB_CONNECTIONSTRING",
+  containerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "requestDetailLifecycle",
+      queueName: "%REQUEST_DETAIL_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onServiceDetailLifecycleChangeEntryPoint,
+  leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%-details-lease",
+  maxItemsPerInvocation: 30,
+  retry: changeFeedFiveSecondsRetryPolicy,
+  startFromBeginning: true,
+});
+
+app.eventHub("SelfcareGroupWatcher", {
+  cardinality: "one",
+  connection: "EH_SC_CONNECTIONSTRING",
+  consumerGroup: "%EH_SC_USERGROUP_CONSUMER_GROUP%",
+  eventHubName: "%EH_SC_USERGROUP_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "syncGroupPoisonQueue",
+      queueName: "%SYNC_GROUP_POISON_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onSelfcareGroupChangeEntryPoint,
+  retry: eventHubRetryPolicy,
+});
+
+app.cosmosDB("ActivationsSyncFromLegacy", {
+  connection: "LEGACY_COSMOSDB_CONNECTIONSTRING",
+  containerName: "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%LEGACY_COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "activationsSyncFromLegacyPoisonQueue",
+      queueName: "%SYNC_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: activationsSyncFromLegacyEntryPoint,
+  leaseContainerName: "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS_LEASE%",
+  maxItemsPerInvocation: 50,
+  retry: changeFeedTenSecondsRetryPolicy,
+  startFromBeginning: true,
+});
+
+app.cosmosDB("IngestionServicePublicationWatcher", {
+  connection: "COSMOSDB_CONNECTIONSTRING",
+  containerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "ingestionError",
+      queueName: "%REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onIngestionServicePublicationChangeEntryPoint,
+  leaseContainerName:
+    "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%-ingestion-lease",
+  maxItemsPerInvocation: 30,
+  startFromBeginning: true,
+});
+
+app.cosmosDB("IngestionServiceLifecycleWatcher", {
+  connection: "COSMOSDB_CONNECTIONSTRING",
+  containerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "ingestionError",
+      queueName: "%REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onIngestionServiceLifecycleChangeEntryPoint,
+  leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%-ingestion-lease",
+  maxItemsPerInvocation: 30,
+  startFromBeginning: true,
+});
+
+app.cosmosDB("IngestionServiceHistoryWatcher", {
+  connection: "COSMOSDB_CONNECTIONSTRING",
+  containerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
+  createLeaseContainerIfNotExists: true,
+  databaseName: "%COSMOSDB_NAME%",
+  extraOutputs: [
+    output.generic({
+      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      name: "ingestionError",
+      queueName: "%REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE%",
+      type: "queue",
+    }),
+  ],
+  handler: onIngestionServiceHistoryChangeEntryPoint,
+  leaseContainerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%-ingestion-lease",
+  maxItemsPerInvocation: 30,
+  startFromBeginning: false,
+});
+
+app.storageBlob("IngestionActivationWatcher", {
+  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  handler: onIngestionActivationChangeEntryPoint,
+  path: "%ACTIVATIONS_CONTAINER_NAME%/{name}",
+});
+
+app.timer("ServiceReviewChecker", {
+  handler: (_timer, context) => serviceReviewCheckerEntryPoint(context),
+  schedule: "0 8-19 * * 1-5",
+});
+
+app.timer("ServiceReviewLegacyChecker", {
+  handler: (_timer, context) => serviceReviewLegacyCheckerEntryPoint(context),
+  schedule: "0 8-19 * * 1-5",
+});
+
+app.timer("ServiceTopicsIngestor", {
+  handler: (_timer, context) => serviceTopicIngestorEntryPoint(context),
+  schedule: "0 0 9 * * 2",
+});

@@ -12,9 +12,8 @@ on:
 
 jobs:
   tf_analysis:
-    uses: pagopa/dx/.github/workflows/static_analysis.yaml@8fd8da4ece3ea29908b983fd8960366efb914253
+    uses: pagopa/dx/.github/workflows/static_analysis.yaml@main
     name: Terraform Validation
     secrets: inherit
     with:
-      pre_commit_tf_tag: "v1.97.0@sha256:d5e2233e199bd97566e20db5bbaf5f1db67edd5398660da3b61b1b6163f28ff1"
       enable_modified_files_detection: true

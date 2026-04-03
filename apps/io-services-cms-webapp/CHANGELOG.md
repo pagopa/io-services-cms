@@ -1,5 +1,38 @@
 # io-services-cms-webapp
 
+## 2.0.4
+
+### Patch Changes
+
+- ce620dfc: Fix path resolution on endpoint /internal/services/xxx
+
+## 2.0.3
+
+### Patch Changes
+
+- 90a97c27: fix get service route regex
+
+## 2.0.2
+
+### Patch Changes
+
+- 4e43a967: resolve get service api route conflict with get service topic
+
+## 2.0.1
+
+### Patch Changes
+
+- e5411807: upgrade @pagopa/io-functions-commons version to v30.0.0
+- Updated dependencies [e5411807]
+  - @io-services-cms/models@1.29.0
+  - @io-services-cms/external-clients@1.9.0
+
+## 2.0.0
+
+### Major Changes
+
+- 73d9dd9b: upgrade Az Fn to PMv4 and upgrade node version to 22
+
 ## 1.42.12
 
 ### Patch Changes

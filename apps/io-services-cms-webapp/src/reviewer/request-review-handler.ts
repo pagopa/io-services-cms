@@ -214,7 +214,7 @@ export const createRequestReviewHandler = (
       ),
       TE.getOrElseW((e) => {
         if (e instanceof QueuePermanentError) {
-          context.log.error(`Permanent error: ${e.message}`);
+          context.error(`Permanent error: ${e.message}`);
           return T.of(void 0);
         }
         throw e;

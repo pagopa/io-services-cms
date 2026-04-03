@@ -1,10 +1,11 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import {
   ServiceHistory as ServiceHistoryCosmosType,
   ServiceLifecycle,
 } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { wrapHandlerV4 } from "@pagopa/io-functions-commons/dist/src/utils/azure-functions-v4-express-adapter";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -18,10 +19,6 @@ import {
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { OptionalQueryParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/optional_query_param";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler,
-} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
@@ -64,7 +61,7 @@ type HandlerResponseTypes =
   | IResponseSuccessJson<ServiceResponsePayload>;
 
 type GetServiceHistoryHandler = (
-  context: Context,
+  context: InvocationContext,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
@@ -184,10 +181,8 @@ const fetchHistory =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (
-    handler: GetServiceHistoryHandler,
-  ): ReturnType<typeof wrapRequestHandler> => {
-    const middlewaresWrap = withRequestMiddlewares(
+  (handler: GetServiceHistoryHandler): ReturnType<typeof wrapHandlerV4> => {
+    const middlewares = [
       // extract the Azure functions context
       ContextMiddleware(),
       // only allow requests by users belonging to certain groups
@@ -217,35 +212,34 @@ export const applyRequestMiddelwares =
       // extract order from query params
       OptionalQueryParamMiddleware("continuationToken", NonEmptyString),
       SelfcareUserGroupsMiddleware(),
-    );
-    return wrapRequestHandler(
-      middlewaresWrap(
-        (
+    ] as const;
+    return wrapHandlerV4(
+      middlewares,
+      (
+        context,
+        auth,
+        clientIp,
+        attrs,
+        serviceId,
+        order,
+        limit,
+        continuationToken,
+        authzGroupIds,
+      ) =>
+        checkSourceIpForHandler(handler, (_, __, clientIp, attrs) =>
+          ipTuple(clientIp, attrs),
+        )(
           context,
           auth,
           clientIp,
           attrs,
-          serviceId,
-          order,
-          limit,
-          continuationToken,
+          {
+            continuationToken,
+            limit,
+            order,
+            serviceId,
+          },
           authzGroupIds,
-        ) =>
-          checkSourceIpForHandler(handler, (_, __, clientIp, attrs) =>
-            ipTuple(clientIp, attrs),
-          )(
-            context,
-            auth,
-            clientIp,
-            attrs,
-            {
-              continuationToken,
-              limit,
-              order,
-              serviceId,
-            },
-            authzGroupIds,
-          ),
-      ),
+        ),
     );
   };

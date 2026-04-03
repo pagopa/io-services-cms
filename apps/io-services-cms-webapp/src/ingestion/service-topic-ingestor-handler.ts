@@ -1,5 +1,5 @@
 import { EventHubProducerClient } from "@azure/event-hubs";
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -17,7 +17,7 @@ const logPrefix = "createServiceTopicIngestorHandler";
 const writeTopicsOnEventHub = (
   items: AllServiceTopics[],
   producer: EventHubProducerClient,
-  context: Context,
+  context: InvocationContext,
 ): TE.TaskEither<Error, void> => {
   const logger = getLogger(context, logPrefix, "writeTopicsOnEventHub");
   return pipe(
@@ -38,7 +38,7 @@ const writeTopicsOnEventHub = (
 
 export const createServiceTopicIngestorHandler =
   (serviceTopicDao: ServiceTopicDao, producer: EventHubProducerClient) =>
-  async (context: Context): Promise<void> => {
+  async (context: InvocationContext): Promise<void> => {
     const logger = getLogger(
       context,
       logPrefix,

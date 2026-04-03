@@ -14,10 +14,14 @@ import {
   NonEmptyString,
 } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
-import request from "supertest";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mockHttpRequest } from "../../../__mocks__/request.mock";
+import { makeInvocationContext } from "../../../__tests__/utils/invocation-context";
 import { IConfig } from "../../../config";
-import { WebServerDependencies, createWebServer } from "../../index";
+import {
+  applyRequestMiddelwares,
+  makeRegenerateServiceKeysHandler,
+} from "../regenerate-service-keys";
 
 const aManageSubscriptionId = "MANAGE-123";
 const userId = "123";
@@ -84,7 +88,7 @@ const mockAppinsights = {
   trackError: vi.fn(),
 } as any;
 
-const mockContext = {} as any;
+const { context: mockContext } = makeInvocationContext();
 
 const {
   serviceOwnerCheckManageTaskMock,
@@ -135,34 +139,55 @@ beforeEach(() => {
 });
 
 describe("regenerateSubscriptionKeys", () => {
-  const app = createWebServer({
-    basePath: "api",
-    apimService: apimServiceMock as unknown as ApimUtils.ApimService,
-    config: mockConfig,
-    fsmLifecycleClientCreator: fsmLifecycleClientCreatorMock,
-    fsmPublicationClient: vi.fn(),
+  const handler = applyRequestMiddelwares(
+    mockConfig,
     subscriptionCIDRsModel,
-    telemetryClient: mockAppinsights,
-    blobService: vi.fn(),
-    serviceTopicDao: vi.fn(),
-  } as unknown as WebServerDependencies);
-  app.set("context", mockContext);
+  )(
+    makeRegenerateServiceKeysHandler({
+      apimService: apimServiceMock as unknown as ApimUtils.ApimService,
+      fsmLifecycleClientCreator: fsmLifecycleClientCreatorMock,
+      telemetryClient: mockAppinsights,
+    }),
+  );
   const logPrefix = "RegenerateServiceKeysHandler";
+
+  const makeRequest = ({
+    keyType = "primary",
+    serviceId = "aServiceId",
+    subscriptionId = aManageSubscriptionId,
+    userGroups = "ApiServiceWrite",
+    userId: requestUserId = userId,
+  }: {
+    keyType?: string;
+    serviceId?: string;
+    subscriptionId?: string;
+    userGroups?: string;
+    userId?: string;
+  } = {}) =>
+    handler(
+      mockHttpRequest({
+        headers: {
+          "x-forwarded-for": "127.0.0.1",
+          "x-subscription-id": subscriptionId,
+          "x-user-email": "example@email.com",
+          "x-user-groups": userGroups,
+          "x-user-id": requestUserId,
+        },
+        method: "PUT",
+        params: { keyType, serviceId },
+      }),
+      mockContext,
+    );
+
   it("should regenerate primary key", async () => {
     // given
     const serviceId = "aServiceId";
     const keyType = "primary";
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "ApiServiceWrite")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ keyType, serviceId });
     // then
-    expect(response.statusCode).toBe(200);
-    expect(JSON.stringify(response.body)).toBe(
+    expect(response.status).toBe(200);
+    expect(JSON.stringify(response.jsonBody)).toBe(
       JSON.stringify({
         primary_key: primaryKey,
         secondary_key: secondaryKey,
@@ -194,21 +219,16 @@ describe("regenerateSubscriptionKeys", () => {
     expect(logErrorResponseMock).not.toHaveBeenCalled();
     expect(mapApimRestErrorMock).not.toHaveBeenCalled();
   });
+
   it("should regenerate secondary key", async () => {
     // given
     const serviceId = "aServiceId";
     const keyType = "secondary";
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "ApiServiceWrite")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ keyType, serviceId });
     // then
-    expect(response.statusCode).toBe(200);
-    expect(JSON.stringify(response.body)).toBe(
+    expect(response.status).toBe(200);
+    expect(JSON.stringify(response.jsonBody)).toBe(
       JSON.stringify({
         primary_key: primaryKey,
         secondary_key: secondaryKey,
@@ -240,6 +260,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(logErrorResponseMock).not.toHaveBeenCalled();
     expect(mapApimRestErrorMock).not.toHaveBeenCalled();
   });
+
   it("should return 404 when service is deleted", async () => {
     // given
     const serviceId = "aServiceId";
@@ -250,15 +271,9 @@ describe("regenerateSubscriptionKeys", () => {
     );
     checkServiceMock.mockReturnValueOnce(TE.left(error));
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "ApiServiceWrite")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ keyType, serviceId });
     // then
-    expect(response.statusCode).toBe(404);
+    expect(response.status).toBe(404);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       apimServiceMock,
@@ -286,20 +301,15 @@ describe("regenerateSubscriptionKeys", () => {
     expect(mapApimRestErrorWrapperMock).not.toHaveBeenCalled();
     expect(mapApimRestErrorMock).not.toHaveBeenCalled();
   });
+
   it("should fail with a bad request response when use a wrong keyType path param", async () => {
     // given
     const serviceId = "aServiceId";
     const keyType = "aWrongKeyType";
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "ApiServiceWrite")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ keyType, serviceId });
     // then
-    expect(response.statusCode).toBe(400);
+    expect(response.status).toBe(400);
     expect(serviceOwnerCheckManageTaskMock).not.toHaveBeenCalled();
     expect(fsmLifecycleClientCreatorMock).not.toHaveBeenCalled();
     expect(checkServiceDepsWrapperMock).not.toHaveBeenCalled();
@@ -310,6 +320,7 @@ describe("regenerateSubscriptionKeys", () => {
     expect(getLoggerMock).not.toHaveBeenCalled();
     expect(logErrorResponseMock).not.toHaveBeenCalled();
   });
+
   it("should fail with a not found error when cannot find requested service subscription", async () => {
     // given
     const serviceId = "aServiceId";
@@ -321,15 +332,9 @@ describe("regenerateSubscriptionKeys", () => {
     const error = ResponseErrorNotFound("title", "detail");
     mapApimRestErrorMock.mockReturnValueOnce(error);
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "ApiServiceWrite")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ keyType, serviceId });
     // then
-    expect(response.statusCode).toBe(404);
+    expect(response.status).toBe(404);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       apimServiceMock,
@@ -363,6 +368,7 @@ describe("regenerateSubscriptionKeys", () => {
       userSubscriptionId: aManageSubscriptionId,
     });
   });
+
   it("should fail with a generic error if regenerate key returns an error", async () => {
     // given
     const serviceId = "aServiceId";
@@ -374,15 +380,9 @@ describe("regenerateSubscriptionKeys", () => {
     const error = ResponseErrorInternal("detail");
     mapApimRestErrorMock.mockReturnValueOnce(error);
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "ApiServiceWrite")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ keyType, serviceId });
     // then
-    expect(response.statusCode).toBe(500);
+    expect(response.status).toBe(500);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       apimServiceMock,
@@ -416,6 +416,7 @@ describe("regenerateSubscriptionKeys", () => {
       userSubscriptionId: aManageSubscriptionId,
     });
   });
+
   it("should fail with a generic error if manage subscription returns an error", async () => {
     // given
     const serviceId = "aServiceId";
@@ -423,15 +424,9 @@ describe("regenerateSubscriptionKeys", () => {
     const error = ResponseErrorInternal("detail");
     serviceOwnerCheckManageTaskMock.mockReturnValueOnce(TE.left(error));
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "ApiServiceWrite")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({ keyType, serviceId });
     // then
-    expect(response.statusCode).toBe(500);
+    expect(response.status).toBe(500);
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledOnce();
     expect(serviceOwnerCheckManageTaskMock).toHaveBeenCalledWith(
       apimServiceMock,
@@ -458,20 +453,19 @@ describe("regenerateSubscriptionKeys", () => {
     expect(mapApimRestErrorWrapperMock).not.toHaveBeenCalled();
     expect(mapApimRestErrorMock).not.toHaveBeenCalled();
   });
+
   it("should not allow the operation without right group", async () => {
     // given
     const serviceId = "aServiceId";
     const keyType = "primary";
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "OtherGroup")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aManageSubscriptionId);
+    const response = await makeRequest({
+      keyType,
+      serviceId,
+      userGroups: "OtherGroup",
+    });
     // then
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
     expect(serviceOwnerCheckManageTaskMock).not.toHaveBeenCalled();
     expect(fsmLifecycleClientCreatorMock).not.toHaveBeenCalled();
     expect(checkServiceDepsWrapperMock).not.toHaveBeenCalled();
@@ -482,21 +476,21 @@ describe("regenerateSubscriptionKeys", () => {
     expect(getLoggerMock).not.toHaveBeenCalled();
     expect(logErrorResponseMock).not.toHaveBeenCalled();
   });
+
   it("should not allow the operation without manageKey", async () => {
     // given
     const serviceId = "aServiceId";
     const keyType = "primary";
     const aNotManageSubscriptionId = "NOT-MANAGE-123";
     // when
-    const response = await request(app)
-      .put(`/api/services/${serviceId}/keys/${keyType}`)
-      .send()
-      .set("x-user-email", "example@email.com")
-      .set("x-user-groups", "ApiServiceWrite")
-      .set("x-user-id", userId)
-      .set("x-subscription-id", aNotManageSubscriptionId);
+    const response = await makeRequest({
+      keyType,
+      serviceId,
+      subscriptionId: aNotManageSubscriptionId,
+    });
+
     // then
-    expect(response.statusCode).toBe(403);
+    expect(response.status).toBe(403);
     expect(serviceOwnerCheckManageTaskMock).not.toHaveBeenCalled();
     expect(fsmLifecycleClientCreatorMock).not.toHaveBeenCalled();
     expect(checkServiceDepsWrapperMock).not.toHaveBeenCalled();

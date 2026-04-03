@@ -1,4 +1,4 @@
-import { Context } from "@azure/functions";
+import { InvocationContext, StorageQueueHandler } from "@azure/functions";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -18,24 +18,32 @@ import { AzureFunctionCall } from "./adapters";
  * @returns an error
  */
 export const logError =
-  (context: Context, label: string) =>
+  (context: InvocationContext, label: string) =>
   (reason: Error | string): Error => {
     const err =
       reason instanceof Error ? reason : new Error(`${label}|${reason}`);
-    context.log.error(
-      `${context.executionContext.functionName}|${err.message}|||${context.executionContext.invocationId}`,
+    context.error(
+      `${context.functionName}|${err.message}|||${context.invocationId}`,
     );
     return err;
   };
 
 export const log = (
-  context: Context,
+  context: InvocationContext,
   message: string,
-  level: keyof Context["log"] = "info",
+  level: "error" | "info" | "warn" = "info",
 ) => {
-  context.log[level](
-    `${context.executionContext.functionName}|${message}|||${context.executionContext.invocationId}`,
-  );
+  const formattedMessage = `${context.functionName}|${message}|||${context.invocationId}`;
+  switch (level) {
+    case "warn":
+      context.warn(formattedMessage);
+      break;
+    case "error":
+      context.error(formattedMessage);
+      break;
+    default:
+      context.info(formattedMessage);
+  }
 };
 
 /**
@@ -47,15 +55,15 @@ export const log = (
  * @returns
  */
 export const withJsonInput =
-  (
+  <T>(
     handler: (
-      context: Context,
+      context: InvocationContext,
       ...parsedInputs: readonly Json[]
     ) => Promise<unknown>,
-  ) =>
-  (context: Context, ...inputs: readonly unknown[]): Promise<unknown> =>
+  ): StorageQueueHandler<T> =>
+  (input, context) =>
     pipe(
-      inputs,
+      [input],
       RA.map((input) =>
         pipe(
           input,
@@ -114,7 +122,7 @@ export const processBatchOf =
    */
   <R>(
     processSingleItem: RTE.ReaderTaskEither<
-      { context: Context; item: T },
+      { context: InvocationContext; item: T },
       Error,
       R
     >,
@@ -165,7 +173,10 @@ export const validateAndMapInput =
       ignoreMalformedItems?: boolean;
     } = {},
   ) =>
-  (items: unknown, context: Context): TE.TaskEither<Error, readonly T[]> =>
+  (
+    items: unknown,
+    context: InvocationContext,
+  ): TE.TaskEither<Error, readonly T[]> =>
     pipe(
       typeof items === "undefined"
         ? []
@@ -229,7 +240,7 @@ export const setBindings =
               results,
               formatter,
               Object.entries,
-              RA.map(([key, value]) => (context.bindings[key] = value)),
+              RA.map(([key, value]) => context.extraOutputs.set(key, value)),
               (_) => TE.right(results),
             ),
       ),

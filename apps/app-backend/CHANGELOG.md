@@ -1,5 +1,18 @@
 # io-services-app-backend
 
+## 3.0.0
+
+### Major Changes
+
+- e4a80352: Ugrade Node version to 22
+
+## 2.1.2
+
+### Patch Changes
+
+- Updated dependencies [e5411807]
+  - @io-services-cms/models@1.29.0
+
 ## 2.1.1
 
 ### Patch Changes

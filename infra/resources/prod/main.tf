@@ -189,7 +189,7 @@ module "postgres" {
   cms_fn_name         = module.cms_function_app.cms_fn_name
   cms_fn_principal_id = module.cms_function_app.cms_fn_principal_id
 
-  cms_pgres_admin_pwd = module.key_vault.secrets_value.cms_pgres_admin_pwd
+  key_vault_id = module.key_vault.key_vault_id
 
   virtual_network = {
     id                  = data.azurerm_virtual_network.itn_common.id

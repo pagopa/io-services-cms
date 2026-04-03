@@ -1,7 +1,8 @@
-import { Context } from "@azure/functions";
+import { InvocationContext } from "@azure/functions";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle, ServicePublication } from "@io-services-cms/models";
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { wrapHandlerV4 } from "@pagopa/io-functions-commons/dist/src/utils/azure-functions-v4-express-adapter";
 import {
   AzureApiAuthMiddleware,
   IAzureApiAuthorization,
@@ -14,10 +15,6 @@ import {
 } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/client_ip_middleware";
 import { ContextMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/context_middleware";
 import { RequiredParamMiddleware } from "@pagopa/io-functions-commons/dist/src/utils/middlewares/required_param";
-import {
-  withRequestMiddlewares,
-  wrapRequestHandler,
-} from "@pagopa/io-functions-commons/dist/src/utils/request_middleware";
 import {
   checkSourceIpForHandler,
   clientIPAndCidrTuple as ipTuple,
@@ -55,7 +52,7 @@ interface Dependencies {
 type HandlerResponseTypes = ErrorResponseTypes | IResponseSuccessNoContent;
 
 type UnPublishServiceHandler = (
-  context: Context,
+  context: InvocationContext,
   auth: IAzureApiAuthorization,
   clientIp: ClientIp,
   attrs: IAzureUserAttributesManage,
@@ -106,8 +103,8 @@ export const makeUnpublishServiceHandler =
 
 export const applyRequestMiddelwares =
   (config: IConfig, subscriptionCIDRsModel: SubscriptionCIDRsModel) =>
-  (handler: UnPublishServiceHandler): ReturnType<typeof wrapRequestHandler> => {
-    const middlewaresWrap = withRequestMiddlewares(
+  (handler: UnPublishServiceHandler): ReturnType<typeof wrapHandlerV4> => {
+    const middlewares = [
       // extract the Azure functions context
       ContextMiddleware(),
       // only allow requests by users belonging to certain groups
@@ -122,11 +119,10 @@ export const applyRequestMiddelwares =
       // extract the service id from the path variables
       RequiredParamMiddleware("serviceId", NonEmptyString),
       SelfcareUserGroupsMiddleware(),
-    );
-    return wrapRequestHandler(
-      middlewaresWrap(
-        // eslint-disable-next-line max-params
-        checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
-      ),
+    ] as const;
+    return wrapHandlerV4(
+      middlewares,
+      // eslint-disable-next-line max-params
+      checkSourceIpForHandler(handler, (_, __, c, u) => ipTuple(c, u)),
     );
   };

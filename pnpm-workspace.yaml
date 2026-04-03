@@ -4,6 +4,8 @@ packages:
 
 catalog:
   prettier: ^3.5.3
+  '@pagopa/io-functions-commons': ^30.0.0
+  '@azure/functions': ^4.11.2
 
 cleanupUnusedCatalogs: true
 

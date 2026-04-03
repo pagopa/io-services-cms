@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.29.0
+
+### Minor Changes
+
+- e5411807: upgrade @pagopa/io-functions-commons version to v30.0.0
+
 ## 1.28.5
 
 ### Patch Changes
