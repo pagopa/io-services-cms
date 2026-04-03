@@ -105,13 +105,13 @@ export default function AggregatedInstitutions() {
 
   const handleRetrieveManageSubscriptionKeys = useCallback(
     async (aggregateId: string) => {
-      const response =
+      const maybeResponse =
         await client.retrieveInstitutionAggregateManageSubscriptionsKeys({
           aggregateId,
         });
 
-      if (E.isRight(response)) {
-        const maybeValue = SubscriptionKeys.decode(response.right.value);
+      if (E.isRight(maybeResponse)) {
+        const maybeValue = SubscriptionKeys.decode(maybeResponse.right.value);
         if (E.isRight(maybeValue)) {
           updateAggregatedInstitutionListItemById(aggregateId, {
             ...maybeValue.right,
@@ -130,11 +130,13 @@ export default function AggregatedInstitutions() {
   );
 
   const handleRegenerateKey = useCallback(
-    async (subscriptionId: string, keyType: SubscriptionKeyTypeEnum) => {
-      const maybeResponse = await client.regenerateManageSubscriptionKey({
-        keyType,
-        subscriptionId,
-      });
+    async (aggregateId: string, keyType: SubscriptionKeyTypeEnum) => {
+      const maybeResponse =
+        await client.regenerateInstitutionAggregateManageSubscriptionsKey({
+          aggregateId,
+          keyType,
+        });
+
       if (E.isRight(maybeResponse)) {
         const maybeValue = SubscriptionKeys.decode(maybeResponse.right.value);
         if (E.isRight(maybeValue)) {
@@ -145,16 +147,14 @@ export default function AggregatedInstitutions() {
               title: t("notifications.success"),
             }),
           );
-          updateAggregatedInstitutionListItemById(subscriptionId, {
-            ...maybeResponse.right.value,
+          updateAggregatedInstitutionListItemById(aggregateId, {
+            ...maybeValue.right,
           });
-          trackEaManageKeyRegenerateEvent(subscriptionId, keyType);
-        } else {
-          getGenericErrorNotification();
+          trackEaManageKeyRegenerateEvent(aggregateId, keyType);
+          return;
         }
-      } else {
-        getGenericErrorNotification();
       }
+      getGenericErrorNotification();
     },
     [
       enqueueSnackbar,
