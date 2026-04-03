@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.0.2
+
+### Patch Changes
+
+- 4e43a967: resolve get service api route conflict with get service topic
+
 ## 2.0.1
 
 ### Patch Changes
