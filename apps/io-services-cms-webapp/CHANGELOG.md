@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.0.4
+
+### Patch Changes
+
+- ce620dfc: Fix path resolution on endpoint /internal/services/xxx
+
 ## 2.0.3
 
 ### Patch Changes
