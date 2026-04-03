@@ -736,7 +736,7 @@ app.http("GetServiceLifecycle", {
     }),
   ),
   methods: ["GET"],
-  route: "services/{serviceId:regex(^(?!topic$).*$)}",
+  route: "services/{serviceId:regex(^(?!topics$).*$)}",
 });
 
 app.http("EditService", {
