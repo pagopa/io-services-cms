@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.0.3
+
+### Patch Changes
+
+- 90a97c27: fix get service route regex
+
 ## 2.0.2
 
 ### Patch Changes
