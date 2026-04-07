@@ -29,7 +29,7 @@
     "node-fetch-commonjs": "3.3.2"
   },
   "devDependencies": {
-    "@types/node": "20.10.8",
+    "@types/node": "catalog:",
     "prettier": "catalog:"
   },
   "imports": {
