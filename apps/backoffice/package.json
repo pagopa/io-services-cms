@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-backoffice",
-  "version": "1.33.0",
+  "version": "2.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -73,7 +73,7 @@
     "@testing-library/react": "^14.1.2",
     "@types/lodash": "^4.14.202",
     "@types/mixpanel-browser": "^2.50.0",
-    "@types/node": "20.4.5",
+    "@types/node": "catalog:",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
     "@vitejs/plugin-react": "^4.2.1",

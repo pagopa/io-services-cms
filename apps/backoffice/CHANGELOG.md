@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.0.0
+
+### Major Changes
+
+- 2d96ab14: upgrade node to version 22
+
 ## 1.33.0
 
 ### Minor Changes
