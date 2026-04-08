@@ -1,5 +1,5 @@
 ---
-"io-services-cms-backoffice": patch
+"io-services-cms-backoffice": minor
 ---
 
 Add regenerate aggregate manage subscriptions keys
