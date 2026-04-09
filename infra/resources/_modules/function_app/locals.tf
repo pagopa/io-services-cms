@@ -1,6 +1,6 @@
 locals {
   app_be = {
-    tier          = "xl"
+    use_case      = "high_load"
     cosmosdb_name = "app-backend"
     app_settings = {
       NODE_ENV = "production"

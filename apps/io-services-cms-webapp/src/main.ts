@@ -719,7 +719,7 @@ app.http("GetServiceLifecycleInternal", {
     }),
   ),
   methods: ["GET"],
-  route: "internal/services/{serviceId}",
+  route: "internal/services/{serviceId:regex(^(?!duplicates$).*$)}",
 });
 
 app.http("GetServiceLifecycle", {
@@ -736,7 +736,7 @@ app.http("GetServiceLifecycle", {
     }),
   ),
   methods: ["GET"],
-  route: "services/{serviceId}",
+  route: "services/{serviceId:regex(^(?!topics$).*$)}",
 });
 
 app.http("EditService", {

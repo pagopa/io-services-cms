@@ -1,5 +1,23 @@
 # io-services-cms-webapp
 
+## 2.0.4
+
+### Patch Changes
+
+- ce620dfc: Fix path resolution on endpoint /internal/services/xxx
+
+## 2.0.3
+
+### Patch Changes
+
+- 90a97c27: fix get service route regex
+
+## 2.0.2
+
+### Patch Changes
+
+- 4e43a967: resolve get service api route conflict with get service topic
+
 ## 2.0.1
 
 ### Patch Changes

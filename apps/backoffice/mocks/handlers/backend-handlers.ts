@@ -14,6 +14,7 @@ import {
   aMockServicePublication,
   aMockServiceTopics,
   anInfoVersion,
+  getAggregateManageSubscriptionKeys,
   getMockAggregatedInstitutionPagination,
   getMockBulkPatchService,
   getMockGroupUnboundedServices,
@@ -26,6 +27,7 @@ import {
   getMockServicesMigrationDelegate,
   getMockServicesMigrationLatestStatus,
   getMockServicesMigrationStatusDetails,
+  regenerateInstitutionAggregateManageSubscriptionsKey,
 } from "../data/backend-data";
 import { getMockInstitutionGroups } from "../data/backend-data";
 import { aMockErrorResponse } from "../data/common-data";
@@ -34,6 +36,7 @@ import {
   getMockInstitution,
   getMockUserAuthorizedInstitution,
 } from "../data/selfcare-data";
+import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -868,12 +871,41 @@ export const buildHandlers = () => {
     ),
     http.get(
       `${baseURL}/institutions/current/aggregates/:aggregateId/subscriptions/manage/keys`,
-      () => {
+      ({ params }) => {
+        const { aggregateId } = params;
         const resultArray = [
           new HttpResponse(
-            JSON.stringify(getGetAggregateManageSubscriptionKeys200Response()),
+            JSON.stringify(
+              getRetrieveInstitutionAggregateManageSubscriptionsKeys200Response(
+                aggregateId as string,
+              ),
+            ),
             { status: 200 },
           ),
+          new HttpResponse(null, { status: 401 }),
+          new HttpResponse(null, { status: 403 }),
+          new HttpResponse(null, { status: 429 }),
+          new HttpResponse(null, { status: 500 }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
+    http.put(
+      `${baseURL}/institutions/current/aggregates/:aggregateId/subscriptions/manage/keys/:keyType`,
+      ({ params }) => {
+        const { aggregateId, keyType } = params;
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify(
+              putRegenerateInstitutionAggregateManageSubscriptionsKey200Response(
+                aggregateId as string,
+                keyType as SubscriptionKeyTypeEnum,
+              ),
+            ),
+            { status: 200 },
+          ),
+          new HttpResponse(null, { status: 400 }),
           new HttpResponse(null, { status: 401 }),
           new HttpResponse(null, { status: 403 }),
           new HttpResponse(null, { status: 404 }),
@@ -1316,8 +1348,20 @@ export function getGetAggregatedInstitutionPagination200Response(
   return getMockAggregatedInstitutionPagination(+limit, +offset, search);
 }
 
-export function getGetAggregateManageSubscriptionKeys200Response() {
-  return getMockServiceKeys();
+export function getRetrieveInstitutionAggregateManageSubscriptionsKeys200Response(
+  aggregateId: string,
+) {
+  return getAggregateManageSubscriptionKeys(aggregateId);
+}
+
+export function putRegenerateInstitutionAggregateManageSubscriptionsKey200Response(
+  aggregateId: string,
+  keyType: SubscriptionKeyTypeEnum,
+) {
+  return regenerateInstitutionAggregateManageSubscriptionsKey(
+    aggregateId,
+    keyType,
+  );
 }
 
 export function getGetManageSubscriptions200Response(

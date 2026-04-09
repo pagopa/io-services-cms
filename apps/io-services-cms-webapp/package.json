@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-webapp",
-  "version": "2.0.1",
+  "version": "2.0.4",
   "main": "dist/main.js",
   "files": [
     "dist",
@@ -36,7 +36,7 @@
     "@azure/arm-apimanagement": "^10.0.0",
     "@azure/cosmos": "^4.0.0",
     "@azure/event-hubs": "^5.12.2",
-    "@azure/functions": "^4.11.2",
+    "@azure/functions": "catalog:",
     "@azure/identity": "^4.13.0",
     "@azure/storage-blob": "^12.27.0",
     "@chasdevs/avro-to-typescript": "^1.4.0",
