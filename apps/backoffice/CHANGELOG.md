@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.1.0
+
+### Minor Changes
+
+- 235fe774: Add regenerate aggregate manage subscriptions keys
+
 ## 2.0.0
 
 ### Major Changes
