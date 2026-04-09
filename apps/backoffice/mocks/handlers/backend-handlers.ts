@@ -829,6 +829,43 @@ export const buildHandlers = () => {
         return resultArray[0];
       },
     ),
+    http.get(`${baseURL}/institutions/current/aggregates/keys`, () => {
+      const resultArray = [
+        new HttpResponse(
+          JSON.stringify({
+            downloadLink: "https://example.com",
+            expirationDate: new Date().toISOString(),
+            state: "IN_PROGRESS",
+          }),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(null, { status: 401 }),
+        new HttpResponse(null, { status: 403 }),
+        new HttpResponse(null, { status: 404 }),
+        new HttpResponse(null, { status: 429 }),
+        new HttpResponse(null, { status: 500 }),
+      ];
+
+      return resultArray[0];
+    }),
+    http.post(
+      `${baseURL}/institutions/current/aggregates/keys`,
+      ({ request }) => {
+        const { body: _ } = request;
+
+        const resultArray = [
+          new HttpResponse(null, { status: 201 }),
+          new HttpResponse(null, { status: 401 }),
+          new HttpResponse(null, { status: 403 }),
+          new HttpResponse(null, { status: 429 }),
+          new HttpResponse(null, { status: 500 }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
     http.get(
       `${baseURL}/institutions/current/aggregates/:aggregateId/subscriptions/manage/keys`,
       () => {

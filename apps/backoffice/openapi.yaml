@@ -1125,6 +1125,54 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /institutions/current/aggregates/keys:
+    get:
+      tags:
+        - manage-keys
+      operationId: getInstitutionsAggregateManageSubscriptionKeysDownloadLink
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Link
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/GetAggregatedInstitutionsKeysDownloadLinkMetadata'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No requests found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - manage-keys
+      operationId: requestInstitutionsAggregateManageSubscriptionKeys
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: A service body payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestAggregatedInstitutionsKeysPayload'
+        required: true
+      responses:
+        '201':
+          description: Manage keys requested
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
   /keys/manage:
     get:
       deprecated: true
@@ -2092,6 +2140,44 @@ components:
       required:
         - value
         - pagination
+    RequestAggregatedInstitutionsKeysPayload:
+      type: object
+      properties:
+        password: 
+          type: string
+          pattern: ^[a-zA-Z0-9]{12,}$
+      required:
+        - password
+    GetAggregatedInstitutionsKeysDownloadLinkSuccess:
+      type: object
+      properties:
+        state:
+          type: string
+          x-extensible-enum:
+            - DONE
+        downloadLink:
+          type: string
+        expirationDate:
+          $ref: '#/components/schemas/Timestamp'
+      required:
+        - state
+        - downloadLink
+        - expirationDate
+    GetAggregatedInstitutionsKeysDownloadLinkPendingOrError:
+      type: object
+      properties:
+        state:
+          type: string
+          x-extensible-enum:
+            - IN_PROGRESS
+            - FAILED
+      required:
+        - state
+    GetAggregatedInstitutionsKeysDownloadLinkMetadata:
+      x-one-of: true
+      allOf:
+        - $ref: '#/components/schemas/GetAggregatedInstitutionsKeysDownloadLinkSuccess'
+        - $ref: '#/components/schemas/GetAggregatedInstitutionsKeysDownloadLinkPendingOrError'
     UserInstitutionProduct:
       type: object
       properties:

@@ -1,13 +1,17 @@
 /* eslint-disable max-lines-per-function */
+import { AggregatedInstitutionDownloadAlert } from "@/components/aggregated-institutions/aggregated-institution-download-alert";
 import { AggregatedInstitutionTableView } from "@/components/aggregated-institutions/aggregated-institution-table-view";
+import { AggregatedInstitutionsDialog } from "@/components/aggregated-institutions/aggregated-institutions-dialog";
+import { AggregatedInstitutionsSearchBar } from "@/components/aggregated-institutions/aggregated-institutions-searchbar";
 import { ApiKeyValueAsync } from "@/components/api-keys/api-key-value-async";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { PageHeader } from "@/components/headers";
-import { InstitutionSearchByName } from "@/components/institutions";
 import { buildSnackbarItem } from "@/components/notification";
 import { TableRowMenuAction, TableViewColumn } from "@/components/table-view";
 import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
+import { GetAggregatedInstitutionsKeysDownloadLinkMetadata } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkMetadata";
+import { StateEnum } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkPendingOrError";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch, { client } from "@/hooks/use-fetch";
@@ -27,6 +31,7 @@ import {
 import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
+import * as tt from "io-ts";
 import { Session, getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -68,6 +73,11 @@ export default function AggregatedInstitutions() {
     loading: dipLoading,
   } = useFetch<AggregatedInstitutionPagination>();
 
+  const { fetchData: fetchRequestKeys, loading: fetchingRequestKeys } =
+    useFetch();
+  const { data: downloadLinkData, fetchData: fetchDownloadLink } =
+    useFetch<GetAggregatedInstitutionsKeysDownloadLinkMetadata>();
+
   const [aggregatedInstitutions, setAggregatedInstitutions] =
     useState<AggregatedInstitutionListItem[]>();
   const [pagination, setPagination] = useState({
@@ -79,6 +89,7 @@ export default function AggregatedInstitutions() {
     useState(false);
   const [currentSearchByInstitutionName, setCurrentSearchByInstitutionName] =
     useState<string>();
+  const [isModalOpened, setIsModalOpened] = useState(false);
 
   const updateAggregatedInstitutionListItemById = useCallback(
     (id: string, updatedItem: Partial<AggregatedInstitutionListItem>) => {
@@ -354,6 +365,14 @@ export default function AggregatedInstitutions() {
     setCurrentSearchByInstitutionName(undefined);
   }, []);
 
+  const fetchSubscriptionKeysDownloadLink = useCallback(() => {
+    fetchDownloadLink(
+      "getInstitutionsAggregateManageSubscriptionKeysDownloadLink",
+      {},
+      GetAggregatedInstitutionsKeysDownloadLinkMetadata,
+    );
+  }, [fetchDownloadLink]);
+
   // Fetch when pagination or search changes
   useEffect(() => {
     dipFetchData(
@@ -401,6 +420,10 @@ export default function AggregatedInstitutions() {
   }, [dipData]);
 
   useEffect(() => {
+    fetchSubscriptionKeysDownloadLink();
+  }, [fetchSubscriptionKeysDownloadLink]);
+
+  useEffect(() => {
     trackAggregatedInstitutionsPageEvent();
   }, []);
 
@@ -418,9 +441,33 @@ export default function AggregatedInstitutions() {
         />
       ) : (
         <>
-          <InstitutionSearchByName
+          <AggregatedInstitutionDownloadAlert
+            onRefresh={fetchSubscriptionKeysDownloadLink}
+            status={downloadLinkData?.state}
+            {...downloadLinkData}
+          />
+          <AggregatedInstitutionsSearchBar
+            disableGenerate={downloadLinkData?.state === StateEnum.IN_PROGRESS}
             onEmptySearch={resetSearchByInstitutionName}
+            onGenerateClick={() => {
+              setIsModalOpened(true);
+            }}
             onSearchClick={handleSearchByInstitutionNameClick}
+          />
+          <AggregatedInstitutionsDialog
+            isOpen={isModalOpened}
+            onClose={() => {
+              setIsModalOpened(false);
+            }}
+            onConfirm={async (password) => {
+              fetchRequestKeys(
+                "requestInstitutionsAggregateManageSubscriptionKeys",
+                { body: { password } },
+                tt.unknown,
+                { notify: "all" },
+              );
+            }}
+            sumbitting={fetchingRequestKeys}
           />
           <AggregatedInstitutionTableView
             columns={tableViewColumns}

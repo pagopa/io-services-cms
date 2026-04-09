@@ -373,6 +373,36 @@
         "name": "Nome dell'ente",
         "primaryKey": "API Key manage primaria",
         "secondaryKey": "API Key manage secondaria"
+      },
+      "exportDialog": {
+        "title": "Crea una password per accedere al file",
+        "description": "La password deve essere almeno di 12 caratteri alfanumerici e deve includere:",
+        "rules": {
+          "uppercase": "1 lettera maiuscola (A-Z)",
+          "number": "1 numero (0-9)"
+        },
+        "fields": {
+          "newPassword": "Nuova password",
+          "confirmPassword": "Conferma nuova password"
+        },
+        "generateButton": "Genera file .json",
+        "info": "L'operazione potrebbe richiedere alcuni minuti. Quando il file sarà pronto, potrai scaricarlo nella parte alta della pagina."
+      },
+      "downloadAlert": {
+        "inProgress": {
+          "title": "Stiamo preparando il file per il download",
+          "description": "Potrai scaricarlo da qui appena sarà pronto. Aggiorna per controllare lo stato del file.",
+          "action": "Aggiorna"
+        },
+        "success": {
+          "title": "Il file .json è pronto per il download",
+          "description": "Sarà disponibile fino al {{expirationDate}}",
+          "action": "Scarica file .json"
+        },
+        "failure": {
+          "title": "La generazione del file non è andata a buon fine",
+          "description": "Si è verificato un errore che ha impedito la generazione del file. Riprova"
+        }
       }
     },
     "overview": {
