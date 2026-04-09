@@ -336,23 +336,11 @@ export const retrieveInstitutionAggregateManageSubscriptionsKeys = async (
   aggregateId: string,
   aggregatorId: string,
 ): Promise<SubscriptionKeys> => {
-  const aggregatorGroups = await getInstitutionGroups(
-    aggregateId,
-    undefined,
-    undefined,
-    undefined,
-    aggregatorId,
-  );
-
-  // Data inconsistency: if there are no groups or more than one group related to the aggregate and the aggregator, we cannot determine the subscription to retrieve the keys for
-  if (aggregatorGroups.totalElements !== 1) {
-    throw new ManagedInternalError(
-      "Data inconsistency",
-      `${aggregatorGroups.totalElements === 0 ? "No" : "Multiple"} groups exist for aggregate '${aggregateId}' related to aggregator '${aggregatorId}'`,
-    );
-  }
   const subscriptionId =
-    ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + aggregatorGroups.content[0].id;
+    await retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId(
+      aggregateId,
+      aggregatorId,
+    );
   const { primaryKey, secondaryKey } =
     await listSubscriptionSecrets(subscriptionId);
 
@@ -397,4 +385,4 @@ export const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId =
       aggregatorGroups.content[0].id;
 
     return subscriptionId;
-};
+  };
