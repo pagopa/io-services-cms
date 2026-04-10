@@ -2,7 +2,7 @@ import {
   InstitutionSearchByName,
   InstitutionSearchByNameProps,
 } from "@/components/institutions";
-import { Button, Stack } from "@mui/material";
+import { Button, Stack, Tooltip } from "@mui/material";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
@@ -29,13 +29,21 @@ export const AggregatedInstitutionsSearchBar = ({
       paddingY={3}
     >
       <InstitutionSearchByName {...institutionSearchByNameProps} />
-      <Button
-        disabled={disableGenerate}
-        onClick={onGenerateClick}
-        variant="outlined"
+      <Tooltip
+        arrow
+        placement="left"
+        title={t("routes.aggregated-institutions.exportDialog.tooltipTitle")}
       >
-        {t("routes.aggregated-institutions.exportDialog.generateButton")}
-      </Button>
+        <span>
+          <Button
+            disabled={disableGenerate}
+            onClick={onGenerateClick}
+            variant="outlined"
+          >
+            {t("routes.aggregated-institutions.exportDialog.generateButton")}
+          </Button>
+        </span>
+      </Tooltip>
     </Stack>
   );
 };

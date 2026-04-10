@@ -392,6 +392,7 @@
           }
         },
         "generateButton": "Genera file .json",
+        "tooltipTitle": "Generazione file in corso. Attendi per generarne uno nuovo",
         "info": {
           "fileNotAvailable": "L'operazione potrebbe richiedere alcuni minuti. Quando il file sarà pronto, potrai scaricarlo nella parte alta della pagina.",
           "fileAvailable": "Esiste già un file pronto per il download. Se continui, sarà sovrascritto."
