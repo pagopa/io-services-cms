@@ -31,6 +31,10 @@ export const AggregatedInstitutionsSearchBar = ({
       <InstitutionSearchByName {...institutionSearchByNameProps} />
       <Tooltip
         arrow
+        disableFocusListener={!disableGenerate}
+        disableHoverListener={!disableGenerate}
+        disableInteractive={!disableGenerate}
+        disableTouchListener={!disableGenerate}
         placement="left"
         title={t("routes.aggregated-institutions.exportDialog.tooltipTitle")}
       >
