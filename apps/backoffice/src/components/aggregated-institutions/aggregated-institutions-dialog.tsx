@@ -14,12 +14,13 @@ import InputAdornment from "@mui/material/InputAdornment";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
-import { useTranslation } from "next-i18next";
+import { TFunction, useTranslation } from "next-i18next";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 export interface AggregatedInstitutionsDialogProps {
+  isDownloadReady?: boolean;
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (password: string) => void;
@@ -31,26 +32,47 @@ const defaultFormValues = {
   password: "",
 };
 
-const getValidationSchema = () =>
+const getValidationSchema = (t: TFunction) =>
   z
     .object({
       confirmPassword: z
         .string()
-        .min(1, { message: "Inserisci di nuovo la password" }),
+        .min(
+          1,
+          t(
+            "routes.aggregated-institutions.exportDialog.fields.errors.emptyConfirmPassword",
+          ),
+        ),
       password: z
         .string()
-        .min(1, "Inserisci una password")
-        .regex(
-          /^(?=.*[A-Z])(?=.*\d).{12,}$/,
-          "La password non rispetta i requisiti di sicurezza",
+        .min(
+          1,
+          t(
+            "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
+          ),
+        )
+        .min(
+          12,
+          t(
+            "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
+          ),
+        )
+        .refine(
+          (val) => /^(?=.*[A-Z])(?=.*\d)/.test(val),
+          t(
+            "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
+          ),
         ),
     })
     .refine((schema) => schema.password === schema.confirmPassword, {
-      message: "La password non corrisponde",
+      message: t(
+        "routes.aggregated-institutions.exportDialog.fields.errors.passwordDontMatch",
+      ),
       path: ["confirmPassword"],
     });
 
 export const AggregatedInstitutionsDialog = ({
+  isDownloadReady,
   isOpen,
   onClose,
   onConfirm,
@@ -59,8 +81,8 @@ export const AggregatedInstitutionsDialog = ({
   const { t } = useTranslation();
   const method = useForm({
     defaultValues: defaultFormValues,
-    mode: "onBlur",
-    resolver: zodResolver(getValidationSchema()),
+    mode: "onTouched",
+    resolver: zodResolver(getValidationSchema(t)),
   });
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -157,7 +179,11 @@ export const AggregatedInstitutionsDialog = ({
             />
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
-                {t("routes.aggregated-institutions.exportDialog.info")}
+                {t(
+                  isDownloadReady
+                    ? "routes.aggregated-institutions.exportDialog.info.fileAvailable"
+                    : "routes.aggregated-institutions.exportDialog.info.fileNotAvailable",
+                )}
               </Typography>
             </Alert>
           </DialogContent>

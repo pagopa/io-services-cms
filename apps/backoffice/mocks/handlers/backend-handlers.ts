@@ -4,6 +4,7 @@
  * Feel free to commit/edit it as you need.
  */
 import { getConfiguration } from "@/config";
+import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionType } from "@/generated/api/SubscriptionType";
 import { faker } from "@faker-js/faker/locale/it";
 import { HttpResponse, http } from "msw";
@@ -36,7 +37,6 @@ import {
   getMockInstitution,
   getMockUserAuthorizedInstitution,
 } from "../data/selfcare-data";
-import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -838,7 +838,23 @@ export const buildHandlers = () => {
           JSON.stringify({
             downloadLink: "https://example.com",
             expirationDate: new Date().toISOString(),
+            state: "DONE",
+          }),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(
+          JSON.stringify({
             state: "IN_PROGRESS",
+          }),
+          {
+            status: 200,
+          },
+        ),
+        new HttpResponse(
+          JSON.stringify({
+            state: "FAILED",
           }),
           {
             status: 200,
@@ -851,7 +867,7 @@ export const buildHandlers = () => {
         new HttpResponse(null, { status: 500 }),
       ];
 
-      return resultArray[0];
+      return resultArray[1];
     }),
     http.post(
       `${baseURL}/institutions/current/aggregates/keys`,

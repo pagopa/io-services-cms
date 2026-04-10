@@ -1,5 +1,4 @@
-import { StateEnum as PendingOrErrorState } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkPendingOrError";
-import { StateEnum as SuccessState } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkSuccess";
+import { GetAggregatedInstitutionsKeysDownloadLinkMetadata } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkMetadata";
 import { Download, RefreshOutlined } from "@mui/icons-material";
 import {
   Alert,
@@ -11,31 +10,26 @@ import {
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-export type AggregatedInstitutionDownloadAlertProps = {
-  downloadLink?: string;
-  expirationDate?: string;
-  status?: PendingOrErrorState | SuccessState;
-} & {
+export interface AggregatedInstitutionDownloadAlertProps {
+  data?: GetAggregatedInstitutionsKeysDownloadLinkMetadata;
   onRefresh: () => void;
-};
+}
 
 export const AggregatedInstitutionDownloadAlert = ({
-  downloadLink,
-  expirationDate,
+  data,
   onRefresh,
-  status,
 }: AggregatedInstitutionDownloadAlertProps) => {
   const { i18n, t } = useTranslation();
 
   const alertProps = useMemo<AlertProps | undefined>(() => {
-    switch (status) {
+    switch (data?.state) {
       case "DONE":
         return {
           action: (
             <Button
               component="a"
               download="I tuoi enti.json"
-              href={downloadLink}
+              href={data.downloadLink}
               startIcon={<Download />}
               variant="naked"
             >
@@ -56,9 +50,9 @@ export const AggregatedInstitutionDownloadAlert = ({
                     expirationDate: new Intl.DateTimeFormat(i18n.language, {
                       day: "2-digit",
                       month: "2-digit",
-                      year: "2-digit",
+                      year: "numeric",
                     })
-                      .format(new Date(expirationDate ?? ""))
+                      .format(new Date(data.expirationDate ?? ""))
                       .replace(/\//g, "-"),
                   },
                 )}
@@ -120,7 +114,7 @@ export const AggregatedInstitutionDownloadAlert = ({
       default:
         break;
     }
-  }, [status, downloadLink, expirationDate, i18n.language, t, onRefresh]);
+  }, [data, i18n.language, t, onRefresh]);
 
   return (
     alertProps && <Alert elevation={4} variant="outlined" {...alertProps} />

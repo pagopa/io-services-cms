@@ -11,7 +11,6 @@ import { buildSnackbarItem } from "@/components/notification";
 import { TableRowMenuAction, TableViewColumn } from "@/components/table-view";
 import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
 import { GetAggregatedInstitutionsKeysDownloadLinkMetadata } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkMetadata";
-import { StateEnum } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkPendingOrError";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch, { client } from "@/hooks/use-fetch";
@@ -442,12 +441,11 @@ export default function AggregatedInstitutions() {
       ) : (
         <>
           <AggregatedInstitutionDownloadAlert
+            data={downloadLinkData}
             onRefresh={fetchSubscriptionKeysDownloadLink}
-            status={downloadLinkData?.state}
-            {...downloadLinkData}
           />
           <AggregatedInstitutionsSearchBar
-            disableGenerate={downloadLinkData?.state === StateEnum.IN_PROGRESS}
+            disableGenerate={downloadLinkData?.state === "IN_PROGRESS"}
             onEmptySearch={resetSearchByInstitutionName}
             onGenerateClick={() => {
               setIsModalOpened(true);
@@ -455,6 +453,7 @@ export default function AggregatedInstitutions() {
             onSearchClick={handleSearchByInstitutionNameClick}
           />
           <AggregatedInstitutionsDialog
+            isDownloadReady={downloadLinkData?.state === "DONE"}
             isOpen={isModalOpened}
             onClose={() => {
               setIsModalOpened(false);
@@ -465,7 +464,7 @@ export default function AggregatedInstitutions() {
                 { body: { password } },
                 tt.unknown,
                 { notify: "all" },
-              );
+              ).then(fetchSubscriptionKeysDownloadLink);
             }}
             sumbitting={fetchingRequestKeys}
           />

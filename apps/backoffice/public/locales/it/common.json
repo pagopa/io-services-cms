@@ -383,10 +383,19 @@
         },
         "fields": {
           "newPassword": "Nuova password",
-          "confirmPassword": "Conferma nuova password"
+          "confirmPassword": "Conferma nuova password",
+          "errors": {
+            "emptyConfirmPassword": "Inserisci di nuovo la password",
+            "emptyPassword": "Inserisci una password",
+            "invalidPassword": "La password non rispetta i requisiti di sicurezza",
+            "passwordDontMatch": "La password non corrisponde"
+          }
         },
         "generateButton": "Genera file .json",
-        "info": "L'operazione potrebbe richiedere alcuni minuti. Quando il file sarà pronto, potrai scaricarlo nella parte alta della pagina."
+        "info": {
+          "fileNotAvailable": "L'operazione potrebbe richiedere alcuni minuti. Quando il file sarà pronto, potrai scaricarlo nella parte alta della pagina.",
+          "fileAvailable": "Esiste già un file pronto per il download. Se continui, sarà sovrascritto."
+        }
       },
       "downloadAlert": {
         "inProgress": {
