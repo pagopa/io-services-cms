@@ -446,6 +446,7 @@ export default function AggregatedInstitutions() {
           />
           <AggregatedInstitutionsSearchBar
             disableGenerate={downloadLinkData?.state === "IN_PROGRESS"}
+            hideGenerate={Boolean(currentSearchByInstitutionName)}
             onEmptySearch={resetSearchByInstitutionName}
             onGenerateClick={() => {
               setIsModalOpened(true);
