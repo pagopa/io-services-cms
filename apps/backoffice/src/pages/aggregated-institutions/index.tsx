@@ -364,13 +364,28 @@ export default function AggregatedInstitutions() {
     setCurrentSearchByInstitutionName(undefined);
   }, []);
 
-  const fetchSubscriptionKeysDownloadLink = useCallback(() => {
+  const fetchAggregatedInstitutionsManageKeysLink = useCallback(() => {
     fetchDownloadLink(
       "getAggregatedInstitutionsManageKeysLink",
       {},
       AggregatedInstitutionsManageKeysLinkMetadata,
     );
   }, [fetchDownloadLink]);
+
+  const handleConfirmDialog = useCallback(
+    (password: string) =>
+      fetchRequestKeys(
+        "requestAggregatedInstitutionsManageKeys",
+        { body: { password } },
+        tt.unknown,
+        { notify: "all" },
+      ).then((data) => {
+        if (data.success) {
+          fetchAggregatedInstitutionsManageKeysLink();
+        }
+      }),
+    [fetchRequestKeys, fetchAggregatedInstitutionsManageKeysLink],
+  );
 
   // Fetch when pagination or search changes
   useEffect(() => {
@@ -419,8 +434,8 @@ export default function AggregatedInstitutions() {
   }, [dipData]);
 
   useEffect(() => {
-    fetchSubscriptionKeysDownloadLink();
-  }, [fetchSubscriptionKeysDownloadLink]);
+    fetchAggregatedInstitutionsManageKeysLink();
+  }, [fetchAggregatedInstitutionsManageKeysLink]);
 
   useEffect(() => {
     trackAggregatedInstitutionsPageEvent();
@@ -442,7 +457,7 @@ export default function AggregatedInstitutions() {
         <>
           <AggregatedInstitutionDownloadAlert
             data={downloadLinkData}
-            onRefresh={fetchSubscriptionKeysDownloadLink}
+            onRefresh={fetchAggregatedInstitutionsManageKeysLink}
           />
           <AggregatedInstitutionsSearchBar
             disableGenerate={downloadLinkData?.state === "IN_PROGRESS"}
@@ -459,14 +474,7 @@ export default function AggregatedInstitutions() {
             onClose={() => {
               setIsModalOpened(false);
             }}
-            onConfirm={async (password) => {
-              fetchRequestKeys(
-                "requestAggregatedInstitutionsManageKeys",
-                { body: { password } },
-                tt.unknown,
-                { notify: "all" },
-              ).then(fetchSubscriptionKeysDownloadLink);
-            }}
+            onConfirm={handleConfirmDialog}
             sumbitting={fetchingRequestKeys}
           />
           <AggregatedInstitutionTableView
