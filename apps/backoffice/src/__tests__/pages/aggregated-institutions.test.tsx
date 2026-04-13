@@ -308,7 +308,7 @@ describe("[AggregatedInstitutions] Page", () => {
       );
 
       expect(mockFetchData).toHaveBeenCalledWith(
-        "getInstitutionsAggregateManageSubscriptionKeysDownloadLink",
+        "getAggregatedInstitutionsManageKeysLink",
         {},
         expect.anything(),
       );

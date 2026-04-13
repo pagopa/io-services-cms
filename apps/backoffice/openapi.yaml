@@ -1129,7 +1129,7 @@ paths:
     get:
       tags:
         - manage-keys
-      operationId: getInstitutionsAggregateManageSubscriptionKeysDownloadLink
+      operationId: getAggregatedInstitutionsManageKeysLink
       security:
         - cookieAuth: []
       responses:
@@ -1138,7 +1138,7 @@ paths:
           content:
             application/json:
               schema: 
-                $ref: '#/components/schemas/GetAggregatedInstitutionsKeysDownloadLinkMetadata'
+                $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkMetadata'
         '401':
           description: Unauthorized
         '403':
@@ -1152,7 +1152,7 @@ paths:
     post:
       tags:
         - manage-keys
-      operationId: requestInstitutionsAggregateManageSubscriptionKeys
+      operationId: requestAggregatedInstitutionsManageKeys
       security:
         - cookieAuth: []
       requestBody:
@@ -1160,11 +1160,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/RequestAggregatedInstitutionsKeysPayload'
+              $ref: '#/components/schemas/RequestAggregatedInstitutionsManageKeysPayload'
         required: true
       responses:
-        '201':
-          description: Manage keys requested
+        '202':
+          description: Accepted
+        '400':
+          description: Bad request
         '401':
           description: Unauthorized
         '403':
@@ -2140,7 +2142,7 @@ components:
       required:
         - value
         - pagination
-    RequestAggregatedInstitutionsKeysPayload:
+    RequestAggregatedInstitutionsManageKeysPayload:
       type: object
       properties:
         password: 
@@ -2148,12 +2150,12 @@ components:
           pattern: ^[a-zA-Z0-9]{12,}$
       required:
         - password
-    GetAggregatedInstitutionsKeysDownloadLinkSuccess:
+    AggregatedInstitutionsManageKeysLinkReady:
       type: object
       properties:
         state:
           type: string
-          x-extensible-enum:
+          enum:
             - DONE
         downloadLink:
           type: string
@@ -2163,21 +2165,18 @@ components:
         - state
         - downloadLink
         - expirationDate
-    GetAggregatedInstitutionsKeysDownloadLinkPendingOrError:
-      type: object
-      properties:
-        state:
-          type: string
-          x-extensible-enum:
-            - IN_PROGRESS
-            - FAILED
-      required:
-        - state
-    GetAggregatedInstitutionsKeysDownloadLinkMetadata:
-      x-one-of: true
-      allOf:
-        - $ref: '#/components/schemas/GetAggregatedInstitutionsKeysDownloadLinkSuccess'
-        - $ref: '#/components/schemas/GetAggregatedInstitutionsKeysDownloadLinkPendingOrError'
+    AggregatedInstitutionsManageKeysLinkMetadata:
+      oneOf:
+        - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkReady'
+        - type: object
+          properties:
+            state:
+              type: string
+              enum:
+                - IN_PROGRESS
+                - FAILED
+          required:
+            - state
     UserInstitutionProduct:
       type: object
       properties:

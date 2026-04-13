@@ -1,4 +1,4 @@
-import { GetAggregatedInstitutionsKeysDownloadLinkMetadata } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkMetadata";
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
 import { Download, RefreshOutlined } from "@mui/icons-material";
 import {
   Alert,
@@ -11,7 +11,7 @@ import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface AggregatedInstitutionDownloadAlertProps {
-  data?: GetAggregatedInstitutionsKeysDownloadLinkMetadata;
+  data?: AggregatedInstitutionsManageKeysLinkMetadata;
   onRefresh: () => void;
 }
 

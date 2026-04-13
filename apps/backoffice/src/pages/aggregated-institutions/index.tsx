@@ -10,7 +10,7 @@ import { PageHeader } from "@/components/headers";
 import { buildSnackbarItem } from "@/components/notification";
 import { TableRowMenuAction, TableViewColumn } from "@/components/table-view";
 import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
-import { GetAggregatedInstitutionsKeysDownloadLinkMetadata } from "@/generated/api/GetAggregatedInstitutionsKeysDownloadLinkMetadata";
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch, { client } from "@/hooks/use-fetch";
@@ -75,7 +75,7 @@ export default function AggregatedInstitutions() {
   const { fetchData: fetchRequestKeys, loading: fetchingRequestKeys } =
     useFetch();
   const { data: downloadLinkData, fetchData: fetchDownloadLink } =
-    useFetch<GetAggregatedInstitutionsKeysDownloadLinkMetadata>();
+    useFetch<AggregatedInstitutionsManageKeysLinkMetadata>();
 
   const [aggregatedInstitutions, setAggregatedInstitutions] =
     useState<AggregatedInstitutionListItem[]>();
@@ -366,9 +366,9 @@ export default function AggregatedInstitutions() {
 
   const fetchSubscriptionKeysDownloadLink = useCallback(() => {
     fetchDownloadLink(
-      "getInstitutionsAggregateManageSubscriptionKeysDownloadLink",
+      "getAggregatedInstitutionsManageKeysLink",
       {},
-      GetAggregatedInstitutionsKeysDownloadLinkMetadata,
+      AggregatedInstitutionsManageKeysLinkMetadata,
     );
   }, [fetchDownloadLink]);
 
@@ -461,7 +461,7 @@ export default function AggregatedInstitutions() {
             }}
             onConfirm={async (password) => {
               fetchRequestKeys(
-                "requestInstitutionsAggregateManageSubscriptionKeys",
+                "requestAggregatedInstitutionsManageKeys",
                 { body: { password } },
                 tt.unknown,
                 { notify: "all" },
