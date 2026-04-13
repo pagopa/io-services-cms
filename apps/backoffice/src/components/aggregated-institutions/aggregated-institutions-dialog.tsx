@@ -51,12 +51,13 @@ const getValidationSchema = (t: TFunction) =>
             "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
           ),
         )
-        .regex(
-          /^(?=[^A-Z]*[A-Z])(?=[^\d]*\d).{12,100}$/,
-          t(
-            "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
-          ),
-        ),
+        .refine((val) => {
+          const isCorrectLength = val.length >= 12;
+          const hasUppercase = /[A-Z]/.test(val);
+          const hasNumber = /\d/.test(val);
+
+          return isCorrectLength && hasUppercase && hasNumber;
+        }, t("routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword")),
     })
     .refine((schema) => schema.password === schema.confirmPassword, {
       message: t(
