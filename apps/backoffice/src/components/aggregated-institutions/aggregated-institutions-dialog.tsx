@@ -51,14 +51,8 @@ const getValidationSchema = (t: TFunction) =>
             "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
           ),
         )
-        .min(
-          12,
-          t(
-            "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
-          ),
-        )
-        .refine(
-          (val) => /^(?=.*[A-Z])(?=.*\d)/.test(val),
+        .regex(
+          /^(?=.*[A-Z])(?=.*\d).{12,36}$/,
           t(
             "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
           ),
