@@ -52,7 +52,7 @@ const getValidationSchema = (t: TFunction) =>
           ),
         )
         .regex(
-          /^(?=.*[A-Z])(?=.*\d).{12,36}$/,
+          /^(?=[^A-Z]*[A-Z])(?=[^\d]*\d).{12,100}$/,
           t(
             "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
           ),
