@@ -288,11 +288,13 @@ describe("[AggregatedInstitutions] Page", () => {
     });
   });
 
-  describe("Fetch behaviour", () => {
+  describe("Fetch behaviour on mount", () => {
     beforeEach(() => setupOperatorMocks(undefined));
 
-    it("should call fetchData on mount with institution id and default pagination", () => {
+    it("should fetch aggregated institutions and download link metadata", () => {
       render(<AggregatedInstitutions />);
+
+      expect(mockFetchData).toHaveBeenCalledTimes(2);
 
       expect(mockFetchData).toHaveBeenCalledWith(
         "retrieveInstitutionAggregates",
@@ -304,16 +306,12 @@ describe("[AggregatedInstitutions] Page", () => {
         expect.anything(),
         expect.objectContaining({ notify: "errors" }),
       );
-    });
 
-    it("should not refetch without pagination interaction", async () => {
-      setupFetch(mockPaginationData);
-
-      render(<AggregatedInstitutions />);
-      await waitFor(() => screen.getByText("Institution Alpha"));
-
-      // With initial pagination state, fetchData should be called only once on mount
-      expect(mockFetchData).toHaveBeenCalledTimes(1);
+      expect(mockFetchData).toHaveBeenCalledWith(
+        "getInstitutionsAggregateManageSubscriptionKeysDownloadLink",
+        {},
+        expect.anything(),
+      );
     });
   });
 
