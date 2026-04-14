@@ -12,8 +12,7 @@ const mocks: {
   sanitizedResponse: NextResponse;
   userAuthz: Mock<any>;
   isAdmin: Mock<any>;
-  regenerateManageSubscriptionApiKey: Mock<any>;
-  retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId: Mock<any>;
+  regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator: Mock<any>;
   withJWTAuthHandler: Mock<any>;
   handleBadRequestErrorResponse: Mock<any>;
   handleForbiddenErrorResponse: Mock<any>;
@@ -34,8 +33,7 @@ const mocks: {
   userAuthz: vi.fn(() => ({
     isAdmin: mocks.isAdmin,
   })),
-  regenerateManageSubscriptionApiKey: vi.fn(),
-  retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId: vi.fn(),
+  regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator: vi.fn(),
   sanitizedNextResponseJson: vi.fn(() => mocks.sanitizedResponse),
   handleBadRequestErrorResponse: vi.fn(() => mocks.badRequestResponse),
   handleForbiddenErrorResponse: vi.fn(() => mocks.forbiddenResponse),
@@ -76,9 +74,7 @@ vi.mock("@/lib/be/sanitize", () => ({
 }));
 
 vi.mock("@/lib/be/subscriptions/business", () => ({
-  regenerateManageSubscriptionApiKey: mocks.regenerateManageSubscriptionApiKey,
-  retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId:
-    mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
+  regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator: mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
 }));
 
 afterEach(() => {
@@ -105,9 +101,8 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
       "Role not authorized",
     );
     expect(
-      mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
+      mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
     ).not.toHaveBeenCalled();
-    expect(mocks.regenerateManageSubscriptionApiKey).not.toHaveBeenCalled();
     expect(mocks.handleBadRequestErrorResponse).not.toHaveBeenCalled();
     expect(mocks.handleInternalErrorResponse).not.toHaveBeenCalled();
     expect(mocks.sanitizedNextResponseJson).not.toHaveBeenCalled();
@@ -134,9 +129,8 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
       expect.stringContaining("invalid"),
     );
     expect(
-      mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
+      mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
     ).not.toHaveBeenCalled();
-    expect(mocks.regenerateManageSubscriptionApiKey).not.toHaveBeenCalled();
     expect(mocks.handleForbiddenErrorResponse).not.toHaveBeenCalled();
     expect(mocks.handleInternalErrorResponse).not.toHaveBeenCalled();
     expect(mocks.sanitizedNextResponseJson).not.toHaveBeenCalled();
@@ -147,12 +141,8 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     const nextRequest = new NextRequest("http://localhost");
     const aggregateId = "aggregateId";
     const keyType = "primary";
-    const subscriptionId = "subscriptionId";
     const error = new Error("test error message");
-    mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId.mockResolvedValueOnce(
-      subscriptionId,
-    );
-    mocks.regenerateManageSubscriptionApiKey.mockRejectedValueOnce(error);
+    mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator.mockRejectedValueOnce(error);
 
     // when and then
     await expect(
@@ -165,17 +155,8 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     expect(mocks.isAdmin).toHaveBeenCalledOnce();
     expect(mocks.isAdmin).toHaveBeenCalledWith();
     expect(
-      mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
-    ).toHaveBeenCalledOnce();
-    expect(
-      mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
-    ).toHaveBeenCalledWith(aggregateId, mocks.backofficeUser.institution.id);
-    expect(mocks.regenerateManageSubscriptionApiKey).toHaveBeenCalledOnce();
-    expect(mocks.regenerateManageSubscriptionApiKey).toHaveBeenCalledWith(
-      mocks.backofficeUser.parameters.userId,
-      subscriptionId,
-      keyType,
-    );
+      mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
+    ).toHaveBeenCalledExactlyOnceWith(aggregateId, mocks.backofficeUser.parameters.userId, mocks.backofficeUser.institution.id, keyType);
     expect(mocks.handleInternalErrorResponse).toHaveBeenCalledOnce();
     expect(mocks.handleInternalErrorResponse).toHaveBeenCalledWith(
       "InstitutionAggregateManageSubscriptionsKeyHandler",
@@ -192,12 +173,8 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     const nextRequest = new NextRequest("http://localhost");
     const aggregateId = "aggregateId";
     const keyType = "secondary";
-    const subscriptionId = "subscriptionId";
     const error = new mocks.SubscriptionOwnershipError("error from business");
-    mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId.mockResolvedValueOnce(
-      subscriptionId,
-    );
-    mocks.regenerateManageSubscriptionApiKey.mockRejectedValueOnce(error);
+    mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator.mockRejectedValueOnce(error);
 
     // when and then
     await expect(
@@ -205,16 +182,10 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
         params: { aggregateId, keyType },
       } as any),
     ).resolves.toEqual(mocks.forbiddenResponse);
-    expect(
-      mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
-    ).toHaveBeenCalledOnce();
-    expect(
-      mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
-    ).toHaveBeenCalledWith(aggregateId, mocks.backofficeUser.institution.id);
-    expect(mocks.regenerateManageSubscriptionApiKey).toHaveBeenCalledOnce();
-    expect(mocks.regenerateManageSubscriptionApiKey).toHaveBeenCalledWith(
+    expect(mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator).toHaveBeenCalledExactlyOnceWith(
+      aggregateId,
       mocks.backofficeUser.parameters.userId,
-      subscriptionId,
+      mocks.backofficeUser.institution.id,
       keyType,
     );
     expect(mocks.handleForbiddenErrorResponse).toHaveBeenCalledOnce();
@@ -231,12 +202,8 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     const nextRequest = new NextRequest("http://localhost");
     const aggregateId = "aggregateId";
     const keyType = "primary";
-    const subscriptionId = "subscriptionId";
     const subscriptionKeysResponse = { foo: "bar" };
-    mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId.mockResolvedValueOnce(
-      subscriptionId,
-    );
-    mocks.regenerateManageSubscriptionApiKey.mockResolvedValueOnce(
+    mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator.mockResolvedValueOnce(
       subscriptionKeysResponse,
     );
 
@@ -250,16 +217,10 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     expect(mocks.userAuthz).toHaveBeenCalledWith(mocks.backofficeUser);
     expect(mocks.isAdmin).toHaveBeenCalledOnce();
     expect(mocks.isAdmin).toHaveBeenCalledWith();
-    expect(
-      mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
-    ).toHaveBeenCalledOnce();
-    expect(
-      mocks.retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
-    ).toHaveBeenCalledWith(aggregateId, mocks.backofficeUser.institution.id);
-    expect(mocks.regenerateManageSubscriptionApiKey).toHaveBeenCalledOnce();
-    expect(mocks.regenerateManageSubscriptionApiKey).toHaveBeenCalledWith(
+    expect(mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator).toHaveBeenCalledExactlyOnceWith(
+      aggregateId,
       mocks.backofficeUser.parameters.userId,
-      subscriptionId,
+      mocks.backofficeUser.institution.id,
       keyType,
     );
     expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledOnce();

@@ -9,10 +9,7 @@ import {
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import {
-  regenerateManageSubscriptionApiKey,
-  retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId,
-} from "@/lib/be/subscriptions/business";
+import { regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -45,17 +42,13 @@ export const PUT = withJWTAuthHandler(
         );
       }
 
-      const subscriptionId =
-        await retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId(
+      const manageKeysResponse =
+        await regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
           params.aggregateId,
+          backofficeUser.parameters.userId,
           backofficeUser.institution.id,
+          maybeDecodedKeyType.right,
         );
-
-      const manageKeysResponse = await regenerateManageSubscriptionApiKey(
-        backofficeUser.parameters.userId,
-        subscriptionId,
-        maybeDecodedKeyType.right,
-      );
 
       return sanitizedNextResponseJson(manageKeysResponse);
     } catch (error) {

@@ -358,31 +358,80 @@ export const retrieveInstitutionAggregateManageSubscriptionsKeys = async (
 };
 
 /**
+ * Regenerates the API keys for the manage-group subscription of a given institution aggregate related to a specific aggregator.
+ * @param aggregateId The id of the aggregate
+ * @param aggregatorId The id of the aggregator
+ * @param aggregatorInstitutionId The id of the aggregator's institution
+ * @param keyType The type of key to regenerate (primary or secondary)
+ * @returns The updated API keys
+ * @throws see {@linkcode retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId} for possible errors related to retrieving the subscription id for the given aggregate and aggregator
+ * @throws see {@linkcode validateSubscriptionOwnership} for possible errors related to subscription ownership validation
+ * @throws see {@linkcode regenerateSubscriptionKey} for possible errors related to regenerating the key in the database
+ * @throws `ManagedInternalError` if the subscription keys are not returned after regeneration
+ */
+export const regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator =
+  async (
+    aggregateId: string,
+    aggregatorId: string,
+    aggregatorInstitutionId: string,
+    keyType: SubscriptionKeyType,
+  ): Promise<SubscriptionKeys> => {
+    const subscriptionId =
+      await retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId(
+        aggregateId,
+        aggregatorInstitutionId,
+      );
+
+    await validateSubscriptionOwnership(subscriptionId, aggregatorId);
+
+    const { primary_key: primaryKey, secondary_key: secondaryKey } =
+      await regenerateManageSubscriptionApiKey(
+        aggregatorId,
+        subscriptionId,
+        keyType,
+      );
+
+    if (!primaryKey || !secondaryKey) {
+      throw new ManagedInternalError(
+        "Data inconsistency",
+        `Missing subscription keys for manage-group subscription '${subscriptionId}'`,
+      );
+    }
+
+    return {
+      primary_key: primaryKey,
+      secondary_key: secondaryKey,
+    };
+  };
+
+/**
  * Retrieves the subscription id of the ApiKey Manage Group related to a given institution aggregate and aggregator.
  * @param aggregateId The id of the aggregate
  * @param aggregatorId The id of the aggregator
  * @returns The subscription id of the ApiKey Manage Group
+ * @throws `ManagedInternalError` if there are no groups or more than one group related to the aggregate and the aggregator which is an indication of data inconsistency
  */
-export const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId =
-  async (aggregateId: string, aggregatorId: string): Promise<string> => {
-    const aggregatorGroups = await getInstitutionGroups(
-      aggregateId,
-      undefined,
-      undefined,
-      undefined,
-      aggregatorId,
+const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId = async (
+  aggregateId: string,
+  aggregatorId: string,
+): Promise<string> => {
+  const aggregatorGroups = await getInstitutionGroups(
+    aggregateId,
+    undefined,
+    undefined,
+    undefined,
+    aggregatorId,
+  );
+
+  // Data inconsistency: if there are no groups or more than one group related to the aggregate and the aggregator, we cannot determine the subscription to retrieve the keys for
+  if (aggregatorGroups.totalElements !== 1) {
+    throw new ManagedInternalError(
+      "Data inconsistency",
+      `${aggregatorGroups.totalElements === 0 ? "No" : "Multiple"} groups exist for aggregate '${aggregateId}' related to aggregator '${aggregatorId}'`,
     );
+  }
+  const subscriptionId =
+    ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + aggregatorGroups.content[0].id;
 
-    // Data inconsistency: if there are no groups or more than one group related to the aggregate and the aggregator, we cannot determine the subscription to retrieve the keys for
-    if (aggregatorGroups.totalElements !== 1) {
-      throw new ManagedInternalError(
-        "Data inconsistency",
-        `${aggregatorGroups.totalElements === 0 ? "No" : "Multiple"} groups exist for aggregate '${aggregateId}' related to aggregator '${aggregatorId}'`,
-      );
-    }
-    const subscriptionId =
-      ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX +
-      aggregatorGroups.content[0].id;
-
-    return subscriptionId;
-  };
+  return subscriptionId;
+};
