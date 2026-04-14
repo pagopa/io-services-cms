@@ -875,7 +875,7 @@ export const buildHandlers = () => {
         const { body: _ } = request;
 
         const resultArray = [
-          new HttpResponse(null, { status: 201 }),
+          new HttpResponse(null, { status: 202 }),
           new HttpResponse(null, { status: 401 }),
           new HttpResponse(null, { status: 403 }),
           new HttpResponse(null, { status: 429 }),
