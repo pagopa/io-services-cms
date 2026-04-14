@@ -820,7 +820,6 @@ describe("Manage Keys", () => {
             totalElements: 1,
           });
           mocks.getUserSubscriptions
-            .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]))
             .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
           mocks.regenerateSubscriptionKey.mockRejectedValueOnce(
             new Error(errorMessage),
@@ -843,16 +842,7 @@ describe("Manage Keys", () => {
             undefined,
             aggregatorInstitutionId,
           );
-          expect(mocks.getUserSubscriptions).toHaveBeenCalledTimes(2);
-          expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
-            1,
-            aggregatorId,
-            undefined,
-            undefined,
-            `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
-          );
-          expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
-            2,
+          expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
             aggregatorId,
             undefined,
             undefined,
@@ -885,7 +875,6 @@ describe("Manage Keys", () => {
             totalElements: 1,
           });
           mocks.getUserSubscriptions
-            .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]))
             .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
           mocks.regenerateSubscriptionKey.mockResolvedValueOnce(apimResponse);
 
@@ -906,16 +895,7 @@ describe("Manage Keys", () => {
             undefined,
             aggregatorInstitutionId,
           );
-          expect(mocks.getUserSubscriptions).toHaveBeenCalledTimes(2);
-          expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
-            1,
-            aggregatorId,
-            undefined,
-            undefined,
-            `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
-          );
-          expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
-            2,
+          expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
             aggregatorId,
             undefined,
             undefined,
@@ -942,7 +922,6 @@ describe("Manage Keys", () => {
         totalElements: 1,
       });
       mocks.getUserSubscriptions
-        .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]))
         .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
       mocks.regenerateSubscriptionKey.mockResolvedValueOnce({
         primaryKey,
@@ -967,16 +946,7 @@ describe("Manage Keys", () => {
         undefined,
         aggregatorInstitutionId,
       );
-      expect(mocks.getUserSubscriptions).toHaveBeenCalledTimes(2);
-      expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
-        1,
-        aggregatorId,
-        undefined,
-        undefined,
-        `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
-      );
-      expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
-        2,
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
         aggregatorId,
         undefined,
         undefined,
