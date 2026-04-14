@@ -745,8 +745,7 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError("Data inconsistency");
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
             aggregateId,
             undefined,
             undefined,
@@ -789,16 +788,14 @@ describe("Manage Keys", () => {
                 SubscriptionKeyTypeEnum.primary,
               ),
             ).rejects.toThrowError(expectedErrorMessage);
-            expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-            expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+            expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
               aggregateId,
               undefined,
               undefined,
               undefined,
               aggregatorInstitutionId,
             );
-            expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
-            expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+            expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
               aggregatorId,
               undefined,
               undefined,
@@ -834,8 +831,7 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError(errorMessage);
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
             aggregateId,
             undefined,
             undefined,
@@ -848,8 +844,7 @@ describe("Manage Keys", () => {
             undefined,
             `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
           );
-          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledOnce();
-          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledExactlyOnceWith(
             `MANAGE-GROUP-${mocks.aGroup.id}`,
             SubscriptionKeyTypeEnum.primary,
           );
@@ -887,8 +882,7 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError("Data inconsistency");
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
             aggregateId,
             undefined,
             undefined,
@@ -901,8 +895,7 @@ describe("Manage Keys", () => {
             undefined,
             `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
           );
-          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledOnce();
-          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledExactlyOnceWith(
             `MANAGE-GROUP-${mocks.aGroup.id}`,
             SubscriptionKeyTypeEnum.primary,
           );
@@ -938,8 +931,7 @@ describe("Manage Keys", () => {
         );
 
       // then
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
         aggregateId,
         undefined,
         undefined,
@@ -952,8 +944,7 @@ describe("Manage Keys", () => {
         undefined,
         `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
       );
-      expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledOnce();
-      expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+      expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledExactlyOnceWith(
         `MANAGE-GROUP-${mocks.aGroup.id}`,
         SubscriptionKeyTypeEnum.primary,
       );
