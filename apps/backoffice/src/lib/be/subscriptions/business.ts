@@ -382,8 +382,6 @@ export const regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator 
         aggregatorInstitutionId,
       );
 
-    await validateSubscriptionOwnership(subscriptionId, aggregatorId);
-
     const { primary_key: primaryKey, secondary_key: secondaryKey } =
       await regenerateManageSubscriptionApiKey(
         aggregatorId,
