@@ -7,6 +7,7 @@ import { SubscriptionKeyTypeEnum } from "../../../../generated/api/SubscriptionK
 import {
   deleteManageSubscription,
   getManageSubscriptions,
+  regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
   regenerateManageSubscriptionApiKey,
   retrieveInstitutionAggregateManageSubscriptionsKeys,
   retrieveManageSubscriptionApiKeys,
@@ -681,6 +682,310 @@ describe("Manage Keys", () => {
         undefined,
         undefined,
         aggregatorId,
+      );
+      expect(result).toStrictEqual({
+        primary_key: primaryKey,
+        secondary_key: secondaryKey,
+      });
+    });
+  });
+
+  describe("regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator", () => {
+    describe("failures from call to retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId", () => {
+      it("should return an error when getInstitutionGroups respond with an error", async () => {
+        // given
+        const aggregateId = "aggregateId";
+        const aggregatorId = "aggregatorId";
+        const aggregatorInstitutionId = "aggregatorInstitutionId";
+        const errorMessage = "test error message";
+        const error = new Error(errorMessage);
+        mocks.getInstitutionGroups.mockRejectedValueOnce(error);
+
+        // when and then
+        await expect(
+          regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
+            aggregateId,
+            aggregatorId,
+            aggregatorInstitutionId,
+            SubscriptionKeyTypeEnum.primary,
+          ),
+        ).rejects.toThrowError(errorMessage);
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
+          aggregateId,
+          undefined,
+          undefined,
+          undefined,
+          aggregatorInstitutionId,
+        );
+        expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
+        expect(mocks.regenerateSubscriptionKey).not.toHaveBeenCalled();
+      });
+
+      it.each`
+        mockGroupsLength
+        ${0}
+        ${2}
+      `(
+        "should return an error when $mockGroupsLength groups are found",
+        async ({ mockGroupsLength }) => {
+          // given
+          const aggregateId = "aggregateId";
+          const aggregatorId = "aggregatorId";
+          const aggregatorInstitutionId = "aggregatorInstitutionId";
+          mocks.getInstitutionGroups.mockResolvedValueOnce({
+            totalElements: mockGroupsLength,
+          });
+
+          // when and then
+          await expect(
+            regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
+              aggregateId,
+              aggregatorId,
+              aggregatorInstitutionId,
+              SubscriptionKeyTypeEnum.primary,
+            ),
+          ).rejects.toThrowError("Data inconsistency");
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+            aggregateId,
+            undefined,
+            undefined,
+            undefined,
+            aggregatorInstitutionId,
+          );
+          expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
+          expect(mocks.regenerateSubscriptionKey).not.toHaveBeenCalled();
+        },
+      );
+    });
+
+    describe("failures from call to regenerateManageSubscriptionApiKey", () => {
+      describe("failures from call to validateSubscriptionOwnership", () => {
+        it.each`
+          scenario                                                              | getUserSubscriptionsMockResult  | expectedErrorMessage
+          ${"validateSubscriptionOwnership fails to retrieve the subscription"} | ${TE.left({ statusCode: 500 })} | ${"Error retrieving user's subscriptions"}
+          ${"user doesn't own the subscription"}                                | ${TE.right([])}                 | ${"The user doesn't own the subscription"}
+        `(
+          "should throw an error when $scenario",
+          async ({ getUserSubscriptionsMockResult, expectedErrorMessage }) => {
+            // given
+            const aggregateId = "aggregateId";
+            const aggregatorId = "aggregatorId";
+            const aggregatorInstitutionId = "aggregatorInstitutionId";
+            mocks.getInstitutionGroups.mockResolvedValueOnce({
+              content: [mocks.aGroup],
+              totalElements: 1,
+            });
+            mocks.getUserSubscriptions.mockReturnValueOnce(
+              getUserSubscriptionsMockResult,
+            );
+
+            // when and then
+            await expect(
+              regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
+                aggregateId,
+                aggregatorId,
+                aggregatorInstitutionId,
+                SubscriptionKeyTypeEnum.primary,
+              ),
+            ).rejects.toThrowError(expectedErrorMessage);
+            expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
+            expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+              aggregateId,
+              undefined,
+              undefined,
+              undefined,
+              aggregatorInstitutionId,
+            );
+            expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+            expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+              aggregatorId,
+              undefined,
+              undefined,
+              `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
+            );
+            expect(mocks.regenerateSubscriptionKey).not.toHaveBeenCalled();
+          },
+        );
+      });
+      describe("failures from call to regenerateManageSubscriptionApiKey", () => {
+        it("should return an error when the subscription's secret regeneration fails", async () => {
+          // given
+          const aggregateId = "aggregateId";
+          const aggregatorId = "aggregatorId";
+          const aggregatorInstitutionId = "aggregatorInstitutionId";
+          const errorMessage = "test error message";
+          mocks.getInstitutionGroups.mockResolvedValueOnce({
+            content: [mocks.aGroup],
+            totalElements: 1,
+          });
+          mocks.getUserSubscriptions
+            .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]))
+            .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
+          mocks.regenerateSubscriptionKey.mockRejectedValueOnce(
+            new Error(errorMessage),
+          );
+
+          // when and then
+          await expect(
+            regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
+              aggregateId,
+              aggregatorId,
+              aggregatorInstitutionId,
+              SubscriptionKeyTypeEnum.primary,
+            ),
+          ).rejects.toThrowError(errorMessage);
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+            aggregateId,
+            undefined,
+            undefined,
+            undefined,
+            aggregatorInstitutionId,
+          );
+          expect(mocks.getUserSubscriptions).toHaveBeenCalledTimes(2);
+          expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
+            1,
+            aggregatorId,
+            undefined,
+            undefined,
+            `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
+          );
+          expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
+            2,
+            aggregatorId,
+            undefined,
+            undefined,
+            `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
+          );
+          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledOnce();
+          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+            `MANAGE-GROUP-${mocks.aGroup.id}`,
+            SubscriptionKeyTypeEnum.primary,
+          );
+        });
+      });
+    });
+
+    describe("data inconsistency errors", () => {
+      it.each`
+        apimResponse
+        ${{ primaryKey: undefined, secondaryKey: "secondary-key" }}
+        ${{ primaryKey: "primary-key", secondaryKey: undefined }}
+        ${{ primaryKey: undefined, secondaryKey: undefined }}
+      `(
+        "should return an error when APIM responds with $apimResponse",
+        async ({ apimResponse }) => {
+          // given
+          const aggregateId = "aggregateId";
+          const aggregatorId = "aggregatorId";
+          const aggregatorInstitutionId = "aggregatorInstitutionId";
+          mocks.getInstitutionGroups.mockResolvedValueOnce({
+            content: [mocks.aGroup],
+            totalElements: 1,
+          });
+          mocks.getUserSubscriptions
+            .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]))
+            .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
+          mocks.regenerateSubscriptionKey.mockResolvedValueOnce(apimResponse);
+
+          // when and then
+          await expect(
+            regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
+              aggregateId,
+              aggregatorId,
+              aggregatorInstitutionId,
+              SubscriptionKeyTypeEnum.primary,
+            ),
+          ).rejects.toThrowError("Data inconsistency");
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+            aggregateId,
+            undefined,
+            undefined,
+            undefined,
+            aggregatorInstitutionId,
+          );
+          expect(mocks.getUserSubscriptions).toHaveBeenCalledTimes(2);
+          expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
+            1,
+            aggregatorId,
+            undefined,
+            undefined,
+            `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
+          );
+          expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
+            2,
+            aggregatorId,
+            undefined,
+            undefined,
+            `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
+          );
+          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledOnce();
+          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+            `MANAGE-GROUP-${mocks.aGroup.id}`,
+            SubscriptionKeyTypeEnum.primary,
+          );
+        },
+      );
+    });
+
+    it("should return the regenerated subscription keys related to the group found", async () => {
+      // given
+      const aggregateId = "aggregateId";
+      const aggregatorId = "aggregatorId";
+      const aggregatorInstitutionId = "aggregatorInstitutionId";
+      const primaryKey = `primary-key-for-${mocks.aGroup.id}`;
+      const secondaryKey = `secondary-key-for-${mocks.aGroup.id}`;
+      mocks.getInstitutionGroups.mockResolvedValueOnce({
+        content: [mocks.aGroup],
+        totalElements: 1,
+      });
+      mocks.getUserSubscriptions
+        .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]))
+        .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
+      mocks.regenerateSubscriptionKey.mockResolvedValueOnce({
+        primaryKey,
+        secondaryKey,
+      });
+
+      // when
+      const result =
+        await regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
+          aggregateId,
+          aggregatorId,
+          aggregatorInstitutionId,
+          SubscriptionKeyTypeEnum.primary,
+        );
+
+      // then
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+        aggregateId,
+        undefined,
+        undefined,
+        undefined,
+        aggregatorInstitutionId,
+      );
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledTimes(2);
+      expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
+        1,
+        aggregatorId,
+        undefined,
+        undefined,
+        `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
+      );
+      expect(mocks.getUserSubscriptions).toHaveBeenNthCalledWith(
+        2,
+        aggregatorId,
+        undefined,
+        undefined,
+        `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
+      );
+      expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledOnce();
+      expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledWith(
+        `MANAGE-GROUP-${mocks.aGroup.id}`,
+        SubscriptionKeyTypeEnum.primary,
       );
       expect(result).toStrictEqual({
         primary_key: primaryKey,
