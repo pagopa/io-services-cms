@@ -120,12 +120,9 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
         params: { aggregateId, keyType },
       } as any),
     ).resolves.toEqual(mocks.badRequestResponse);
-    expect(mocks.userAuthz).toHaveBeenCalledOnce();
-    expect(mocks.userAuthz).toHaveBeenCalledWith(mocks.backofficeUser);
-    expect(mocks.isAdmin).toHaveBeenCalledOnce();
-    expect(mocks.isAdmin).toHaveBeenCalledWith();
-    expect(mocks.handleBadRequestErrorResponse).toHaveBeenCalledOnce();
-    expect(mocks.handleBadRequestErrorResponse).toHaveBeenCalledWith(
+    expect(mocks.userAuthz).toHaveBeenCalledExactlyOnceWith(mocks.backofficeUser);
+    expect(mocks.isAdmin).toHaveBeenCalledExactlyOnceWith();
+    expect(mocks.handleBadRequestErrorResponse).toHaveBeenCalledExactlyOnceWith(
       expect.stringContaining("invalid"),
     );
     expect(
@@ -150,15 +147,12 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
         params: { aggregateId, keyType },
       } as any),
     ).resolves.toEqual(mocks.errorResponse);
-    expect(mocks.userAuthz).toHaveBeenCalledOnce();
-    expect(mocks.userAuthz).toHaveBeenCalledWith(mocks.backofficeUser);
-    expect(mocks.isAdmin).toHaveBeenCalledOnce();
-    expect(mocks.isAdmin).toHaveBeenCalledWith();
+    expect(mocks.userAuthz).toHaveBeenCalledExactlyOnceWith(mocks.backofficeUser);
+    expect(mocks.isAdmin).toHaveBeenCalledExactlyOnceWith();
     expect(
       mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
     ).toHaveBeenCalledExactlyOnceWith(aggregateId, mocks.backofficeUser.parameters.userId, mocks.backofficeUser.institution.id, keyType);
-    expect(mocks.handleInternalErrorResponse).toHaveBeenCalledOnce();
-    expect(mocks.handleInternalErrorResponse).toHaveBeenCalledWith(
+    expect(mocks.handleInternalErrorResponse).toHaveBeenCalledExactlyOnceWith(
       "InstitutionAggregateManageSubscriptionsKeyHandler",
       error,
       `An Error has occurred while regenerating ${keyType} Manage Group Subscription Key for aggregateId '${aggregateId}' requested by aggregatorId '${mocks.backofficeUser.institution.id}'`,
@@ -188,8 +182,7 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
       mocks.backofficeUser.institution.id,
       keyType,
     );
-    expect(mocks.handleForbiddenErrorResponse).toHaveBeenCalledOnce();
-    expect(mocks.handleForbiddenErrorResponse).toHaveBeenCalledWith(
+    expect(mocks.handleForbiddenErrorResponse).toHaveBeenCalledExactlyOnceWith(
       "You can only handle subscriptions that you own",
     );
     expect(mocks.handleBadRequestErrorResponse).not.toHaveBeenCalled();
@@ -213,18 +206,15 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
         params: { aggregateId, keyType },
       } as any),
     ).resolves.toEqual(mocks.sanitizedResponse);
-    expect(mocks.userAuthz).toHaveBeenCalledOnce();
-    expect(mocks.userAuthz).toHaveBeenCalledWith(mocks.backofficeUser);
-    expect(mocks.isAdmin).toHaveBeenCalledOnce();
-    expect(mocks.isAdmin).toHaveBeenCalledWith();
+    expect(mocks.userAuthz).toHaveBeenCalledExactlyOnceWith(mocks.backofficeUser);
+    expect(mocks.isAdmin).toHaveBeenCalledExactlyOnceWith();
     expect(mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator).toHaveBeenCalledExactlyOnceWith(
       aggregateId,
       mocks.backofficeUser.parameters.userId,
       mocks.backofficeUser.institution.id,
       keyType,
     );
-    expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledOnce();
-    expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledWith(
+    expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledExactlyOnceWith(
       subscriptionKeysResponse,
     );
     expect(mocks.handleBadRequestErrorResponse).not.toHaveBeenCalled();
