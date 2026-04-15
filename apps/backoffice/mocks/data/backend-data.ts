@@ -1,8 +1,8 @@
 /* eslint-disable no-useless-escape */
 import { Cidr } from "@/generated/api/Cidr";
 import { SubscriptionCIDRs } from "@/generated/api/SubscriptionCIDRs";
-import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
+import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import {
   SubscriptionType,
   SubscriptionTypeEnum,
@@ -497,6 +497,20 @@ export const getMockAggregatedInstitutionPagination = (
     },
     value: Array.from({ length: pageSize }).map(getMockAggregatedInstitution),
   };
+};
+
+export const getMockAggregatedInstitutionManageKeysJsonDownloadLink = () => {
+  const jsonInput = Array.from({ length: cachedInstitutionsCount }).map(() => ({
+    fc: faker.company.name(),
+    pk: faker.string.uuid(),
+    sk: faker.string.uuid(),
+  }));
+  const bytes = new TextEncoder().encode(JSON.stringify(jsonInput, null, 2));
+  const binary = Array.from(bytes)
+    .map((b) => String.fromCharCode(b))
+    .join("");
+
+  return `data:application/json;base64,${btoa(binary)}`;
 };
 
 // **********************************************************************

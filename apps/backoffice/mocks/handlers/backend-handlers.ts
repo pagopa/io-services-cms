@@ -16,6 +16,7 @@ import {
   aMockServiceTopics,
   anInfoVersion,
   getAggregateManageSubscriptionKeys,
+  getMockAggregatedInstitutionManageKeysJsonDownloadLink,
   getMockAggregatedInstitutionPagination,
   getMockBulkPatchService,
   getMockGroupUnboundedServices,
@@ -838,7 +839,8 @@ export const buildHandlers = () => {
         const resultArray = [
           new HttpResponse(
             JSON.stringify({
-              downloadLink: "https://example.com",
+              downloadLink:
+                getMockAggregatedInstitutionManageKeysJsonDownloadLink(),
               expirationDate: new Date().toISOString(),
               state: "DONE",
             }),
@@ -869,7 +871,7 @@ export const buildHandlers = () => {
           new HttpResponse(null, { status: 500 }),
         ];
 
-        return resultArray[1];
+        return resultArray[0];
       },
     ),
     http.post(
