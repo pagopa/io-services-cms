@@ -9,7 +9,7 @@
   try {
     var jsonBody = JObject.Parse(stringBody);
     try {
-      jsonBody["data"]["groupId"].Parent.Remove();
+      jsonBody["metadata"]["group_id"].Parent.Remove();
       return jsonBody.ToString();
     } catch (Exception) {
       return jsonBody.ToString();
