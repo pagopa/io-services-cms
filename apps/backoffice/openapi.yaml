@@ -1125,7 +1125,7 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
-  /institutions/current/aggregates/keys:
+  /institutions/current/aggregates/subscriptions/keys:
     get:
       tags:
         - manage-keys
