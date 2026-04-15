@@ -6,7 +6,7 @@ import { Button, Stack, Tooltip } from "@mui/material";
 import React from "react";
 import { useTranslation } from "react-i18next";
 
-interface AggregatedInstitutionsSearchBarProps
+export interface AggregatedInstitutionsSearchBarProps
   extends InstitutionSearchByNameProps {
   disableGenerate?: boolean;
   hideGenerate?: boolean;

@@ -97,10 +97,7 @@ export const AggregatedInstitutionsDialog = ({
   return (
     <Dialog fullWidth onClose={handleClose} open={isOpen}>
       <FormProvider {...method}>
-        <form
-          onReset={handleClose}
-          onSubmit={method.handleSubmit(handleConfirm)}
-        >
+        <form onSubmit={method.handleSubmit(handleConfirm)}>
           <DialogTitle>
             {t("routes.aggregated-institutions.exportDialog.title")}
           </DialogTitle>
@@ -186,7 +183,7 @@ export const AggregatedInstitutionsDialog = ({
             disableSpacing
             sx={{ gap: 2, paddingX: 3, paddingY: 2 }}
           >
-            <Button type="reset" variant="outlined">
+            <Button onClick={handleClose} type="button" variant="outlined">
               {t("buttons.cancel")}
             </Button>
             <LoadingButton
