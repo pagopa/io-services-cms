@@ -832,45 +832,48 @@ export const buildHandlers = () => {
         return resultArray[0];
       },
     ),
-    http.get(`${baseURL}/institutions/current/aggregates/keys`, () => {
-      const resultArray = [
-        new HttpResponse(
-          JSON.stringify({
-            downloadLink: "https://example.com",
-            expirationDate: new Date().toISOString(),
-            state: "DONE",
-          }),
-          {
-            status: 200,
-          },
-        ),
-        new HttpResponse(
-          JSON.stringify({
-            state: "IN_PROGRESS",
-          }),
-          {
-            status: 200,
-          },
-        ),
-        new HttpResponse(
-          JSON.stringify({
-            state: "FAILED",
-          }),
-          {
-            status: 200,
-          },
-        ),
-        new HttpResponse(null, { status: 401 }),
-        new HttpResponse(null, { status: 403 }),
-        new HttpResponse(null, { status: 404 }),
-        new HttpResponse(null, { status: 429 }),
-        new HttpResponse(null, { status: 500 }),
-      ];
+    http.get(
+      `${baseURL}/institutions/current/aggregates/subscriptions/keys`,
+      () => {
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify({
+              downloadLink: "https://example.com",
+              expirationDate: new Date().toISOString(),
+              state: "DONE",
+            }),
+            {
+              status: 200,
+            },
+          ),
+          new HttpResponse(
+            JSON.stringify({
+              state: "IN_PROGRESS",
+            }),
+            {
+              status: 200,
+            },
+          ),
+          new HttpResponse(
+            JSON.stringify({
+              state: "FAILED",
+            }),
+            {
+              status: 200,
+            },
+          ),
+          new HttpResponse(null, { status: 401 }),
+          new HttpResponse(null, { status: 403 }),
+          new HttpResponse(null, { status: 404 }),
+          new HttpResponse(null, { status: 429 }),
+          new HttpResponse(null, { status: 500 }),
+        ];
 
-      return resultArray[1];
-    }),
+        return resultArray[1];
+      },
+    ),
     http.post(
-      `${baseURL}/institutions/current/aggregates/keys`,
+      `${baseURL}/institutions/current/aggregates/subscriptions/keys`,
       ({ request }) => {
         const { body: _ } = request;
 
