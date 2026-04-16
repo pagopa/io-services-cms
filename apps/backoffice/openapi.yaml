@@ -2147,7 +2147,7 @@ components:
       properties:
         password: 
           type: string
-          pattern: ^[a-zA-Z0-9]{12,}$
+          pattern: ^[a-zA-Z0-9]{12,64}$
       required:
         - password
     AggregatedInstitutionsManageKeysLinkReady:
