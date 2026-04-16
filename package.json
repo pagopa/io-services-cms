@@ -2,7 +2,6 @@
   "name": "io-services-cms",
   "private": true,
   "scripts": {
-    "dev:backoffice": "pnpm --filter io-services-cms-backoffice dev",
     "test": "turbo run test --no-daemon",
     "test:integrations": "turbo run test:integrations --no-daemon",
     "format": "turbo run format --no-daemon",
