@@ -380,8 +380,7 @@ export const regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator 
         aggregatorInstitutionId,
       );
 
-    const aggregateEmail =
-      getApimService().formatEmailForOrganization(aggregateId);
+    const aggregateEmail = ApimUtils.formatEmailForOrganization(aggregateId);
 
     const maybeAggregateApimUserOrError =
       await getApimService().getUserByEmail(aggregateEmail)();

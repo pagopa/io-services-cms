@@ -73,10 +73,23 @@ vi.mock("@/lib/be/apim-service", () => ({
   getApimService: () => ({
     getUserSubscriptions: mocks.getUserSubscriptions,
     deleteSubscription: mocks.deleteSubscription,
-    formatEmailForOrganization: mocks.formatEmailForOrganization,
     getUserByEmail: mocks.getUserByEmail,
   }),
 }));
+
+vi.mock("@io-services-cms/external-clients", async () => {
+  const actual = await vi.importActual<
+    typeof import("@io-services-cms/external-clients")
+  >("@io-services-cms/external-clients");
+
+  return {
+    ...actual,
+    ApimUtils: {
+      ...actual.ApimUtils,
+      formatEmailForOrganization: mocks.formatEmailForOrganization,
+    },
+  };
+});
 
 vi.mock("../../institutions/selfcare", () => ({
   getInstitutionGroups: mocks.getInstitutionGroups,
