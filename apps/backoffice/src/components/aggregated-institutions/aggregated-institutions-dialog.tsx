@@ -1,4 +1,5 @@
 import { TextFieldController } from "@/components/forms/controllers";
+import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
@@ -23,13 +24,13 @@ export interface AggregatedInstitutionsDialogProps {
   isDownloadReady?: boolean;
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (password: string) => void;
+  onConfirm: (password: AggregatedInstitutionsManageKeysPassword) => void;
   sumbitting?: boolean;
 }
 
 const defaultFormValues = {
   confirmPassword: "",
-  password: "",
+  password: "" as AggregatedInstitutionsManageKeysPassword,
 };
 
 const getValidationSchema = (t: TFunction) =>
@@ -51,13 +52,12 @@ const getValidationSchema = (t: TFunction) =>
             "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
           ),
         )
-        .refine((val) => {
-          const isCorrectLength = val.length >= 12;
-          const hasUppercase = /[A-Z]/.test(val);
-          const hasNumber = /\d/.test(val);
-
-          return isCorrectLength && hasUppercase && hasNumber;
-        }, t("routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword")),
+        .refine(
+          (password) => AggregatedInstitutionsManageKeysPassword.is(password),
+          t(
+            "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
+          ),
+        ),
     })
     .refine((schema) => schema.password === schema.confirmPassword, {
       message: t(

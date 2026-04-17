@@ -11,6 +11,7 @@ import { buildSnackbarItem } from "@/components/notification";
 import { TableRowMenuAction, TableViewColumn } from "@/components/table-view";
 import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
 import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch, { client } from "@/hooks/use-fetch";
@@ -373,7 +374,7 @@ export default function AggregatedInstitutions() {
   }, [fetchDownloadLink]);
 
   const handleConfirmDialog = useCallback(
-    (password: string) =>
+    (password: AggregatedInstitutionsManageKeysPassword) =>
       fetchRequestKeys(
         "requestAggregatedInstitutionsManageKeys",
         { body: { password } },

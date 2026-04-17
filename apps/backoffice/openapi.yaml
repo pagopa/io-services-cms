@@ -2145,9 +2145,8 @@ components:
     RequestAggregatedInstitutionsManageKeysPayload:
       type: object
       properties:
-        password: 
-          type: string
-          pattern: ^[a-zA-Z0-9]{12,64}$
+        password:
+          $ref: '#/components/schemas/AggregatedInstitutionsManageKeysPassword'
       required:
         - password
     AggregatedInstitutionsManageKeysLinkReady:
@@ -2165,18 +2164,23 @@ components:
         - state
         - downloadLink
         - expirationDate
+    AggregatedInstitutionsManageKeysLinkNotReady:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+            - IN_PROGRESS
+            - FAILED
+      required:
+        - state
     AggregatedInstitutionsManageKeysLinkMetadata:
       oneOf:
         - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkReady'
-        - type: object
-          properties:
-            state:
-              type: string
-              enum:
-                - IN_PROGRESS
-                - FAILED
-          required:
-            - state
+        - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkNotReady'
+    AggregatedInstitutionsManageKeysPassword:
+        type: string
+        pattern: ^(?=.*[0-9])(?=.*[A-Z])[a-zA-Z0-9]{12,64}$
     UserInstitutionProduct:
       type: object
       properties:
