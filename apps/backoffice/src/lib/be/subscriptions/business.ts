@@ -360,7 +360,6 @@ export const retrieveInstitutionAggregateManageSubscriptionsKeys = async (
 /**
  * Regenerates the API keys for the manage-group subscription of a given institution aggregate related to a specific aggregator.
  * @param aggregateId The id of the aggregate
- * @param aggregatorId The id of the aggregator
  * @param aggregatorInstitutionId The id of the aggregator's institution
  * @param keyType The type of key to regenerate (primary or secondary)
  * @returns The updated API keys
@@ -372,7 +371,6 @@ export const retrieveInstitutionAggregateManageSubscriptionsKeys = async (
 export const regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator =
   async (
     aggregateId: string,
-    aggregatorId: string,
     aggregatorInstitutionId: string,
     keyType: SubscriptionKeyType,
   ): Promise<SubscriptionKeys> => {
