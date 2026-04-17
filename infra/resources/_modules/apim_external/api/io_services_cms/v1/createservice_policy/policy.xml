@@ -15,9 +15,9 @@
     var jsonBody = JObject.Parse(stringBody);
     try {
       if (context.Request.Headers.ContainsKey("x-user-groups-selc")) {
-        jsonBody["data"]["groupId"] = context.Request.Headers["x-user-groups-selc"][0];
+        jsonBody["metadata"]["group_id"] = context.Request.Headers["x-user-groups-selc"][0];
       } else {
-        jsonBody["data"]["groupId"].Parent.Remove();
+        jsonBody["metadata"]["group_id"].Parent.Remove();
       }
       return jsonBody.ToString();
     } catch (Exception) {
