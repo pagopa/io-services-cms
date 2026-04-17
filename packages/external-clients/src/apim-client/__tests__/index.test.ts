@@ -608,6 +608,28 @@ describe("ApimService Test", () => {
     });
   });
 
+  describe("formatEmailForOrganization", () => {
+    // mock ApimClient
+    const mockApimClient = {};
+
+    it("should format the email correctly", () => {
+      //given
+      const organizationId = "org123";
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+
+      // when
+      const email = apimService.formatEmailForOrganization(organizationId);
+
+      // then
+      expect(email).toBe(`org.${organizationId}@selfcare.io.pagopa.it`);
+    });
+  });
+
   describe("upsertSubscription", () => {
     // mock ApimClient
     const mockApimClient = {

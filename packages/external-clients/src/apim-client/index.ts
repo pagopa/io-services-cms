@@ -104,6 +104,7 @@ export interface ApimService {
     subscriptionId: string,
     ifMatch?: string,
   ) => TE.TaskEither<ApimRestError | Error, void>;
+  readonly formatEmailForOrganization: (organizationId: string) => EmailString;
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, Delegate>;
@@ -185,6 +186,8 @@ export const getApimService = (
       subscriptionId,
       ifMatch,
     ),
+  formatEmailForOrganization: (organizationId) =>
+    formatEmailForOrganization(organizationId),
   getDelegateFromServiceId: (serviceId) =>
     getDelegateFromServiceId(
       apimClient,
@@ -532,6 +535,24 @@ const deleteSubscription = (
       identity,
     ),
     chainApimMappedError,
+  );
+
+/**
+ * Format the APIM account email for the organization
+ *
+ * @param organizationId
+ * @returns
+ */
+const formatEmailForOrganization = (organizationId: string): EmailString =>
+  pipe(
+    EmailString.decode(`org.${organizationId}@selfcare.io.pagopa.it`),
+    E.getOrElseW((e) => {
+      throw new Error(
+        `Cannot format APIM account email for the organization, ${readableReport(
+          e,
+        )}`,
+      );
+    }),
   );
 
 /**
