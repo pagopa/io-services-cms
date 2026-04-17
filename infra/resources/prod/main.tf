@@ -151,6 +151,8 @@ module "backoffice" {
   selfcare_api_key_name               = module.key_vault.secrets_name.selfcare_api_key
   subscription_migration_api_key_name = module.key_vault.secrets_name.subscription_migration_api_key
 
+  error_action_group_id = module.monitor.action_group_ids.oncall
+
   tags = local.tags
 }
 
