@@ -23,6 +23,8 @@ const mocks: {
   upsertSubscription: Mock<any>;
   getUserSubscriptions: Mock<any>;
   deleteSubscription: Mock<any>;
+  formatEmailForOrganization: Mock<any>;
+  getUserByEmail: Mock<any>;
   findLastVersionByModelId: Mock<any>;
   upsert: Mock<(...args: Parameters<SubscriptionCIDRsModel["upsert"]>) => any>;
   cidrs: Set<Cidr>;
@@ -50,6 +52,8 @@ const mocks: {
   upsertSubscription: vi.fn(),
   getUserSubscriptions: vi.fn(),
   deleteSubscription: vi.fn(),
+  formatEmailForOrganization: vi.fn(),
+  getUserByEmail: vi.fn(),
   findLastVersionByModelId: vi.fn(),
   upsert: vi.fn(),
   regenerateSubscriptionKey: vi.fn(),
@@ -69,6 +73,8 @@ vi.mock("@/lib/be/apim-service", () => ({
   getApimService: () => ({
     getUserSubscriptions: mocks.getUserSubscriptions,
     deleteSubscription: mocks.deleteSubscription,
+    formatEmailForOrganization: mocks.formatEmailForOrganization,
+    getUserByEmail: mocks.getUserByEmail,
   }),
 }));
 
@@ -705,7 +711,6 @@ describe("Manage Keys", () => {
         await expect(
           regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
             aggregateId,
-            aggregatorId,
             aggregatorInstitutionId,
             SubscriptionKeyTypeEnum.primary,
           ),
@@ -740,7 +745,6 @@ describe("Manage Keys", () => {
           await expect(
             regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
               aggregateId,
-              aggregatorId,
               aggregatorInstitutionId,
               SubscriptionKeyTypeEnum.primary,
             ),
@@ -769,12 +773,23 @@ describe("Manage Keys", () => {
           async ({ getUserSubscriptionsMockResult, expectedErrorMessage }) => {
             // given
             const aggregateId = "aggregateId";
+            const apimAggregateInstitutionId = "apimAggregateInstitutionId";
             const aggregatorId = "aggregatorId";
             const aggregatorInstitutionId = "aggregatorInstitutionId";
             mocks.getInstitutionGroups.mockResolvedValueOnce({
               content: [mocks.aGroup],
               totalElements: 1,
             });
+            mocks.formatEmailForOrganization.mockReturnValueOnce(
+              `prefix.${aggregateId}@example.org`,
+            );
+            mocks.getUserByEmail.mockReturnValueOnce(
+              TE.right(
+                O.some({
+                  id: apimAggregateInstitutionId,
+                }),
+              ),
+            );
             mocks.getUserSubscriptions.mockReturnValueOnce(
               getUserSubscriptionsMockResult,
             );
@@ -783,7 +798,6 @@ describe("Manage Keys", () => {
             await expect(
               regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
                 aggregateId,
-                aggregatorId,
                 aggregatorInstitutionId,
                 SubscriptionKeyTypeEnum.primary,
               ),
@@ -796,10 +810,17 @@ describe("Manage Keys", () => {
               aggregatorInstitutionId,
             );
             expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
-              aggregatorId,
+              apimAggregateInstitutionId,
               undefined,
               undefined,
               `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
+            );
+
+            expect(
+              mocks.formatEmailForOrganization,
+            ).toHaveBeenCalledExactlyOnceWith(aggregateId);
+            expect(mocks.getUserByEmail).toHaveBeenCalledExactlyOnceWith(
+              `prefix.${aggregateId}@example.org`,
             );
             expect(mocks.regenerateSubscriptionKey).not.toHaveBeenCalled();
           },
@@ -809,6 +830,7 @@ describe("Manage Keys", () => {
         it("should return an error when the subscription's secret regeneration fails", async () => {
           // given
           const aggregateId = "aggregateId";
+          const apimAggregateInstitutionId = "apimAggregateInstitutionId";
           const aggregatorId = "aggregatorId";
           const aggregatorInstitutionId = "aggregatorInstitutionId";
           const errorMessage = "test error message";
@@ -816,8 +838,19 @@ describe("Manage Keys", () => {
             content: [mocks.aGroup],
             totalElements: 1,
           });
-          mocks.getUserSubscriptions
-            .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
+          mocks.formatEmailForOrganization.mockReturnValueOnce(
+            `prefix.${aggregateId}@example.org`,
+          );
+          mocks.getUserByEmail.mockReturnValueOnce(
+            TE.right(
+              O.some({
+                id: apimAggregateInstitutionId,
+              }),
+            ),
+          );
+          mocks.getUserSubscriptions.mockReturnValueOnce(
+            TE.right([mocks.aSubscriptionContract]),
+          );
           mocks.regenerateSubscriptionKey.mockRejectedValueOnce(
             new Error(errorMessage),
           );
@@ -826,7 +859,6 @@ describe("Manage Keys", () => {
           await expect(
             regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
               aggregateId,
-              aggregatorId,
               aggregatorInstitutionId,
               SubscriptionKeyTypeEnum.primary,
             ),
@@ -839,12 +871,20 @@ describe("Manage Keys", () => {
             aggregatorInstitutionId,
           );
           expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
-            aggregatorId,
+            apimAggregateInstitutionId,
             undefined,
             undefined,
             `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
           );
-          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledExactlyOnceWith(
+          expect(
+            mocks.formatEmailForOrganization,
+          ).toHaveBeenCalledExactlyOnceWith(aggregateId);
+          expect(mocks.getUserByEmail).toHaveBeenCalledExactlyOnceWith(
+            `prefix.${aggregateId}@example.org`,
+          );
+          expect(
+            mocks.regenerateSubscriptionKey,
+          ).toHaveBeenCalledExactlyOnceWith(
             `MANAGE-GROUP-${mocks.aGroup.id}`,
             SubscriptionKeyTypeEnum.primary,
           );
@@ -863,21 +903,32 @@ describe("Manage Keys", () => {
         async ({ apimResponse }) => {
           // given
           const aggregateId = "aggregateId";
+          const apimAggregateInstitutionId = "apimAggregateInstitutionId";
           const aggregatorId = "aggregatorId";
           const aggregatorInstitutionId = "aggregatorInstitutionId";
           mocks.getInstitutionGroups.mockResolvedValueOnce({
             content: [mocks.aGroup],
             totalElements: 1,
           });
-          mocks.getUserSubscriptions
-            .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
+          mocks.formatEmailForOrganization.mockReturnValueOnce(
+            `prefix.${aggregateId}@example.org`,
+          );
+          mocks.getUserByEmail.mockReturnValueOnce(
+            TE.right(
+              O.some({
+                id: apimAggregateInstitutionId,
+              }),
+            ),
+          );
+          mocks.getUserSubscriptions.mockReturnValueOnce(
+            TE.right([mocks.aSubscriptionContract]),
+          );
           mocks.regenerateSubscriptionKey.mockResolvedValueOnce(apimResponse);
 
           // when and then
           await expect(
             regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
               aggregateId,
-              aggregatorId,
               aggregatorInstitutionId,
               SubscriptionKeyTypeEnum.primary,
             ),
@@ -889,13 +940,25 @@ describe("Manage Keys", () => {
             undefined,
             aggregatorInstitutionId,
           );
+          expect(
+            mocks.formatEmailForOrganization,
+          ).toHaveBeenCalledExactlyOnceWith(aggregateId);
+          mocks.getUserByEmail.mockReturnValueOnce(
+            TE.right(
+              O.some({
+                id: apimAggregateInstitutionId,
+              }),
+            ),
+          );
           expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
-            aggregatorId,
+            apimAggregateInstitutionId,
             undefined,
             undefined,
             `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
           );
-          expect(mocks.regenerateSubscriptionKey).toHaveBeenCalledExactlyOnceWith(
+          expect(
+            mocks.regenerateSubscriptionKey,
+          ).toHaveBeenCalledExactlyOnceWith(
             `MANAGE-GROUP-${mocks.aGroup.id}`,
             SubscriptionKeyTypeEnum.primary,
           );
@@ -906,6 +969,7 @@ describe("Manage Keys", () => {
     it("should return the regenerated subscription keys related to the group found", async () => {
       // given
       const aggregateId = "aggregateId";
+      const apimAggregateInstitutionId = "apimAggregateInstitutionId";
       const aggregatorId = "aggregatorId";
       const aggregatorInstitutionId = "aggregatorInstitutionId";
       const primaryKey = `primary-key-for-${mocks.aGroup.id}`;
@@ -914,8 +978,19 @@ describe("Manage Keys", () => {
         content: [mocks.aGroup],
         totalElements: 1,
       });
-      mocks.getUserSubscriptions
-        .mockReturnValueOnce(TE.right([mocks.aSubscriptionContract]));
+      mocks.formatEmailForOrganization.mockReturnValueOnce(
+        `prefix.${aggregateId}@example.org`,
+      );
+      mocks.getUserByEmail.mockReturnValueOnce(
+        TE.right(
+          O.some({
+            id: apimAggregateInstitutionId,
+          }),
+        ),
+      );
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([mocks.aSubscriptionContract]),
+      );
       mocks.regenerateSubscriptionKey.mockResolvedValueOnce({
         primaryKey,
         secondaryKey,
@@ -925,7 +1000,6 @@ describe("Manage Keys", () => {
       const result =
         await regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
           aggregateId,
-          aggregatorId,
           aggregatorInstitutionId,
           SubscriptionKeyTypeEnum.primary,
         );
@@ -938,8 +1012,11 @@ describe("Manage Keys", () => {
         undefined,
         aggregatorInstitutionId,
       );
+      expect(mocks.formatEmailForOrganization).toHaveBeenCalledExactlyOnceWith(
+        aggregateId,
+      );
       expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
-        aggregatorId,
+        apimAggregateInstitutionId,
         undefined,
         undefined,
         `name eq 'MANAGE-GROUP-${mocks.aGroup.id}'`,
