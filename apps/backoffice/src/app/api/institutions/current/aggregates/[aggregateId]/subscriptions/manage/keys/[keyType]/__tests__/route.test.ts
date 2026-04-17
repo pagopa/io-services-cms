@@ -139,6 +139,33 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     expect(mocks.sanitizedNextResponseJson).not.toHaveBeenCalled();
   });
 
+    it("should return a bad request response when aggregateId is invalid", async () => {
+    // given
+    const nextRequest = new NextRequest("http://localhost");
+    const aggregateId = "invalid";
+    const keyType = "primary";
+
+    // when and then
+    await expect(
+      PUT(nextRequest, {
+        params: { aggregateId, keyType },
+      } as any),
+    ).resolves.toEqual(mocks.badRequestResponse);
+    expect(mocks.userAuthz).toHaveBeenCalledExactlyOnceWith(
+      mocks.backofficeUser,
+    );
+    expect(mocks.isAdmin).toHaveBeenCalledExactlyOnceWith();
+    expect(mocks.handleBadRequestErrorResponse).toHaveBeenCalledExactlyOnceWith(
+      expect.stringContaining("invalid"),
+    );
+    expect(
+      mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
+    ).not.toHaveBeenCalled();
+    expect(mocks.handleForbiddenErrorResponse).not.toHaveBeenCalled();
+    expect(mocks.handleInternalErrorResponse).not.toHaveBeenCalled();
+    expect(mocks.sanitizedNextResponseJson).not.toHaveBeenCalled();
+  });
+
   it("should return an internal error response when an error is thrown during key regeneration", async () => {
     // given
     const nextRequest = new NextRequest("http://localhost");
