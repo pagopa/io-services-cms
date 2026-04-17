@@ -104,8 +104,8 @@ const retrieveOrCreateApimUser =
     identityTokenPayload: IdentityTokenPayload,
   ): TE.TaskEither<Error | ManagedInternalError, ApimUser> =>
     pipe(
-      formatApimAccountEmailForSelfcareOrganization(
-        identityTokenPayload.organization,
+      getApimService().formatEmailForOrganization(
+        identityTokenPayload.organization.id,
       ),
       retrieveUserByEmail,
       TE.chain(
@@ -117,8 +117,8 @@ const retrieveOrCreateApimUser =
                 createApimUser(config),
                 TE.chain(() =>
                   pipe(
-                    formatApimAccountEmailForSelfcareOrganization(
-                      identityTokenPayload.organization,
+                    getApimService().formatEmailForOrganization(
+                      identityTokenPayload.organization.id,
                     ),
                     retrieveUserByEmail,
                     TE.chain(
@@ -165,20 +165,6 @@ const retrieveOrCreateApimUser =
       ),
     );
 
-const formatApimAccountEmailForSelfcareOrganization = (
-  organization: IdentityTokenPayload["organization"],
-): EmailString =>
-  pipe(
-    EmailString.decode(`org.${organization.id}@selfcare.io.pagopa.it`),
-    E.getOrElseW((e) => {
-      throw new Error(
-        `Cannot format APIM account email for the organization, ${readableReport(
-          e,
-        )}`,
-      );
-    }),
-  );
-
 const retrieveUserByEmail = (
   userEmail: EmailString,
 ): TE.TaskEither<ManagedInternalError, O.Option<UserContract>> =>
@@ -199,8 +185,8 @@ const createApimUser =
       getApimService(),
       (apimService) =>
         apimService.createOrUpdateUser({
-          email: formatApimAccountEmailForSelfcareOrganization(
-            identityTokenPayload.organization,
+          email: getApimService().formatEmailForOrganization(
+            identityTokenPayload.organization.id,
           ),
           firstName: identityTokenPayload.organization.fiscal_code,
           lastName: identityTokenPayload.organization.id,
