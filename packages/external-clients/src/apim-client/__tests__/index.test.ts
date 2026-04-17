@@ -3,7 +3,7 @@ import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApimRestError, getApimService, parseIdFromFullPath } from "..";
+import { ApimRestError, formatEmailForOrganization, getApimService, parseIdFromFullPath } from "..";
 import { SubscriptionKeyTypeEnum } from "../../generated/api/SubscriptionKeyType";
 
 afterEach(() => {
@@ -623,7 +623,7 @@ describe("ApimService Test", () => {
       );
 
       // when
-      const email = apimService.formatEmailForOrganization(organizationId);
+      const email = formatEmailForOrganization(organizationId);
 
       // then
       expect(email).toBe(`org.${organizationId}@selfcare.io.pagopa.it`);

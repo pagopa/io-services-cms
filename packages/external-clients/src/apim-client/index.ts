@@ -52,6 +52,9 @@ export type ApimRestError = t.TypeOf<typeof ApimRestError>;
 export const SUBSCRIPTION_MANAGE_PREFIX = "MANAGE-";
 export const SUBSCRIPTION_MANAGE_GROUP_PREFIX = "MANAGE-GROUP-";
 
+const ORGANIZATION_EMAIL_PREFIX = "org.";
+const ORGANIZATION_EMAIL_DOMAIN = "selfcare.io.pagopa.it";
+
 export const mapApimRestError =
   (resource: string) =>
   (apimRestError: ApimRestError): ApimMappedErrors =>
@@ -104,7 +107,6 @@ export interface ApimService {
     subscriptionId: string,
     ifMatch?: string,
   ) => TE.TaskEither<ApimRestError | Error, void>;
-  readonly formatEmailForOrganization: (organizationId: string) => EmailString;
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, Delegate>;
@@ -186,8 +188,6 @@ export const getApimService = (
       subscriptionId,
       ifMatch,
     ),
-  formatEmailForOrganization: (organizationId) =>
-    formatEmailForOrganization(organizationId),
   getDelegateFromServiceId: (serviceId) =>
     getDelegateFromServiceId(
       apimClient,
@@ -543,9 +543,13 @@ const deleteSubscription = (
  * @param organizationId
  * @returns
  */
-const formatEmailForOrganization = (organizationId: string): EmailString =>
+export const formatEmailForOrganization = (
+  organizationId: string,
+): EmailString =>
   pipe(
-    EmailString.decode(`org.${organizationId}@selfcare.io.pagopa.it`),
+    EmailString.decode(
+      `${ORGANIZATION_EMAIL_PREFIX}${organizationId}@${ORGANIZATION_EMAIL_DOMAIN}`,
+    ),
     E.getOrElseW((e) => {
       throw new Error(
         `Cannot format APIM account email for the organization, ${readableReport(
