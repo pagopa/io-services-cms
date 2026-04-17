@@ -139,7 +139,6 @@ const { getApimService } = vi.hoisted(() => ({
     getSubscription,
     createOrUpdateUser,
     createGroupUser,
-    formatEmailForOrganization,
   }),
 }));
 
@@ -147,6 +146,20 @@ vi.mock("@/lib/be/apim-service", () => ({
   getApimService,
   upsertSubscription,
 }));
+
+vi.mock("@io-services-cms/external-clients", async () => {
+  const actual = await vi.importActual<
+    typeof import("@io-services-cms/external-clients")
+  >("@io-services-cms/external-clients");
+
+  return {
+    ...actual,
+    ApimUtils: {
+      ...actual.ApimUtils,
+      formatEmailForOrganization: formatEmailForOrganization,
+    },
+  };
+});
 
 const { jwtVerify } = vi.hoisted(() => ({
   jwtVerify: vi.fn(),
@@ -234,7 +247,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
     createOrUpdateUser.mockReturnValueOnce(TE.left({ statusCode }));
@@ -266,7 +279,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
     createOrUpdateUser.mockReturnValueOnce(TE.right(aValidApimUser));
@@ -313,7 +326,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
     createOrUpdateUser.mockReturnValueOnce(TE.right(aValidApimUser));
@@ -356,7 +369,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(
       TE.right(
@@ -401,7 +414,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(
       TE.right(
@@ -444,7 +457,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(
       TE.right(
@@ -486,7 +499,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(
       TE.right(O.some({ ...aValidApimUser, name: undefined })),
@@ -515,7 +528,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(TE.right(O.some(aValidApimUser)));
     const statusCode = 500;
@@ -554,7 +567,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
@@ -591,7 +604,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.left({ statusCode: 404 }));
@@ -630,7 +643,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
@@ -665,7 +678,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
@@ -706,7 +719,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
     createOrUpdateUser.mockReturnValueOnce(TE.right(aValidApimUser));
@@ -780,7 +793,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
@@ -809,7 +822,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
@@ -832,7 +845,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
@@ -861,7 +874,7 @@ describe("Authorize", () => {
       payload: aValidJwtPayload,
     });
     formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.org`,
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
     );
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));

@@ -104,7 +104,7 @@ const retrieveOrCreateApimUser =
     identityTokenPayload: IdentityTokenPayload,
   ): TE.TaskEither<Error | ManagedInternalError, ApimUser> =>
     pipe(
-      getApimService().formatEmailForOrganization(
+      ApimUtils.formatEmailForOrganization(
         identityTokenPayload.organization.id,
       ),
       retrieveUserByEmail,
@@ -117,7 +117,7 @@ const retrieveOrCreateApimUser =
                 createApimUser(config),
                 TE.chain(() =>
                   pipe(
-                    getApimService().formatEmailForOrganization(
+                    ApimUtils.formatEmailForOrganization(
                       identityTokenPayload.organization.id,
                     ),
                     retrieveUserByEmail,
@@ -185,7 +185,7 @@ const createApimUser =
       getApimService(),
       (apimService) =>
         apimService.createOrUpdateUser({
-          email: getApimService().formatEmailForOrganization(
+          email: ApimUtils.formatEmailForOrganization(
             identityTokenPayload.organization.id,
           ),
           firstName: identityTokenPayload.organization.fiscal_code,
