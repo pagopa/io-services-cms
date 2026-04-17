@@ -382,9 +382,39 @@ export const regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator 
         aggregatorInstitutionId,
       );
 
+    const aggregateEmail =
+      getApimService().formatEmailForOrganization(aggregateId);
+
+    const maybeAggregateApimUserOrError =
+      await getApimService().getUserByEmail(aggregateEmail)();
+
+    if (E.isLeft(maybeAggregateApimUserOrError)) {
+      throw apimErrorToManagedInternalError(
+        "Error retrieving APIM user for the aggregate",
+        maybeAggregateApimUserOrError.left,
+      );
+    }
+
+    const maybeAggregateApimUser = maybeAggregateApimUserOrError.right;
+    if (O.isNone(maybeAggregateApimUser)) {
+      throw new ManagedInternalError(
+        "Data inconsistency",
+        `No APIM user found for aggregate '${aggregateId}' with email '${aggregateEmail}'`,
+      );
+    }
+
+    const aggregateApimUserId = maybeAggregateApimUser.value.id;
+
+    if (!aggregateApimUserId) {
+      throw new ManagedInternalError(
+        "Data inconsistency",
+        `APIM user for aggregate '${aggregateId}' does not have an id`,
+      );
+    }
+
     const { primary_key: primaryKey, secondary_key: secondaryKey } =
       await regenerateManageSubscriptionApiKey(
-        aggregatorId,
+        aggregateApimUserId,
         subscriptionId,
         keyType,
       );
