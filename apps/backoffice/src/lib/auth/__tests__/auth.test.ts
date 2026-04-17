@@ -246,9 +246,13 @@ describe("Authorize", () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload,
     });
-    formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
-    );
+    formatEmailForOrganization
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      )
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      );
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
     createOrUpdateUser.mockReturnValueOnce(TE.left({ statusCode }));
 
@@ -278,9 +282,13 @@ describe("Authorize", () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload,
     });
-    formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
-    );
+    formatEmailForOrganization
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      )
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      );
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
     createOrUpdateUser.mockReturnValueOnce(TE.right(aValidApimUser));
     createGroupUser.mockReturnValueOnce(TE.left({ statusCode }));
@@ -325,9 +333,13 @@ describe("Authorize", () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload,
     });
-    formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
-    );
+    formatEmailForOrganization
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      )
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      );
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
     createOrUpdateUser.mockReturnValueOnce(TE.right(aValidApimUser));
     createGroupUser.mockReturnValue(TE.right(aValidApimUser));
@@ -413,9 +425,13 @@ describe("Authorize", () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload,
     });
-    formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
-    );
+    formatEmailForOrganization
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      )
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      );
     getUserByEmail.mockReturnValueOnce(
       TE.right(
         O.some({
@@ -456,9 +472,13 @@ describe("Authorize", () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload,
     });
-    formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
-    );
+    formatEmailForOrganization
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      )
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      );
     getUserByEmail.mockReturnValueOnce(
       TE.right(
         O.some({
@@ -718,9 +738,13 @@ describe("Authorize", () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload,
     });
-    formatEmailForOrganization.mockReturnValueOnce(
-      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
-    );
+    formatEmailForOrganization
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      )
+      .mockReturnValueOnce(
+        `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+      );
     getUserByEmail.mockReturnValueOnce(TE.right(O.none));
     createOrUpdateUser.mockReturnValueOnce(TE.right(aValidApimUser));
     createGroupUser.mockReturnValue(TE.right(aValidApimUser));
