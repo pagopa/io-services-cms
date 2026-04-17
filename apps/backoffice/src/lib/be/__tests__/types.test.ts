@@ -4,15 +4,15 @@ import * as E from "fp-ts/lib/Either";
 
 describe("UUID", () => {
   it.each`
-    value
-    ${"550e8400-e29b-41d4-a716-446655440000"}
-    ${"550E8400-E29B-41D4-A716-446655440000"}
-    ${"123e4567-e89b-12d3-a456-426614174000"}
-  `("accepts valid UUID values: $value", async ({ value }) => {
+    scenario                        | value
+    ${"value is already lowercase"} | ${"550e8400-e29b-41d4-a716-446655440000"}
+    ${"value is uppercase"}         | ${"550E8400-E29B-41D4-A716-446655440000"}
+    ${"value is mixed valid UUID"}  | ${"123e4567-e89b-12d3-a456-426614174000"}
+  `("accepts valid UUID values when $scenario: $value", async ({ value }) => {
     const result = UUID.decode(value);
 
     expect(E.isRight(result)).toBe(true);
-    expect(result).toEqual(E.right(value));
+    expect(result).toEqual(E.right(value.toLowerCase()));
   });
 
   it.each`
