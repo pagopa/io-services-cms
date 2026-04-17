@@ -22,7 +22,6 @@ export function TextFieldController({
       render={({ field: { onChange, value } }) => (
         <TextField
           {...register(name)}
-          {...props}
           InputProps={{
             endAdornment: error ? (
               <InputAdornment position="end">
@@ -30,6 +29,7 @@ export function TextFieldController({
               </InputAdornment>
             ) : undefined,
           }}
+          {...props}
           error={!!error}
           fullWidth
           helperText={error ? error.message : (props.helperText ?? null)}

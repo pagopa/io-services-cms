@@ -1125,6 +1125,56 @@ paths:
           description: Too many requests
         '500':
           description: Internal server error
+  /institutions/current/aggregates/subscriptions/keys:
+    get:
+      tags:
+        - manage-keys
+      operationId: getAggregatedInstitutionsManageKeysLink
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Link
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkMetadata'
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '404':
+          description: No requests found
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+    post:
+      tags:
+        - manage-keys
+      operationId: requestAggregatedInstitutionsManageKeys
+      security:
+        - cookieAuth: []
+      requestBody:
+        description: A service body payload
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequestAggregatedInstitutionsManageKeysPayload'
+        required: true
+      responses:
+        '202':
+          description: Accepted
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
   /keys/manage:
     get:
       deprecated: true
@@ -2092,6 +2142,45 @@ components:
       required:
         - value
         - pagination
+    RequestAggregatedInstitutionsManageKeysPayload:
+      type: object
+      properties:
+        password:
+          $ref: '#/components/schemas/AggregatedInstitutionsManageKeysPassword'
+      required:
+        - password
+    AggregatedInstitutionsManageKeysLinkReady:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+            - DONE
+        downloadLink:
+          type: string
+        expirationDate:
+          $ref: '#/components/schemas/Timestamp'
+      required:
+        - state
+        - downloadLink
+        - expirationDate
+    AggregatedInstitutionsManageKeysLinkNotReady:
+      type: object
+      properties:
+        state:
+          type: string
+          enum:
+            - IN_PROGRESS
+            - FAILED
+      required:
+        - state
+    AggregatedInstitutionsManageKeysLinkMetadata:
+      oneOf:
+        - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkReady'
+        - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkNotReady'
+    AggregatedInstitutionsManageKeysPassword:
+        type: string
+        pattern: ^(?=.*[0-9])(?=.*[A-Z])[a-zA-Z0-9]{12,64}$
     UserInstitutionProduct:
       type: object
       properties:
