@@ -2,7 +2,7 @@
 locals {
   app_name = "bo"
   containers = {
-    "exports_api-keys" = { name = "exports/api-keys" }
+    "api-keys" = { name = "api-keys" }
   }
   backoffice = {
     size = "P0v3"
