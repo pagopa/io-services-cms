@@ -2,7 +2,7 @@
 locals {
   app_name = "bo"
   containers = {
-    "exports_api-keys" = { name = "exports/api-keys" }
+    "api-keys" = { name = "api-keys" }
   }
   backoffice = {
     size = "P0v3"
@@ -71,7 +71,7 @@ locals {
       GROUP_AUTHZ_ENABLED = true
 
       SA_EXT_BLOB_ENDPOINT            = module.bo_ext_storage_account.primary_blob_endpoint
-      EXPORTS_API_KEYS_CONTAINER_NAME = local.containers["exports_api-keys"].name
+      EXPORTS_API_KEYS_CONTAINER_NAME = local.containers["api-keys"].name
     }
 
     prod_app_setting = {
