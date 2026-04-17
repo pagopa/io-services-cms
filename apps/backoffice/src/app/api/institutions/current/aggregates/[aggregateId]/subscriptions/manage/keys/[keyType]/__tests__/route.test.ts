@@ -151,7 +151,7 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     expect(mocks.isAdmin).toHaveBeenCalledExactlyOnceWith();
     expect(
       mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
-    ).toHaveBeenCalledExactlyOnceWith(aggregateId, mocks.backofficeUser.parameters.userId, mocks.backofficeUser.institution.id, keyType);
+    ).toHaveBeenCalledExactlyOnceWith(aggregateId, mocks.backofficeUser.institution.id, keyType);
     expect(mocks.handleInternalErrorResponse).toHaveBeenCalledExactlyOnceWith(
       "InstitutionAggregateManageSubscriptionsKeyHandler",
       error,
@@ -178,7 +178,6 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     ).resolves.toEqual(mocks.forbiddenResponse);
     expect(mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator).toHaveBeenCalledExactlyOnceWith(
       aggregateId,
-      mocks.backofficeUser.parameters.userId,
       mocks.backofficeUser.institution.id,
       keyType,
     );
@@ -210,7 +209,6 @@ describe("regenerateInstitutionAggregateManageSubscriptionsKey", () => {
     expect(mocks.isAdmin).toHaveBeenCalledExactlyOnceWith();
     expect(mocks.regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator).toHaveBeenCalledExactlyOnceWith(
       aggregateId,
-      mocks.backofficeUser.parameters.userId,
       mocks.backofficeUser.institution.id,
       keyType,
     );

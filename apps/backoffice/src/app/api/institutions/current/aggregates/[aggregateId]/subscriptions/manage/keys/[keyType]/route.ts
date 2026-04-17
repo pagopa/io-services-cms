@@ -45,7 +45,6 @@ export const PUT = withJWTAuthHandler(
       const manageKeysResponse =
         await regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
           params.aggregateId,
-          backofficeUser.parameters.userId,
           backofficeUser.institution.id,
           maybeDecodedKeyType.right,
         );
