@@ -106,3 +106,12 @@ variable "cms_fn_default_hostname" {
   type        = string
   description = "Service CMS Function App Default Hostname Property"
 }
+
+################
+#  Monitoring  #
+################
+
+variable "error_action_group_id" {
+  description = "Id of the action group to use for error notifications"
+  type        = string
+}
