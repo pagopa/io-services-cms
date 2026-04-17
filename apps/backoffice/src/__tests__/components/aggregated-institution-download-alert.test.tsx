@@ -2,7 +2,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { AggregatedInstitutionDownloadAlert } from "../../components/aggregated-institutions/aggregated-institution-download-alert";
-import { StateEnum as MetadataStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { StateEnum as NotReadyStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
 import { StateEnum as ReadyStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysLinkReady";
 
 vi.mock("react-i18next", () => ({
@@ -64,7 +64,7 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
 
     render(
       <AggregatedInstitutionDownloadAlert
-        data={{ state: MetadataStateEnum.IN_PROGRESS }}
+        data={{ state: NotReadyStateEnum.IN_PROGRESS }}
         onRefresh={onRefresh}
       />,
     );
@@ -92,7 +92,7 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
   it("should render the failure state without actions", () => {
     render(
       <AggregatedInstitutionDownloadAlert
-        data={{ state: MetadataStateEnum.FAILED }}
+        data={{ state: NotReadyStateEnum.FAILED }}
         onRefresh={vi.fn()}
       />,
     );
