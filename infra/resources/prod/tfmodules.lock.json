@@ -100,5 +100,11 @@
     "version": "2.0.1",
     "name": "azure_app_service_plan_autoscaler",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-app-service-plan-autoscaler/azurerm/2.0.1"
+  },
+  "backoffice.bo_ext_storage_account": {
+    "hash": "5a369299255aaa17f1dd7222c971889beeb0ad9f729f8483bf1a6a9268bbd845",
+    "version": "2.2.3",
+    "name": "azure_storage_account",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-storage-account/azurerm/2.2.3"
   }
 }
