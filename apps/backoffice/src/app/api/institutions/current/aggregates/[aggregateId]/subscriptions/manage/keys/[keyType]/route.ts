@@ -10,6 +10,8 @@ import {
 } from "@/lib/be/errors";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator } from "@/lib/be/subscriptions/business";
+import { UUID } from "@/lib/be/types";
+import { UUID } from "@/lib/be/types";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
@@ -42,9 +44,17 @@ export const PUT = withJWTAuthHandler(
         );
       }
 
+      const maybeDecodedAggregateId = UUID.decode(params.aggregateId);
+
+      if (E.isLeft(maybeDecodedAggregateId)) {
+        return handleBadRequestErrorResponse(
+          readableReport(maybeDecodedAggregateId.left),
+        );
+      }
+
       const manageKeysResponse =
         await regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator(
-          params.aggregateId,
+          maybeDecodedAggregateId.right,
           backofficeUser.institution.id,
           maybeDecodedKeyType.right,
         );
