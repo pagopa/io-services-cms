@@ -10,6 +10,7 @@ import {
 import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -26,7 +27,6 @@ import {
   getSubscriptionAuthorizedCIDRs,
   upsertSubscriptionAuthorizedCIDRs,
 } from "./cosmos";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // Type utility to extract the right side of a TaskEither
 type RightType<T> = T extends TE.TaskEither<unknown, infer R> ? R : never; // TODO: move to an Utils monorepo package
