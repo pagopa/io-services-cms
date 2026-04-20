@@ -11,7 +11,6 @@ import {
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator } from "@/lib/be/subscriptions/business";
 import { UUID } from "@/lib/be/types";
-import { UUID } from "@/lib/be/types";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
