@@ -3,7 +3,7 @@ import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApimRestError, getApimService, parseIdFromFullPath } from "..";
+import { ApimRestError, formatEmailForOrganization, getApimService, parseIdFromFullPath } from "..";
 import { SubscriptionKeyTypeEnum } from "../../generated/api/SubscriptionKeyType";
 
 afterEach(() => {
@@ -605,6 +605,28 @@ describe("ApimService Test", () => {
         aServiceId,
         "*",
       );
+    });
+  });
+
+  describe("formatEmailForOrganization", () => {
+    // mock ApimClient
+    const mockApimClient = {};
+
+    it("should format the email correctly", () => {
+      //given
+      const organizationId = "org123";
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+
+      // when
+      const email = formatEmailForOrganization(organizationId);
+
+      // then
+      expect(email).toBe(`org.${organizationId}@selfcare.io.pagopa.it`);
     });
   });
 

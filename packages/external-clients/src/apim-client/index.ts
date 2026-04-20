@@ -52,6 +52,9 @@ export type ApimRestError = t.TypeOf<typeof ApimRestError>;
 export const SUBSCRIPTION_MANAGE_PREFIX = "MANAGE-";
 export const SUBSCRIPTION_MANAGE_GROUP_PREFIX = "MANAGE-GROUP-";
 
+const ORGANIZATION_EMAIL_PREFIX = "org.";
+const ORGANIZATION_EMAIL_DOMAIN = "selfcare.io.pagopa.it";
+
 export const mapApimRestError =
   (resource: string) =>
   (apimRestError: ApimRestError): ApimMappedErrors =>
@@ -532,6 +535,28 @@ const deleteSubscription = (
       identity,
     ),
     chainApimMappedError,
+  );
+
+/**
+ * Format the APIM account email for the organization
+ *
+ * @param organizationId
+ * @returns
+ */
+export const formatEmailForOrganization = (
+  organizationId: string,
+): EmailString =>
+  pipe(
+    EmailString.decode(
+      `${ORGANIZATION_EMAIL_PREFIX}${organizationId}@${ORGANIZATION_EMAIL_DOMAIN}`,
+    ),
+    E.getOrElseW((e) => {
+      throw new Error(
+        `Cannot format APIM account email for the organization, ${readableReport(
+          e,
+        )}`,
+      );
+    }),
   );
 
 /**
