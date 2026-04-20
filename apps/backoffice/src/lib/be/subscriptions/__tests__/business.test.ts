@@ -799,7 +799,7 @@ describe("Manage Keys", () => {
             mocks.getUserByEmail.mockReturnValueOnce(
               TE.right(
                 O.some({
-                  id: apimAggregateInstitutionId,
+                  id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
                 }),
               ),
             );
@@ -857,7 +857,7 @@ describe("Manage Keys", () => {
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: apimAggregateInstitutionId,
+                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
               }),
             ),
           );
@@ -929,7 +929,7 @@ describe("Manage Keys", () => {
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: apimAggregateInstitutionId,
+                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
               }),
             ),
           );
@@ -959,7 +959,7 @@ describe("Manage Keys", () => {
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: apimAggregateInstitutionId,
+                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
               }),
             ),
           );
@@ -997,7 +997,7 @@ describe("Manage Keys", () => {
       mocks.getUserByEmail.mockReturnValueOnce(
         TE.right(
           O.some({
-            id: apimAggregateInstitutionId,
+            id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
           }),
         ),
       );
