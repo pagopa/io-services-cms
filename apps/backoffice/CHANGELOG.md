@@ -1,5 +1,17 @@
 # io-services-cms-backoffice
 
+## 2.1.0
+
+### Minor Changes
+
+- 0d4e82fa: Add `regenerateInstitutionAggregateManageSubscriptionsKey` endpoint
+- 235fe774: Add regenerate aggregate manage subscriptions keys
+
+### Patch Changes
+
+- Updated dependencies [0d4e82fa]
+  - @io-services-cms/external-clients@1.10.0
+
 ## 2.0.0
 
 ### Major Changes
