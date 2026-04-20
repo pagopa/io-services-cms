@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.1.1
+
+### Patch Changes
+
+- fbb3d407: Fix aggregate's APIM user ID parsing the ID from the full path
+
 ## 2.1.0
 
 ### Minor Changes

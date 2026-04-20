@@ -10,6 +10,7 @@ import {
 import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -400,14 +401,18 @@ export const regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator 
       );
     }
 
-    const aggregateApimUserId = maybeAggregateApimUser.value.id;
+    const aggregateApimUserFullPathId = maybeAggregateApimUser.value.id;
 
-    if (!aggregateApimUserId) {
+    if (!aggregateApimUserFullPathId) {
       throw new ManagedInternalError(
         "Data inconsistency",
         `APIM user for aggregate '${aggregateId}' does not have an id`,
       );
     }
+
+    const aggregateApimUserId = ApimUtils.parseIdFromFullPath(
+      aggregateApimUserFullPathId as NonEmptyString,
+    );
 
     const { primary_key: primaryKey, secondary_key: secondaryKey } =
       await regenerateManageSubscriptionApiKey(
