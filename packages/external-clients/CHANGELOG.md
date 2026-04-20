@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.10.0
+
+### Minor Changes
+
+- 0d4e82fa: Add utility to construct the expected Selfcare email address for an organization
+
 ## 1.9.0
 
 ### Minor Changes
