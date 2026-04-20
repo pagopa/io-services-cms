@@ -26,6 +26,7 @@ import {
   getSubscriptionAuthorizedCIDRs,
   upsertSubscriptionAuthorizedCIDRs,
 } from "./cosmos";
+import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 
 // Type utility to extract the right side of a TaskEither
 type RightType<T> = T extends TE.TaskEither<unknown, infer R> ? R : never; // TODO: move to an Utils monorepo package
@@ -400,14 +401,18 @@ export const regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator 
       );
     }
 
-    const aggregateApimUserId = maybeAggregateApimUser.value.id;
+    const aggregateApimUserFullPathId = maybeAggregateApimUser.value.id;
 
-    if (!aggregateApimUserId) {
+    if (!aggregateApimUserFullPathId) {
       throw new ManagedInternalError(
         "Data inconsistency",
         `APIM user for aggregate '${aggregateId}' does not have an id`,
       );
     }
+
+    const aggregateApimUserId = ApimUtils.parseIdFromFullPath(
+      aggregateApimUserFullPathId as NonEmptyString,
+    );
 
     const { primary_key: primaryKey, secondary_key: secondaryKey } =
       await regenerateManageSubscriptionApiKey(
