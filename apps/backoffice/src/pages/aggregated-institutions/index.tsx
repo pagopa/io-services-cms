@@ -1,13 +1,17 @@
 /* eslint-disable max-lines-per-function */
+import { AggregatedInstitutionDownloadAlert } from "@/components/aggregated-institutions/aggregated-institution-download-alert";
 import { AggregatedInstitutionTableView } from "@/components/aggregated-institutions/aggregated-institution-table-view";
+import { AggregatedInstitutionsDialog } from "@/components/aggregated-institutions/aggregated-institutions-dialog";
+import { AggregatedInstitutionsSearchBar } from "@/components/aggregated-institutions/aggregated-institutions-searchbar";
 import { ApiKeyValueAsync } from "@/components/api-keys/api-key-value-async";
 import { useDialog } from "@/components/dialog-provider";
 import { EmptyStateLayer } from "@/components/empty-state";
 import { PageHeader } from "@/components/headers";
-import { InstitutionSearchByName } from "@/components/institutions";
 import { buildSnackbarItem } from "@/components/notification";
 import { TableRowMenuAction, TableViewColumn } from "@/components/table-view";
 import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch, { client } from "@/hooks/use-fetch";
@@ -27,6 +31,7 @@ import {
 import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
+import * as tt from "io-ts";
 import { Session, getServerSession } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -68,6 +73,11 @@ export default function AggregatedInstitutions() {
     loading: dipLoading,
   } = useFetch<AggregatedInstitutionPagination>();
 
+  const { fetchData: fetchRequestKeys, loading: fetchingRequestKeys } =
+    useFetch();
+  const { data: downloadLinkData, fetchData: fetchDownloadLink } =
+    useFetch<AggregatedInstitutionsManageKeysLinkMetadata>();
+
   const [aggregatedInstitutions, setAggregatedInstitutions] =
     useState<AggregatedInstitutionListItem[]>();
   const [pagination, setPagination] = useState({
@@ -79,6 +89,7 @@ export default function AggregatedInstitutions() {
     useState(false);
   const [currentSearchByInstitutionName, setCurrentSearchByInstitutionName] =
     useState<string>();
+  const [isModalOpened, setIsModalOpened] = useState(false);
 
   const updateAggregatedInstitutionListItemById = useCallback(
     (id: string, updatedItem: Partial<AggregatedInstitutionListItem>) => {
@@ -354,6 +365,29 @@ export default function AggregatedInstitutions() {
     setCurrentSearchByInstitutionName(undefined);
   }, []);
 
+  const fetchAggregatedInstitutionsManageKeysLink = useCallback(() => {
+    fetchDownloadLink(
+      "getAggregatedInstitutionsManageKeysLink",
+      {},
+      AggregatedInstitutionsManageKeysLinkMetadata,
+    );
+  }, [fetchDownloadLink]);
+
+  const handleConfirmDialog = useCallback(
+    (password: AggregatedInstitutionsManageKeysPassword) =>
+      fetchRequestKeys(
+        "requestAggregatedInstitutionsManageKeys",
+        { body: { password } },
+        tt.unknown,
+        { notify: "all" },
+      ).then((data) => {
+        if (data.success) {
+          fetchAggregatedInstitutionsManageKeysLink();
+        }
+      }),
+    [fetchRequestKeys, fetchAggregatedInstitutionsManageKeysLink],
+  );
+
   // Fetch when pagination or search changes
   useEffect(() => {
     dipFetchData(
@@ -401,6 +435,10 @@ export default function AggregatedInstitutions() {
   }, [dipData]);
 
   useEffect(() => {
+    fetchAggregatedInstitutionsManageKeysLink();
+  }, [fetchAggregatedInstitutionsManageKeysLink]);
+
+  useEffect(() => {
     trackAggregatedInstitutionsPageEvent();
   }, []);
 
@@ -418,9 +456,27 @@ export default function AggregatedInstitutions() {
         />
       ) : (
         <>
-          <InstitutionSearchByName
+          <AggregatedInstitutionDownloadAlert
+            data={downloadLinkData}
+            onRefresh={fetchAggregatedInstitutionsManageKeysLink}
+          />
+          <AggregatedInstitutionsSearchBar
+            disableGenerate={downloadLinkData?.state === "IN_PROGRESS"}
+            hideGenerate={Boolean(currentSearchByInstitutionName)}
             onEmptySearch={resetSearchByInstitutionName}
+            onGenerateClick={() => {
+              setIsModalOpened(true);
+            }}
             onSearchClick={handleSearchByInstitutionNameClick}
+          />
+          <AggregatedInstitutionsDialog
+            isDownloadReady={downloadLinkData?.state === "DONE"}
+            isOpen={isModalOpened}
+            onClose={() => {
+              setIsModalOpened(false);
+            }}
+            onConfirm={handleConfirmDialog}
+            sumbitting={fetchingRequestKeys}
           />
           <AggregatedInstitutionTableView
             columns={tableViewColumns}

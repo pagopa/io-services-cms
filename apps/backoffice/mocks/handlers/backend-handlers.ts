@@ -4,6 +4,7 @@
  * Feel free to commit/edit it as you need.
  */
 import { getConfiguration } from "@/config";
+import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionType } from "@/generated/api/SubscriptionType";
 import { faker } from "@faker-js/faker/locale/it";
 import { HttpResponse, http } from "msw";
@@ -15,6 +16,7 @@ import {
   aMockServiceTopics,
   anInfoVersion,
   getAggregateManageSubscriptionKeys,
+  getMockAggregatedInstitutionManageKeysJsonDownloadLink,
   getMockAggregatedInstitutionPagination,
   getMockBulkPatchService,
   getMockGroupUnboundedServices,
@@ -36,7 +38,6 @@ import {
   getMockInstitution,
   getMockUserAuthorizedInstitution,
 } from "../data/selfcare-data";
-import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 
 const MAX_ARRAY_LENGTH = 20;
 
@@ -827,6 +828,63 @@ export const buildHandlers = () => {
           new HttpResponse(null, {
             status: 500,
           }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
+    http.get(
+      `${baseURL}/institutions/current/aggregates/subscriptions/keys`,
+      () => {
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify({
+              downloadLink:
+                getMockAggregatedInstitutionManageKeysJsonDownloadLink(),
+              expirationDate: new Date().toISOString(),
+              state: "DONE",
+            }),
+            {
+              status: 200,
+            },
+          ),
+          new HttpResponse(
+            JSON.stringify({
+              state: "IN_PROGRESS",
+            }),
+            {
+              status: 200,
+            },
+          ),
+          new HttpResponse(
+            JSON.stringify({
+              state: "FAILED",
+            }),
+            {
+              status: 200,
+            },
+          ),
+          new HttpResponse(null, { status: 401 }),
+          new HttpResponse(null, { status: 403 }),
+          new HttpResponse(null, { status: 404 }),
+          new HttpResponse(null, { status: 429 }),
+          new HttpResponse(null, { status: 500 }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
+    http.post(
+      `${baseURL}/institutions/current/aggregates/subscriptions/keys`,
+      ({ request }) => {
+        const { body: _ } = request;
+
+        const resultArray = [
+          new HttpResponse(null, { status: 202 }),
+          new HttpResponse(null, { status: 401 }),
+          new HttpResponse(null, { status: 403 }),
+          new HttpResponse(null, { status: 429 }),
+          new HttpResponse(null, { status: 500 }),
         ];
 
         return resultArray[0];

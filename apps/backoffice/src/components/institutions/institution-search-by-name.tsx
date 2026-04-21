@@ -65,7 +65,7 @@ export const InstitutionSearchByName = ({
   }, [inputValue]);
 
   return (
-    <Stack alignItems="flex-start" direction="row" paddingY={3} spacing={1}>
+    <Stack direction="row" gap={1}>
       <TextField
         InputProps={{
           endAdornment: <Search color="disabled" />,
