@@ -96,7 +96,7 @@ export const AppLayout = ({
     <Box display="flex" flexDirection="column" minHeight="100vh">
       <TopBar
         hideAssistance={hideAssistance}
-        user={session?.user ? { id: session.user.id } : undefined}
+        user={session?.user?.id ? { id: session.user.id } : undefined}
       />
       {hideHeader ? null : <Header />}
       <Grid bgcolor={"#F5F5F5"} container flexGrow={1} spacing={0}>

@@ -29,28 +29,24 @@ vi.hoisted(() => {
   };
 });
 
+const { auth } = vi.hoisted(() => ({
+  auth: vi.fn(() => Promise.resolve({ user: mocks.jwtMock }))
+}));
+
 const {
-  getToken,
   getManageSubscriptionAuthorizedCidrsHandlerMock,
   updateManageSubscriptionAuthorizedCidrsHandlerMock
 } = vi.hoisted(() => ({
-  getToken: vi.fn(() => Promise.resolve(mocks.jwtMock)),
   getManageSubscriptionAuthorizedCidrsHandlerMock: vi.fn(),
   updateManageSubscriptionAuthorizedCidrsHandlerMock: vi.fn()
 }));
+
+vi.mock("@/auth", () => ({ auth }));
 
 vi.mock("@/app/api/subscriptions/[subscriptionId]/cidrs/handler", () => ({
   getManageSubscriptionAuthorizedCidrsHandler: getManageSubscriptionAuthorizedCidrsHandlerMock,
   updateManageSubscriptionAuthorizedCidrsHandler: updateManageSubscriptionAuthorizedCidrsHandlerMock
 }));
-
-vi.mock("next-auth/jwt", async () => {
-  const actual = await vi.importActual("next-auth/jwt");
-  return {
-    ...(actual as any),
-    getToken
-  };
-});
 
 afterEach(() => {
   vi.resetAllMocks();

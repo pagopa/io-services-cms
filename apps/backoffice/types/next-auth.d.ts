@@ -1,43 +1,44 @@
-/**
- * next-auth` module augmentation _(used to augment `user` and `session.user` interface)_
- */
-import { DefaultUser } from "next-auth";
+import { DefaultSession } from "next-auth";
 
-declare module "next-auth" {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface User extends BackOfficeUser {}
-  interface Session {
-    user?: User;
-  }
-}
-
-declare module "next-auth/jwt" {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
-  interface JWT extends BackOfficeUser {}
-}
-
-interface BackOfficeUser extends DefaultUser {
-  institution: Institution;
-  parameters: BackOfficeUserParameters;
-  permissions: BackOfficeUserPermissions;
-}
-
-interface BackOfficeUserPermissions {
-  apimGroups: string[];
-  selcGroups?: string[];
-}
-
-interface BackOfficeUserParameters {
-  subscriptionId: string;
-  userEmail: string;
-  userId: string;
-}
-
-interface Institution {
+export interface Institution {
   fiscalCode: string;
   id: string;
   isAggregator: boolean;
   logo_url?: string;
   name: string;
   role: string;
+}
+
+export interface BackOfficeUserPermissions {
+  apimGroups: string[];
+  selcGroups?: string[];
+}
+
+export interface BackOfficeUserParameters {
+  subscriptionId: string;
+  userEmail: string;
+  userId: string;
+}
+
+export interface BackOfficeUser {
+  id: string;
+  institution: Institution;
+  parameters: BackOfficeUserParameters;
+  permissions: BackOfficeUserPermissions;
+}
+
+declare module "next-auth" {
+  /**
+   * Extends the built-in Session.user with custom BackOffice fields.
+   * DefaultSession["user"] provides the standard fields (id, name, email, image).
+   */
+  interface Session {
+    user: BackOfficeUser & DefaultSession["user"];
+  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface User extends BackOfficeUser {}
+}
+
+declare module "@auth/core/jwt" {
+  interface JWT extends Partial<BackOfficeUser> {}
 }

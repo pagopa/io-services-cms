@@ -1,6 +1,6 @@
+import { auth } from "@/auth";
 import { Group } from "@/generated/api/Group";
 import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
 
 import {
   BackOfficeUser,
@@ -22,15 +22,12 @@ export const withJWTAuthHandler =
     nextRequest: NextRequest,
     { params }: { params: Record<string, unknown> },
   ) => {
-    // Metodo di next-auth usato anche all'interno del middleware withAuth
-    // Restituisce:
-    // - Nel caso di valido e non scaduto token JWT, il payload tipizzato contenuto nello stesso
-    // - Nel caso di token scaduto o non valido, null
-    const authenticationDetails = await getToken({ req: nextRequest });
+    const session = await auth();
 
-    if (!authenticationDetails) {
+    if (!session?.user) {
       return handleUnauthorizedErrorResponse("No Authentication provided");
     }
+    const authenticationDetails = session.user;
 
     let backofficeUser: BackOfficeUserEnriched;
     const userAuth = userAuthz(authenticationDetails);

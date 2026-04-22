@@ -17,21 +17,17 @@ const mocks: {
   } as unknown as BackOfficeUser,
 }));
 
-const { getToken } = vi.hoisted(() => ({
-  getToken: vi.fn().mockReturnValue(() => Promise.resolve(mocks.jwtMock)),
+const { auth } = vi.hoisted(() => ({
+  auth: vi.fn().mockResolvedValue({ user: mocks.jwtMock }),
 }));
 
 const { retrieveInstitutionGroups } = vi.hoisted(() => ({
   retrieveInstitutionGroups: vi.fn(),
 }));
 
-vi.mock("next-auth/jwt", async () => {
-  const actual = await vi.importActual("next-auth/jwt");
-  return {
-    ...(actual as any),
-    getToken,
-  };
-});
+vi.mock("@/auth", () => ({
+  auth,
+}));
 
 vi.mock("../institutions/business", () => ({
   retrieveInstitutionGroups,
@@ -39,7 +35,7 @@ vi.mock("../institutions/business", () => ({
 
 describe("withJWTAuthHandler", () => {
   it("no token or invalid one provided should end up in 401 response", async () => {
-    getToken.mockReturnValueOnce(Promise.resolve(null));
+    auth.mockResolvedValueOnce(null);
 
     const nextRequestMock = new NextRequest(new URL("http://localhost"));
 
@@ -56,7 +52,7 @@ describe("withJWTAuthHandler", () => {
   });
 
   it("valid token provided should end up in 200 response", async () => {
-    getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+    auth.mockResolvedValueOnce({ user: mocks.jwtMock });
 
     const nextRequestMock = new NextRequest(new URL("http://localhost"));
 
@@ -80,7 +76,7 @@ describe("withJWTAuthHandler", () => {
   it("valid token provided should end up in 200 response without selfcare groups detail when user is an admin", async () => {
     //given
     mocks.jwtMock.institution.role = "admin";
-    getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+    auth.mockResolvedValueOnce({ user: mocks.jwtMock });
     const aMockedHandler = vi.fn(() =>
       Promise.resolve(NextResponse.json({}, { status: 200 })),
     );
@@ -117,7 +113,7 @@ describe("withJWTAuthHandler", () => {
     async ({ selcGroups }) => {
       //given
       mocks.jwtMock.permissions.selcGroups = selcGroups;
-      getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+      auth.mockResolvedValueOnce({ user: mocks.jwtMock });
       const aMockedHandler = vi.fn(() =>
         Promise.resolve(NextResponse.json({}, { status: 200 })),
       );
@@ -150,7 +146,7 @@ describe("withJWTAuthHandler", () => {
     //given
     mocks.jwtMock.institution.role = "operator";
     mocks.jwtMock.permissions.selcGroups = ["id1"];
-    getToken.mockReturnValueOnce(Promise.resolve(mocks.jwtMock));
+    auth.mockResolvedValueOnce({ user: mocks.jwtMock });
     const aMockedHandler = vi.fn(() =>
       Promise.resolve(NextResponse.json({}, { status: 200 })),
     );

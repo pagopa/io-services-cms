@@ -25,22 +25,19 @@ const mocks: {
   } as unknown) as BackOfficeUser
 }));
 
-const { getToken, getManageSubscriptionKeysHandlerMock } = vi.hoisted(() => ({
-  getToken: vi.fn(() => Promise.resolve(mocks.jwtMock)),
+const { auth } = vi.hoisted(() => ({
+  auth: vi.fn(() => Promise.resolve({ user: mocks.jwtMock }))
+}));
+
+const { getManageSubscriptionKeysHandlerMock } = vi.hoisted(() => ({
   getManageSubscriptionKeysHandlerMock: vi.fn()
 }));
+
+vi.mock("@/auth", () => ({ auth }));
 
 vi.mock("../../../subscriptions/[subscriptionId]/keys/handler", () => ({
   getManageSubscriptionKeysHandler: getManageSubscriptionKeysHandlerMock
 }));
-
-vi.mock("next-auth/jwt", async () => {
-  const actual = await vi.importActual("next-auth/jwt");
-  return {
-    ...(actual as any),
-    getToken
-  };
-});
 
 afterEach(() => {
   vi.resetAllMocks();
