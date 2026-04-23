@@ -7,17 +7,23 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 export type GroupChangeEvent = t.TypeOf<typeof GroupChangeEvent>;
-export const GroupChangeEvent = t.type({
-  id: NonEmptyString,
-  institutionId: NonEmptyString,
-  name: NonEmptyString,
-  productId: NonEmptyString,
-  status: t.union([
-    t.literal("ACTIVE"),
-    t.literal("SUSPENDED"),
-    t.literal("DELETED"),
-  ]),
-});
+export const GroupChangeEvent = t.intersection([
+  t.type({
+    id: NonEmptyString,
+    institutionId: NonEmptyString,
+    name: NonEmptyString,
+    productId: NonEmptyString,
+    status: t.union([
+      t.literal("ACTIVE"),
+      t.literal("SUSPENDED"),
+      t.literal("DELETED"),
+    ]),
+  }),
+  t.partial({
+    modifiedAt: t.union([t.string, t.null]),
+    parentInstitutionId: t.union([NonEmptyString, t.null]),
+  }),
+]);
 
 export const syncSubscription =
   (apimService: ApimUtils.ApimService) =>
@@ -43,7 +49,9 @@ export const syncSubscription =
       TE.orElse((e) =>
         "statusCode" in e
           ? e.statusCode === 404
-            ? TE.right(void 0)
+            ? shouldCreateManageGroupSubscription(group)
+              ? createManageGroupSubscription(apimService, group)
+              : TE.right(void 0)
             : TE.left(
                 new Error(
                   `Failed to update subcription ${group.id}, reason: ${JSON.stringify(e.details)}`,
@@ -52,6 +60,29 @@ export const syncSubscription =
           : TE.left(e),
       ),
     );
+
+const shouldCreateManageGroupSubscription = (group: GroupChangeEvent) =>
+  group.modifiedAt === null && group.parentInstitutionId != null;
+
+const createManageGroupSubscription = (
+  apimService: ApimUtils.ApimService,
+  group: GroupChangeEvent,
+): TE.TaskEither<Error, void> =>
+  pipe(
+    apimService.upsertSubscription(
+      group.institutionId,
+      ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id,
+      group.name,
+    ),
+    TE.mapLeft((err) =>
+      err instanceof Error
+        ? err
+        : new Error(
+            `Failed to create manage-group subscription ${group.id}, reason: ${JSON.stringify(err)}`,
+          ),
+    ),
+    TE.map(() => void 0),
+  );
 
 const mapStateFromGroupToSubscription = (
   status: GroupChangeEvent["status"],
