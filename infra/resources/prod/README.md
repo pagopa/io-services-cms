@@ -32,6 +32,7 @@
 | <a name="module_key_vault"></a> [key\_vault](#module\_key\_vault) | ../_modules/key_vault | n/a |
 | <a name="module_monitor"></a> [monitor](#module\_monitor) | ../_modules/monitor | n/a |
 | <a name="module_postgres"></a> [postgres](#module\_postgres) | ../_modules/postgres | n/a |
+| <a name="module_storage_account_external"></a> [storage\_account\_external](#module\_storage\_account\_external) | ../_modules/storage_account_external | n/a |
 
 ## Resources
 

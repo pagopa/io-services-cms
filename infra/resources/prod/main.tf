@@ -50,6 +50,19 @@ module "ai_search" {
   tags = local.tags
 }
 
+module "storage_account_external" {
+  source                = "../_modules/storage_account_external"
+  prefix                = local.prefix
+  env_short             = local.env_short
+  location              = local.location
+  domain                = local.domain
+  resource_group_name   = data.azurerm_resource_group.rg.name
+  peps_snet_id          = data.azurerm_subnet.private_endpoints_subnet.id
+  error_action_group_id = module.monitor.action_group_ids.offcall
+
+  tags = local.tags
+}
+
 module "function_app" {
   source              = "../_modules/function_app"
   prefix              = local.prefix
@@ -150,6 +163,16 @@ module "backoffice" {
   legacy_cosmosdb_key_name            = module.key_vault.secrets_name.legacy_cosmosdb_key
   selfcare_api_key_name               = module.key_vault.secrets_name.selfcare_api_key
   subscription_migration_api_key_name = module.key_vault.secrets_name.subscription_migration_api_key
+
+  sa_ext = {
+    id                  = module.storage_account_external.id
+    name                = module.storage_account_external.name
+    resource_group_name = module.storage_account_external.resource_group_name
+    blob = {
+      primary_blob_endpoint   = module.storage_account_external.blob.primary_blob_endpoint
+      api_keys_container_name = module.storage_account_external.blob.containers.api_keys.name
+    }
+  }
 
   error_action_group_id = module.monitor.action_group_ids.oncall
 

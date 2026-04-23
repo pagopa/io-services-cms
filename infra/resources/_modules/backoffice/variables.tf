@@ -115,3 +115,21 @@ variable "error_action_group_id" {
   description = "Id of the action group to use for error notifications"
   type        = string
 }
+
+
+#################################################
+# External Storage Account for API Keys Exports #
+#################################################
+
+variable "sa_ext" {
+  type = object({
+    id                  = string
+    name                = string
+    resource_group_name = string
+    blob = object({
+      primary_blob_endpoint   = string
+      api_keys_container_name = string
+    })
+  })
+  description = "Storage account information for the delegated access storage account"
+}

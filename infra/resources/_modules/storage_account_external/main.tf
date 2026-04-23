@@ -1,4 +1,4 @@
-module "bo_ext_storage_account" {
+module "ext_storage_account" {
   source  = "pagopa-dx/azure-storage-account/azurerm"
   version = "~> 2.0"
 
@@ -7,7 +7,7 @@ module "bo_ext_storage_account" {
     env_short       = var.env_short
     location        = var.location
     domain          = var.domain
-    app_name        = "${local.app_name}-ext"
+    app_name        = local.app_name
     instance_number = "01"
   }
   resource_group_name = var.resource_group_name
@@ -30,8 +30,8 @@ module "bo_ext_storage_account" {
  * Storage Management Policies for External Storage Account *
  ************************************************************/
 
-resource "azurerm_storage_management_policy" "bo_ext_sa_mgmt_policy" {
-  storage_account_id = module.bo_ext_storage_account.id
+resource "azurerm_storage_management_policy" "ext_sa_mgmt_policy" {
+  storage_account_id = module.ext_storage_account.id
 
   rule {
     name    = "move-version-to-archive"

@@ -70,8 +70,8 @@ locals {
       // Group ApiKey feature
       GROUP_AUTHZ_ENABLED = true
 
-      SA_EXT_BLOB_ENDPOINT            = module.bo_ext_storage_account.primary_blob_endpoint
-      EXPORTS_API_KEYS_CONTAINER_NAME = local.containers["api-keys"].name
+      SA_EXT_BLOB_ENDPOINT            = var.sa_ext.blob.primary_blob_endpoint
+      EXPORTS_API_KEYS_CONTAINER_NAME = var.sa_ext.blob.api_keys_container_name
     }
 
     prod_app_setting = {

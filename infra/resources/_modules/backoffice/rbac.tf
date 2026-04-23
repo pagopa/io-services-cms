@@ -14,8 +14,8 @@ module "bo_roles" {
     role                = "owner"
   }]
   storage_blob = [{
-    storage_account_name = module.bo_ext_storage_account.name
-    resource_group_name  = module.bo_ext_storage_account.resource_group_name
+    storage_account_name = var.sa_ext.name
+    resource_group_name  = var.sa_ext.resource_group_name
     description          = "To allow managing blobs in the delegated access storage account"
     role                 = "writer"
     container_name       = local.containers["api-keys"].name
@@ -24,7 +24,7 @@ module "bo_roles" {
 }
 
 resource "azurerm_role_assignment" "bo_storage_blob_delegator" {
-  scope                = module.bo_ext_storage_account.id
+  scope                = var.sa_ext.id
   role_definition_name = "Storage Blob Delegator"
   principal_id         = module.backoffice.app_service.app_service.principal_id
   description          = "Allow to create SAS tokens in the delegated access storage account"
@@ -46,8 +46,8 @@ module "bo_staging_slot_roles" {
     role                = "owner"
   }]
   storage_blob = [{
-    storage_account_name = module.bo_ext_storage_account.name
-    resource_group_name  = module.bo_ext_storage_account.resource_group_name
+    storage_account_name = var.sa_ext.name
+    resource_group_name  = var.sa_ext.resource_group_name
     description          = "To allow managing blobs in the delegated access storage account"
     role                 = "writer"
     container_name       = local.containers["api-keys"].name
@@ -56,7 +56,7 @@ module "bo_staging_slot_roles" {
 }
 
 resource "azurerm_role_assignment" "bo_staging_slot_storage_blob_delegator" {
-  scope                = module.bo_ext_storage_account.id
+  scope                = var.sa_ext.id
   role_definition_name = "Storage Blob Delegator"
   principal_id         = module.backoffice.app_service.app_service.slot.principal_id
   description          = "Allow to create SAS tokens in the delegated access storage account"
