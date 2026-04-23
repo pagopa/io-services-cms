@@ -44,7 +44,7 @@ describe("withJWTAuthHandler", () => {
     );
 
     const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
-      params: {},
+      params: Promise.resolve({}),
     });
 
     expect(aMockedHandler).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe("withJWTAuthHandler", () => {
     );
 
     const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
-      params: {},
+      params: Promise.resolve({}),
     });
 
     expect(aMockedHandler).toHaveBeenCalledWith(
@@ -84,7 +84,7 @@ describe("withJWTAuthHandler", () => {
 
     //when
     const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
-      params: {},
+      params: Promise.resolve({}),
     });
 
     //then
@@ -121,7 +121,7 @@ describe("withJWTAuthHandler", () => {
 
       //when
       const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
-        params: {},
+        params: Promise.resolve({}),
       });
 
       //then
@@ -159,7 +159,7 @@ describe("withJWTAuthHandler", () => {
 
     //when
     const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
-      params: {},
+      params: Promise.resolve({}),
     });
 
     //then

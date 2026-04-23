@@ -20,7 +20,7 @@ export const withJWTAuthHandler =
   ) =>
   async (
     nextRequest: NextRequest,
-    { params }: { params: Record<string, unknown> },
+    { params }: { params: Promise<Record<string, unknown>> },
   ) => {
     const session = await auth();
 
@@ -57,10 +57,11 @@ export const withJWTAuthHandler =
       };
     }
 
+    const resolvedParams = await params;
     // chiamo l'handler finale "iniettando" il payload contenuto nel token
     return handler(nextRequest, {
       backofficeUser,
-      params,
+      params: resolvedParams,
     });
   };
 
