@@ -29,7 +29,7 @@ import { ButtonWithTooltip } from "../buttons";
 import { useDialog } from "../dialog-provider";
 import { ServiceAutopublishCheckbox } from "./service-autopublish-checkbox";
 
-export enum ServiceContextMenuActions {
+export const enum ServiceContextMenuActions {
   delete = "delete",
   edit = "edit",
   history = "history",

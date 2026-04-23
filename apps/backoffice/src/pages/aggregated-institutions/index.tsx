@@ -32,6 +32,7 @@ import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
+import { GetServerSideProps } from "next";
 import { Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -493,8 +494,8 @@ export default function AggregatedInstitutions() {
   );
 }
 
-export async function getServerSideProps(context: any) {
-  const { locale } = context;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { locale = "it" } = context;
 
   // Check feature flag
   if (process.env.NEXT_PUBLIC_EA_ENABLED !== "true") {
@@ -515,7 +516,7 @@ export async function getServerSideProps(context: any) {
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 AggregatedInstitutions.getLayout = function getLayout(page: ReactElement) {
   return (

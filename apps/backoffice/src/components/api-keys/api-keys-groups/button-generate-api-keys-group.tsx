@@ -27,7 +27,7 @@ const checkUnboundedGroupsExists = async (institutionId: string) => {
       return maybeResponse.right.status === 200;
     }
     return false;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

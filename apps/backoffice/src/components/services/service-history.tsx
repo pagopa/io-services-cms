@@ -128,12 +128,10 @@ export const ServiceHistoryComponent = ({
         ...Array.from(historyData?.items ?? []),
       ],
     }));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [historyData]);
 
   useEffect(() => {
     setIsDrawerOpen(showHistory);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showHistory]);
 
   const renderServiceStatus = (
