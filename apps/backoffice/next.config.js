@@ -19,6 +19,12 @@ const nextConfig = {
         ...config.resolve.alias,
         "msw/browser": false,
       };
+      config.externals = [
+        ...(config.externals || []),
+        "@azure/functions-core",
+        "@opentelemetry/instrumentation",
+        "@opentelemetry/exporter-jaeger",
+      ];
     } else {
       config.resolve.alias = {
         ...config.resolve.alias,
