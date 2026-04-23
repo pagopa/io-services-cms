@@ -34,7 +34,7 @@ resource "azurerm_storage_management_policy" "ext_sa_mgmt_policy" {
   storage_account_id = module.ext_storage_account.id
 
   rule {
-    name    = "move-version-to-archive"
+    name    = "delete-old-blobs-api-keys"
     enabled = true
     filters {
       blob_types   = ["blockBlob"]
