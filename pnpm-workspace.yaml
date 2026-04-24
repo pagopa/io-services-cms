@@ -7,6 +7,7 @@ catalog:
   '@pagopa/io-functions-commons': ^30.0.0
   '@azure/functions': ^4.11.2
   '@types/node': ^22
+  '@azure/storage-blob': ^12.31.0
 
 cleanupUnusedCatalogs: true
 
