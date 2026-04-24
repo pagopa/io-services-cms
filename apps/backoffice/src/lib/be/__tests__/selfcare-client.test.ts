@@ -296,13 +296,13 @@ describe("Selfcare Client", () => {
         });
 
         // when
-        const result = await getSelfcareClient().getInstitutionGroups(
+        const result = await getSelfcareClient().getInstitutionGroups({
           institutionId,
-          givenParams.size,
-          givenParams.page,
-          givenParams.state,
-          givenParams.parentInstitutionId,
-        )();
+          size: givenParams.size,
+          page: givenParams.page,
+          state: givenParams.state,
+          parentInstitutionId: givenParams.parentInstitutionId,
+        })();
 
         // then
         expect(getMock).toHaveBeenCalledWith("/user-groups", {
@@ -333,8 +333,9 @@ describe("Selfcare Client", () => {
       isAxiosError.mockReturnValueOnce(true);
 
       // when
-      const result =
-        await getSelfcareClient().getInstitutionGroups(institutionId)();
+      const result = await getSelfcareClient().getInstitutionGroups({
+        institutionId,
+      })();
 
       // then
       expect(getMock).toHaveBeenCalledWith("/user-groups", {
@@ -354,8 +355,9 @@ describe("Selfcare Client", () => {
       getMock.mockResolvedValueOnce({ status: 200, data: "" });
 
       // when
-      const result =
-        await getSelfcareClient().getInstitutionGroups(institutionId)();
+      const result = await getSelfcareClient().getInstitutionGroups({
+        institutionId,
+      })();
 
       // then
       expect(getMock).toHaveBeenCalledWith("/user-groups", {

@@ -556,13 +556,10 @@ describe("Manage Keys", () => {
         ),
       ).rejects.toThrowError(errorMessage);
       expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-        aggregateId,
-        undefined,
-        undefined,
-        undefined,
-        aggregatorId,
-      );
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+        institutionId: aggregateId,
+        parentInstitutionId: aggregatorId,
+      });
       expect(mocks.listSubscriptionSecrets).not.toHaveBeenCalled();
     });
 
@@ -588,13 +585,10 @@ describe("Manage Keys", () => {
           ),
         ).rejects.toThrowError("Data inconsistency");
         expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-          aggregateId,
-          undefined,
-          undefined,
-          undefined,
-          aggregatorId,
-        );
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+          institutionId: aggregateId,
+          parentInstitutionId: aggregatorId,
+        });
         expect(mocks.listSubscriptionSecrets).not.toHaveBeenCalled();
       },
     );
@@ -619,13 +613,10 @@ describe("Manage Keys", () => {
         ),
       ).rejects.toThrowError(errorMessage);
       expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-        aggregateId,
-        undefined,
-        undefined,
-        undefined,
-        aggregatorId,
-      );
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+        institutionId: aggregateId,
+        parentInstitutionId: aggregatorId,
+      });
       expect(mocks.listSubscriptionSecrets).toHaveBeenCalledOnce();
       expect(mocks.listSubscriptionSecrets).toHaveBeenCalledWith(
         `MANAGE-GROUP-${mocks.aGroup.id}`,
@@ -662,13 +653,10 @@ describe("Manage Keys", () => {
           ),
         ).rejects.toThrowError("Data inconsistency");
         expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-          aggregateId,
-          undefined,
-          undefined,
-          undefined,
-          aggregatorId,
-        );
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+          institutionId: aggregateId,
+          parentInstitutionId: aggregatorId,
+        });
       },
     );
 
@@ -695,13 +683,10 @@ describe("Manage Keys", () => {
 
       // then
       expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-        aggregateId,
-        undefined,
-        undefined,
-        undefined,
-        aggregatorId,
-      );
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+        institutionId: aggregateId,
+        parentInstitutionId: aggregatorId,
+      });
       expect(result).toStrictEqual({
         primary_key: primaryKey,
         secondary_key: secondaryKey,
@@ -728,13 +713,10 @@ describe("Manage Keys", () => {
             SubscriptionKeyTypeEnum.primary,
           ),
         ).rejects.toThrowError(errorMessage);
-        expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-          aggregateId,
-          undefined,
-          undefined,
-          undefined,
-          aggregatorInstitutionId,
-        );
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+          institutionId: aggregateId,
+          parentInstitutionId: aggregatorInstitutionId,
+        });
         expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
         expect(mocks.regenerateSubscriptionKey).not.toHaveBeenCalled();
       });
@@ -762,13 +744,10 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError("Data inconsistency");
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-            aggregateId,
-            undefined,
-            undefined,
-            undefined,
-            aggregatorInstitutionId,
-          );
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+            institutionId: aggregateId,
+            parentInstitutionId: aggregatorInstitutionId,
+          });
           expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
           expect(mocks.regenerateSubscriptionKey).not.toHaveBeenCalled();
         },
@@ -799,7 +778,9 @@ describe("Manage Keys", () => {
             mocks.getUserByEmail.mockReturnValueOnce(
               TE.right(
                 O.some({
-                  id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+                  id:
+                    "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+                    apimAggregateInstitutionId,
                 }),
               ),
             );
@@ -815,13 +796,10 @@ describe("Manage Keys", () => {
                 SubscriptionKeyTypeEnum.primary,
               ),
             ).rejects.toThrowError(expectedErrorMessage);
-            expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-              aggregateId,
-              undefined,
-              undefined,
-              undefined,
-              aggregatorInstitutionId,
-            );
+            expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+              institutionId: aggregateId,
+              parentInstitutionId: aggregatorInstitutionId,
+            });
             expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
               apimAggregateInstitutionId,
               undefined,
@@ -857,7 +835,9 @@ describe("Manage Keys", () => {
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+                id:
+                  "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+                  apimAggregateInstitutionId,
               }),
             ),
           );
@@ -876,13 +856,10 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError(errorMessage);
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-            aggregateId,
-            undefined,
-            undefined,
-            undefined,
-            aggregatorInstitutionId,
-          );
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+            institutionId: aggregateId,
+            parentInstitutionId: aggregatorInstitutionId,
+          });
           expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
             apimAggregateInstitutionId,
             undefined,
@@ -929,7 +906,9 @@ describe("Manage Keys", () => {
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+                id:
+                  "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+                  apimAggregateInstitutionId,
               }),
             ),
           );
@@ -946,20 +925,19 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError("Data inconsistency");
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-            aggregateId,
-            undefined,
-            undefined,
-            undefined,
-            aggregatorInstitutionId,
-          );
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+            institutionId: aggregateId,
+            parentInstitutionId: aggregatorInstitutionId,
+          });
           expect(
             mocks.formatEmailForOrganization,
           ).toHaveBeenCalledExactlyOnceWith(aggregateId);
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+                id:
+                  "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+                  apimAggregateInstitutionId,
               }),
             ),
           );
@@ -997,7 +975,9 @@ describe("Manage Keys", () => {
       mocks.getUserByEmail.mockReturnValueOnce(
         TE.right(
           O.some({
-            id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+            id:
+              "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+              apimAggregateInstitutionId,
           }),
         ),
       );
@@ -1018,13 +998,10 @@ describe("Manage Keys", () => {
         );
 
       // then
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-        aggregateId,
-        undefined,
-        undefined,
-        undefined,
-        aggregatorInstitutionId,
-      );
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+        institutionId: aggregateId,
+        parentInstitutionId: aggregatorInstitutionId,
+      });
       expect(mocks.formatEmailForOrganization).toHaveBeenCalledExactlyOnceWith(
         aggregateId,
       );

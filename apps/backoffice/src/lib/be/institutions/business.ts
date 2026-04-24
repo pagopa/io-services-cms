@@ -63,12 +63,12 @@ export const retrieveInstitutionGroups = async (
   let page = 0;
   let hasMoreItems = false;
   do {
-    const apiResult = await getInstitutionGroups(
+    const apiResult = await getInstitutionGroups({
       institutionId,
-      1000,
-      page++,
+      size: 1000,
+      page: page++,
       state,
-    );
+    });
     groups.push(...toGroups(apiResult.content));
     hasMoreItems = apiResult.totalPages >= page;
   } while (hasMoreItems);
