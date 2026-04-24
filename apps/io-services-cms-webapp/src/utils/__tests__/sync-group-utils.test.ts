@@ -10,11 +10,7 @@ import {
 } from "../sync-group-utils";
 
 const mocks = vi.hoisted(() => ({
-  ApimService: {
-    getSubscription: vi.fn(),
-    updateSubscription: vi.fn(),
-    upsertSubscription: vi.fn(),
-  },
+  ApimService: { getSubscription: vi.fn(), updateSubscription: vi.fn() },
   LifecycleStore: {
     executeOnServicesFilteredByGroupId: vi.fn(),
     bulkPatch: vi.fn(),
@@ -54,7 +50,6 @@ describe("sync group utils", () => {
           ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + item.id,
         );
         expect(mocks.ApimService.updateSubscription).not.toHaveBeenCalled();
-        expect(mocks.ApimService.upsertSubscription).not.toHaveBeenCalled();
       },
     );
 
@@ -107,7 +102,6 @@ describe("sync group utils", () => {
           },
           expectedSubscription.eTag,
         );
-        expect(mocks.ApimService.upsertSubscription).not.toHaveBeenCalled();
       },
     );
 
@@ -151,71 +145,6 @@ describe("sync group utils", () => {
         },
         expectedSubscription.eTag,
       );
-      expect(mocks.ApimService.upsertSubscription).not.toHaveBeenCalled();
-    });
-
-    it("should create manage-group subscription when group is newly created and subscription does not exist", async () => {
-      //given
-      const item = {
-        productId: "prod-io",
-        id: "groupId",
-        institutionId: "institutionId",
-        name: "name",
-        modifiedAt: null,
-        parentInstitutionId: "parentInstitutionId",
-        status: "ACTIVE",
-      } as GroupChangeEvent;
-      mocks.ApimService.getSubscription.mockReturnValueOnce(
-        TE.left({ statusCode: 404 }),
-      );
-      mocks.ApimService.upsertSubscription.mockReturnValueOnce(TE.right({}));
-
-      // when
-      const result = await syncSubscription(deps.apimService)(item)();
-
-      // then
-      expect(E.isRight(result)).toBeTruthy();
-      if (E.isRight(result)) {
-        expect(result.right).toBeUndefined();
-      }
-      expect(mocks.ApimService.getSubscription).toHaveBeenCalledOnce();
-      expect(mocks.ApimService.upsertSubscription).toHaveBeenCalledOnce();
-      expect(mocks.ApimService.upsertSubscription).toHaveBeenCalledWith(
-        item.institutionId,
-        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + item.id,
-        item.name,
-      );
-      expect(mocks.ApimService.updateSubscription).not.toHaveBeenCalled();
-    });
-
-    it("should fail when manage-group subscription creation fails", async () => {
-      //given
-      const item = {
-        productId: "prod-io",
-        id: "groupId",
-        institutionId: "institutionId",
-        name: "name",
-        modifiedAt: null,
-        parentInstitutionId: "parentInstitutionId",
-        status: "ACTIVE",
-      } as GroupChangeEvent;
-      const error = new Error("error on upsertSubscription");
-      mocks.ApimService.getSubscription.mockReturnValueOnce(
-        TE.left({ statusCode: 404 }),
-      );
-      mocks.ApimService.upsertSubscription.mockReturnValueOnce(TE.left(error));
-
-      // when
-      const result = await syncSubscription(deps.apimService)(item)();
-
-      // then
-      expect(E.isLeft(result)).toBeTruthy();
-      if (E.isLeft(result)) {
-        expect(result.left).toStrictEqual(error);
-      }
-      expect(mocks.ApimService.getSubscription).toHaveBeenCalledOnce();
-      expect(mocks.ApimService.upsertSubscription).toHaveBeenCalledOnce();
-      expect(mocks.ApimService.updateSubscription).not.toHaveBeenCalled();
     });
   });
 
