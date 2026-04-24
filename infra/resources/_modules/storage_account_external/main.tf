@@ -34,11 +34,11 @@ resource "azurerm_storage_management_policy" "ext_sa_mgmt_policy" {
   storage_account_id = module.ext_storage_account.id
 
   rule {
-    name    = "delete-old-blobs-api-keys"
+    name    = "delete-old-${local.containers.api_keys.name}"
     enabled = true
     filters {
       blob_types   = ["blockBlob"]
-      prefix_match = ["api-keys/"]
+      prefix_match = ["${local.containers.api_keys.name}/"]
     }
     actions {
       base_blob {
