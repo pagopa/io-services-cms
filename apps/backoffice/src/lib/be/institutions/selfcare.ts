@@ -60,20 +60,20 @@ export const getInstitutionById = async (
   return apiResult.right;
 };
 
-export const getInstitutionGroups = async (
-  institutionId: string,
-  size?: number,
-  page?: number,
-  state?: GroupFilter,
-  parentInstitutionId?: string,
-): Promise<PageOfUserGroupResource> => {
-  const apiResult = await getSelfcareClient().getInstitutionGroups(
-    institutionId,
-    size,
-    page,
-    state,
-    parentInstitutionId,
-  )();
+export const getInstitutionGroups = async (params: {
+  institutionId?: string;
+  size?: number;
+  page?: number;
+  state?: GroupFilter;
+  parentInstitutionId?: string;
+}): Promise<PageOfUserGroupResource> => {
+  const apiResult = await getSelfcareClient().getInstitutionGroups({
+    institutionId: params.institutionId,
+    size: params.size,
+    page: params.page,
+    state: params.state,
+    parentInstitutionId: params.parentInstitutionId,
+  })();
 
   if (E.isLeft(apiResult)) {
     throw new ManagedInternalError(

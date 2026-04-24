@@ -15,6 +15,7 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
 import {
   ManagedInternalError,
   PreconditionFailedError,
@@ -27,6 +28,9 @@ import {
   getSubscriptionAuthorizedCIDRs,
   upsertSubscriptionAuthorizedCIDRs,
 } from "./cosmos";
+import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
+import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+import { randomBytes } from "crypto";
 
 // Type utility to extract the right side of a TaskEither
 type RightType<T> = T extends TE.TaskEither<unknown, infer R> ? R : never; // TODO: move to an Utils monorepo package
@@ -445,13 +449,10 @@ const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId = async (
   aggregateId: string,
   aggregatorId: string,
 ): Promise<string> => {
-  const aggregatorGroups = await getInstitutionGroups(
-    aggregateId,
-    undefined,
-    undefined,
-    undefined,
-    aggregatorId,
-  );
+  const aggregatorGroups = await getInstitutionGroups({
+    institutionId: aggregateId,
+    parentInstitutionId: aggregatorId,
+  });
 
   // Data inconsistency: if there are no groups or more than one group related to the aggregate and the aggregator, we cannot determine the subscription to retrieve the keys for
   if (aggregatorGroups.totalElements !== 1) {
@@ -465,3 +466,59 @@ const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId = async (
 
   return subscriptionId;
 };
+
+export async function generateApiKeysExports(
+  institutionId: string,
+  userId: string,
+): Promise<void> {
+  const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
+  const exportsFiles = await apiKeysExportsAdapter.findExportsFiles(
+    institutionId,
+    userId,
+    StateEnumNotReady.IN_PROGRESS, // TODO: consider if we want to create a typescript enum with all the possible states of the export file (not ready, ready, failed) to avoid importing StateEnum from the generated API models which contains also states that are not relevant for the export files
+  );
+  if (exportsFiles.length > 0) {
+    throw new PreconditionFailedError(
+      "An export file is already being generated",
+      `There are ${exportsFiles.length} export files in state 'IN_PROGRESS' for institution '${institutionId}' and user '${userId}'`,
+    );
+  }
+
+  const fileName = randomBytes(32).toString("hex"); // generate a random string to be used as file name for the export file to avoid conflicts in case of multiple export generation requests
+
+  await apiKeysExportsAdapter.initializeFile(fileName, institutionId, userId);
+
+  generateApiKeysExportsInner(institutionId, userId, fileName).catch(
+    (error) => {
+      // In case of error, we mark the export file as failed to allow the user to retry the export
+      apiKeysExportsAdapter
+        .markFileAsFailed(fileName)
+        .catch((markFileAsFailedError) => {
+          console.error(
+            `Error marking export file '${fileName}' as failed after an error occurred during the export generation:`,
+            markFileAsFailedError,
+          );
+        });
+      console.error("Error generating API keys export:", error);
+    },
+  );
+
+  return Promise.resolve();
+}
+
+async function generateApiKeysExportsInner(
+  institutionId: string,
+  userId: string,
+  fileName: string,
+): Promise<void> {
+  const aggregatorGroups = await getInstitutionGroups({
+    parentInstitutionId: institutionId,
+  });
+}
+
+export async function retrieveApiKeysExports(
+  institutionId: string,
+  userId: string,
+): Promise<AggregatedInstitutionsManageKeysLinkMetadata> {
+  return Promise.reject(null);
+}

@@ -44,13 +44,13 @@ export interface SelfcareClient {
     page?: number,
     search?: string,
   ) => TE.TaskEither<Error, DelegationWithPaginationResponse>;
-  getInstitutionGroups: (
-    institutionId: string,
-    size?: number,
-    page?: number,
-    state?: GroupFilter,
-    parentInstitutionId?: string,
-  ) => TE.TaskEither<Error, PageOfUserGroupResource>;
+  getInstitutionGroups: (params: {
+    institutionId?: string;
+    size?: number;
+    page?: number;
+    state?: GroupFilter;
+    parentInstitutionId?: string;
+  }) => TE.TaskEither<Error, PageOfUserGroupResource>;
   getInstitutionProducts: (
     institutionId: string,
     userId: string,
@@ -170,13 +170,13 @@ const buildSelfcareClient = (): SelfcareClient => {
       ),
     );
 
-  const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = (
+  const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = ({
     institutionId,
-    size?,
-    page?,
+    size,
+    page,
     state = StateEnum.ACTIVE,
-    parentInstitutionId?,
-  ) =>
+    parentInstitutionId,
+  }) =>
     pipe(
       TE.tryCatch(
         () =>
