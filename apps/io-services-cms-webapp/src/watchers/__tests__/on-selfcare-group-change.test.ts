@@ -1,7 +1,7 @@
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GroupChangeEvent } from "../../utils/sync-group-utils";
+import { GroupChangeEvent } from "../../utils/selfcare-group-change";
 import { makeHandler } from "../on-selfcare-group-change";
 
 const mocks = vi.hoisted(() => ({
@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   syncServices: vi.fn(),
 }));
 
-vi.mock("../../utils/sync-group-utils", () => ({
+vi.mock("../../utils/selfcare-group-change", () => ({
   syncSubscription: mocks.syncSubscription,
   syncServices: mocks.syncServices,
 }));

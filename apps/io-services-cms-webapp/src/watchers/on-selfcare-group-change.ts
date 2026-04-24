@@ -9,7 +9,7 @@ import {
   GroupChangeEvent,
   syncServices,
   syncSubscription,
-} from "../utils/sync-group-utils";
+} from "../utils/selfcare-group-change";
 
 interface HandlerDependencies {
   apimService: ApimUtils.ApimService;
