@@ -25,7 +25,7 @@ export interface AggregatedInstitutionsDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (password: AggregatedInstitutionsManageKeysPassword) => void;
-  sumbitting?: boolean;
+  submitting?: boolean;
 }
 
 const defaultFormValues = {
@@ -71,7 +71,7 @@ export const AggregatedInstitutionsDialog = ({
   isOpen,
   onClose,
   onConfirm,
-  sumbitting,
+  submitting,
 }: AggregatedInstitutionsDialogProps) => {
   const { t } = useTranslation();
   const method = useForm({
@@ -187,7 +187,7 @@ export const AggregatedInstitutionsDialog = ({
               {t("buttons.cancel")}
             </Button>
             <LoadingButton
-              loading={sumbitting}
+              loading={submitting}
               loadingIndicator={
                 <CircularProgress size={24} sx={{ color: "white" }} />
               }

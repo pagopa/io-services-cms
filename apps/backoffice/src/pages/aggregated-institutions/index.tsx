@@ -476,7 +476,7 @@ export default function AggregatedInstitutions() {
               setIsModalOpened(false);
             }}
             onConfirm={handleConfirmDialog}
-            sumbitting={fetchingRequestKeys}
+            submitting={fetchingRequestKeys}
           />
           <AggregatedInstitutionTableView
             columns={tableViewColumns}
