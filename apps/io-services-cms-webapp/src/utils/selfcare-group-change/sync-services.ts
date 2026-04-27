@@ -2,12 +2,12 @@ import { ServiceLifecycle } from "@io-services-cms/models";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { GroupChangeEvent } from "./types";
+import { GroupChangeEvent, GroupDeleteEvent } from "./types";
 
 export const syncServices =
   (serviceLifecycleStore: ServiceLifecycle.LifecycleStore) =>
   (group: GroupChangeEvent): TE.TaskEither<Error, void> =>
-    group.status === "DELETED"
+    shouldSyncServices(group)
       ? pipe(
           serviceLifecycleStore.executeOnServicesFilteredByGroupId(
             group.id,
@@ -31,3 +31,6 @@ export const syncServices =
           ),
         )
       : TE.right(void 0);
+
+export const shouldSyncServices = (group: GroupChangeEvent): boolean =>
+  GroupDeleteEvent.is(group);
