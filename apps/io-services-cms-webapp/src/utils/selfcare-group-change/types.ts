@@ -28,3 +28,11 @@ export const GroupCreateEvent = t.intersection([
     parentInstitutionId: NonEmptyString,
   }),
 ]);
+
+export type GroupDeleteEvent = t.TypeOf<typeof GroupDeleteEvent>;
+export const GroupDeleteEvent = t.intersection([
+  GroupChangeEvent,
+  t.type({
+    status: t.literal("DELETED"),
+  }),
+]);
