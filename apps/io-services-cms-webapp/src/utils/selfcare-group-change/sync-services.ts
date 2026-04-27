@@ -8,29 +8,34 @@ export const syncServices =
   (serviceLifecycleStore: ServiceLifecycle.LifecycleStore) =>
   (group: GroupChangeEvent): TE.TaskEither<Error, void> =>
     shouldSyncServices(group)
-      ? pipe(
-          serviceLifecycleStore.executeOnServicesFilteredByGroupId(
-            group.id,
-            (serviceIds) =>
-              pipe(
-                serviceIds.map((sid) => ({
-                  data: {
-                    metadata: {
-                      group_id: undefined,
-                    },
-                  },
-                  id: sid,
-                })),
-                serviceLifecycleStore.bulkPatch,
-                TE.chain((results) =>
-                  results.some((result) => result.statusCode !== 200)
-                    ? TE.left(new Error("At least one patch operation failed"))
-                    : TE.right(void 0),
-                ),
-              ),
-          ),
-        )
+      ? syncServicesForGroup(serviceLifecycleStore)(group)
       : TE.right(void 0);
 
-export const shouldSyncServices = (group: GroupChangeEvent): boolean =>
+const syncServicesForGroup =
+  (serviceLifecycleStore: ServiceLifecycle.LifecycleStore) =>
+  (group: GroupChangeEvent): TE.TaskEither<Error, void> =>
+    pipe(
+      serviceLifecycleStore.executeOnServicesFilteredByGroupId(
+        group.id,
+        (serviceIds) =>
+          pipe(
+            serviceIds.map((sid) => ({
+              data: {
+                metadata: {
+                  group_id: undefined,
+                },
+              },
+              id: sid,
+            })),
+            serviceLifecycleStore.bulkPatch,
+            TE.chain((results) =>
+              results.some((result) => result.statusCode !== 200)
+                ? TE.left(new Error("At least one patch operation failed"))
+                : TE.right(void 0),
+            ),
+          ),
+      ),
+    );
+
+const shouldSyncServices = (group: GroupChangeEvent): boolean =>
   GroupDeleteEvent.is(group);
