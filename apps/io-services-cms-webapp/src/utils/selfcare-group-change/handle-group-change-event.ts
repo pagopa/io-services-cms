@@ -1,8 +1,6 @@
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
-import * as B from "fp-ts/boolean";
 import * as TE from "fp-ts/lib/TaskEither";
-import { pipe } from "fp-ts/lib/function";
 
 import { createSubscriptionForGroup } from "./create-manage-group-subscription";
 import { syncServices } from "./sync-services";
@@ -16,17 +14,16 @@ interface HandlerDependencies {
 
 export const handleGroupChangeEvent =
   ({ apimService, serviceLifecycleStore }: HandlerDependencies) =>
-  (item: GroupChangeEvent): TE.TaskEither<Error, void> =>
-    pipe(
-      item.productId === "prod-io",
-      B.fold(
-        () => TE.right(void 0),
-        () =>
-          pipe(
-            item,
-            createSubscriptionForGroup(apimService),
-            TE.chain((_) => syncSubscription(apimService)(item)),
-            TE.chain((_) => syncServices(serviceLifecycleStore)(item)),
-          ),
-      ),
-    );
+  (item: GroupChangeEvent): TE.TaskEither<Error, void> => {
+    if (item.productId !== "prod-io") {
+      return TE.right(void 0);
+    }
+
+    const tasks: readonly TE.TaskEither<Error, void>[] = [
+      createSubscriptionForGroup(apimService)(item),
+      syncSubscription(apimService)(item),
+      syncServices(serviceLifecycleStore)(item),
+    ];
+
+    return TE.map(() => void 0)(TE.sequenceSeqArray(tasks));
+  };
