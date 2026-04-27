@@ -1,4 +1,5 @@
 import {
+  SubscriptionContract,
   SubscriptionGetResponse,
   SubscriptionState,
 } from "@azure/arm-apimanagement";
@@ -25,6 +26,26 @@ export const getSubscription =
               new Error(
                 `Failed to get subscription ${subscriptionId}, reason: ${JSON.stringify(e)}`,
               ),
+            ),
+      ),
+    );
+
+export const updateSubscription =
+  (apimService: ApimUtils.ApimService) =>
+  (group: GroupChangeEvent): TE.TaskEither<Error, SubscriptionContract> =>
+    pipe(
+      apimService.updateSubscription(
+        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id,
+        {
+          displayName: group.name,
+          state: mapStateFromGroupToSubscription(group.status),
+        },
+      ),
+      TE.mapLeft((e) =>
+        e instanceof Error
+          ? e
+          : new Error(
+              `Failed to update subscription ${group.id}, reason: ${JSON.stringify(e)}`,
             ),
       ),
     );
