@@ -1,6 +1,7 @@
 import { Card, CardContent, Grid, Typography } from "@mui/material";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
+import { GetStaticProps } from "next";
 
 /** This is a mock page, for development purpose only */
 export default function Assistenza() {
@@ -36,18 +37,18 @@ export default function Assistenza() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => {
   // ! return a not found error in prod environemnt
   if (process.env.APP_ENV === "production") {
     return { notFound: true };
   }
+
   return {
     props: {
-      // pass the translation props to the page component
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 // No Auth required
 Assistenza.publicRoute = true;

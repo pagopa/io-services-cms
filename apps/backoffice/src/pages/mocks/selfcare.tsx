@@ -22,6 +22,7 @@ import {
   aMockedChangeInstitutionIdentityToken,
   aMockedIdentityToken,
 } from "../../../mocks/data/selfcare-data";
+import { GetStaticProps } from "next";
 
 /** This is a mock page, for development purpose only */
 export default function Selfcare() {
@@ -97,18 +98,18 @@ export default function Selfcare() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => {
   // ! return a not found error in prod environemnt
   if (process.env.APP_ENV === "production") {
     return { notFound: true };
   }
+
   return {
     props: {
-      // pass the translation props to the page component
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 // No Auth required
 Selfcare.publicRoute = true;

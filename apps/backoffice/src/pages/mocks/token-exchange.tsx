@@ -7,6 +7,7 @@ import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useEffect } from "react";
 
 import { aMockedChangeInstitutionIdentityToken } from "../../../mocks/data/selfcare-data";
+import { GetStaticProps } from "next";
 
 /**
  * Selfcare change institution page.
@@ -57,18 +58,18 @@ export default function TokenExchange() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => {
   // ! return a not found error in prod environemnt
   if (process.env.APP_ENV === "production") {
     return { notFound: true };
   }
+
   return {
     props: {
-      // pass the translation props to the page component
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 // No Auth required
 TokenExchange.publicRoute = true;

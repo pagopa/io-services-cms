@@ -10,6 +10,7 @@ import { trackGroupKeyGenerateEndEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
+import { GetStaticProps } from "next";
 
 const pageTitleLocaleKey = "routes.new-group-api-key.title";
 const pageDescriptionLocaleKey = "routes.new-group-api-key.description";
@@ -49,17 +50,17 @@ export default function NewGroupApiKey() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => {
   if (!getConfiguration().GROUP_APIKEY_ENABLED) {
     return { notFound: true };
   }
+
   return {
     props: {
-      // pass the translation props to the page component
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 NewGroupApiKey.getLayout = function getLayout(page: ReactElement) {
   return (

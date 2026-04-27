@@ -3,6 +3,7 @@ import { trackLoginErrorEvent } from "@/utils/mix-panel";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useEffect } from "react";
+import { GetStaticProps } from "next";
 
 export default function ErrorPage() {
   const router = useRouter();
@@ -20,14 +21,10 @@ export default function ErrorPage() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
-  return {
-    props: {
-      // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
-
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 // No Auth required
 ErrorPage.publicRoute = true;

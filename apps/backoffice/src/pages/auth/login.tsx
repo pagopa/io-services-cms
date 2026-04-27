@@ -8,6 +8,7 @@ import { useRouter } from "next/router";
 import { signIn, useSession } from "next-auth/react";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useEffect } from "react";
+import { GetStaticProps } from "next";
 
 export default function Login() {
   const router = useRouter();
@@ -63,14 +64,11 @@ export default function Login() {
   return <LoaderFullscreen content="auth.loading" title="app.title" />;
 }
 
-export async function getStaticProps({ locale }: any) {
-  return {
-    props: {
-      // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 
 // No Auth required
 Login.publicRoute = true;
