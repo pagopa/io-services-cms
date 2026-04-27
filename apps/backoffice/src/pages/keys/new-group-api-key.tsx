@@ -7,10 +7,10 @@ import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { ROUTES } from "@/lib/routes";
 import { trackGroupKeyGenerateEndEvent } from "@/utils/mix-panel";
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
-import { GetStaticProps } from "next";
 
 const pageTitleLocaleKey = "routes.new-group-api-key.title";
 const pageDescriptionLocaleKey = "routes.new-group-api-key.description";

@@ -12,6 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { GetStaticProps } from "next";
 import NextLink from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -22,7 +23,6 @@ import {
   aMockedChangeInstitutionIdentityToken,
   aMockedIdentityToken,
 } from "../../../mocks/data/selfcare-data";
-import { GetStaticProps } from "next";
 
 /** This is a mock page, for development purpose only */
 export default function Selfcare() {

@@ -1,9 +1,9 @@
 import { LoaderFullscreen } from "@/components/loaders";
 import { trackLoginErrorEvent } from "@/utils/mix-panel";
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useEffect } from "react";
-import { GetStaticProps } from "next";
 
 export default function ErrorPage() {
   const router = useRouter();

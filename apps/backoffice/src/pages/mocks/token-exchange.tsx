@@ -2,12 +2,12 @@ import { getConfiguration } from "@/config";
 import { ROUTES } from "@/lib/routes";
 import { isNullUndefinedOrEmpty } from "@/utils/string-util";
 import { Grid, Typography } from "@mui/material";
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useEffect } from "react";
 
 import { aMockedChangeInstitutionIdentityToken } from "../../../mocks/data/selfcare-data";
-import { GetStaticProps } from "next";
 
 /**
  * Selfcare change institution page.
