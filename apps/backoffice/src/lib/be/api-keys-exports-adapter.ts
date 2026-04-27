@@ -1,15 +1,17 @@
 import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+import { StateEnum as StateEnumReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
+import Stream from "stream";
+import { ManagedInternalError } from "./errors";
 import {
   ApiKeysExportsPort,
   StateEnum,
 } from "./subscriptions/api-keys-exports-port";
-import { ManagedInternalError } from "./errors";
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
@@ -112,41 +114,41 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
 
   async finalizeFile(
     fileName: string,
-    payload: string | Buffer,
+    payload: Stream.Readable,
     payloadContentType?: string,
-  ): Promise<boolean> {
+  ): Promise<void> {
     const blockBlobClient =
       this.blobContainerClient.getBlockBlobClient(fileName);
+
     try {
-      await blockBlobClient.upload(payload, payload.length, {
+      await blockBlobClient.uploadStream(payload, undefined, undefined, {
         tags: {
-          state: StateEnumNotReady.IN_PROGRESS,
+          state: StateEnumReady.DONE,
         },
         blobHTTPHeaders: {
           blobContentType: payloadContentType,
         },
       });
-      return Promise.resolve(true);
     } catch (error) {
-      console.error("Errore durante l'inizializzazione del file:", error);
-      return Promise.resolve(false);
+      throw new ManagedInternalError(
+        `Error uploading file \`${fileName}\``,
+        error instanceof Error ? error.message : error,
+      );
     }
   }
 
-  async markFileAsFailed(fileName: string): Promise<boolean> {
+  async markFileAsFailed(fileName: string): Promise<void> {
     const blockBlobClient =
       this.blobContainerClient.getBlockBlobClient(fileName);
     try {
       await blockBlobClient.setTags({
         state: StateEnumNotReady.FAILED,
       });
-      return Promise.resolve(true);
     } catch (error) {
-      console.error(
-        "Errore durante l'aggiornamento dello stato del file:",
-        error,
+      throw new ManagedInternalError(
+        `Error marking file \`${fileName}\` as failed`,
+        error instanceof Error ? error.message : error,
       );
-      return Promise.resolve(false);
     }
   }
 }

@@ -12,6 +12,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
+import { DelegationResponse } from "@/generated/selfcare/DelegationResponse";
 import { InstitutionResponse } from "../../generated/selfcare/InstitutionResponse";
 import { ProductResource } from "../../generated/selfcare/ProductResource";
 import { UserInstitutionResource } from "../../generated/selfcare/UserInstitutionResource";
@@ -31,6 +32,27 @@ export const InstitutionProducts = t.readonlyArray(
 );
 export type InstitutionProducts = t.TypeOf<typeof InstitutionProducts>;
 
+const PageInfoStrict = t.type({
+  totalPages: t.number,
+  totalElements: t.number,
+  pageNo: t.number,
+  pageSize: t.number,
+});
+type PageInfoStrict = t.TypeOf<typeof PageInfoStrict>;
+
+export const DelegationWithPaginationResponseStrict = t.intersection([
+  DelegationWithPaginationResponse,
+  t.type({
+    pageInfo: PageInfoStrict,
+  }),
+  t.type({
+    delegations: t.readonlyArray(DelegationResponse),
+  }),
+]);
+export type DelegationWithPaginationResponseStrict = t.TypeOf<
+  typeof DelegationWithPaginationResponseStrict
+>;
+
 export interface SelfcareClient {
   getGroup: (
     id: NonEmptyString,
@@ -43,7 +65,7 @@ export interface SelfcareClient {
     size?: number,
     page?: number,
     search?: string,
-  ) => TE.TaskEither<Error, DelegationWithPaginationResponse>;
+  ) => TE.TaskEither<Error, DelegationWithPaginationResponseStrict>;
   getInstitutionGroups: (params: {
     institutionId?: string;
     size?: number;
@@ -254,7 +276,7 @@ const buildSelfcareClient = (): SelfcareClient => {
         TE.chainEitherK((response) =>
           pipe(
             response.data,
-            DelegationWithPaginationResponse.decode,
+            DelegationWithPaginationResponseStrict.decode,
             E.mapLeft((e) => pipe(e, readableReport, E.toError)),
           ),
         ),

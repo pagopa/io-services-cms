@@ -22,7 +22,10 @@ import {
   SubscriptionOwnershipError,
   apimErrorToManagedInternalError,
 } from "../errors";
-import { getInstitutionGroups } from "../institutions/selfcare";
+import {
+  getInstitutionDelegations,
+  getInstitutionGroups,
+} from "../institutions/selfcare";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
@@ -31,6 +34,18 @@ import {
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
 import { randomBytes } from "crypto";
+import archiver from "archiver";
+
+// Register zip-encrypted format with archiver (once per process)
+try {
+  archiver.registerFormat(
+    "zip-encrypted",
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    require("archiver-zip-encrypted"),
+  );
+} catch {
+  // Format already registered
+}
 
 // Type utility to extract the right side of a TaskEither
 type RightType<T> = T extends TE.TaskEither<unknown, infer R> ? R : never; // TODO: move to an Utils monorepo package
@@ -470,6 +485,7 @@ const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId = async (
 export async function generateApiKeysExports(
   institutionId: string,
   userId: string,
+  password: string,
 ): Promise<void> {
   const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
   const exportsFiles = await apiKeysExportsAdapter.findExportsFiles(
@@ -488,7 +504,7 @@ export async function generateApiKeysExports(
 
   await apiKeysExportsAdapter.initializeFile(fileName, institutionId, userId);
 
-  generateApiKeysExportsInner(institutionId, userId, fileName).catch(
+  generateApiKeysExportsInner(institutionId, userId, password, fileName).catch(
     (error) => {
       // In case of error, we mark the export file as failed to allow the user to retry the export
       apiKeysExportsAdapter
@@ -499,7 +515,10 @@ export async function generateApiKeysExports(
             markFileAsFailedError,
           );
         });
-      console.error("Error generating API keys export:", error);
+      console.error(
+        `Error generating API keys export file '${fileName}' :`,
+        error,
+      );
     },
   );
 
@@ -507,13 +526,154 @@ export async function generateApiKeysExports(
 }
 
 async function generateApiKeysExportsInner(
-  institutionId: string,
-  userId: string,
+  aggregatorId: string,
+  userId: string, // not used for now, but we might want to use it if upload file override all tags and we need to re-apply the userId and institutionId tags after the upload
+  password: string,
   fileName: string,
 ): Promise<void> {
-  const aggregatorGroups = await getInstitutionGroups({
-    parentInstitutionId: institutionId,
+  const { groupsCounter, aggregateMap } =
+    await retrieveAggregatorGroups(aggregatorId);
+
+  const { aggregatesCounter, enrichedAggregateData } = await retrieveAggregates(
+    aggregatorId,
+    aggregateMap,
+  );
+
+  if (aggregatesCounter !== groupsCounter) {
+    throw new ManagedInternalError(
+      "Data inconsistency",
+      `The number of aggregates related to the aggregator '${aggregatorId}' is different from the number of groups related to the aggregator. Groups count: ${groupsCounter}, Aggregates count: ${aggregatesCounter}`,
+    );
+  }
+
+  enrichedAggregateData.map(async (aggregate) => {
+    const subscriptionManageGroupId = `${ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX}${aggregate.groupId}`;
+    const { primaryKey, secondaryKey } = await listSubscriptionSecrets(
+      subscriptionManageGroupId,
+    );
+    if (!primaryKey || !secondaryKey) {
+      throw new ManagedInternalError(
+        "Data inconsistency",
+        `Missing subscription keys for manage-group subscription '${subscriptionManageGroupId}' related to aggregate '${aggregate.aggregateId}' and group '${aggregate.groupId}'`,
+      );
+    }
+    return {
+      fc: aggregate.aggregateFiscalCode,
+      pk: primaryKey,
+      sk: secondaryKey,
+    };
   });
+
+  try {
+    const archive = archiver.create(
+      "zip-encrypted" as archiver.Format,
+      {
+        zlib: { level: 8 },
+        encryptionMethod: "aes256",
+        password,
+      } as archiver.ArchiverOptions,
+    );
+    archive.append(JSON.stringify(enrichedAggregateData), {
+      name: "api-keys.json",
+    });
+    const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(
+      process.env,
+    );
+    await apiKeysExportsAdapter.finalizeFile(
+      fileName,
+      archive,
+      "application/zip",
+    );
+  } catch (error) {
+    throw error instanceof ManagedInternalError
+      ? error
+      : new ManagedInternalError(
+          "Error generating export file",
+          error instanceof Error ? error.message : String(error),
+        );
+  }
+}
+
+async function retrieveAggregatorGroups(aggregatorId: string): Promise<{
+  groupsCounter: number;
+  aggregateMap: Map<string, string>;
+}> {
+  let page = 0;
+  let groupsCounter = 0;
+  let aggregateToGroupMap: Map<string, string> = new Map();
+  while (true) {
+    const aggregatorGroups = await getInstitutionGroups({
+      parentInstitutionId: aggregatorId,
+      page: page++,
+      size: 2000,
+    });
+    aggregatorGroups.content.forEach((group) => {
+      aggregateToGroupMap.set(group.institutionId, group.id);
+    });
+    groupsCounter += aggregatorGroups.content.length;
+
+    if (page >= aggregatorGroups.totalPages) {
+      break;
+    }
+  }
+  return {
+    groupsCounter: groupsCounter,
+    aggregateMap: aggregateToGroupMap,
+  };
+}
+
+async function retrieveAggregates(
+  aggregatorId: string,
+  aggregateToGroupMap: Map<string, string>,
+): Promise<{
+  aggregatesCounter: number;
+  enrichedAggregateData: Array<{
+    groupId: string;
+    aggregateId: string;
+    aggregateFiscalCode: string;
+  }>;
+}> {
+  let aggregatesCounter = 0;
+  const enrichedAggregateData: Array<{
+    groupId: string;
+    aggregateId: string;
+    aggregateFiscalCode: string;
+  }> = [];
+  let page = 0;
+  while (true) {
+    const aggregates = await getInstitutionDelegations(
+      aggregatorId,
+      10000,
+      page++,
+    ); // we need to retrieve all delegations to make sure that the groups related to the aggregates are included in the export, otherwise we might end up with aggregates without groups in the export file which is an indication of data inconsistency that we want to avoid
+
+    aggregates.delegations.forEach((delegation) => {
+      let groupId = aggregateToGroupMap.get(delegation.institutionId);
+      if (!groupId) {
+        throw new ManagedInternalError(
+          "Data inconsistency",
+          `No group found for aggregate with institution id '${delegation.institutionId}'`,
+        );
+      }
+      if (!delegation.taxCode) {
+        throw new ManagedInternalError(
+          "Data inconsistency",
+          `Missing tax code for delegation with institution id '${delegation.institutionId}'`,
+        );
+      }
+      enrichedAggregateData.push({
+        groupId: groupId,
+        aggregateId: delegation.institutionId,
+        aggregateFiscalCode: delegation.taxCode,
+      });
+    });
+    aggregatesCounter += aggregates.delegations.length;
+    if (page >= aggregates.pageInfo.totalPages) {
+      break;
+    }
+  }
+
+  return { aggregatesCounter, enrichedAggregateData };
 }
 
 export async function retrieveApiKeysExports(

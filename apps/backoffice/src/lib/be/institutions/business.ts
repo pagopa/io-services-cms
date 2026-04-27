@@ -208,12 +208,11 @@ export const retrieveInstitutionAggregates = async (
   );
   return {
     pagination: {
-      count: apiResult.pageInfo?.totalElements ?? 0,
-      limit: apiResult.pageInfo?.pageSize ?? 0,
-      offset:
-        (apiResult.pageInfo?.pageNo ?? 0) * (apiResult.pageInfo?.pageSize ?? 0),
+      count: apiResult.pageInfo.totalElements,
+      limit: apiResult.pageInfo.pageSize,
+      offset: apiResult.pageInfo.pageNo * apiResult.pageInfo.pageSize,
     },
-    value: (apiResult.delegations ?? []).map((delegation) => ({
+    value: apiResult.delegations.map((delegation) => ({
       id: delegation.institutionId,
       name: delegation.institutionName,
     })),
