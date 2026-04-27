@@ -6,6 +6,7 @@ import mixpanel from "mixpanel-browser";
 export type TechEventResult = "error" | "success";
 
 type ApiKeyType = "primary" | "secondary";
+type GeneratePasswordStatus = "new_password" | "replacement";
 
 interface MixPanelEventsStructure {
   readonly IO_BO_APIKEY_PAGE: Record<string, never>;
@@ -82,6 +83,30 @@ interface MixPanelEventsStructure {
     keyType: ApiKeyType;
   };
   readonly IO_BO_EA_GET_ALL_MANAGE_KEYS: { result: TechEventResult };
+  readonly IO_BO_EA_FILE_GENERATE_START: Record<string, never>;
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_CANCEL: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_CONFIRM: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_MISSING: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_NOT_COMPLIANT: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_UNMATCHED: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PROGRESS: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_GENERATE_END: { result: TechEventResult };
+  readonly IO_BO_EA_FILE_GENERATE_COMPLETED: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_DOWNLOAD: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_GENERATE_ERROR: Record<string, unknown>;
 }
 
 export const mixpanelSetup = () => {
@@ -99,9 +124,9 @@ type MixPanelEvents<T extends keyof MixPanelEventsStructure> =
 
 const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
   operationId: T,
-  eventCategory: "TECH" | "UX",
+  eventCategory: "KO" | "TECH" | "UX",
   mixpanelEventData: MixPanelEvents<T>,
-  eventType?: "action" | "screen_view",
+  eventType?: "action" | "error" | "screen_view",
 ) => {
   const categorizedEventData = {
     eventCategory,
@@ -407,4 +432,92 @@ export const trackEaManageKeyRegenerateEvent = (
 
 export const trackEaGetAllManageKeysEvent = (result: TechEventResult) => {
   logToMixpanel("IO_BO_EA_GET_ALL_MANAGE_KEYS", "UX", { result }, "action");
+};
+
+export const trackEaFileGenerateStart = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_START", "UX", {}, "action");
+};
+
+export const trackEaFileGeneratePassword = (status: GeneratePasswordStatus) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD",
+    "UX",
+    { status },
+    "screen_view",
+  );
+};
+
+export const trackEaFileGeneratePasswordCancel = (
+  status: GeneratePasswordStatus,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD_CANCEL",
+    "UX",
+    { status },
+    "action",
+  );
+};
+
+export const trackEaFileGeneratePasswordConfirm = (
+  status: GeneratePasswordStatus,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD_CONFIRM",
+    "UX",
+    { status },
+    "action",
+  );
+};
+
+export const trackEaFileGeneratePasswordMissing = (
+  status: GeneratePasswordStatus,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD_MISSING",
+    "KO",
+    { status },
+    "error",
+  );
+};
+
+export const trackEaFileGeneratePasswordNotCompliant = (
+  status: GeneratePasswordStatus,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD_NOT_COMPLIANT",
+    "KO",
+    { status },
+    "error",
+  );
+};
+
+export const trackEaFileGeneratePasswordUnmatched = (
+  status: GeneratePasswordStatus,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD_UNMATCHED",
+    "KO",
+    { status },
+    "error",
+  );
+};
+
+export const trackEaFileGenerateProgress = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_PROGRESS", "UX", {}, "screen_view");
+};
+
+export const trackEaFileGenerateEnd = (result: TechEventResult) => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_END", "TECH", { result });
+};
+
+export const trackEaFileGenerateCompleted = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_COMPLETED", "UX", {}, "screen_view");
+};
+
+export const trackEaFileGenerateDownload = () => {
+  logToMixpanel("IO_BO_EA_FILE_DOWNLOAD", "UX", {}, "action");
+};
+
+export const trackEaFileGenerateError = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_ERROR", "KO", {}, "screen_view");
 };
