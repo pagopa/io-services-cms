@@ -434,11 +434,13 @@ export const trackEaGetAllManageKeysEvent = (result: TechEventResult) => {
   logToMixpanel("IO_BO_EA_GET_ALL_MANAGE_KEYS", "UX", { result }, "action");
 };
 
-export const trackEaFileGenerateStart = () => {
+export const trackEaFileGenerateStartEvent = () => {
   logToMixpanel("IO_BO_EA_FILE_GENERATE_START", "UX", {}, "action");
 };
 
-export const trackEaFileGeneratePassword = (status: GeneratePasswordStatus) => {
+export const trackEaFileGeneratePasswordEvent = (
+  status: GeneratePasswordStatus,
+) => {
   logToMixpanel(
     "IO_BO_EA_FILE_GENERATE_PASSWORD",
     "UX",
@@ -447,7 +449,7 @@ export const trackEaFileGeneratePassword = (status: GeneratePasswordStatus) => {
   );
 };
 
-export const trackEaFileGeneratePasswordCancel = (
+export const trackEaFileGeneratePasswordCancelEvent = (
   status: GeneratePasswordStatus,
 ) => {
   logToMixpanel(
@@ -458,7 +460,7 @@ export const trackEaFileGeneratePasswordCancel = (
   );
 };
 
-export const trackEaFileGeneratePasswordConfirm = (
+export const trackEaFileGeneratePasswordConfirmEvent = (
   status: GeneratePasswordStatus,
 ) => {
   logToMixpanel(
@@ -469,7 +471,7 @@ export const trackEaFileGeneratePasswordConfirm = (
   );
 };
 
-export const trackEaFileGeneratePasswordMissing = (
+export const trackEaFileGeneratePasswordMissingEvent = (
   status: GeneratePasswordStatus,
 ) => {
   logToMixpanel(
@@ -480,7 +482,7 @@ export const trackEaFileGeneratePasswordMissing = (
   );
 };
 
-export const trackEaFileGeneratePasswordNotCompliant = (
+export const trackEaFileGeneratePasswordNotCompliantEvent = (
   status: GeneratePasswordStatus,
 ) => {
   logToMixpanel(
@@ -491,7 +493,7 @@ export const trackEaFileGeneratePasswordNotCompliant = (
   );
 };
 
-export const trackEaFileGeneratePasswordUnmatched = (
+export const trackEaFileGeneratePasswordUnmatchedEvent = (
   status: GeneratePasswordStatus,
 ) => {
   logToMixpanel(
@@ -502,22 +504,22 @@ export const trackEaFileGeneratePasswordUnmatched = (
   );
 };
 
-export const trackEaFileGenerateProgress = () => {
+export const trackEaFileGenerateProgressEvent = () => {
   logToMixpanel("IO_BO_EA_FILE_GENERATE_PROGRESS", "UX", {}, "screen_view");
 };
 
-export const trackEaFileGenerateEnd = (result: TechEventResult) => {
+export const trackEaFileGenerateEndEvent = (result: TechEventResult) => {
   logToMixpanel("IO_BO_EA_FILE_GENERATE_END", "TECH", { result });
 };
 
-export const trackEaFileGenerateCompleted = () => {
+export const trackEaFileGenerateCompletedEvent = () => {
   logToMixpanel("IO_BO_EA_FILE_GENERATE_COMPLETED", "UX", {}, "screen_view");
 };
 
-export const trackEaFileGenerateDownload = () => {
+export const trackEaFileGenerateDownloadEvent = () => {
   logToMixpanel("IO_BO_EA_FILE_DOWNLOAD", "UX", {}, "action");
 };
 
-export const trackEaFileGenerateError = () => {
+export const trackEaFileGenerateErrorEvent = () => {
   logToMixpanel("IO_BO_EA_FILE_GENERATE_ERROR", "KO", {}, "screen_view");
 };
