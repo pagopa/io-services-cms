@@ -56,6 +56,7 @@ export const AssociateGroupToService = ({
         groupId: z
           .string()
           .min(1, { message: t("forms.errors.field.required") }),
+        name: z.string().optional(),
       })
       .refine((schema) => schema.groupId !== groupId, {
         message: t("forms.errors.field.sameSelectedValue"),

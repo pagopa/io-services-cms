@@ -27,7 +27,7 @@ const schema = z.object({
 
 /** Show and Edit an IP List in CIDR format */
 export const AuthorizedCidrs = ({
-  cidrs,
+  cidrs = [],
   description,
   editable,
   onSaveClick,
