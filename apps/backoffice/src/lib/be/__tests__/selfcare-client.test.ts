@@ -440,28 +440,37 @@ describe("Selfcare Client", () => {
       commonExpectation();
     });
 
-    it("should return an error when received a bad response from selfcare", async () => {
-      // given
-      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+    it.each`
+      scenario                 | data
+      ${"empty response"}      | ${""}
+      ${"empty object"}        | ${{}}
+      ${"missing delegations"} | ${{ ...mocks.delegations, delegations: undefined }}
+      ${"missing pageInfo"}    | ${{ ...mocks.delegations, pageInfo: undefined }}
+    `(
+      "should return an error when received a bad response from selfcare: $scenario",
+      async ({ data }) => {
+        // given
+        getMock.mockResolvedValueOnce({ status: 200, data });
 
-      // when
-      const result =
-        await getSelfcareClient().getInstitutionDelegations(institutionId)();
+        // when
+        const result =
+          await getSelfcareClient().getInstitutionDelegations(institutionId)();
 
-      // then
-      expect(getMock).toHaveBeenCalledWith(endpoint, {
-        params: {
-          brokerId: institutionId,
-          size: undefined,
-          page: undefined,
-          search: undefined,
-          order: "ASC",
-        },
-      });
-      expect(isAxiosError).not.toHaveBeenCalled();
-      expect(E.isLeft(result)).toBeTruthy();
-      commonExpectation();
-    });
+        // then
+        expect(getMock).toHaveBeenCalledWith(endpoint, {
+          params: {
+            brokerId: institutionId,
+            size: undefined,
+            page: undefined,
+            search: undefined,
+            order: "ASC",
+          },
+        });
+        expect(isAxiosError).not.toHaveBeenCalled();
+        expect(E.isLeft(result)).toBeTruthy();
+        commonExpectation();
+      },
+    );
   });
 
   describe("getInstitutionProducts", () => {

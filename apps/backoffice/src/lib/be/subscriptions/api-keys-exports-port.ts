@@ -2,6 +2,7 @@ import { StateEnum as StateEnumFailed } from "@/generated/api/AggregatedInstitut
 import { StateEnum as StateEnumSuccess } from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import { enumType } from "@pagopa/ts-commons/lib/types";
 import * as t from "io-ts";
+import Stream from "stream";
 
 // TODO: add to openapi spec as unused definition
 export const StateEnum = t.union([
@@ -28,7 +29,11 @@ export interface ApiKeysExportsPort {
     userId: string,
   ): Promise<void>;
 
-  finalizeFile(fileName: string, payload: string | Buffer): Promise<boolean>;
+  finalizeFile(
+    fileName: string,
+    payload: Stream.Readable,
+    payloadContentType?: string,
+  ): Promise<void>;
 
-  markFileAsFailed(fileName: string): Promise<boolean>;
+  markFileAsFailed(fileName: string): Promise<void>;
 }
