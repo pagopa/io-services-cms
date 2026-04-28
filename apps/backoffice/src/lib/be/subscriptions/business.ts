@@ -482,29 +482,38 @@ const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId = async (
   return subscriptionId;
 };
 
+/**
+ * Generates API keys exports for a given institution and user.
+ * @param aggregatorId The institution id of the aggregator
+ * @param userId The id of the user
+ * @param password The password to use for the export
+ * @returns A promise that resolves when the export is complete
+ * @throws `PreconditionFailedError` if there is already an export in progress
+ * @throws `ManagedInternalError` if there is an error during the export generation
+ */
 export async function generateApiKeysExports(
-  institutionId: string,
+  aggregatorId: string,
   userId: string,
   password: string,
 ): Promise<void> {
   const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
   const exportsFiles = await apiKeysExportsAdapter.findExportsFiles(
-    institutionId,
+    aggregatorId,
     userId,
     StateEnumNotReady.IN_PROGRESS, // TODO: consider if we want to create a typescript enum with all the possible states of the export file (not ready, ready, failed) to avoid importing StateEnum from the generated API models which contains also states that are not relevant for the export files
   );
   if (exportsFiles.length > 0) {
     throw new PreconditionFailedError(
       "An export file is already being generated",
-      `There are ${exportsFiles.length} export files in state 'IN_PROGRESS' for institution '${institutionId}' and user '${userId}'`,
+      `There are ${exportsFiles.length} export files in state 'IN_PROGRESS' for institution '${aggregatorId}' and user '${userId}'`,
     );
   }
 
   const fileName = randomBytes(32).toString("hex"); // generate a random string to be used as file name for the export file to avoid conflicts in case of multiple export generation requests
 
-  await apiKeysExportsAdapter.initializeFile(fileName, institutionId, userId);
+  await apiKeysExportsAdapter.initializeFile(fileName, aggregatorId, userId);
 
-  generateApiKeysExportsInner(institutionId, userId, password, fileName).catch(
+  generateApiKeysExportsInner(aggregatorId, userId, password, fileName).catch(
     (error) => {
       // In case of error, we mark the export file as failed to allow the user to retry the export
       apiKeysExportsAdapter

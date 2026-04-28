@@ -1130,6 +1130,7 @@ paths:
       tags:
         - manage-keys
       operationId: getAggregatedInstitutionsManageKeysLink
+      description: Retrieve the link to manage keys exports file for aggregated institutions allowed to use by the current aggregator. The file will be generated on demand by calling _requestAggregatedInstitutionsManageKeys_.
       security:
         - cookieAuth: []
       responses:
@@ -1137,7 +1138,7 @@ paths:
           description: Link
           content:
             application/json:
-              schema: 
+              schema:
                 $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkMetadata'
         '401':
           description: Unauthorized
@@ -1153,6 +1154,7 @@ paths:
       tags:
         - manage-keys
       operationId: requestAggregatedInstitutionsManageKeys
+      description: Request to generate a manage keys exports file for aggregated institutions allowed to use by the current aggregator. The link to the file can be retrieved by calling _getAggregatedInstitutionsManageKeysLink_
       security:
         - cookieAuth: []
       requestBody:
@@ -2179,8 +2181,8 @@ components:
         - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkReady'
         - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkNotReady'
     AggregatedInstitutionsManageKeysPassword:
-        type: string
-        pattern: ^(?=.*[0-9])(?=.*[A-Z])[a-zA-Z0-9]{12,64}$
+      type: string
+      pattern: ^(?=.*[0-9])(?=.*[A-Z])[a-zA-Z0-9]{12,64}$
     UserInstitutionProduct:
       type: object
       properties:
