@@ -7,7 +7,7 @@ module "cms_storage_account" {
     env_short       = var.env_short
     location        = var.location
     domain          = var.domain
-    app_name        = "cms"
+    app_name        = local.app_name
     instance_number = "01"
   }
   resource_group_name = var.resource_group_name

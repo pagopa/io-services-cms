@@ -1,5 +1,6 @@
 
 locals {
+  app_name = "cms"
   queues = [
     { name = "request-review", hasPoison : true },
     { name = "request-publication", hasPoison : true },

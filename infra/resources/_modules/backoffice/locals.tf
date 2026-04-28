@@ -1,5 +1,9 @@
 
 locals {
+  app_name = "bo"
+  containers = {
+    "api-keys" = { name = "api-keys" }
+  }
   backoffice = {
     size = "P0v3"
     base_app_settings = {
@@ -65,6 +69,9 @@ locals {
 
       // Group ApiKey feature
       GROUP_AUTHZ_ENABLED = true
+
+      SA_EXT_BLOB_ENDPOINT            = var.sa_ext.blob.primary_blob_endpoint
+      EXPORTS_API_KEYS_CONTAINER_NAME = var.sa_ext.blob.api_keys_container_name
     }
 
     prod_app_setting = {

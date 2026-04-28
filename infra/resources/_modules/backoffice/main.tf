@@ -11,7 +11,7 @@ module "backoffice" {
     env_short       = var.env_short
     location        = var.location
     domain          = var.domain
-    app_name        = "bo"
+    app_name        = local.app_name
     instance_number = "01"
   }
 
