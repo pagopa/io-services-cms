@@ -5,13 +5,11 @@ import { GroupChangeEvent } from "../../utils/selfcare-group-change";
 import { makeHandler } from "../on-selfcare-group-change";
 
 const mocks = vi.hoisted(() => ({
-  syncSubscription: vi.fn(),
-  syncServices: vi.fn(),
+  handleGroupChangeEvent: vi.fn(),
 }));
 
 vi.mock("../../utils/selfcare-group-change", () => ({
-  syncSubscription: mocks.syncSubscription,
-  syncServices: mocks.syncServices,
+  handleGroupChangeEvent: mocks.handleGroupChangeEvent,
 }));
 
 beforeEach(() => {
@@ -24,9 +22,16 @@ describe("makeOnSelfcareGroupChangeHandler", () => {
     serviceLifecycleStore: {},
   } as unknown as Parameters<typeof makeHandler>[0];
 
-  it("should complete successfully but do nothing when productId is different from prod-io", async () => {
+  it("should complete successfully", async () => {
     // given
-    const item = { productId: "others" } as GroupChangeEvent;
+    const item = {
+      id: "group-id",
+      institutionId: "institution-id",
+      name: "group-name",
+      productId: "product-io",
+      status: "ACTIVE",
+    } as GroupChangeEvent;
+    mocks.handleGroupChangeEvent.mockReturnValueOnce(() => TE.right(void 0));
 
     // when
     const result = await makeHandler(deps)({ item })();
@@ -36,15 +41,20 @@ describe("makeOnSelfcareGroupChangeHandler", () => {
     if (E.isRight(result)) {
       expect(result.right).toBeUndefined();
     }
-    expect(mocks.syncSubscription).not.toHaveBeenCalled();
-    expect(mocks.syncServices).not.toHaveBeenCalled();
+    expect(mocks.handleGroupChangeEvent).toHaveBeenCalledExactlyOnceWith(deps);
   });
 
-  it("should fail when the productId is equal to prod-io and syncSubscription fails", async () => {
+  it("should fail when handleGroupChangeEvent fails", async () => {
     // given
-    const item = { productId: "prod-io" } as GroupChangeEvent;
-    const error = new Error("error from syncSubscription");
-    mocks.syncSubscription.mockReturnValueOnce(() => TE.left(error));
+    const item = {
+      id: "group-id",
+      institutionId: "institution-id",
+      name: "group-name",
+      productId: "product-io",
+      status: "ACTIVE",
+    } as GroupChangeEvent;
+    const error = new Error("error from handleGroupChangeEvent");
+    mocks.handleGroupChangeEvent.mockReturnValueOnce(() => TE.left(error));
 
     // when
     const result = await makeHandler(deps)({ item })();
@@ -54,49 +64,6 @@ describe("makeOnSelfcareGroupChangeHandler", () => {
     if (E.isLeft(result)) {
       expect(result.left).toStrictEqual(error);
     }
-    expect(mocks.syncSubscription).toHaveBeenCalledOnce();
-    expect(mocks.syncSubscription).toHaveBeenCalledWith(deps.apimService);
-    expect(mocks.syncServices).not.toHaveBeenCalled();
-  });
-
-  it("should fail when the productId is equal to prod-io and syncServices fails", async () => {
-    // given
-    const item = { productId: "prod-io" } as GroupChangeEvent;
-    const error = new Error("error from syncServices");
-    mocks.syncSubscription.mockReturnValueOnce(() => TE.right(void 0));
-    mocks.syncServices.mockReturnValueOnce(() => TE.left(error));
-
-    // when
-    const result = await makeHandler(deps)({ item })();
-
-    // then
-    expect(E.isLeft(result)).toBeTruthy();
-    if (E.isLeft(result)) {
-      expect(result.left).toStrictEqual(error);
-    }
-    expect(mocks.syncSubscription).toHaveBeenCalledOnce();
-    expect(mocks.syncSubscription).toHaveBeenCalledWith(deps.apimService);
-    expect(mocks.syncServices).toHaveBeenCalledOnce();
-    expect(mocks.syncServices).toHaveBeenCalledWith(deps.serviceLifecycleStore);
-  });
-
-  it("should complete successfully when the productId is equal to prod-io", async () => {
-    // given
-    const item = { productId: "prod-io" } as GroupChangeEvent;
-    mocks.syncSubscription.mockReturnValueOnce(() => TE.right(void 0));
-    mocks.syncServices.mockReturnValueOnce(() => TE.right(void 0));
-
-    // when
-    const result = await makeHandler(deps)({ item })();
-
-    // then
-    expect(E.isRight(result)).toBeTruthy();
-    if (E.isRight(result)) {
-      expect(result.right).toBeUndefined();
-    }
-    expect(mocks.syncSubscription).toHaveBeenCalledOnce();
-    expect(mocks.syncSubscription).toHaveBeenCalledWith(deps.apimService);
-    expect(mocks.syncServices).toHaveBeenCalledOnce();
-    expect(mocks.syncServices).toHaveBeenCalledWith(deps.serviceLifecycleStore);
+    expect(mocks.handleGroupChangeEvent).toHaveBeenCalledExactlyOnceWith(deps);
   });
 });
