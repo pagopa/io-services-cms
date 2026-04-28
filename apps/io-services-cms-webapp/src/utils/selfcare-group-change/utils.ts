@@ -4,6 +4,7 @@ import {
   SubscriptionState,
 } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
+import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
@@ -41,12 +42,11 @@ export const updateSubscription =
           state: mapStateFromGroupToSubscription(group.status),
         },
       ),
-      TE.mapLeft((e) =>
-        e instanceof Error
-          ? e
-          : new Error(
-              `Failed to update subscription ${group.id}, reason: ${JSON.stringify(e)}`,
-            ),
+      TE.mapLeft(
+        (e) =>
+          new Error(
+            `Failed to update subscription ${group.id}, reason: ${JSON.stringify(e)}`,
+          ),
       ),
     );
 

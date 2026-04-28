@@ -4,7 +4,13 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import * as O from "fp-ts/lib/Option";
 
-import { mapStateFromGroupToSubscription, getSubscription } from "../utils";
+import {
+  mapStateFromGroupToSubscription,
+  getSubscription,
+  updateSubscription,
+} from "../utils";
+import { SubscriptionContract } from "@azure/arm-apimanagement";
+import { GroupChangeEvent } from "..";
 
 const mocks = vi.hoisted(() => ({
   ApimService: {
@@ -57,7 +63,9 @@ describe("getSubscription", () => {
     const result = await getSubscription(mocks.ApimService)(subscriptionName)();
     expect(result).toEqual(
       E.left(
-        new Error(`Failed to get subscription ${subscriptionName}, reason: ${JSON.stringify(error)}`),
+        new Error(
+          `Failed to get subscription ${subscriptionName}, reason: ${JSON.stringify(error)}`,
+        ),
       ),
     );
   });
@@ -77,5 +85,71 @@ describe("mapStateFromGroupToSubscription", () => {
     expect(() =>
       mapStateFromGroupToSubscription("INVALID_STATUS" as any),
     ).toThrow("Invalid status");
+  });
+});
+
+describe("updateSubscription", () => {
+  const group = {
+    id: "group-id",
+    institutionId: "institution-id",
+    name: "my group",
+    productId: "prod-io",
+    status: "ACTIVE",
+  } as GroupChangeEvent;
+
+  it("should update subscription successfully", async () => {
+    const expectedSubscription = {
+      name: "subscription-id",
+      state: "active",
+      displayName: group.name,
+    } as SubscriptionContract;
+    mocks.ApimService.updateSubscription.mockReturnValueOnce(
+      TE.right(expectedSubscription),
+    );
+
+    const result = await updateSubscription(mocks.ApimService)(group)();
+
+    expect(result).toEqual(E.right(expectedSubscription));
+    expect(mocks.ApimService.updateSubscription).toHaveBeenCalledOnce();
+    expect(mocks.ApimService.updateSubscription).toHaveBeenCalledWith(
+      ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id,
+      {
+        displayName: group.name,
+        state: "active",
+      },
+    );
+  });
+
+  it("should map non-Error failures to Error", async () => {
+    const failure = {
+      statusCode: 404,
+      details: { reason: "" },
+    } as ApimUtils.ApimRestError;
+    mocks.ApimService.updateSubscription.mockReturnValueOnce(TE.left(failure));
+
+    const result = await updateSubscription(mocks.ApimService)(group)();
+
+    expect(result).toEqual(
+      E.left(
+        new Error(
+          `Failed to update subscription ${group.id}, reason: ${JSON.stringify(failure)}`,
+        ),
+      ),
+    );
+  });
+
+  it("should keep Error failures unchanged", async () => {
+    const failure = new Error("An error occurred");
+    mocks.ApimService.updateSubscription.mockReturnValueOnce(TE.left(failure));
+
+    const result = await updateSubscription(mocks.ApimService)(group)();
+
+    expect(result).toEqual(
+      E.left(
+        new Error(
+          `Failed to update subscription ${group.id}, reason: ${JSON.stringify(failure)}`,
+        ),
+      ),
+    );
   });
 });
