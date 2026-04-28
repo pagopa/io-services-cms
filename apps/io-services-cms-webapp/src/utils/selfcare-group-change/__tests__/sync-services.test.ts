@@ -2,7 +2,8 @@ import { ServiceLifecycle } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GroupChangeEvent, syncServices } from "..";
+import { GroupChangeEvent } from "..";
+import { syncServices } from "../sync-services";
 
 const mocks = vi.hoisted(() => ({
   ApimService: { getSubscription: vi.fn(), updateSubscription: vi.fn() },
