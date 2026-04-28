@@ -35,9 +35,9 @@ export const AuthorizedCidrs = ({
 
   const formMethods = useForm({
     defaultValues: { cidrs: cidrs ?? [] },
-    values: { cidrs: cidrs ?? [] },
     mode: "onChange",
     resolver: zodResolver(schema),
+    values: { cidrs: cidrs ?? [] },
   });
   const { formState, getValues, reset } = formMethods;
 
