@@ -16,7 +16,7 @@ export const createSubscriptionForGroup =
       : TE.right(void 0);
 
 const shouldCreateManageGroupSubscription = (group: GroupChangeEvent) =>
-  GroupCreateEvent.is(group) && group.status === "ACTIVE";
+  GroupCreateEvent.is(group);
 
 const createManageGroupSubscription = (
   apimService: ApimUtils.ApimService,
