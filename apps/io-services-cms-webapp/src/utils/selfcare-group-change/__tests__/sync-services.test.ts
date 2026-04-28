@@ -2,7 +2,7 @@ import { ServiceLifecycle } from "@io-services-cms/models";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GroupChangeEvent, syncServices, syncSubscription } from "..";
+import { GroupChangeEvent, syncServices } from "..";
 
 const mocks = vi.hoisted(() => ({
   ApimService: { getSubscription: vi.fn(), updateSubscription: vi.fn() },
@@ -27,6 +27,7 @@ describe("syncServices", () => {
       productId: "prod-io",
       id: "groupId",
       name: "name",
+      institutionId: "institutionId",
       status: "ACTIVE",
     } as GroupChangeEvent;
 
@@ -51,6 +52,7 @@ describe("syncServices", () => {
       productId: "prod-io",
       id: groupId,
       name: "name",
+      institutionId: "institutionId",
       status: "DELETED",
     } as GroupChangeEvent;
     const error = new Error("error on executeOnServicesFilteredByGroupId");
@@ -82,6 +84,7 @@ describe("syncServices", () => {
       productId: "prod-io",
       id: groupId,
       name: "name",
+      institutionId: "institutionId",
       status: "DELETED",
     } as GroupChangeEvent;
     const serviceIds = ["service1", "service2"];
@@ -129,6 +132,7 @@ describe("syncServices", () => {
       productId: "prod-io",
       id: groupId,
       name: "name",
+      institutionId: "institutionId",
       status: "DELETED",
     } as GroupChangeEvent;
     const serviceIds = ["service1", "service2"];
@@ -181,6 +185,7 @@ describe("syncServices", () => {
       productId: "prod-io",
       id: groupId,
       name: "name",
+      institutionId: "institutionId",
       status: "DELETED",
     } as GroupChangeEvent;
     const serviceIds = ["service1", "service2"];
