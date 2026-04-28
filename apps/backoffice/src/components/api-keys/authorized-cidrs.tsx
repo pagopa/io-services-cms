@@ -1,7 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
-import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as z from "zod";
 
@@ -27,7 +26,7 @@ const schema = z.object({
 
 /** Show and Edit an IP List in CIDR format */
 export const AuthorizedCidrs = ({
-  cidrs = [],
+  cidrs,
   description,
   editable,
   onSaveClick,
@@ -35,7 +34,8 @@ export const AuthorizedCidrs = ({
   const { t } = useTranslation();
 
   const formMethods = useForm({
-    defaultValues: { cidrs },
+    defaultValues: { cidrs: cidrs ?? [] },
+    values: { cidrs: cidrs ?? [] },
     mode: "onChange",
     resolver: zodResolver(schema),
   });
@@ -49,13 +49,8 @@ export const AuthorizedCidrs = ({
   };
 
   const handleCancel = () => {
-    reset({ cidrs });
+    reset({ cidrs: cidrs ?? [] });
   };
-
-  useEffect(() => {
-    reset({ cidrs });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cidrs]);
 
   return (
     <Box
