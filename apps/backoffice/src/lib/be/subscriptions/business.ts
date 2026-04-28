@@ -16,6 +16,10 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
 import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+import archiver from "archiver";
+import { randomBytes } from "crypto";
+import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
   ManagedInternalError,
   PreconditionFailedError,
@@ -31,10 +35,6 @@ import {
   getSubscriptionAuthorizedCIDRs,
   upsertSubscriptionAuthorizedCIDRs,
 } from "./cosmos";
-import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
-import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
-import { randomBytes } from "crypto";
-import archiver from "archiver";
 
 // Register zip-encrypted format with archiver (once per process)
 try {
@@ -546,23 +546,26 @@ async function generateApiKeysExportsInner(
     );
   }
 
-  enrichedAggregateData.map(async (aggregate) => {
+  const enrichedAggregateDataWithKeys = [];
+  for (const aggregate of enrichedAggregateData) {
     const subscriptionManageGroupId = `${ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX}${aggregate.groupId}`;
     const { primaryKey, secondaryKey } = await listSubscriptionSecrets(
       subscriptionManageGroupId,
     );
+
     if (!primaryKey || !secondaryKey) {
       throw new ManagedInternalError(
         "Data inconsistency",
         `Missing subscription keys for manage-group subscription '${subscriptionManageGroupId}' related to aggregate '${aggregate.aggregateId}' and group '${aggregate.groupId}'`,
       );
     }
-    return {
+
+    enrichedAggregateDataWithKeys.push({
       fc: aggregate.aggregateFiscalCode,
       pk: primaryKey,
       sk: secondaryKey,
-    };
-  });
+    });
+  }
 
   try {
     const archive = archiver.create(
@@ -573,7 +576,7 @@ async function generateApiKeysExportsInner(
         password,
       } as archiver.ArchiverOptions,
     );
-    archive.append(JSON.stringify(enrichedAggregateData), {
+    archive.append(JSON.stringify(enrichedAggregateDataWithKeys), {
       name: "api-keys.json",
     });
     const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(
