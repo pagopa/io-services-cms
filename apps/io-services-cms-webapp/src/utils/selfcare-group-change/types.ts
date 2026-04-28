@@ -24,8 +24,10 @@ export type GroupCreateEvent = t.TypeOf<typeof GroupCreateEvent>;
 export const GroupCreateEvent = t.intersection([
   GroupChangeEvent,
   t.type({
-    modifiedAt: t.null,
     parentInstitutionId: NonEmptyString,
+  }),
+  t.partial({
+    modifiedAt: t.null,
   }),
 ]);
 
