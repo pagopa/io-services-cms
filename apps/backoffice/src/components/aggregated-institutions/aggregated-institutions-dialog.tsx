@@ -1,5 +1,14 @@
 import { TextFieldController } from "@/components/forms/controllers";
 import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
+import {
+  GeneratePasswordStatus,
+  trackEaFileGeneratePasswordCancelEvent,
+  trackEaFileGeneratePasswordConfirmEvent,
+  trackEaFileGeneratePasswordEvent,
+  trackEaFileGeneratePasswordMissingEvent,
+  trackEaFileGeneratePasswordNotCompliantEvent,
+  trackEaFileGeneratePasswordUnmatchedEvent,
+} from "@/utils/mix-panel";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
@@ -16,9 +25,24 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
 import { TFunction, useTranslation } from "next-i18next";
-import { useState } from "react";
-import { FormProvider, useForm } from "react-hook-form";
+import { useCallback, useEffect, useState } from "react";
+import { FormProvider, SubmitErrorHandler, useForm } from "react-hook-form";
 import { z } from "zod";
+
+const getLocalizedErrorMessages = (t: TFunction) => ({
+  emptyConfirmPassword: t(
+    "routes.aggregated-institutions.exportDialog.fields.errors.emptyConfirmPassword",
+  ),
+  emptyPassword: t(
+    "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
+  ),
+  invalidPassword: t(
+    "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
+  ),
+  passwordDontMatch: t(
+    "routes.aggregated-institutions.exportDialog.fields.errors.passwordDontMatch",
+  ),
+});
 
 export interface AggregatedInstitutionsDialogProps {
   isDownloadReady?: boolean;
@@ -33,38 +57,25 @@ const defaultFormValues = {
   password: "" as AggregatedInstitutionsManageKeysPassword,
 };
 
-const getValidationSchema = (t: TFunction) =>
-  z
+const getValidationSchema = (t: TFunction) => {
+  const errorMessages = getLocalizedErrorMessages(t);
+
+  return z
     .object({
-      confirmPassword: z
-        .string()
-        .min(
-          1,
-          t(
-            "routes.aggregated-institutions.exportDialog.fields.errors.emptyConfirmPassword",
-          ),
-        ),
+      confirmPassword: z.string().min(1, errorMessages.emptyConfirmPassword),
       password: z
         .string()
-        .min(
-          1,
-          t(
-            "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
-          ),
-        )
+        .min(1, errorMessages.emptyPassword)
         .refine(
           (password) => AggregatedInstitutionsManageKeysPassword.is(password),
-          t(
-            "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
-          ),
+          errorMessages.invalidPassword,
         ),
     })
     .refine((schema) => schema.password === schema.confirmPassword, {
-      message: t(
-        "routes.aggregated-institutions.exportDialog.fields.errors.passwordDontMatch",
-      ),
+      message: errorMessages.passwordDontMatch,
       path: ["confirmPassword"],
     });
+};
 
 export const AggregatedInstitutionsDialog = ({
   isDownloadReady,
@@ -73,8 +84,11 @@ export const AggregatedInstitutionsDialog = ({
   onConfirm,
   submitting,
 }: AggregatedInstitutionsDialogProps) => {
+  const passwordStatus: GeneratePasswordStatus = isDownloadReady
+    ? "replacement"
+    : "new_password";
   const { t } = useTranslation();
-  const method = useForm({
+  const methods = useForm({
     defaultValues: defaultFormValues,
     mode: "onTouched",
     resolver: zodResolver(getValidationSchema(t)),
@@ -82,22 +96,59 @@ export const AggregatedInstitutionsDialog = ({
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleClose = () => {
-    method.reset();
+  useEffect(() => {
+    if (isOpen) {
+      trackEaFileGeneratePasswordEvent(passwordStatus);
+    }
+  }, [isOpen, passwordStatus]);
+
+  const resetAndClose = useCallback(() => {
     setShowNewPassword(false);
     setShowConfirmPassword(false);
+    methods.reset(defaultFormValues);
     onClose();
-  };
+  }, [methods, onClose]);
+
+  const handleClose = useCallback(() => {
+    trackEaFileGeneratePasswordCancelEvent(passwordStatus);
+    resetAndClose();
+  }, [passwordStatus, resetAndClose]);
 
   const handleConfirm = () => {
-    onConfirm(method.getValues().password);
-    handleClose();
+    const password = methods.getValues("password");
+    trackEaFileGeneratePasswordConfirmEvent(passwordStatus);
+    onConfirm(password);
+    resetAndClose();
   };
+
+  const handleSubmitError = useCallback<
+    SubmitErrorHandler<z.infer<ReturnType<typeof getValidationSchema>>>
+  >(
+    (errors) => {
+      const errorMessages = getLocalizedErrorMessages(t);
+
+      if (
+        errors?.password?.message === errorMessages.emptyPassword ||
+        errors?.confirmPassword?.message === errorMessages.emptyConfirmPassword
+      ) {
+        trackEaFileGeneratePasswordMissingEvent(passwordStatus);
+      }
+      if (errors?.password?.message === errorMessages.invalidPassword) {
+        trackEaFileGeneratePasswordNotCompliantEvent(passwordStatus);
+      }
+      if (
+        errors?.confirmPassword?.message === errorMessages.passwordDontMatch
+      ) {
+        trackEaFileGeneratePasswordUnmatchedEvent(passwordStatus);
+      }
+    },
+    [t, passwordStatus],
+  );
 
   return (
     <Dialog fullWidth onClose={handleClose} open={isOpen}>
-      <FormProvider {...method}>
-        <form onSubmit={method.handleSubmit(handleConfirm)}>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(handleConfirm, handleSubmitError)}>
           <DialogTitle>
             {t("routes.aggregated-institutions.exportDialog.title")}
           </DialogTitle>

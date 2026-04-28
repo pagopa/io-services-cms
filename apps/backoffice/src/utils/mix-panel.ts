@@ -6,7 +6,7 @@ import mixpanel from "mixpanel-browser";
 export type TechEventResult = "error" | "success";
 
 type ApiKeyType = "primary" | "secondary";
-type GeneratePasswordStatus = "new_password" | "replacement";
+export type GeneratePasswordStatus = "new_password" | "replacement";
 
 interface MixPanelEventsStructure {
   readonly IO_BO_APIKEY_PAGE: Record<string, never>;

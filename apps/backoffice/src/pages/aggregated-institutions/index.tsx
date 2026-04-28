@@ -20,6 +20,7 @@ import { authOptions } from "@/lib/auth/auth-options";
 import { isAdmin } from "@/utils/auth-util";
 import {
   trackAggregatedInstitutionsPageEvent,
+  trackEaFileGenerateStartEvent,
   trackEaManageKeyCopyEvent,
   trackEaManageKeyRegenerateEvent,
   trackEaManageKeyShowEvent,
@@ -465,6 +466,7 @@ export default function AggregatedInstitutions() {
             hideGenerate={Boolean(currentSearchByInstitutionName)}
             onEmptySearch={resetSearchByInstitutionName}
             onGenerateClick={() => {
+              trackEaFileGenerateStartEvent();
               setIsModalOpened(true);
             }}
             onSearchClick={handleSearchByInstitutionNameClick}
