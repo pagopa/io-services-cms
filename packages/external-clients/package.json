@@ -21,7 +21,8 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\"",
-    "generate": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --response-decoders"
+    "generate:api-definitions": "rm -rf ./src/generated/api & gen-api-models --api-spec ./openapi.yaml --out-dir ./src/generated/api --response-decoders",
+    "generate:selfcare-api-models": "rm -rf ./src/generated/selfcare && gen-api-models --api-spec ./openapi-selfcare.json --out-dir ./src/generated/selfcare --response-decoders"
   },
   "dependencies": {
     "@azure/arm-apimanagement": "^10.0.0",
