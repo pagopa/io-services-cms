@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmosdb_model";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { NextResponse } from "next/server";
