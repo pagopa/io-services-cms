@@ -30,6 +30,8 @@ export interface ApiKeysExportsPort {
   ): Promise<void>;
 
   finalizeFile(
+    aggregatorId: string,
+    userId: string,
     fileName: string,
     payload: Stream.Readable,
     payloadContentType?: string,

@@ -79,12 +79,12 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
         blobs.push({ fileName: blob.name, state: stateResult.right });
       }
     } catch (error) {
-      console.error("Errore durante la ricerca dei tag:", error);
+      throw new ManagedInternalError(
+        "Errore durante la ricerca dei file di esportazione delle chiavi API",
+        error instanceof Error ? error.message : error,
+      );
     }
 
-    if (blobs.length === 0) {
-      console.log("Nessun blob trovato con i tag");
-    }
     return Promise.resolve(blobs);
   }
 
@@ -113,6 +113,8 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
   }
 
   async finalizeFile(
+    aggregatorId: string,
+    userId: string,
     fileName: string,
     payload: Stream.Readable,
     payloadContentType?: string,
@@ -123,6 +125,8 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
     try {
       await blockBlobClient.uploadStream(payload, undefined, undefined, {
         tags: {
+          institutionId: aggregatorId,
+          userId,
           state: StateEnumReady.DONE,
         },
         blobHTTPHeaders: {

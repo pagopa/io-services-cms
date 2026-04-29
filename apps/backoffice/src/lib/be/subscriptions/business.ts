@@ -509,7 +509,7 @@ export async function generateApiKeysExports(
     );
   }
 
-  const fileName = randomBytes(32).toString("hex"); // generate a random string to be used as file name for the export file to avoid conflicts in case of multiple export generation requests
+  const fileName = randomBytes(16).toString("hex") + ".zip"; // generate a random string to be used as file name for the export file to avoid conflicts in case of multiple export generation requests
 
   await apiKeysExportsAdapter.initializeFile(fileName, aggregatorId, userId);
 
@@ -536,7 +536,7 @@ export async function generateApiKeysExports(
 
 async function generateApiKeysExportsInner(
   aggregatorId: string,
-  userId: string, // not used for now, but we might want to use it if upload file override all tags and we need to re-apply the userId and institutionId tags after the upload
+  userId: string,
   password: string,
   fileName: string,
 ): Promise<void> {
@@ -576,22 +576,35 @@ async function generateApiKeysExportsInner(
     });
   }
 
+  const archive = archiver.create(
+    "zip-encrypted" as archiver.Format,
+    {
+      zlib: { level: 8 },
+      encryptionMethod: "aes256",
+      password,
+    } as archiver.ArchiverOptions,
+  );
+
   try {
-    const archive = archiver.create(
-      "zip-encrypted" as archiver.Format,
-      {
-        zlib: { level: 8 },
-        encryptionMethod: "aes256",
-        password,
-      } as archiver.ArchiverOptions,
+    archive
+      .append(JSON.stringify(enrichedAggregateDataWithKeys), {
+        name: "api-keys.json",
+      })
+      .finalize();
+  } catch (error) {
+    throw new ManagedInternalError(
+      "Error creating export archive",
+      error instanceof Error ? error.message : error,
     );
-    archive.append(JSON.stringify(enrichedAggregateDataWithKeys), {
-      name: "api-keys.json",
-    });
+  }
+
+  try {
     const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(
       process.env,
     );
     await apiKeysExportsAdapter.finalizeFile(
+      aggregatorId,
+      userId,
       fileName,
       archive,
       "application/zip",
@@ -600,8 +613,8 @@ async function generateApiKeysExportsInner(
     throw error instanceof ManagedInternalError
       ? error
       : new ManagedInternalError(
-          "Error generating export file",
-          error instanceof Error ? error.message : String(error),
+          "Error uploading export file",
+          error instanceof Error ? error.message : error,
         );
   }
 }
