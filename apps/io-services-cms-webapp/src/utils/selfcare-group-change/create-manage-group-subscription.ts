@@ -35,7 +35,7 @@ const createManageGroupSubscription = (
     TE.mapLeft(
       (err) =>
         new Error(
-          `Failed to create manage-group subscription ${group.id}, reason: ${err instanceof Error ? err.message : JSON.stringify(err)}`,
+          `Failed to create manage-group subscription ${ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id}, reason: ${err instanceof Error ? err.message : JSON.stringify(err)}`,
         ),
     ),
     TE.map(() => void 0),

@@ -93,7 +93,7 @@ describe("createSubscriptionForGroup", () => {
       parentInstitutionId: "parent-institution-id",
     } as GroupChangeEvent;
     const error = new Error(
-      `Failed to create manage-group subscription ${group.id}, reason: No user found for institution ${group.institutionId}`,
+      `Failed to create manage-group subscription ${ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id}, reason: No user found for institution ${group.institutionId}`,
     );
 
     mocks.ApimService.getUserByEmail.mockReturnValueOnce(TE.right(O.none));
@@ -120,7 +120,7 @@ describe("createSubscriptionForGroup", () => {
     } as UserContract;
     const reason = "upsert failed";
     const error = new Error(
-      `Failed to create manage-group subscription ${group.id}, reason: ${reason}`,
+      `Failed to create manage-group subscription ${ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id}, reason: ${reason}`,
     );
 
     mocks.ApimService.getUserByEmail.mockReturnValueOnce(
