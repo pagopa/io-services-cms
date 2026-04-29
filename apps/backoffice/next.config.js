@@ -20,6 +20,10 @@ const nextConfig = {
         ...config.resolve.alias,
         "msw/browser": false,
       };
+      config.externals = [
+        ...(config.externals || []),
+        "@opentelemetry/instrumentation",
+      ];
     } else {
       config.resolve.alias = {
         ...config.resolve.alias,
