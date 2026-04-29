@@ -9,7 +9,11 @@ const nextConfig = {
   experimental: {
     clientRouterFilter: false, // fix full reload for pages that contains "-"
   },
-  serverExternalPackages: ["pino"],
+  serverExternalPackages: [
+    "pino",
+    "@opentelemetry/instrumentation-pino",
+    "@pagopa/azure-tracing",
+  ],
   // https://github.com/mswjs/msw/issues/1801
   // Setting `resolve.alias` to `false` will tell webpack to ignore a module.
   // `msw/node` is a server-only module that exports methods not available in the `browser`.
@@ -20,10 +24,6 @@ const nextConfig = {
         ...config.resolve.alias,
         "msw/browser": false,
       };
-      config.externals = [
-        ...(config.externals || []),
-        "@opentelemetry/instrumentation",
-      ];
     } else {
       config.resolve.alias = {
         ...config.resolve.alias,
