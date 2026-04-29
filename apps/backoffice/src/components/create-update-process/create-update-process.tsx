@@ -28,7 +28,7 @@ export interface BuilderStep {
   /** if specified, a "more info" button will be displayed on top of step _(immediately under step label/description)_ */
   moreInfoUrl?: string;
   /** step fields validation schema as Zod type definitions */
-  validationSchema: ZodType<any, any, any>;
+  validationSchema: ZodType<FieldValues, FieldValues, any>;
 }
 
 export type CreateUpdateMode = "create" | "update";
