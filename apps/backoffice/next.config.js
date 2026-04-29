@@ -8,7 +8,7 @@ const nextConfig = {
   output: "standalone",
   experimental: {
     clientRouterFilter: false, // fix full reload for pages that contains "-"
-    serverComponentsExternalPackages: ["pino"],
+    serverExternalPackages: ["pino"],
   },
   // https://github.com/mswjs/msw/issues/1801
   // Setting `resolve.alias` to `false` will tell webpack to ignore a module.
