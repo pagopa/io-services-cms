@@ -40,5 +40,6 @@ declare module "next-auth" {
 }
 
 declare module "@auth/core/jwt" {
-  interface JWT extends Partial<BackOfficeUser> {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  interface JWT extends BackOfficeUser {}
 }

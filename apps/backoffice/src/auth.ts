@@ -12,7 +12,8 @@ const authConfig: NextAuthConfig = {
     jwt({ token, user }) {
       /* update the token based on the user object */
       if (user) {
-        token.id = user.id;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        token.id = user.id!;
         token.institution = user.institution;
         token.permissions = user.permissions;
         token.parameters = user.parameters;
@@ -34,15 +35,10 @@ const authConfig: NextAuthConfig = {
     session({ session, token }) {
       /* update the session.user based on the token object */
       if (token && session.user) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        session.user.id = token.id!;
-        // These fields are always set by the jwt callback on login
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        session.user.institution = token.institution!;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        session.user.permissions = token.permissions!;
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        session.user.parameters = token.parameters!;
+        session.user.id = token.id;
+        session.user.institution = token.institution;
+        session.user.permissions = token.permissions;
+        session.user.parameters = token.parameters;
       }
       return session;
     },
