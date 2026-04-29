@@ -1,5 +1,15 @@
 # io-services-cms-backoffice
 
+## 2.2.0
+
+### Minor Changes
+
+- 6ea72516: Integrate manage-keys API operations
+
+### Patch Changes
+
+- af429d58: Add @pagopa/azure-tracing and pino logger
+
 ## 2.1.1
 
 ### Patch Changes
