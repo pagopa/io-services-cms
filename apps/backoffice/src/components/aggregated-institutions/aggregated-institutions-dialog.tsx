@@ -117,7 +117,7 @@ export const AggregatedInstitutionsDialog = ({
   const handleConfirm = () => {
     const password = methods.getValues("password");
     trackEaFileGeneratePasswordConfirmEvent(passwordStatus);
-    onConfirm(password);
+    onConfirm(password as AggregatedInstitutionsManageKeysPassword);
     resetAndClose();
   };
 
