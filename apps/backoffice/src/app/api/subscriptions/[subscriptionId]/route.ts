@@ -54,7 +54,7 @@ export const DELETE = withJWTAuthHandler(
         );
       } else {
         handlerErrorLog(
-          `An Error has occurred while deleting subscription with id ${params.subscriptionId} for institution having APIM userId: ${backofficeUser.parameters.userId}, caused by: `,
+          `An Error has occurred while deleting subscription with id ${params.subscriptionId} for institution having APIM userId: ${backofficeUser.parameters.userId}`,
           error,
         );
         return handleInternalErrorResponse("SubscriptionDeletionError", error);

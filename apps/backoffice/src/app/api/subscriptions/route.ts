@@ -76,7 +76,7 @@ export const PUT = withJWTAuthHandler(
         );
       }
       handlerErrorLog(
-        `An Error has occurred while creating subscription for institution having APIM userId: ${backofficeUser.parameters.userId}, caused by: `,
+        `An Error has occurred while creating subscription for institution having APIM userId: ${backofficeUser.parameters.userId}`,
         error,
       );
       return handleInternalErrorResponse("SubscriptionCreateError", error);
@@ -135,7 +135,7 @@ export const GET = withJWTAuthHandler(
       );
     } catch (error) {
       handlerErrorLog(
-        `An Error has occurred while retrieving manage group subscriptions for user having Selfcare userId = '${backofficeUser.id}' and institution having APIM userId = '${backofficeUser.parameters.userId}', caused by: `,
+        `An Error has occurred while retrieving manage group subscriptions for user having Selfcare userId = '${backofficeUser.id}' and institution having APIM userId = '${backofficeUser.parameters.userId}'`,
         error,
       );
       return handleInternalErrorResponse("SubscriptionsRetrieveError", error);

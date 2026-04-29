@@ -14,6 +14,8 @@ import { CosmosErrors } from "@pagopa/io-functions-commons/dist/src/utils/cosmos
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import { NextResponse } from "next/server";
 
+import { logger } from "./logger";
+
 export class GroupNotFoundError extends Error {
   constructor(message: string) {
     super("the Group does not exists");
@@ -182,22 +184,14 @@ export const handlePreconditionFailedErrorResponse = (
   );
 };
 
-export const handlerErrorLog = (logPrefix: string, e: unknown): void => {
-  if (e instanceof ManagedInternalError) {
-    console.error(
-      `${logPrefix}, caused by: ${e.message} , additionalDetails: ${e.additionalDetails}`,
-    );
+export const handlerErrorLog = (logPrefix: string, error: unknown): void => {
+  if (error instanceof ManagedInternalError) {
+    logger.error(`${logPrefix}, caused by: ${error.message}`, {
+      additionalDetails: error.additionalDetails,
+    });
     return;
-  } else if (e instanceof Error) {
-    console.error(`${logPrefix}, caused by: `, e);
-    return;
-  } else {
-    console.error(
-      `${logPrefix} , caused by: unknown error ,additionalDetails: ${JSON.stringify(
-        e,
-      )}`,
-    );
   }
+  logger.error(logPrefix, { error });
 };
 
 export const cosmosErrorsToManagedInternalError = (

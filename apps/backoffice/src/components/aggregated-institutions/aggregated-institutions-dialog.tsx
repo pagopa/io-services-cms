@@ -90,7 +90,9 @@ export const AggregatedInstitutionsDialog = ({
   };
 
   const handleConfirm = () => {
-    onConfirm(method.getValues().password);
+    onConfirm(
+      method.getValues().password as AggregatedInstitutionsManageKeysPassword,
+    );
     handleClose();
   };
 

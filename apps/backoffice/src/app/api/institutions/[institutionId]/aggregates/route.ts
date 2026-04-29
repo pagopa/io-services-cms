@@ -3,6 +3,7 @@ import {
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
 import { retrieveInstitutionAggregates } from "@/lib/be/institutions/business";
+import { logger } from "@/lib/be/logger";
 import {
   parseLimitQueryParam,
   parseOffsetQueryParam,
@@ -67,9 +68,9 @@ export const GET = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
-      console.error(
-        `An Error has occurred while retrieving institution aggregates for institutionId: ${params.institutionId}, caused by: `,
-        error,
+      logger.error(
+        `An Error has occurred while retrieving institution aggregates for institutionId: ${params.institutionId}`,
+        { error },
       );
 
       return handleInternalErrorResponse(
