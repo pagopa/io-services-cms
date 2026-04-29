@@ -23,7 +23,7 @@ const createManageGroupSubscription = (
   group: GroupChangeEvent,
 ): TE.TaskEither<Error, void> =>
   pipe(
-    getUserForInstitution(apimService, group.institutionId),
+    getApimUserFromInstitutionId(apimService, group.institutionId),
     TE.chain((user) => TE.fromEither(getIdFromUser(user))),
     TE.chain((userId) =>
       apimService.upsertSubscription(
@@ -41,7 +41,7 @@ const createManageGroupSubscription = (
     TE.map(() => void 0),
   );
 
-const getUserForInstitution = (
+const getApimUserFromInstitutionId = (
   apimService: ApimUtils.ApimService,
   institutionId: string,
 ) =>
