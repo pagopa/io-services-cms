@@ -21,7 +21,7 @@ locals {
       API_APIM_MOCKING          = false
 
       # Logs
-      AI_SDK_CONNECTION_STRING = data.azurerm_application_insights.ai_common.connection_string
+      APPLICATIONINSIGHTS_CONNECTION_STRING = data.azurerm_application_insights.ai_common.connection_string
       # NextAuthJS
       AUTH_URL    = "https://selfcare.io.pagopa.it/"
       AUTH_SECRET = var.bo_auth_session_secret

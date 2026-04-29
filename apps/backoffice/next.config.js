@@ -8,8 +8,8 @@ const nextConfig = {
   output: "standalone",
   experimental: {
     clientRouterFilter: false, // fix full reload for pages that contains "-"
-    serverExternalPackages: ["pino"],
   },
+  serverExternalPackages: ["pino"],
   // https://github.com/mswjs/msw/issues/1801
   // Setting `resolve.alias` to `false` will tell webpack to ignore a module.
   // `msw/node` is a server-only module that exports methods not available in the `browser`.

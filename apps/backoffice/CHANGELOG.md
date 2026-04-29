@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.2.1
+
+### Patch Changes
+
+- 1e0a0325: Fix connection string and remove unused dependencies
+
 ## 2.2.0
 
 ### Minor Changes
