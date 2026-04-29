@@ -84,9 +84,9 @@ export const AggregatedInstitutionsDialog = ({
   onConfirm,
   submitting,
 }: AggregatedInstitutionsDialogProps) => {
-  const passwordStatus: GeneratePasswordStatus = isDownloadReady
+  const passwordStatus: GeneratePasswordStatus = isDownloadReady // NOSONAR
     ? "replacement"
-    : "new_password"; // NOSONAR
+    : "new_password";
   const { t } = useTranslation();
   const methods = useForm({
     defaultValues: defaultFormValues,
