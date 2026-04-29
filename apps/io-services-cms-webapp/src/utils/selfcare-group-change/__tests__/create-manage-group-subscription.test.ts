@@ -118,15 +118,16 @@ describe("createSubscriptionForGroup", () => {
     const user = {
       id: "/users/user-id",
     } as UserContract;
+    const reason = "upsert failed";
     const error = new Error(
-      `Failed to create manage-group subscription ${group.id}, reason: upsert failed`,
+      `Failed to create manage-group subscription ${group.id}, reason: ${reason}`,
     );
 
     mocks.ApimService.getUserByEmail.mockReturnValueOnce(
       TE.right(O.some(user)),
     );
     mocks.ApimService.upsertSubscription.mockReturnValueOnce(
-      TE.left(new Error("upsert failed")),
+      TE.left(new Error(reason)),
     );
 
     //when
