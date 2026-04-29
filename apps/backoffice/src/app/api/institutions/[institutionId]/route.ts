@@ -4,6 +4,7 @@ import {
   handleInternalErrorResponse,
 } from "@/lib/be/errors";
 import { retrieveInstitution } from "@/lib/be/institutions/business";
+import { logger } from "@/lib/be/logger";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
@@ -27,17 +28,16 @@ export const GET = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
-      console.error(
-        `An Error has occurred while searching institutionId: ${params.institutionId}, caused by: `,
-        error,
+      logger.error(
+        `An Error has occurred while searching institutionId: ${params.institutionId}`,
+        { error },
       );
 
       if (error instanceof InstitutionNotFoundError) {
         return NextResponse.json(
           {
             detail: error.message,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            status: HTTP_STATUS_NOT_FOUND as any,
+            status: HTTP_STATUS_NOT_FOUND,
             title: "InstitutionNotFoundError",
           },
           { status: HTTP_STATUS_NOT_FOUND },
