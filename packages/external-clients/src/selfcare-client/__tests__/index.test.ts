@@ -1,0 +1,547 @@
+import * as E from "fp-ts/lib/Either";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { getMockInstitutionProducts } from "../mocks/data/selfcare-data";
+import { TypeEnum } from "../../generated/selfcare/DelegationResponse";
+import { DelegationWithPaginationResponse } from "../../generated/selfcare/DelegationWithPaginationResponse";
+import { InstitutionResponse } from "../../generated/selfcare/InstitutionResponse";
+import { PageOfUserGroupResource } from "../../generated/selfcare/PageOfUserGroupResource";
+import { ProductResource } from "../../generated/selfcare/ProductResource";
+import { StatusEnum } from "../../generated/selfcare/UserGroupResource";
+import {
+  getSelfcareClient,
+  resetInstance,
+  UserInstitutions,
+} from "../index";
+
+const mocks: {
+  institution: InstitutionResponse;
+  userInstitutions: UserInstitutions;
+  aSelfcareUserId: string;
+  institutionGroups: PageOfUserGroupResource;
+  delegations: DelegationWithPaginationResponse;
+} = {
+  institution: {
+    id: "institutionId",
+    origin: "IPA",
+    originId: "originId",
+  } as InstitutionResponse,
+  userInstitutions: [
+    {
+      institutionId: "institutionId1",
+      userId: "userId",
+    },
+    {
+      institutionId: "institutionId2",
+      userId: "userId",
+    },
+  ],
+  aSelfcareUserId: "aSelfcareUserId",
+  institutionGroups: {
+    content: [
+      {
+        description: "institutionGroups description",
+        id: "institutionGroupsID",
+        institutionId: "institutionGroupsInstID",
+        name: "institutionGroupsName",
+        productId: "institutionGroupsProdID",
+        status: "ACTIVE" as StatusEnum,
+      },
+      {
+        description: "institutionGroupsDescription2",
+        id: "institutionGroupsID2",
+        institutionId: "institutionGroupsInstID2",
+        name: "institutionGroupsName2",
+        productId: "institutionGroupsProdID2",
+        status: "DELETED" as StatusEnum,
+      },
+    ],
+    number: 0,
+    size: 0,
+    totalElements: 0,
+    totalPages: 0,
+  },
+  delegations: {
+    delegations: [
+      {
+        id: "delegationId1",
+        institutionId: "institutionGroupsInstID",
+        institutionName: "institutionGroupsName",
+        type: "PT" as TypeEnum,
+        productId: "productId1",
+        brokerId: "brokerId1",
+      },
+      {
+        id: "delegationId2",
+        institutionId: "institutionGroupsInstID2",
+        institutionName: "institutionGroupsName2",
+        type: "PT" as TypeEnum,
+        productId: "productId2",
+        brokerId: "brokerId2",
+      },
+    ],
+    pageInfo: {
+      pageNo: 0,
+      pageSize: 10,
+      totalElements: 2,
+      totalPages: 1,
+    },
+  },
+};
+
+const { create, isAxiosError, getMock } = vi.hoisted(() => {
+  const getMock = vi.fn();
+  return {
+    create: vi.fn(() => ({
+      get: getMock,
+    })),
+    getMock,
+    isAxiosError: vi.fn().mockReturnValue(false),
+  };
+});
+
+vi.mock("axios", async () => {
+  const actual = await vi.importActual("axios");
+  return {
+    ...(actual as any),
+    default: { create, isAxiosError },
+  };
+});
+
+vi.hoisted(() => {
+  const originalEnv = process.env;
+  process.env = {
+    ...originalEnv,
+    SELFCARE_EXTERNAL_API_BASE_URL: "https://example.com",
+    SELFCARE_API_KEY: "abc123",
+    SELFCARE_API_MOCKING: "false",
+  };
+});
+
+beforeEach(() => {
+  vi.restoreAllMocks();
+  // reset selfcare client instance
+  resetInstance();
+});
+
+describe("Selfcare Client", () => {
+  const commonExpectation = () => {
+    expect(create).toHaveBeenCalledOnce();
+    expect(create).toHaveBeenCalledWith({
+      baseURL: process.env.SELFCARE_EXTERNAL_API_BASE_URL,
+      headers: {
+        "Ocp-Apim-Subscription-Key": process.env.SELFCARE_API_KEY,
+      },
+      httpAgent: expect.anything(),
+      httpsAgent: expect.anything(),
+      timeout: 5000,
+    });
+  };
+  describe("getUserAuthorizedInstitutions", () => {
+    it("should return the institutions found", async () => {
+      // when
+      getMock.mockResolvedValueOnce({
+        status: 200,
+        data: mocks.userInstitutions,
+      });
+
+      // when
+      const result = await getSelfcareClient().getUserAuthorizedInstitutions(
+        mocks.aSelfcareUserId,
+      )();
+
+      // then
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(mocks.userInstitutions);
+      }
+      commonExpectation();
+      expect(getMock).toHaveBeenCalledWith("/users", {
+        params: {
+          userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
+          size: 10000,
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+    });
+
+    it("should return an error when received an error from selfcare", async () => {
+      getMock.mockRejectedValueOnce({
+        message: "Axios Error Message",
+        response: { status: 500 },
+      });
+      isAxiosError.mockReturnValueOnce(true);
+
+      const result = await getSelfcareClient().getUserAuthorizedInstitutions(
+        mocks.aSelfcareUserId,
+      )();
+
+      expect(getMock).toHaveBeenCalledWith("/users", {
+        params: {
+          userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
+          size: 10000,
+        },
+      });
+      expect(isAxiosError).toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return an error when received a bad response from selfcare", async () => {
+      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+      const result = await getSelfcareClient().getUserAuthorizedInstitutions(
+        mocks.aSelfcareUserId,
+      )();
+
+      expect(getMock).toHaveBeenCalledWith("/users", {
+        params: {
+          userId: mocks.aSelfcareUserId,
+          states: "ACTIVE",
+          size: 10000,
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+  });
+
+  describe("getInstitutionById", () => {
+    it("should return the institution found", async () => {
+      getMock.mockResolvedValueOnce({ status: 200, data: mocks.institution });
+
+      const result = await getSelfcareClient().getInstitutionById(
+        mocks.institution.id as string,
+      )();
+
+      expect(getMock).toHaveBeenCalledWith(
+        `/institutions/${mocks.institution.id}`,
+      );
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(mocks.institution);
+      }
+      commonExpectation();
+    });
+
+    it.each`
+      scenario             | isAxiosErrorMockResponse | error
+      ${"an axios error"}  | ${true}                  | ${"axios error"}
+      ${"a generic error"} | ${false}                 | ${"non axios error"}
+    `(
+      "should return an error when received $scenario from selfcare",
+      async ({ isAxiosErrorMockResponse, error }) => {
+        // given
+        isAxiosError.mockReturnValueOnce(isAxiosErrorMockResponse);
+        getMock.mockRejectedValueOnce(error);
+
+        // when
+        const result = await getSelfcareClient().getInstitutionById(
+          mocks.institution.id as string,
+        )();
+
+        // then
+        expect(getMock).toHaveBeenCalledOnce();
+        expect(getMock).toHaveBeenCalledWith(
+          `/institutions/${mocks.institution.id}`,
+        );
+        expect(isAxiosError).toHaveBeenCalledOnce();
+        expect(E.isLeft(result)).toBeTruthy();
+        if (E.isLeft(result)) {
+          expect(result.left).toStrictEqual(
+            isAxiosErrorMockResponse
+              ? error
+              : new Error(
+                  `Error calling selfcare getInstitutionById API: ${error}`,
+                ),
+          );
+        }
+        commonExpectation();
+      },
+    );
+
+    it("should return an error when received a bad response from selfcare", async () => {
+      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+      const result = await getSelfcareClient().getInstitutionById(
+        mocks.institution.id as string,
+      )();
+
+      expect(getMock).toHaveBeenCalledWith(
+        `/institutions/${mocks.institution.id}`,
+      );
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+  });
+
+  describe("getInstitutionGroups", () => {
+    it.each`
+      givenParams                                                                                 | expectedParams
+      ${{ state: undefined, size: undefined, page: undefined, parentInstitutionId: undefined }}   | ${{ status: "ACTIVE", size: undefined, page: undefined, parentInstitutionId: undefined }}
+      ${{ state: "SUSPENDED", size: undefined, page: undefined, parentInstitutionId: undefined }} | ${{ status: "SUSPENDED", size: undefined, page: undefined, parentInstitutionId: undefined }}
+      ${{ state: "*", size: 5, page: 1, parentInstitutionId: "pInstId" }}                         | ${{ status: undefined, size: 5, page: 1, parentInstitutionId: "pInstId" }}
+    `(
+      "should call selfcare with the correct params when called with $givenParams",
+      async ({ givenParams, expectedParams }) => {
+        // given
+        const institutionId = mocks.institutionGroups.content[0].institutionId;
+        getMock.mockResolvedValueOnce({
+          status: 200,
+          data: mocks.institutionGroups,
+        });
+
+        // when
+        const result = await getSelfcareClient().getInstitutionGroups(
+          institutionId,
+          givenParams.size,
+          givenParams.page,
+          givenParams.state,
+          givenParams.parentInstitutionId,
+        )();
+
+        // then
+        expect(getMock).toHaveBeenCalledWith("/user-groups", {
+          params: {
+            institutionId,
+            status: expectedParams.status,
+            size: expectedParams.size,
+            page: expectedParams.page,
+            parentInstitutionId: expectedParams.parentInstitutionId,
+          },
+        });
+        expect(isAxiosError).not.toHaveBeenCalled();
+        expect(E.isRight(result)).toBeTruthy();
+        if (E.isRight(result)) {
+          expect(result.right).toEqual(mocks.institutionGroups);
+        }
+        commonExpectation();
+      },
+    );
+
+    it("should return an error when received an error from selfcare", async () => {
+      // given
+      const institutionId = mocks.institutionGroups.content[0].institutionId;
+      getMock.mockRejectedValueOnce({
+        message: "Received 404 response",
+        response: { status: 404 },
+      });
+      isAxiosError.mockReturnValueOnce(true);
+
+      // when
+      const result =
+        await getSelfcareClient().getInstitutionGroups(institutionId)();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith("/user-groups", {
+        params: {
+          institutionId,
+          status: "ACTIVE",
+        },
+      });
+      expect(isAxiosError).toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return an error when received a bad response from selfcare", async () => {
+      // given
+      const institutionId = mocks.institutionGroups.content[0].institutionId;
+      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+      // when
+      const result =
+        await getSelfcareClient().getInstitutionGroups(institutionId)();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith("/user-groups", {
+        params: {
+          institutionId,
+          status: "ACTIVE",
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+  });
+
+  describe("getDelegations", () => {
+    const institutionId = "instId";
+    const endpoint = `/delegations/delegations-with-pagination`;
+
+    it("should return the delegated institutions for the given institution", async () => {
+      // given
+      const size = 5;
+      const page = 0;
+      const search = "search";
+
+      getMock.mockResolvedValueOnce({
+        status: 200,
+        data: mocks.delegations,
+      });
+
+      // when
+      const result = await getSelfcareClient().getInstitutionDelegations(
+        institutionId,
+        size,
+        page,
+        search,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          brokerId: institutionId,
+          size,
+          page,
+          search,
+          order: "ASC",
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(mocks.delegations);
+      }
+      commonExpectation();
+    });
+
+    it("should return an error when received an error from selfcare", async () => {
+      // given
+      getMock.mockRejectedValueOnce({
+        message: "Received 400 response",
+        response: { status: 400 },
+      });
+      isAxiosError.mockReturnValueOnce(true);
+
+      // when
+      const result =
+        await getSelfcareClient().getInstitutionDelegations(institutionId)();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          brokerId: institutionId,
+          size: undefined,
+          page: undefined,
+          search: undefined,
+          order: "ASC",
+        },
+      });
+      expect(isAxiosError).toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return an error when received a bad response from selfcare", async () => {
+      // given
+      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+      // when
+      const result =
+        await getSelfcareClient().getInstitutionDelegations(institutionId)();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          brokerId: institutionId,
+          size: undefined,
+          page: undefined,
+          search: undefined,
+          order: "ASC",
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+  });
+
+  describe("getInstitutionProducts", () => {
+    const institutionId = "institutionId";
+    const userId = "userId";
+    const endpoint = `/institutions/${institutionId}/products`;
+
+    it("should return an error when received an error from selfcare", async () => {
+      // given
+      getMock.mockRejectedValueOnce({
+        message: "Received 400 response",
+        response: { status: 400 },
+      });
+      isAxiosError.mockReturnValueOnce(true);
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return an error when received a bad response from selfcare", async () => {
+      // given
+      getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it("should return the user institution products for the given institution and user", async () => {
+      // given
+      const institutionProducts = getMockInstitutionProducts(
+        "institutionId",
+      ) as unknown as ProductResource[];
+
+      getMock.mockResolvedValueOnce({
+        status: 200,
+        data: institutionProducts,
+      });
+
+      // when
+      const result = await getSelfcareClient().getInstitutionProducts(
+        institutionId,
+        userId,
+      )();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          userId,
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(institutionProducts);
+      }
+      commonExpectation();
+    });
+  });
+});
