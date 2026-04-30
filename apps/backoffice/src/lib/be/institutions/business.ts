@@ -65,8 +65,8 @@ export const retrieveInstitutionGroups = async (
   do {
     const apiResult = await getInstitutionGroups({
       institutionId,
-      size: 1000,
       page: page++,
+      size: 1000,
       state,
     });
     groups.push(...toGroups(apiResult.content));

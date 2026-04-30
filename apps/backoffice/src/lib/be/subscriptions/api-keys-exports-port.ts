@@ -12,6 +12,14 @@ export const StateEnum = t.union([
 export type StateEnum = t.TypeOf<typeof StateEnum>;
 
 export interface ApiKeysExportsPort {
+  finalizeFile(
+    aggregatorId: string,
+    userId: string,
+    fileName: string,
+    payload: Stream.Readable,
+    payloadContentType?: string,
+  ): Promise<void>;
+
   findExportsFiles(
     institutionId: string,
     userId: string,
@@ -27,14 +35,6 @@ export interface ApiKeysExportsPort {
     fileName: string,
     institutionId: string,
     userId: string,
-  ): Promise<void>;
-
-  finalizeFile(
-    aggregatorId: string,
-    userId: string,
-    fileName: string,
-    payload: Stream.Readable,
-    payloadContentType?: string,
   ): Promise<void>;
 
   markFileAsFailed(fileName: string): Promise<void>;

@@ -7,6 +7,7 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import Stream from "stream";
+
 import { ManagedInternalError } from "./errors";
 import {
   ApiKeysExportsPort,
@@ -15,23 +16,14 @@ import {
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
-  SA_EXT_BLOB_ENDPOINT: NonEmptyString,
   EXPORTS_API_KEYS_CONTAINER_NAME: NonEmptyString,
+  SA_EXT_BLOB_ENDPOINT: NonEmptyString,
 });
 
 export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
-  private static instance: ApiKeysExportsAdapter;
-
-  public static getInstance(
-    environment: Record<string, unknown>,
-  ): ApiKeysExportsAdapter {
-    if (!ApiKeysExportsAdapter.instance) {
-      ApiKeysExportsAdapter.instance = new ApiKeysExportsAdapter(environment);
-    }
-    return ApiKeysExportsAdapter.instance;
-  }
-
   private blobContainerClient: ContainerClient;
+
+  private static instance: ApiKeysExportsAdapter;
 
   private constructor(environment: Record<string, unknown>) {
     const result = Config.decode(environment);
@@ -47,6 +39,44 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
     this.blobContainerClient = blobServiceClient.getContainerClient(
       result.right.EXPORTS_API_KEYS_CONTAINER_NAME,
     );
+  }
+
+  public static getInstance(
+    environment: Record<string, unknown>,
+  ): ApiKeysExportsAdapter {
+    if (!ApiKeysExportsAdapter.instance) {
+      ApiKeysExportsAdapter.instance = new ApiKeysExportsAdapter(environment);
+    }
+    return ApiKeysExportsAdapter.instance;
+  }
+
+  async finalizeFile(
+    aggregatorId: string,
+    userId: string,
+    fileName: string,
+    payload: Stream.Readable,
+    payloadContentType?: string,
+  ): Promise<void> {
+    const blockBlobClient =
+      this.blobContainerClient.getBlockBlobClient(fileName);
+
+    try {
+      await blockBlobClient.uploadStream(payload, undefined, undefined, {
+        blobHTTPHeaders: {
+          blobContentType: payloadContentType,
+        },
+        tags: {
+          institutionId: aggregatorId,
+          state: StateEnumReady.DONE,
+          userId,
+        },
+      });
+    } catch (error) {
+      throw new ManagedInternalError(
+        `Error uploading file \`${fileName}\``,
+        error instanceof Error ? error.message : error,
+      );
+    }
   }
 
   async findExportsFiles(
@@ -100,42 +130,13 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
       await blockBlobClient.upload("", 0, {
         tags: {
           institutionId,
-          userId,
           state: StateEnumNotReady.IN_PROGRESS,
+          userId,
         },
       });
     } catch (error) {
       throw new ManagedInternalError(
         "Errore durante l'inizializzazione del file",
-        error instanceof Error ? error.message : error,
-      );
-    }
-  }
-
-  async finalizeFile(
-    aggregatorId: string,
-    userId: string,
-    fileName: string,
-    payload: Stream.Readable,
-    payloadContentType?: string,
-  ): Promise<void> {
-    const blockBlobClient =
-      this.blobContainerClient.getBlockBlobClient(fileName);
-
-    try {
-      await blockBlobClient.uploadStream(payload, undefined, undefined, {
-        tags: {
-          institutionId: aggregatorId,
-          userId,
-          state: StateEnumReady.DONE,
-        },
-        blobHTTPHeaders: {
-          blobContentType: payloadContentType,
-        },
-      });
-    } catch (error) {
-      throw new ManagedInternalError(
-        `Error uploading file \`${fileName}\``,
         error instanceof Error ? error.message : error,
       );
     }

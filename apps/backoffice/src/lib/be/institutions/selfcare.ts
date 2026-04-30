@@ -62,17 +62,17 @@ export const getInstitutionById = async (
 
 export const getInstitutionGroups = async (params: {
   institutionId?: string;
-  size?: number;
   page?: number;
-  state?: GroupFilter;
   parentInstitutionId?: string;
+  size?: number;
+  state?: GroupFilter;
 }): Promise<PageOfUserGroupResource> => {
   const apiResult = await getSelfcareClient().getInstitutionGroups({
     institutionId: params.institutionId,
-    size: params.size,
     page: params.page,
-    state: params.state,
     parentInstitutionId: params.parentInstitutionId,
+    size: params.size,
+    state: params.state,
   })();
 
   if (E.isLeft(apiResult)) {
