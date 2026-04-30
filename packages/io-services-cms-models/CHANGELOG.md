@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.29.1
+
+### Patch Changes
+
+- 2ee232be: Upgrade Next.js to v15, next-auth to v5 (Auth.js), and ESLint to v9
+
 ## 1.29.0
 
 ### Minor Changes
