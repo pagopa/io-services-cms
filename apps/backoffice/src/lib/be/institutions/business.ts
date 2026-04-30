@@ -63,12 +63,12 @@ export const retrieveInstitutionGroups = async (
   let page = 0;
   let hasMoreItems = false;
   do {
-    const apiResult = await getInstitutionGroups(
+    const apiResult = await getInstitutionGroups({
       institutionId,
-      1000,
-      page++,
+      page: page++,
+      size: 1000,
       state,
-    );
+    });
     groups.push(...toGroups(apiResult.content));
     hasMoreItems = apiResult.totalPages >= page;
   } while (hasMoreItems);
@@ -208,12 +208,11 @@ export const retrieveInstitutionAggregates = async (
   );
   return {
     pagination: {
-      count: apiResult.pageInfo?.totalElements ?? 0,
-      limit: apiResult.pageInfo?.pageSize ?? 0,
-      offset:
-        (apiResult.pageInfo?.pageNo ?? 0) * (apiResult.pageInfo?.pageSize ?? 0),
+      count: apiResult.pageInfo.totalElements,
+      limit: apiResult.pageInfo.pageSize,
+      offset: apiResult.pageInfo.pageNo * apiResult.pageInfo.pageSize,
     },
-    value: (apiResult.delegations ?? []).map((delegation) => ({
+    value: apiResult.delegations.map((delegation) => ({
       id: delegation.institutionId,
       name: delegation.institutionName,
     })),

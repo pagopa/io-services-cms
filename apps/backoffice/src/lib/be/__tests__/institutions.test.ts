@@ -1,4 +1,3 @@
-import { faker } from "@faker-js/faker/locale/it";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
 import { UserInstitutions } from "../../../lib/be/selfcare-client";
@@ -229,20 +228,18 @@ describe("Institutions", () => {
 
       // then
       expect(getInstitutionGroupsMock).toHaveBeenCalledTimes(2);
-      expect(getInstitutionGroupsMock).toHaveBeenNthCalledWith(
-        1,
+      expect(getInstitutionGroupsMock).toHaveBeenNthCalledWith(1, {
         institutionId,
-        1000,
-        0,
-        undefined,
-      );
-      expect(getInstitutionGroupsMock).toHaveBeenNthCalledWith(
-        2,
+        size: 1000,
+        page: 0,
+        state: undefined,
+      });
+      expect(getInstitutionGroupsMock).toHaveBeenNthCalledWith(2, {
         institutionId,
-        1000,
-        1,
-        undefined,
-      );
+        size: 1000,
+        page: 1,
+        state: undefined,
+      });
       expect(result).toStrictEqual([
         ...(mocks.institutionGroups.content?.map((userGroupResources) => ({
           id: userGroupResources.id,
@@ -268,12 +265,13 @@ describe("Institutions", () => {
           (mocks.institutionGroups.content as any[])[0].institutionId,
         ),
       ).rejects.toThrowError(error);
-      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
-        (mocks.institutionGroups.content as any[])[0].institutionId,
-        1000,
-        0,
-        undefined,
-      );
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith({
+        institutionId: (mocks.institutionGroups.content as any[])[0]
+          .institutionId,
+        size: 1000,
+        page: 0,
+        state: undefined,
+      });
     });
   });
 
@@ -343,12 +341,12 @@ describe("Institutions", () => {
         apimUserId,
       );
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
-      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith({
         institutionId,
-        1000,
-        0,
-        undefined,
-      );
+        size: 1000,
+        page: 0,
+        state: undefined,
+      });
     });
 
     it("should filter the selfcare groups based on subscriptions group", async () => {
@@ -384,12 +382,12 @@ describe("Institutions", () => {
         apimUserId,
       );
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
-      expect(getInstitutionGroupsMock).toHaveBeenCalledWith(
+      expect(getInstitutionGroupsMock).toHaveBeenCalledWith({
         institutionId,
-        1000,
-        0,
-        undefined,
-      );
+        size: 1000,
+        page: 0,
+        state: undefined,
+      });
     });
   });
 

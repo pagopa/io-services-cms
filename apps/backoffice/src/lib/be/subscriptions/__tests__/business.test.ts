@@ -1,11 +1,12 @@
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
-import { afterEach, describe, expect, it, Mock, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 import { Cidr } from "../../../../generated/api/Cidr";
 import { SubscriptionKeyTypeEnum } from "../../../../generated/api/SubscriptionKeyType";
 import {
   deleteManageSubscription,
+  generateApiKeysExports,
   getManageSubscriptions,
   regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
   regenerateManageSubscriptionApiKey,
@@ -34,6 +35,13 @@ const mocks: {
   regenerateSubscriptionKey: Mock<any>;
   getInstitutionGroups: Mock<any>;
   listSubscriptionSecrets: Mock<any>;
+  findExportsFiles: Mock<any>;
+  initializeFile: Mock<any>;
+  markFileAsFailed: Mock<any>;
+  finalizeFile: Mock<any>;
+  getInstitutionDelegations: Mock<any>;
+  randomBytes: Mock<any>;
+  archiverCreate: Mock<any>;
 } = vi.hoisted(() => ({
   anOwnerId: "anOwnerId",
   aGroup: {
@@ -59,6 +67,13 @@ const mocks: {
   regenerateSubscriptionKey: vi.fn(),
   getInstitutionGroups: vi.fn(),
   listSubscriptionSecrets: vi.fn(),
+  findExportsFiles: vi.fn(),
+  initializeFile: vi.fn(),
+  markFileAsFailed: vi.fn(),
+  finalizeFile: vi.fn(),
+  getInstitutionDelegations: vi.fn(),
+  randomBytes: vi.fn(),
+  archiverCreate: vi.fn(),
 }));
 
 vi.mock("@/lib/be/legacy-cosmos", () => ({
@@ -93,11 +108,34 @@ vi.mock("@io-services-cms/external-clients", async () => {
 
 vi.mock("../../institutions/selfcare", () => ({
   getInstitutionGroups: mocks.getInstitutionGroups,
+  getInstitutionDelegations: mocks.getInstitutionDelegations,
 }));
 
 vi.mock("../apim", () => ({
   listSubscriptionSecrets: mocks.listSubscriptionSecrets,
   regenerateSubscriptionKey: mocks.regenerateSubscriptionKey,
+}));
+
+vi.mock("@/lib/be/api-keys-exports-adapter", () => ({
+  ApiKeysExportsAdapter: {
+    getInstance: () => ({
+      findExportsFiles: mocks.findExportsFiles,
+      initializeFile: mocks.initializeFile,
+      markFileAsFailed: mocks.markFileAsFailed,
+      finalizeFile: mocks.finalizeFile,
+    }),
+  },
+}));
+
+vi.mock("crypto", () => ({
+  randomBytes: (...args: any[]) => mocks.randomBytes(...args),
+}));
+
+vi.mock("archiver", () => ({
+  default: {
+    create: (...args: any[]) => mocks.archiverCreate(...args),
+    registerFormat: vi.fn(),
+  },
 }));
 
 afterEach(() => {
@@ -556,13 +594,10 @@ describe("Manage Keys", () => {
         ),
       ).rejects.toThrowError(errorMessage);
       expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-        aggregateId,
-        undefined,
-        undefined,
-        undefined,
-        aggregatorId,
-      );
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+        institutionId: aggregateId,
+        parentInstitutionId: aggregatorId,
+      });
       expect(mocks.listSubscriptionSecrets).not.toHaveBeenCalled();
     });
 
@@ -588,13 +623,10 @@ describe("Manage Keys", () => {
           ),
         ).rejects.toThrowError("Data inconsistency");
         expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-          aggregateId,
-          undefined,
-          undefined,
-          undefined,
-          aggregatorId,
-        );
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+          institutionId: aggregateId,
+          parentInstitutionId: aggregatorId,
+        });
         expect(mocks.listSubscriptionSecrets).not.toHaveBeenCalled();
       },
     );
@@ -619,13 +651,10 @@ describe("Manage Keys", () => {
         ),
       ).rejects.toThrowError(errorMessage);
       expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-        aggregateId,
-        undefined,
-        undefined,
-        undefined,
-        aggregatorId,
-      );
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+        institutionId: aggregateId,
+        parentInstitutionId: aggregatorId,
+      });
       expect(mocks.listSubscriptionSecrets).toHaveBeenCalledOnce();
       expect(mocks.listSubscriptionSecrets).toHaveBeenCalledWith(
         `MANAGE-GROUP-${mocks.aGroup.id}`,
@@ -662,13 +691,10 @@ describe("Manage Keys", () => {
           ),
         ).rejects.toThrowError("Data inconsistency");
         expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-          aggregateId,
-          undefined,
-          undefined,
-          undefined,
-          aggregatorId,
-        );
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+          institutionId: aggregateId,
+          parentInstitutionId: aggregatorId,
+        });
       },
     );
 
@@ -695,13 +721,10 @@ describe("Manage Keys", () => {
 
       // then
       expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
-        aggregateId,
-        undefined,
-        undefined,
-        undefined,
-        aggregatorId,
-      );
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
+        institutionId: aggregateId,
+        parentInstitutionId: aggregatorId,
+      });
       expect(result).toStrictEqual({
         primary_key: primaryKey,
         secondary_key: secondaryKey,
@@ -728,13 +751,10 @@ describe("Manage Keys", () => {
             SubscriptionKeyTypeEnum.primary,
           ),
         ).rejects.toThrowError(errorMessage);
-        expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-          aggregateId,
-          undefined,
-          undefined,
-          undefined,
-          aggregatorInstitutionId,
-        );
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+          institutionId: aggregateId,
+          parentInstitutionId: aggregatorInstitutionId,
+        });
         expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
         expect(mocks.regenerateSubscriptionKey).not.toHaveBeenCalled();
       });
@@ -762,13 +782,10 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError("Data inconsistency");
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-            aggregateId,
-            undefined,
-            undefined,
-            undefined,
-            aggregatorInstitutionId,
-          );
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+            institutionId: aggregateId,
+            parentInstitutionId: aggregatorInstitutionId,
+          });
           expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();
           expect(mocks.regenerateSubscriptionKey).not.toHaveBeenCalled();
         },
@@ -799,7 +816,9 @@ describe("Manage Keys", () => {
             mocks.getUserByEmail.mockReturnValueOnce(
               TE.right(
                 O.some({
-                  id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+                  id:
+                    "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+                    apimAggregateInstitutionId,
                 }),
               ),
             );
@@ -815,13 +834,10 @@ describe("Manage Keys", () => {
                 SubscriptionKeyTypeEnum.primary,
               ),
             ).rejects.toThrowError(expectedErrorMessage);
-            expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-              aggregateId,
-              undefined,
-              undefined,
-              undefined,
-              aggregatorInstitutionId,
-            );
+            expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+              institutionId: aggregateId,
+              parentInstitutionId: aggregatorInstitutionId,
+            });
             expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
               apimAggregateInstitutionId,
               undefined,
@@ -857,7 +873,9 @@ describe("Manage Keys", () => {
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+                id:
+                  "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+                  apimAggregateInstitutionId,
               }),
             ),
           );
@@ -876,13 +894,10 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError(errorMessage);
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-            aggregateId,
-            undefined,
-            undefined,
-            undefined,
-            aggregatorInstitutionId,
-          );
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+            institutionId: aggregateId,
+            parentInstitutionId: aggregatorInstitutionId,
+          });
           expect(mocks.getUserSubscriptions).toHaveBeenCalledExactlyOnceWith(
             apimAggregateInstitutionId,
             undefined,
@@ -929,7 +944,9 @@ describe("Manage Keys", () => {
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+                id:
+                  "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+                  apimAggregateInstitutionId,
               }),
             ),
           );
@@ -946,20 +963,19 @@ describe("Manage Keys", () => {
               SubscriptionKeyTypeEnum.primary,
             ),
           ).rejects.toThrowError("Data inconsistency");
-          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-            aggregateId,
-            undefined,
-            undefined,
-            undefined,
-            aggregatorInstitutionId,
-          );
+          expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+            institutionId: aggregateId,
+            parentInstitutionId: aggregatorInstitutionId,
+          });
           expect(
             mocks.formatEmailForOrganization,
           ).toHaveBeenCalledExactlyOnceWith(aggregateId);
           mocks.getUserByEmail.mockReturnValueOnce(
             TE.right(
               O.some({
-                id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+                id:
+                  "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+                  apimAggregateInstitutionId,
               }),
             ),
           );
@@ -997,7 +1013,9 @@ describe("Manage Keys", () => {
       mocks.getUserByEmail.mockReturnValueOnce(
         TE.right(
           O.some({
-            id: "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" + apimAggregateInstitutionId,
+            id:
+              "/subscriptions/subid/resourceGroups/RESOURCE_GROUP/providers/Microsoft.ApiManagement/service/APIM_SERVICE/users/" +
+              apimAggregateInstitutionId,
           }),
         ),
       );
@@ -1018,13 +1036,10 @@ describe("Manage Keys", () => {
         );
 
       // then
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith(
-        aggregateId,
-        undefined,
-        undefined,
-        undefined,
-        aggregatorInstitutionId,
-      );
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledExactlyOnceWith({
+        institutionId: aggregateId,
+        parentInstitutionId: aggregatorInstitutionId,
+      });
       expect(mocks.formatEmailForOrganization).toHaveBeenCalledExactlyOnceWith(
         aggregateId,
       );
@@ -1042,6 +1057,144 @@ describe("Manage Keys", () => {
         primary_key: primaryKey,
         secondary_key: secondaryKey,
       });
+    });
+  });
+
+  describe("generateApiKeysExports", () => {
+    const aggregatorId = "aggregatorId";
+    const userId = "userId";
+    const password = "aSecurePassword";
+    const fakeFileName = "abcdef1234567890abcdef1234567890.zip";
+
+    beforeEach(() => {
+      mocks.randomBytes.mockReturnValue({
+        toString: () => "abcdef1234567890abcdef1234567890",
+      });
+    });
+
+    it("should throw when findExportsFiles fails", async () => {
+      // given
+      mocks.findExportsFiles.mockRejectedValueOnce(
+        new Error("blob storage error"),
+      );
+
+      // when and then
+      await expect(
+        generateApiKeysExports(aggregatorId, userId, password),
+      ).rejects.toThrowError("blob storage error");
+      expect(mocks.findExportsFiles).toHaveBeenCalledOnce();
+      expect(mocks.findExportsFiles).toHaveBeenCalledWith(
+        aggregatorId,
+        userId,
+        "IN_PROGRESS",
+      );
+      expect(mocks.initializeFile).not.toHaveBeenCalled();
+    });
+
+    it("should throw PreconditionFailedError when there are already IN_PROGRESS export files", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([
+        { fileName: "existing.zip", state: "IN_PROGRESS" },
+      ]);
+
+      // when and then
+      await expect(
+        generateApiKeysExports(aggregatorId, userId, password),
+      ).rejects.toThrowError("An export file is already being generated");
+      expect(mocks.findExportsFiles).toHaveBeenCalledOnce();
+      expect(mocks.findExportsFiles).toHaveBeenCalledWith(
+        aggregatorId,
+        userId,
+        "IN_PROGRESS",
+      );
+      expect(mocks.initializeFile).not.toHaveBeenCalled();
+    });
+
+    it("should throw when initializeFile fails", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([]);
+      mocks.initializeFile.mockRejectedValueOnce(
+        new Error("initialization error"),
+      );
+
+      // when and then
+      await expect(
+        generateApiKeysExports(aggregatorId, userId, password),
+      ).rejects.toThrowError("initialization error");
+      expect(mocks.findExportsFiles).toHaveBeenCalledOnce();
+      expect(mocks.findExportsFiles).toHaveBeenCalledWith(
+        aggregatorId,
+        userId,
+        "IN_PROGRESS",
+      );
+      expect(mocks.initializeFile).toHaveBeenCalledOnce();
+      expect(mocks.initializeFile).toHaveBeenCalledWith(
+        fakeFileName,
+        aggregatorId,
+        userId,
+      );
+    });
+
+    it("should resolve when initialization succeeds and fire-and-forget inner runs in background", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([]);
+      mocks.initializeFile.mockResolvedValueOnce(undefined);
+      mocks.getInstitutionGroups.mockResolvedValueOnce({
+        content: [],
+        totalPages: 1,
+      });
+      mocks.getInstitutionDelegations.mockResolvedValueOnce({
+        delegations: [],
+        pageInfo: { totalPages: 1 },
+      });
+      mocks.archiverCreate.mockReturnValueOnce({
+        append: vi.fn().mockReturnThis(),
+        finalize: vi.fn(),
+      });
+      mocks.finalizeFile.mockResolvedValueOnce(undefined);
+
+      // when
+      const result = await generateApiKeysExports(
+        aggregatorId,
+        userId,
+        password,
+      );
+
+      // then
+      expect(result).toBeUndefined();
+      expect(mocks.findExportsFiles).toHaveBeenCalledOnce();
+      expect(mocks.findExportsFiles).toHaveBeenCalledWith(
+        aggregatorId,
+        userId,
+        "IN_PROGRESS",
+      );
+      expect(mocks.initializeFile).toHaveBeenCalledOnce();
+      expect(mocks.initializeFile).toHaveBeenCalledWith(
+        fakeFileName,
+        aggregatorId,
+        userId,
+      );
+    });
+
+    it("should call markFileAsFailed when inner generation rejects", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([]);
+      mocks.initializeFile.mockResolvedValueOnce(undefined);
+      mocks.markFileAsFailed.mockResolvedValueOnce(undefined);
+      // Make inner fail by having getInstitutionGroups reject
+      mocks.getInstitutionGroups.mockRejectedValueOnce(
+        new Error("inner failure"),
+      );
+
+      // when
+      await generateApiKeysExports(aggregatorId, userId, password);
+
+      // wait for background promise catch handler to execute
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
+      // then
+      expect(mocks.markFileAsFailed).toHaveBeenCalledOnce();
+      expect(mocks.markFileAsFailed).toHaveBeenCalledWith(fakeFileName);
     });
   });
 });
