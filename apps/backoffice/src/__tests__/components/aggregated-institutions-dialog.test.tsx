@@ -3,7 +3,7 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AggregatedInstitutionsDialog } from "../../components/aggregated-institutions/aggregated-institutions-dialog";
 import {
-  trackEaFileGeneratePasswordCancelEvent,
+  trackEaFileGeneratePasswordCloseEvent,
   trackEaFileGeneratePasswordConfirmEvent,
   trackEaFileGeneratePasswordEvent,
   trackEaFileGeneratePasswordMissingEvent,
@@ -12,7 +12,7 @@ import {
 } from "../../utils/mix-panel";
 
 vi.mock("../../utils/mix-panel", () => ({
-  trackEaFileGeneratePasswordCancelEvent: vi.fn(),
+  trackEaFileGeneratePasswordCloseEvent: vi.fn(),
   trackEaFileGeneratePasswordConfirmEvent: vi.fn(),
   trackEaFileGeneratePasswordEvent: vi.fn(),
   trackEaFileGeneratePasswordMissingEvent: vi.fn(),
@@ -227,7 +227,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
       "new_password",
     );
     expect(vi.mocked(trackEaFileGeneratePasswordEvent)).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
@@ -241,7 +241,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
       "replacement",
     );
     expect(vi.mocked(trackEaFileGeneratePasswordEvent)).toHaveBeenCalledTimes(1);
-    expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
@@ -254,9 +254,9 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
     fireEvent.click(screen.getByRole("button", { name: "buttons.cancel" }));
 
     expect(
-      vi.mocked(trackEaFileGeneratePasswordCancelEvent),
+      vi.mocked(trackEaFileGeneratePasswordCloseEvent),
     ).toHaveBeenCalledWith("new_password");
-    expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
@@ -285,7 +285,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
         vi.mocked(trackEaFileGeneratePasswordConfirmEvent),
       ).toHaveBeenCalledWith("new_password");
       expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).toHaveBeenCalledTimes(1);
-      expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent)).not.toHaveBeenCalled();
@@ -302,7 +302,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
         vi.mocked(trackEaFileGeneratePasswordMissingEvent),
       ).toHaveBeenCalledWith("new_password");
       expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).toHaveBeenCalledTimes(1);
-      expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent)).not.toHaveBeenCalled();
@@ -331,7 +331,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
         vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent),
       ).toHaveBeenCalledWith("new_password");
       expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).toHaveBeenCalledTimes(1);
-      expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent)).not.toHaveBeenCalled();
@@ -360,7 +360,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
         vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent),
       ).toHaveBeenCalledWith("new_password");
       expect(vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent)).toHaveBeenCalledTimes(1);
-      expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
@@ -373,9 +373,9 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
     fireEvent.click(screen.getByRole("button", { name: "buttons.cancel" }));
 
     expect(
-      vi.mocked(trackEaFileGeneratePasswordCancelEvent),
+      vi.mocked(trackEaFileGeneratePasswordCloseEvent),
     ).toHaveBeenCalledWith("replacement");
-    expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).toHaveBeenCalledTimes(1);
     expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
@@ -404,7 +404,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
         vi.mocked(trackEaFileGeneratePasswordConfirmEvent),
       ).toHaveBeenCalledWith("replacement");
       expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).toHaveBeenCalledTimes(1);
-      expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent)).not.toHaveBeenCalled();
@@ -421,7 +421,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
         vi.mocked(trackEaFileGeneratePasswordMissingEvent),
       ).toHaveBeenCalledWith("replacement");
       expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).toHaveBeenCalledTimes(1);
-      expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent)).not.toHaveBeenCalled();
@@ -450,7 +450,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
         vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent),
       ).toHaveBeenCalledWith("replacement");
       expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).toHaveBeenCalledTimes(1);
-      expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent)).not.toHaveBeenCalled();
@@ -479,7 +479,7 @@ describe("[AggregatedInstitutionsDialog] Tracking events", () => {
         vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent),
       ).toHaveBeenCalledWith("replacement");
       expect(vi.mocked(trackEaFileGeneratePasswordUnmatchedEvent)).toHaveBeenCalledTimes(1);
-      expect(vi.mocked(trackEaFileGeneratePasswordCancelEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordMissingEvent)).not.toHaveBeenCalled();
       expect(vi.mocked(trackEaFileGeneratePasswordNotCompliantEvent)).not.toHaveBeenCalled();

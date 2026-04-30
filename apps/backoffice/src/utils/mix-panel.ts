@@ -87,7 +87,7 @@ interface MixPanelEventsStructure {
   readonly IO_BO_EA_FILE_GENERATE_PASSWORD: {
     status: GeneratePasswordStatus;
   };
-  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_CANCEL: {
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_CLOSE: {
     status: GeneratePasswordStatus;
   };
   readonly IO_BO_EA_FILE_GENERATE_PASSWORD_CONFIRM: {
@@ -449,11 +449,11 @@ export const trackEaFileGeneratePasswordEvent = (
   );
 };
 
-export const trackEaFileGeneratePasswordCancelEvent = (
+export const trackEaFileGeneratePasswordCloseEvent = (
   status: GeneratePasswordStatus,
 ) => {
   logToMixpanel(
-    "IO_BO_EA_FILE_GENERATE_PASSWORD_CANCEL",
+    "IO_BO_EA_FILE_GENERATE_PASSWORD_CLOSE",
     "UX",
     { status },
     "action",

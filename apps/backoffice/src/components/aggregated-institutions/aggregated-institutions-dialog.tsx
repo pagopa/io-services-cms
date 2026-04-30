@@ -2,7 +2,7 @@ import { TextFieldController } from "@/components/forms/controllers";
 import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
 import {
   GeneratePasswordStatus,
-  trackEaFileGeneratePasswordCancelEvent,
+  trackEaFileGeneratePasswordCloseEvent,
   trackEaFileGeneratePasswordConfirmEvent,
   trackEaFileGeneratePasswordEvent,
   trackEaFileGeneratePasswordMissingEvent,
@@ -110,7 +110,7 @@ export const AggregatedInstitutionsDialog = ({
   }, [methods, onClose]);
 
   const handleClose = useCallback(() => {
-    trackEaFileGeneratePasswordCancelEvent(passwordStatus);
+    trackEaFileGeneratePasswordCloseEvent(passwordStatus);
     resetAndClose();
   }, [passwordStatus, resetAndClose]);
 
