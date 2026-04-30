@@ -10,6 +10,7 @@ import {
   trackEaFileGenerateEndEvent,
   trackEaFileGenerateErrorEvent,
   trackEaFileGenerateProgressEvent,
+  trackEaFileGenerateRefreshEvent,
 } from "../../utils/mix-panel";
 
 vi.mock("../../utils/mix-panel", () => ({
@@ -18,6 +19,7 @@ vi.mock("../../utils/mix-panel", () => ({
   trackEaFileGenerateEndEvent: vi.fn(),
   trackEaFileGenerateErrorEvent: vi.fn(),
   trackEaFileGenerateProgressEvent: vi.fn(),
+  trackEaFileGenerateRefreshEvent: vi.fn(),
 }));
 
 vi.mock("react-i18next", () => ({
@@ -102,6 +104,7 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
     );
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGenerateRefreshEvent)).toHaveBeenCalledTimes(1);
   });
 
   it("should render the failure state without actions", () => {
@@ -141,6 +144,7 @@ describe("[AggregatedInstitutionDownloadAlert] Tracking events", () => {
     expect(vi.mocked(trackEaFileGenerateProgressEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGenerateErrorEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGenerateEndEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateRefreshEvent)).not.toHaveBeenCalled();
   });
 
   it("should fire progressEvent when state is IN_PROGRESS", () => {
@@ -155,6 +159,7 @@ describe("[AggregatedInstitutionDownloadAlert] Tracking events", () => {
     expect(vi.mocked(trackEaFileGenerateCompletedEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGenerateErrorEvent)).not.toHaveBeenCalled();
     expect(vi.mocked(trackEaFileGenerateEndEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateRefreshEvent)).not.toHaveBeenCalled();
   });
 
   it("should fire completedEvent and endEvent(success) when state is DONE", () => {
@@ -208,5 +213,22 @@ describe("[AggregatedInstitutionDownloadAlert] Tracking events", () => {
     );
 
     expect(vi.mocked(trackEaFileGenerateDownloadEvent)).toHaveBeenCalledTimes(1);
+  });
+
+  it("should fire refreshEvent when the refresh button is clicked", () => {
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{ state: NotReadyStateEnum.IN_PROGRESS }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "routes.aggregated-institutions.downloadAlert.inProgress.action",
+      }),
+    );
+
+    expect(vi.mocked(trackEaFileGenerateRefreshEvent)).toHaveBeenCalledTimes(1);
   });
 });

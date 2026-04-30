@@ -103,6 +103,7 @@ interface MixPanelEventsStructure {
     status: GeneratePasswordStatus;
   };
   readonly IO_BO_EA_FILE_GENERATE_PROGRESS: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_GENERATE_REFRESH: Record<string, unknown>;
   readonly IO_BO_EA_FILE_GENERATE_END: { result: TechEventResult };
   readonly IO_BO_EA_FILE_GENERATE_COMPLETED: Record<string, unknown>;
   readonly IO_BO_EA_FILE_DOWNLOAD: Record<string, unknown>;
@@ -506,6 +507,10 @@ export const trackEaFileGeneratePasswordUnmatchedEvent = (
 
 export const trackEaFileGenerateProgressEvent = () => {
   logToMixpanel("IO_BO_EA_FILE_GENERATE_PROGRESS", "UX", {}, "screen_view");
+};
+
+export const trackEaFileGenerateRefreshEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_REFRESH", "UX", {}, "action");
 };
 
 export const trackEaFileGenerateEndEvent = (result: TechEventResult) => {

@@ -5,6 +5,7 @@ import {
   trackEaFileGenerateEndEvent,
   trackEaFileGenerateErrorEvent,
   trackEaFileGenerateProgressEvent,
+  trackEaFileGenerateRefreshEvent,
 } from "@/utils/mix-panel";
 import { Download, RefreshOutlined } from "@mui/icons-material";
 import {
@@ -92,7 +93,10 @@ export const AggregatedInstitutionDownloadAlert = ({
         return {
           action: (
             <Button
-              onClick={onRefresh}
+              onClick={() => {
+                trackEaFileGenerateRefreshEvent();
+                onRefresh();
+              }}
               startIcon={<RefreshOutlined />}
               variant="naked"
             >
