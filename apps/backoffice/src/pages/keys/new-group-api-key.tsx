@@ -7,6 +7,7 @@ import useFetch from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
 import { ROUTES } from "@/lib/routes";
 import { trackGroupKeyGenerateEndEvent } from "@/utils/mix-panel";
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
@@ -49,17 +50,17 @@ export default function NewGroupApiKey() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => {
   if (!getConfiguration().GROUP_APIKEY_ENABLED) {
     return { notFound: true };
   }
+
   return {
     props: {
-      // pass the translation props to the page component
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 NewGroupApiKey.getLayout = function getLayout(page: ReactElement) {
   return (

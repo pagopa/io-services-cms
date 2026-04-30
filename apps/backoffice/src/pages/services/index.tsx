@@ -52,6 +52,7 @@ import {
 import { Button, Grid, Stack, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -114,7 +115,7 @@ const checkAtLeastOneActiveGroupExists = async (institutionId: string) => {
       return maybeResponse.right.status === 200;
     }
     return false;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -621,14 +622,11 @@ export default function Services() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
-  return {
-    props: {
-      // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 
 Services.getLayout = function getLayout(page: ReactElement) {
   return (

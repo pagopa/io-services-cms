@@ -7,7 +7,7 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import { GetStaticPaths } from "next";
+import { GetStaticPaths, GetStaticProps } from "next";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -60,18 +60,18 @@ export const getStaticPaths: GetStaticPaths<{
   paths: [], //indicates that no page needs be created at build time
 });
 
-export async function getStaticProps({ locale }: any) {
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => {
   // ! return a not found error in prod environemnt
   if (process.env.APP_ENV === "production") {
     return { notFound: true };
   }
+
   return {
     props: {
-      // pass the translation props to the page component
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 // No Auth required
 SelfcareGroups.publicRoute = true;

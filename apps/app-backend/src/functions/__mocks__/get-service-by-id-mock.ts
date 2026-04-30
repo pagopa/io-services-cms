@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/dot-notation */
 import { Container } from "@azure/cosmos";
 import { ServiceDetail as CosmosDbServiceDetails } from "@io-services-cms/models";
 import {

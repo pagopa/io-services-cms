@@ -20,6 +20,7 @@ import {
   trackManageKeyRegenerateEvent,
 } from "@/utils/mix-panel";
 import { Stack } from "@mui/material";
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
@@ -118,14 +119,11 @@ export default function Keys() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
-  return {
-    props: {
-      // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 
 Keys.getLayout = function getLayout(page: ReactElement) {
   return (

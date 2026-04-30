@@ -1,18 +1,19 @@
 import { getConfiguration } from "@/config";
 import { ROUTES } from "@/lib/routes";
-import { NextAuthOptions } from "next-auth";
+import NextAuth, { type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-import { authorize } from "./auth";
+import { authorize } from "./lib/auth/auth";
 
 const maxAgeSeconds = 2 * 60 * 60; // 2 hours
 
-export const authOptions: NextAuthOptions = {
+const authConfig: NextAuthConfig = {
   callbacks: {
     jwt({ token, user }) {
       /* update the token based on the user object */
       if (user) {
-        token.id = user.id;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        token.id = user.id!;
         token.institution = user.institution;
         token.permissions = user.permissions;
         token.parameters = user.parameters;
@@ -61,3 +62,5 @@ export const authOptions: NextAuthOptions = {
     maxAge: maxAgeSeconds,
   },
 };
+
+export const { auth, handlers, signIn, signOut } = NextAuth(authConfig);

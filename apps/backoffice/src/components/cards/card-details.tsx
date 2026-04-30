@@ -9,8 +9,7 @@ import { CardBaseContainer, CardRowType, CardRows } from ".";
 
 export interface CardDetailsCtaType {
   /** call to action function performed on button click */
-  // eslint-disable-next-line @typescript-eslint/ban-types
-  fn?: Function;
+  fn?: () => void;
   /** call to action href */
   href?: string;
   /** call to action end icon */
