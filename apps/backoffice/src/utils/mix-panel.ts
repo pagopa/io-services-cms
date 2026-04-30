@@ -7,6 +7,11 @@ export type TechEventResult = "error" | "success";
 
 type ApiKeyType = "primary" | "secondary";
 export type GeneratePasswordStatus = "new_password" | "replacement";
+export type InvalidFormReason =
+  | "confirm_password_missing"
+  | "password_mismatch"
+  | "password_missing"
+  | "password_not_compliant";
 
 interface MixPanelEventsStructure {
   readonly IO_BO_APIKEY_PAGE: Record<string, never>;
@@ -93,13 +98,8 @@ interface MixPanelEventsStructure {
   readonly IO_BO_EA_FILE_GENERATE_PASSWORD_CONFIRM: {
     status: GeneratePasswordStatus;
   };
-  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_MISSING: {
-    status: GeneratePasswordStatus;
-  };
-  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_NOT_COMPLIANT: {
-    status: GeneratePasswordStatus;
-  };
-  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_UNMATCHED: {
+  readonly IO_BO_EA_FILE_GENERATE_INVALID_FORM: {
+    reason: string;
     status: GeneratePasswordStatus;
   };
   readonly IO_BO_EA_FILE_GENERATE_PROGRESS: Record<string, unknown>;
@@ -472,35 +472,14 @@ export const trackEaFileGeneratePasswordConfirmEvent = (
   );
 };
 
-export const trackEaFileGeneratePasswordMissingEvent = (
+export const trackEaFileGenerateInvalidFormEvent = (
   status: GeneratePasswordStatus,
+  reasons: Set<InvalidFormReason>,
 ) => {
   logToMixpanel(
-    "IO_BO_EA_FILE_GENERATE_PASSWORD_MISSING",
+    "IO_BO_EA_FILE_GENERATE_INVALID_FORM",
     "KO",
-    { status },
-    "error",
-  );
-};
-
-export const trackEaFileGeneratePasswordNotCompliantEvent = (
-  status: GeneratePasswordStatus,
-) => {
-  logToMixpanel(
-    "IO_BO_EA_FILE_GENERATE_PASSWORD_NOT_COMPLIANT",
-    "KO",
-    { status },
-    "error",
-  );
-};
-
-export const trackEaFileGeneratePasswordUnmatchedEvent = (
-  status: GeneratePasswordStatus,
-) => {
-  logToMixpanel(
-    "IO_BO_EA_FILE_GENERATE_PASSWORD_UNMATCHED",
-    "KO",
-    { status },
+    { reason: Array.from(reasons).join(","), status },
     "error",
   );
 };

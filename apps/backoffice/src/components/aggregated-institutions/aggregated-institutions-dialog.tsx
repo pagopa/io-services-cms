@@ -2,12 +2,11 @@ import { TextFieldController } from "@/components/forms/controllers";
 import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
 import {
   GeneratePasswordStatus,
+  InvalidFormReason,
+  trackEaFileGenerateInvalidFormEvent,
   trackEaFileGeneratePasswordCloseEvent,
   trackEaFileGeneratePasswordConfirmEvent,
   trackEaFileGeneratePasswordEvent,
-  trackEaFileGeneratePasswordMissingEvent,
-  trackEaFileGeneratePasswordNotCompliantEvent,
-  trackEaFileGeneratePasswordUnmatchedEvent,
 } from "@/utils/mix-panel";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -122,24 +121,34 @@ export const AggregatedInstitutionsDialog = ({
   };
 
   const handleSubmitError = useCallback<
-    SubmitErrorHandler<z.infer<ReturnType<typeof getValidationSchema>>>
+    SubmitErrorHandler<{
+      confirmPassword: string;
+      password: string;
+    }>
   >(
     (errors) => {
       const errorMessages = getLocalizedErrorMessages(t);
+      const reasons = new Set<InvalidFormReason>();
 
+      if (errors?.password?.message === errorMessages.emptyPassword) {
+        reasons.add("password_missing");
+      }
       if (
-        errors?.password?.message === errorMessages.emptyPassword ||
         errors?.confirmPassword?.message === errorMessages.emptyConfirmPassword
       ) {
-        trackEaFileGeneratePasswordMissingEvent(passwordStatus);
+        reasons.add("confirm_password_missing");
       }
       if (errors?.password?.message === errorMessages.invalidPassword) {
-        trackEaFileGeneratePasswordNotCompliantEvent(passwordStatus);
+        reasons.add("password_not_compliant");
       }
       if (
         errors?.confirmPassword?.message === errorMessages.passwordDontMatch
       ) {
-        trackEaFileGeneratePasswordUnmatchedEvent(passwordStatus);
+        reasons.add("password_mismatch");
+      }
+
+      if (reasons.size > 0) {
+        trackEaFileGenerateInvalidFormEvent(passwordStatus, reasons);
       }
     },
     [t, passwordStatus],
