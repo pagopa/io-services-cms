@@ -1,4 +1,5 @@
 import { StateEnum } from "@/generated/api/Group";
+import { DelegationResponse } from "@/generated/selfcare/DelegationResponse";
 import { DelegationWithPaginationResponse } from "@/generated/selfcare/DelegationWithPaginationResponse";
 import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import { UserGroupResource } from "@/generated/selfcare/UserGroupResource";
@@ -12,7 +13,6 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { flow, identity, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
-import { DelegationResponse } from "@/generated/selfcare/DelegationResponse";
 import { InstitutionResponse } from "../../generated/selfcare/InstitutionResponse";
 import { ProductResource } from "../../generated/selfcare/ProductResource";
 import { UserInstitutionResource } from "../../generated/selfcare/UserInstitutionResource";
@@ -33,10 +33,10 @@ export const InstitutionProducts = t.readonlyArray(
 export type InstitutionProducts = t.TypeOf<typeof InstitutionProducts>;
 
 const PageInfoStrict = t.type({
-  totalPages: t.number,
-  totalElements: t.number,
   pageNo: t.number,
   pageSize: t.number,
+  totalElements: t.number,
+  totalPages: t.number,
 });
 type PageInfoStrict = t.TypeOf<typeof PageInfoStrict>;
 
@@ -68,10 +68,10 @@ export interface SelfcareClient {
   ) => TE.TaskEither<Error, DelegationWithPaginationResponseStrict>;
   getInstitutionGroups: (params: {
     institutionId?: string;
-    size?: number;
     page?: number;
-    state?: GroupFilter;
     parentInstitutionId?: string;
+    size?: number;
+    state?: GroupFilter;
   }) => TE.TaskEither<Error, PageOfUserGroupResource>;
   getInstitutionProducts: (
     institutionId: string,
@@ -194,10 +194,10 @@ const buildSelfcareClient = (): SelfcareClient => {
 
   const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = ({
     institutionId,
-    size,
     page,
-    state = StateEnum.ACTIVE,
     parentInstitutionId,
+    size,
+    state = StateEnum.ACTIVE,
   }) =>
     pipe(
       TE.tryCatch(

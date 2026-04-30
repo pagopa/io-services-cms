@@ -1,12 +1,12 @@
 import { RequestAggregatedInstitutionsManageKeysPayload } from "@/generated/api/RequestAggregatedInstitutionsManageKeysPayload";
 import { ResponseError } from "@/generated/api/ResponseError";
 import {
+  PreconditionFailedError,
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
   handlePreconditionFailedErrorResponse,
   handlerErrorLog,
-  PreconditionFailedError,
 } from "@/lib/be/errors";
 import { parseBody } from "@/lib/be/req-res-utils";
 import { generateApiKeysExports } from "@/lib/be/subscriptions/business";

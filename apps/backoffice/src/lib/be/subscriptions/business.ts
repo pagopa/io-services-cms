@@ -1,3 +1,5 @@
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
 import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
@@ -11,14 +13,12 @@ import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import archiver from "archiver";
+import { randomBytes } from "crypto";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
-import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
-import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
-import archiver from "archiver";
-import { randomBytes } from "crypto";
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
   ManagedInternalError,
@@ -40,7 +40,7 @@ import {
 try {
   archiver.registerFormat(
     "zip-encrypted",
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+
     require("archiver-zip-encrypted"),
   );
 } catch {
@@ -540,7 +540,7 @@ async function generateApiKeysExportsInner(
   password: string,
   fileName: string,
 ): Promise<void> {
-  const { groupsCounter, aggregateMap } =
+  const { aggregateMap, groupsCounter } =
     await retrieveAggregatorGroups(aggregatorId);
 
   const { aggregatesCounter, enrichedAggregateData } = await retrieveAggregates(
@@ -579,9 +579,9 @@ async function generateApiKeysExportsInner(
   const archive = archiver.create(
     "zip-encrypted" as archiver.Format,
     {
-      zlib: { level: 8 },
       encryptionMethod: "aes256",
       password,
+      zlib: { level: 8 },
     } as archiver.ArchiverOptions,
   );
 
@@ -620,16 +620,16 @@ async function generateApiKeysExportsInner(
 }
 
 async function retrieveAggregatorGroups(aggregatorId: string): Promise<{
-  groupsCounter: number;
   aggregateMap: Map<string, string>;
+  groupsCounter: number;
 }> {
   let page = 0;
   let groupsCounter = 0;
-  let aggregateToGroupMap: Map<string, string> = new Map();
+  const aggregateToGroupMap = new Map<string, string>();
   while (true) {
     const aggregatorGroups = await getInstitutionGroups({
-      parentInstitutionId: aggregatorId,
       page: page++,
+      parentInstitutionId: aggregatorId,
       size: 2000,
     });
     aggregatorGroups.content.forEach((group) => {
@@ -642,8 +642,8 @@ async function retrieveAggregatorGroups(aggregatorId: string): Promise<{
     }
   }
   return {
-    groupsCounter: groupsCounter,
     aggregateMap: aggregateToGroupMap,
+    groupsCounter: groupsCounter,
   };
 }
 
@@ -652,18 +652,18 @@ async function retrieveAggregates(
   aggregateToGroupMap: Map<string, string>,
 ): Promise<{
   aggregatesCounter: number;
-  enrichedAggregateData: Array<{
-    groupId: string;
-    aggregateId: string;
+  enrichedAggregateData: {
     aggregateFiscalCode: string;
-  }>;
+    aggregateId: string;
+    groupId: string;
+  }[];
 }> {
   let aggregatesCounter = 0;
-  const enrichedAggregateData: Array<{
-    groupId: string;
-    aggregateId: string;
+  const enrichedAggregateData: {
     aggregateFiscalCode: string;
-  }> = [];
+    aggregateId: string;
+    groupId: string;
+  }[] = [];
   let page = 0;
   while (true) {
     const aggregates = await getInstitutionDelegations(
@@ -673,7 +673,7 @@ async function retrieveAggregates(
     ); // we need to retrieve all delegations to make sure that the groups related to the aggregates are included in the export, otherwise we might end up with aggregates without groups in the export file which is an indication of data inconsistency that we want to avoid
 
     aggregates.delegations.forEach((delegation) => {
-      let groupId = aggregateToGroupMap.get(delegation.institutionId);
+      const groupId = aggregateToGroupMap.get(delegation.institutionId);
       if (!groupId) {
         throw new ManagedInternalError(
           "Data inconsistency",
@@ -687,9 +687,9 @@ async function retrieveAggregates(
         );
       }
       enrichedAggregateData.push({
-        groupId: groupId,
-        aggregateId: delegation.institutionId,
         aggregateFiscalCode: delegation.taxCode,
+        aggregateId: delegation.institutionId,
+        groupId: groupId,
       });
     });
     aggregatesCounter += aggregates.delegations.length;
@@ -699,11 +699,4 @@ async function retrieveAggregates(
   }
 
   return { aggregatesCounter, enrichedAggregateData };
-}
-
-export async function retrieveApiKeysExports(
-  institutionId: string,
-  userId: string,
-): Promise<AggregatedInstitutionsManageKeysLinkMetadata> {
-  return Promise.reject(null);
 }
