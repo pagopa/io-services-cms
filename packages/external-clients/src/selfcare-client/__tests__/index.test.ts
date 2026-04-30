@@ -1,6 +1,6 @@
 import * as E from "fp-ts/lib/Either";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getMockInstitutionProducts } from "./mocks/data/selfcare-data";
+import { getMockInstitutionProducts } from "../mocks/data/selfcare-data";
 import { TypeEnum } from "../../generated/selfcare/DelegationResponse";
 import { DelegationWithPaginationResponse } from "../../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../../generated/selfcare/InstitutionResponse";
