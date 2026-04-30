@@ -65,6 +65,8 @@ vi.mock("@/hooks/use-fetch", () => ({
   },
 }));
 
+vi.mock("@/auth", () => ({ auth: vi.fn() }));
+
 vi.mock("next-auth/react");
 const mockUseSession = useSession as Mock;
 

@@ -29,7 +29,7 @@ import { Service, ServiceId } from "../service-lifecycle/definitions";
 
 // utility type: turn a list of states into a record
 type ToRecord<Q> = Q extends []
-  ? {} // eslint-disable-line @typescript-eslint/ban-types
+  ? {} // eslint-disable-line @typescript-eslint/no-empty-object-type
   : Q extends [WithState<infer State, infer T>, ...infer Rest extends unknown[]]
     ? { [K in State]: Omit<T, "fsm"> } & ToRecord<Rest>
     : never;

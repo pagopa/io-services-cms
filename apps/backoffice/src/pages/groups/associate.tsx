@@ -7,6 +7,7 @@ import { AppLayout, PageLayout } from "@/layouts";
 import { ROUTES } from "@/lib/routes";
 import { SelfcareRoles } from "@/types/auth";
 import { trackBulkGroupAssignmentEndEvent } from "@/utils/mix-panel";
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { ReactElement } from "react";
@@ -50,15 +51,12 @@ export default function AssociateGroups() {
     </>
   );
 }
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export async function getStaticProps({ locale }: any) {
-  return {
-    props: {
-      // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
+
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 
 AssociateGroups.getLayout = function getLayout(page: ReactElement) {
   return (

@@ -3,14 +3,17 @@ const { i18n } = require("./next-i18next.config");
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@pagopa/mui-italia"],
+  transpilePackages: ["@pagopa/mui-italia", "next-auth"],
   i18n,
   output: "standalone",
   experimental: {
     clientRouterFilter: false, // fix full reload for pages that contains "-"
-    instrumentationHook: true,
-    serverComponentsExternalPackages: ["pino"],
   },
+  serverExternalPackages: [
+    "pino",
+    "@opentelemetry/instrumentation-pino",
+    "@pagopa/azure-tracing",
+  ],
   // https://github.com/mswjs/msw/issues/1801
   // Setting `resolve.alias` to `false` will tell webpack to ignore a module.
   // `msw/node` is a server-only module that exports methods not available in the `browser`.

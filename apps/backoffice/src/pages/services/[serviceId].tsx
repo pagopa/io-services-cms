@@ -28,6 +28,7 @@ import {
 } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import * as tt from "io-ts";
+import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -243,13 +244,13 @@ export default function ServiceDetails() {
   );
 }
 
-export async function getServerSideProps({ locale }: any) {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
+export const getServerSideProps: GetServerSideProps = async ({
+  locale = "it",
+}) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 
 ServiceDetails.getLayout = function getLayout(page: ReactElement) {
   return (

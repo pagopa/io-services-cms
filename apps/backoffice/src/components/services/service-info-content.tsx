@@ -14,6 +14,7 @@ export interface ServiceInfoContentProps {
 }
 
 /** Render service details information */
+// eslint-disable-next-line complexity
 export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
   const { t } = useTranslation();
 

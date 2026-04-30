@@ -64,7 +64,7 @@ const getSubscriptionsMigrationConfig = (): Config => {
     }
 
     if (result.right.SUBSCRIPTION_MIGRATION_API_MOCKING) {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const { setupMocks } = require("../../../mocks");
       setupMocks();
     }
@@ -153,6 +153,7 @@ const buildSubscriptionsMigrationClient = (): SubscriptionsMigrationClient => {
           E.mapLeft(flow(readableReport, E.toError)),
           // This is an adapter cause io-subscriptions-migration API returns a different shape than the one defined in the openapi spec
           E.map(
+            // eslint-disable-next-line complexity
             (migrationData) =>
               ({
                 data: {

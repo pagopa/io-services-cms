@@ -93,7 +93,6 @@ export function TableView<T>({ ...props }: TableViewProps<T>) {
   useEffect(() => {
     setRowsPerPage(props.pagination.limit);
     setPage(Math.floor(props.pagination.offset / props.pagination.limit));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.pagination]);
 
   return (

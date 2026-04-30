@@ -173,7 +173,7 @@ export const jiraLegacyClient = (
         headers[key] = value;
       });
       return JSON.stringify(headers);
-    } catch (e) {
+    } catch {
       return "CANNOT EXTRACT HEADERS";
     }
   };

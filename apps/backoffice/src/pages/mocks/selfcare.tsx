@@ -12,6 +12,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
+import { GetStaticProps } from "next";
 import NextLink from "next/link";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
 import { useState } from "react";
@@ -97,18 +98,18 @@ export default function Selfcare() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => {
   // ! return a not found error in prod environemnt
   if (process.env.APP_ENV === "production") {
     return { notFound: true };
   }
+
   return {
     props: {
-      // pass the translation props to the page component
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 // No Auth required
 Selfcare.publicRoute = true;

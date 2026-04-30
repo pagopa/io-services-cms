@@ -45,7 +45,7 @@ const buildIoServicesCmsClient = (): Client => {
   const configuration = getIoServicesCmsClientConfig();
 
   if (configuration.API_SERVICES_CMS_MOCKING) {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { setupMocks } = require("../../../mocks");
     setupMocks();
   }

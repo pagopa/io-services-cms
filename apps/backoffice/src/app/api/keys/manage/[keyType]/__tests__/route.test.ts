@@ -24,12 +24,15 @@ const mocks: {
   } as unknown) as BackOfficeUser
 }));
 
-const { getToken, regenerateManageSubscriptionKeyHandlerMock } = vi.hoisted(
-  () => ({
-    getToken: vi.fn(() => Promise.resolve(mocks.jwtMock)),
-    regenerateManageSubscriptionKeyHandlerMock: vi.fn()
-  })
-);
+const { auth } = vi.hoisted(() => ({
+  auth: vi.fn(() => Promise.resolve({ user: mocks.jwtMock }))
+}));
+
+const { regenerateManageSubscriptionKeyHandlerMock } = vi.hoisted(() => ({
+  regenerateManageSubscriptionKeyHandlerMock: vi.fn()
+}));
+
+vi.mock("@/auth", () => ({ auth }));
 
 vi.mock(
   "@/app/api/subscriptions/[subscriptionId]/keys/[keyType]/handler",
@@ -37,14 +40,6 @@ vi.mock(
     regenerateManageSubscriptionKeyHandler: regenerateManageSubscriptionKeyHandlerMock
   })
 );
-
-vi.mock("next-auth/jwt", async () => {
-  const actual = await vi.importActual("next-auth/jwt");
-  return {
-    ...(actual as any),
-    getToken
-  };
-});
 
 afterEach(() => {
   vi.resetAllMocks();

@@ -22,6 +22,7 @@ export default [
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "no-console": "off",
+      "@typescript-eslint/no-duplicate-enum-values": "off",
     },
   },
   {
