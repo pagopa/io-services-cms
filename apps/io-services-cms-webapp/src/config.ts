@@ -143,6 +143,7 @@ export const ApimConfig = t.type({
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
+  APIM_USER_GROUPS: NonEmptyString,
 });
 export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 
