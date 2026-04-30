@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.1.0
+
+### Minor Changes
+
+- 9969087a: Extend SelfcareGroupWatcher to create MANAGE-GROUP on group creation
+
 ## 2.0.6
 
 ### Patch Changes
