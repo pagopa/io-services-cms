@@ -28,7 +28,7 @@ if (
   getConfiguration().SELFCARE_API_MOCKING ||
   getConfiguration().API_APIM_MOCKING
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { setupMocks } = require("../../../mocks");
   setupMocks();
 }

@@ -17,7 +17,7 @@ import { ReactElement, ReactNode } from "react";
 import "../styles/fonts.css";
 
 if (getConfiguration().API_BACKEND_MOCKING) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   const { setupMocks } = require("../../mocks");
   setupMocks();
 }

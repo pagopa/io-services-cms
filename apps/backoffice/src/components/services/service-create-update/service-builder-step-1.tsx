@@ -72,14 +72,12 @@ export const ServiceBuilderStep1 = ({ topics }: ServiceBuilderStep1Props) => {
     } else {
       setIsPreviewEnabled(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [watchedName, watchedDescription]);
 
   useEffect(() => {
     if (topics) {
       setTopicList(topics.map((item) => ({ id: item.id, label: item.name })));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topics]);
 
   return (

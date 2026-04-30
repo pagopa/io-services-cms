@@ -1,4 +1,5 @@
 /* eslint-disable max-lines-per-function */
+import { auth } from "@/auth";
 import { AggregatedInstitutionDownloadAlert } from "@/components/aggregated-institutions/aggregated-institution-download-alert";
 import { AggregatedInstitutionTableView } from "@/components/aggregated-institutions/aggregated-institution-table-view";
 import { AggregatedInstitutionsDialog } from "@/components/aggregated-institutions/aggregated-institutions-dialog";
@@ -16,7 +17,6 @@ import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import useFetch, { client } from "@/hooks/use-fetch";
 import { AppLayout, PageLayout } from "@/layouts";
-import { authOptions } from "@/lib/auth/auth-options";
 import { isAdmin } from "@/utils/auth-util";
 import {
   trackAggregatedInstitutionsPageEvent,
@@ -32,7 +32,8 @@ import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import * as E from "fp-ts/lib/Either";
 import * as tt from "io-ts";
-import { Session, getServerSession } from "next-auth";
+import { GetServerSideProps } from "next";
+import { Session } from "next-auth";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -493,8 +494,8 @@ export default function AggregatedInstitutions() {
   );
 }
 
-export async function getServerSideProps(context: any) {
-  const { locale, req, res } = context;
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { locale = "it" } = context;
 
   // Check feature flag
   if (process.env.NEXT_PUBLIC_EA_ENABLED !== "true") {
@@ -502,7 +503,7 @@ export async function getServerSideProps(context: any) {
   }
 
   // Get server side session
-  const session: Session | null = await getServerSession(req, res, authOptions);
+  const session: Session | null = await auth(context);
 
   // Check isAggregator session flag
   if (!session?.user?.institution.isAggregator) {
@@ -515,7 +516,7 @@ export async function getServerSideProps(context: any) {
       ...(await serverSideTranslations(locale)),
     },
   };
-}
+};
 
 AggregatedInstitutions.getLayout = function getLayout(page: ReactElement) {
   return (

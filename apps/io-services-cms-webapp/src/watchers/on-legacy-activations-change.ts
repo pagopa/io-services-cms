@@ -5,9 +5,8 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-const noAction = {};
 type Actions = "migrationError";
-type MigrationSuccess = typeof noAction;
+type MigrationSuccess = Record<string, never>;
 type Action<A extends Actions, B> = Record<A, B>;
 type MigrationError<S> = Action<"migrationError", S>;
 export type MigrationResults<S> = MigrationError<S> | MigrationSuccess;

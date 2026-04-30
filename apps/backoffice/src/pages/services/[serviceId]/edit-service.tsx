@@ -16,6 +16,7 @@ import {
 } from "@/utils/mix-panel";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
+import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -86,7 +87,6 @@ export default function EditService() {
       setServiceCreateUpdatePayload(
         fromServiceLifecycleToServiceCreateUpdatePayload(serviceData),
       );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [serviceData]);
 
   return (
@@ -109,13 +109,13 @@ export default function EditService() {
   );
 }
 
-export async function getServerSideProps({ locale }: any) {
-  return {
-    props: {
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
+export const getServerSideProps: GetServerSideProps = async ({
+  locale = "it",
+}) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 
 EditService.getLayout = function getLayout(page: ReactElement) {
   return (

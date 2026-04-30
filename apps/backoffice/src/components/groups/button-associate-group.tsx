@@ -25,7 +25,7 @@ const checkAtLeastOneGroupUnboundedServiceExists = async () => {
       return maybeResponse.right.status === 200;
     }
     return false;
-  } catch (error) {
+  } catch {
     return false;
   }
 };
@@ -41,7 +41,7 @@ const checkAtLeastOneActiveGroupExists = async (institutionId: string) => {
       return maybeResponse.right.status === 200;
     }
     return false;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

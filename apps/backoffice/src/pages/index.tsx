@@ -9,6 +9,7 @@ import { AppLayout, PageLayout } from "@/layouts";
 import { trackOverviewPageEvent } from "@/utils/mix-panel";
 import { Grid } from "@mui/material";
 import mixpanel from "mixpanel-browser";
+import { GetStaticProps } from "next";
 import { useSession } from "next-auth/react";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -116,14 +117,11 @@ export default function Home() {
   );
 }
 
-export async function getStaticProps({ locale }: any) {
-  return {
-    props: {
-      // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 
 Home.getLayout = function getLayout(page: ReactElement) {
   return (

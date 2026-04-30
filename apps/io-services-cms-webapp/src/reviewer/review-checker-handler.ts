@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { InvocationContext } from "@azure/functions";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { sequenceT } from "fp-ts/lib/Apply";

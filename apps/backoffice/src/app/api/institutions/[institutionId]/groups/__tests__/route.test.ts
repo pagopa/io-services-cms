@@ -36,6 +36,8 @@ const mocks = vi.hoisted(() => {
   };
 });
 
+vi.mock("@/auth", () => ({ auth: vi.fn() }));
+
 vi.mock("@/lib/be/wrappers", async (importOriginal) => {
   const original = (await importOriginal()) as any;
   return {

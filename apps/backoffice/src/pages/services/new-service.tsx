@@ -13,6 +13,7 @@ import {
 } from "@/utils/mix-panel";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
+import { GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { useTranslation } from "next-i18next";
 import { serverSideTranslations } from "next-i18next/serverSideTranslations";
@@ -83,15 +84,12 @@ export default function NewService() {
     </>
   );
 }
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export async function getStaticProps({ locale }: any) {
-  return {
-    props: {
-      // pass the translation props to the page component
-      ...(await serverSideTranslations(locale)),
-    },
-  };
-}
+
+export const getStaticProps: GetStaticProps = async ({ locale = "it" }) => ({
+  props: {
+    ...(await serverSideTranslations(locale)),
+  },
+});
 
 NewService.getLayout = function getLayout(page: ReactElement) {
   return (
