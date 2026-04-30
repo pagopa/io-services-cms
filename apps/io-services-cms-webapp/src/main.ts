@@ -73,9 +73,9 @@ import {
 } from "./utils/cosmos-legacy";
 import { jiraProxy } from "./utils/jira-proxy";
 import { pdvTokenizerClient } from "./utils/pdvTokenizerClient";
+import { GroupChangeEvent } from "./utils/selfcare-group-change";
 import { getDao as getServiceReviewDao } from "./utils/service-review-dao";
 import { getDao as getServiceTopicDao } from "./utils/service-topic-dao";
-import { GroupChangeEvent } from "./utils/sync-group-utils";
 import {
   handler as onIngestionActivationChangeHandler,
   parseBlob,
