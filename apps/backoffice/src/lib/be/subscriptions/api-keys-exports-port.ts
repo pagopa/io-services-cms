@@ -29,6 +29,8 @@ export interface ApiKeysExportsPort {
     }[]
   >;
 
+  generateDownloadUrl(fileName: string, expirationDate?: Date): Promise<URL>;
+
   initializeFile(
     fileName: string,
     institutionId: string,

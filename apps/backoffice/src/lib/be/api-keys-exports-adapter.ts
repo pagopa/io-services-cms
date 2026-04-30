@@ -1,5 +1,9 @@
 import { DefaultAzureCredential } from "@azure/identity";
-import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
+import {
+  BlobSASPermissions,
+  BlobServiceClient,
+  ContainerClient,
+} from "@azure/storage-blob";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -12,17 +16,19 @@ import {
   FileState,
   FileStateEnum,
 } from "./subscriptions/api-keys-exports-port";
+import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
   EXPORTS_API_KEYS_CONTAINER_NAME: NonEmptyString,
+  EXPORTS_API_KEYS_DURATION_IN_HOURS: NonNegativeInteger,
   SA_EXT_BLOB_ENDPOINT: NonEmptyString,
 });
 
 export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
   private blobContainerClient: ContainerClient;
-
   private static instance: ApiKeysExportsAdapter;
+  public EXPORTS_API_KEYS_DURATION_IN_HOURS: NonNegativeInteger;
 
   private constructor(environment: Record<string, unknown>) {
     const result = Config.decode(environment);
@@ -38,6 +44,8 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
     this.blobContainerClient = blobServiceClient.getContainerClient(
       result.right.EXPORTS_API_KEYS_CONTAINER_NAME,
     );
+    this.EXPORTS_API_KEYS_DURATION_IN_HOURS =
+      result.right.EXPORTS_API_KEYS_DURATION_IN_HOURS;
   }
 
   public static getInstance(
@@ -84,13 +92,17 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
     state?: FileState,
   ): Promise<
     {
+      creationDate: Date;
       fileName: string;
-      state?: FileState;
+      lastModifiedDate: Date;
+      state: FileState;
     }[]
   > {
     const blobs: {
+      creationDate: Date;
       fileName: string;
-      state?: FileState;
+      lastModifiedDate: Date;
+      state: FileState;
     }[] = [];
     const tagQuery =
       `"institutionId" = '${institutionId}' AND "userId" = '${userId}'` +
@@ -99,13 +111,31 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
       const result = this.blobContainerClient.findBlobsByTags(tagQuery);
 
       for await (const blob of result) {
+        const blobClient = this.blobContainerClient.getBlobClient(blob.name);
+        const { createdOn: creationDate, lastModified: lastModifiedDate } =
+          await blobClient.getProperties();
+
+        if (
+          !(creationDate instanceof Date) ||
+          !(lastModifiedDate instanceof Date)
+        ) {
+          throw new Error(
+            `Blob ${blob.name} has an invalid dates properties: ${creationDate} ${lastModifiedDate}`,
+          );
+        }
+
         const stateResult = FileState.decode(blob.tags?.state);
         if (E.isLeft(stateResult)) {
           throw new Error(
             `Blob ${blob.name} has an invalid state tag: ${blob.tags?.state}`,
           );
         }
-        blobs.push({ fileName: blob.name, state: stateResult.right });
+        blobs.push({
+          creationDate,
+          fileName: blob.name,
+          lastModifiedDate,
+          state: stateResult.right,
+        });
       }
     } catch (error) {
       throw new ManagedInternalError(
@@ -115,6 +145,23 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
     }
 
     return Promise.resolve(blobs);
+  }
+
+  async generateDownloadUrl(
+    fileName: string,
+    expirationDate?: Date,
+  ): Promise<URL> {
+    const blobClient = this.blobContainerClient.getBlobClient(fileName);
+
+    // "r" = read permissions
+    const permissions = BlobSASPermissions.parse("r");
+
+    const sasUrl = await blobClient.generateSasUrl({
+      expiresOn: expirationDate,
+      permissions,
+    });
+
+    return new URL(sasUrl);
   }
 
   async initializeFile(
