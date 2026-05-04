@@ -1,4 +1,10 @@
 import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+import {
+  AggregatedInstitutionsManageKeysLinkReady,
+  StateEnum as StateEnumReady,
+} from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
@@ -19,17 +25,6 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
-import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
-import {
-  AggregatedInstitutionsManageKeysLinkReady,
-  StateEnum as StateEnumReady,
-} from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
-import {
-  StateEnum as StateEnumNotReady,
-  AggregatedInstitutionsManageKeysLinkNotReady,
-} from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
-import archiver from "archiver";
-import { randomBytes } from "crypto";
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
   BadRequestError,
@@ -725,7 +720,7 @@ export async function retrieveApiKeysExports(
     exportsFiles.push(
       ...(await apiKeysExportsAdapter.findExportsFiles(aggregatorId, userId)),
     );
-  } catch (err) {
+  } catch (_err) {
     throw new ManagedInternalError("Error while searching for exports");
   }
 
