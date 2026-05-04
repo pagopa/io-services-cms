@@ -139,11 +139,11 @@ export const CosmosLegacyConfig = t.type({
 
 // Apim configuration
 export const ApimConfig = t.type({
+  APIM_USER_GROUPS: NonEmptyString,
   AZURE_APIM: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME: NonEmptyString,
   AZURE_SUBSCRIPTION_ID: NonEmptyString,
-  APIM_USER_GROUPS: NonEmptyString,
 });
 export type ApimConfig = t.TypeOf<typeof ApimConfig>;
 
