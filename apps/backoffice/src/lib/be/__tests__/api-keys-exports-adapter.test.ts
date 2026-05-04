@@ -19,16 +19,21 @@ const mocks = vi.hoisted(() => {
   const getBlobClient = vi.fn(() => ({
     getProperties,
     getTags,
+    url: "https://localhost",
   }));
   const getContainerClient = vi.fn(() => ({
     findBlobsByTags,
     getBlockBlobClient,
     getBlobClient,
   }));
+  const getUserDelegationKey = vi.fn();
   const blobServiceClientConstructor = vi.fn(() => ({
     getContainerClient,
+    getUserDelegationKey,
   }));
   const defaultAzureCredentialConstructor = vi.fn();
+
+  const generateBlobSASQueryParameters = vi.fn();
 
   return {
     upload,
@@ -36,11 +41,14 @@ const mocks = vi.hoisted(() => {
     setTags,
     getTags,
     getBlockBlobClient,
+    getBlobClient,
     getProperties,
     findBlobsByTags,
     getContainerClient,
     blobServiceClientConstructor,
     defaultAzureCredentialConstructor,
+    getUserDelegationKey,
+    generateBlobSASQueryParameters,
   };
 });
 
@@ -51,6 +59,10 @@ vi.mock("@azure/identity", () => ({
 vi.mock("@azure/storage-blob", () => ({
   BlobServiceClient: mocks.blobServiceClientConstructor,
   ContainerClient: vi.fn(),
+  generateBlobSASQueryParameters: mocks.generateBlobSASQueryParameters,
+  BlobSASPermissions: {
+    parse: vi.fn(),
+  },
 }));
 
 const resetAdapterSingleton = () => {
@@ -425,5 +437,59 @@ describe("markFileAsFailed", () => {
       institutionId: "aggregatorId",
       userId: "userId",
     });
+  });
+});
+
+describe("generateDownloadUrl", () => {
+  const environment = {
+    SA_EXT_BLOB_ENDPOINT: "https://account.blob.core.windows.net",
+    EXPORTS_API_KEYS_CONTAINER_NAME: "api-keys-exports",
+    EXPORTS_API_KEYS_DURATION_IN_HOURS: "24",
+  };
+  const adapter = ApiKeysExportsAdapter.getInstance(environment);
+
+  const aFileName = "file.zip";
+  const anExpirationDate = new Date(2027, 0, 1);
+  const aSasToken = "sv=2022-11-02&sp=r&sig=fake-sig";
+
+  it("should generate a download URL", async () => {
+    mocks.getUserDelegationKey.mockResolvedValueOnce({});
+    mocks.generateBlobSASQueryParameters.mockReturnValueOnce(aSasToken);
+
+    const result = await adapter.generateDownloadUrl(
+      aFileName,
+      anExpirationDate,
+    );
+
+    expect(mocks.getBlobClient).toHaveBeenCalledExactlyOnceWith(aFileName);
+    expect(mocks.getUserDelegationKey).toHaveBeenCalledTimes(1);
+    expect(mocks.generateBlobSASQueryParameters).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(new URL(`https://localhost?${aSasToken}`));
+  });
+
+  it("should throw when user delegation request fails", async () => {
+    const anError = Error("fail");
+    mocks.getUserDelegationKey.mockRejectedValueOnce(anError);
+
+    await expect(
+      adapter.generateDownloadUrl(aFileName, anExpirationDate),
+    ).rejects.toThrowError(ManagedInternalError);
+
+    expect(mocks.getBlobClient).toHaveBeenCalledExactlyOnceWith(aFileName);
+    expect(mocks.getUserDelegationKey).toHaveBeenCalledTimes(1);
+  });
+
+  it("should throw when sas token generation fails", async () => {
+    const anError = Error("fail");
+    mocks.generateBlobSASQueryParameters.mockImplementationOnce(() => {
+      throw anError;
+    });
+
+    await expect(
+      adapter.generateDownloadUrl(aFileName, anExpirationDate),
+    ).rejects.toThrowError(ManagedInternalError);
+
+    expect(mocks.getBlobClient).toHaveBeenCalledExactlyOnceWith(aFileName);
+    expect(mocks.getUserDelegationKey).toHaveBeenCalledTimes(1);
   });
 });
