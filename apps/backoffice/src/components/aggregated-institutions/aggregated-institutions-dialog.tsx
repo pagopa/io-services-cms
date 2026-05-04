@@ -1,4 +1,3 @@
-import { TextFieldController } from "@/components/forms/controllers";
 import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
 import {
   GeneratePasswordStatus,
@@ -11,7 +10,7 @@ import {
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
-import { CircularProgress } from "@mui/material";
+import { CircularProgress, TextField } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -23,9 +22,17 @@ import InputAdornment from "@mui/material/InputAdornment";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
+import { Box } from "@mui/system";
 import { TFunction, useTranslation } from "next-i18next";
 import { useCallback, useEffect, useState } from "react";
-import { FormProvider, SubmitErrorHandler, useForm } from "react-hook-form";
+import {
+  Controller,
+  FormProvider,
+  Path,
+  SubmitErrorHandler,
+  useForm,
+  useFormContext,
+} from "react-hook-form";
 import { z } from "zod";
 
 const getLocalizedErrorMessages = (t: TFunction) => ({
@@ -54,6 +61,51 @@ export interface AggregatedInstitutionsDialogProps {
 const defaultFormValues = {
   confirmPassword: "",
   password: "" as AggregatedInstitutionsManageKeysPassword,
+};
+
+type FormValues = typeof defaultFormValues;
+
+interface PasswordTextFieldProps {
+  label: string;
+  name: Path<FormValues>;
+}
+
+const PasswordTextField = ({ label, name }: PasswordTextFieldProps) => {
+  const { control } = useFormContext<FormValues>();
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <Controller
+      control={control}
+      name={name}
+      render={({ field, fieldState: { error } }) => (
+        <TextField
+          {...field}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  edge="end"
+                  onClick={() => setShowPassword((prev) => !prev)}
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          error={!!error}
+          fullWidth
+          helperText={error?.message}
+          label={label}
+          margin="normal"
+          type={showPassword ? "text" : "password"}
+        />
+      )}
+    />
+  );
 };
 
 const getValidationSchema = (t: TFunction) => {
@@ -92,8 +144,6 @@ export const AggregatedInstitutionsDialog = ({
     mode: "onTouched",
     resolver: zodResolver(getValidationSchema(t)),
   });
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -102,8 +152,6 @@ export const AggregatedInstitutionsDialog = ({
   }, [isOpen, passwordStatus]);
 
   const resetAndClose = useCallback(() => {
-    setShowNewPassword(false);
-    setShowConfirmPassword(false);
     methods.reset(defaultFormValues);
     onClose();
   }, [methods, onClose]);
@@ -157,7 +205,10 @@ export const AggregatedInstitutionsDialog = ({
   return (
     <Dialog fullWidth onClose={handleClose} open={isOpen}>
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(handleConfirm, handleSubmitError)}>
+        <Box
+          component="form"
+          onSubmit={methods.handleSubmit(handleConfirm, handleSubmitError)}
+        >
           <DialogTitle>
             {t("routes.aggregated-institutions.exportDialog.title")}
           </DialogTitle>
@@ -181,53 +232,17 @@ export const AggregatedInstitutionsDialog = ({
                 </Typography>
               </ListItem>
             </List>
-            <TextFieldController
-              InputLabelProps={{
-                shrink: true,
-              }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      edge="end"
-                      onClick={() => setShowNewPassword((prev) => !prev)}
-                    >
-                      {showNewPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              fullWidth
+            <PasswordTextField
               label={t(
                 "routes.aggregated-institutions.exportDialog.fields.newPassword",
               )}
-              margin="normal"
               name="password"
-              type={showNewPassword ? "text" : "password"}
             />
-            <TextFieldController
-              InputLabelProps={{
-                shrink: true,
-              }}
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      edge="end"
-                      onClick={() => setShowConfirmPassword((prev) => !prev)}
-                    >
-                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              fullWidth
+            <PasswordTextField
               label={t(
                 "routes.aggregated-institutions.exportDialog.fields.confirmPassword",
               )}
-              margin="normal"
               name="confirmPassword"
-              type={showConfirmPassword ? "text" : "password"}
             />
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
@@ -262,7 +277,7 @@ export const AggregatedInstitutionsDialog = ({
               <span>{t("buttons.confirm")}</span>
             </LoadingButton>
           </DialogActions>
-        </form>
+        </Box>
       </FormProvider>
     </Dialog>
   );
