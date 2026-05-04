@@ -27,7 +27,11 @@ export const handleGroupChangeEvent =
     }
 
     const tasks: readonly TE.TaskEither<Error, void>[] = [
-      createSubscriptionForGroup(apimService, selfcareClient, apimUserGroups)(item),
+      createSubscriptionForGroup(
+        apimService,
+        selfcareClient,
+        apimUserGroups,
+      )(item),
       syncSubscription(apimService)(item),
       syncServices(serviceLifecycleStore)(item),
     ];
