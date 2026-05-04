@@ -1,4 +1,6 @@
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
+import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+import { StateEnum as StateEnumReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
@@ -10,12 +12,14 @@ import {
   getManageSubscriptions,
   regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
   regenerateManageSubscriptionApiKey,
+  retrieveApiKeysExports,
   retrieveInstitutionAggregateManageSubscriptionsKeys,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
   upsertManageSubscription,
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "../business";
+import { BadRequestError, ManagedInternalError } from "../../errors";
 
 const mocks: {
   anOwnerId: string;
@@ -34,6 +38,7 @@ const mocks: {
   aSecondaryKey: string;
   regenerateSubscriptionKey: Mock<any>;
   getInstitutionGroups: Mock<any>;
+  generateDownloadUrl: Mock<any>;
   listSubscriptionSecrets: Mock<any>;
   findExportsFiles: Mock<any>;
   initializeFile: Mock<any>;
@@ -66,6 +71,7 @@ const mocks: {
   upsert: vi.fn(),
   regenerateSubscriptionKey: vi.fn(),
   getInstitutionGroups: vi.fn(),
+  generateDownloadUrl: vi.fn(),
   listSubscriptionSecrets: vi.fn(),
   findExportsFiles: vi.fn(),
   initializeFile: vi.fn(),
@@ -123,6 +129,8 @@ vi.mock("@/lib/be/api-keys-exports-adapter", () => ({
       initializeFile: mocks.initializeFile,
       markFileAsFailed: mocks.markFileAsFailed,
       finalizeFile: mocks.finalizeFile,
+      generateDownloadUrl: mocks.generateDownloadUrl,
+      EXPORTS_API_KEYS_DURATION_IN_HOURS: 24,
     }),
   },
 }));
@@ -1199,6 +1207,171 @@ describe("Manage Keys", () => {
         aggregatorId,
         userId,
       );
+    });
+  });
+
+  describe("retrieveApiKeysExports", () => {
+    const aggregatorId = "aggregatorId";
+    const userId = "userId";
+    const creationDate = new Date(2026, 0, 1);
+    const lastModifiedDate = new Date(2026, 0, 2);
+    const aSuccessFileName = "file_success.zip";
+    const aFailedFileName = "file_failed.zip";
+    const anInProgressFileName = "file_wip.zip";
+    const anInProgressExport = {
+      creationDate,
+      lastModifiedDate: creationDate,
+      state: StateEnumNotReady.IN_PROGRESS,
+      fileName: anInProgressFileName,
+    };
+
+    const aFailedExport = {
+      creationDate,
+      lastModifiedDate,
+      state: StateEnumNotReady.FAILED,
+      fileName: aFailedFileName,
+    };
+
+    const aDoneExport = {
+      creationDate,
+      lastModifiedDate,
+      state: StateEnumReady.DONE,
+      fileName: aSuccessFileName,
+    };
+    const anUrl = new URL("https://localhost");
+
+    vi.useFakeTimers({ now: lastModifiedDate.getTime() + 5000 });
+
+    it("should retrieve api keys exports", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([aDoneExport]);
+      mocks.generateDownloadUrl.mockResolvedValueOnce(anUrl);
+      const expirationDate = new Date(
+        lastModifiedDate.getTime() + 24 * 60 * 60 * 1000,
+      );
+
+      // when
+      const result = await retrieveApiKeysExports(aggregatorId, userId);
+
+      // then
+      expect(result).toEqual({
+        downloadLink: anUrl.href,
+        expirationDate: expirationDate.toISOString(),
+        state: StateEnumReady.DONE,
+      });
+      expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
+        aggregatorId,
+        userId,
+      );
+      expect(mocks.generateDownloadUrl).toHaveBeenCalledExactlyOnceWith(
+        aSuccessFileName,
+        expirationDate,
+      );
+    });
+
+    it("should retrieve most recent api keys exports", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([
+        aDoneExport,
+        // failed export 5 minutes before
+        {
+          ...aFailedExport,
+          lastModifiedDate: new Date(lastModifiedDate.getTime() - 300 * 1000),
+        },
+      ]);
+      mocks.generateDownloadUrl.mockResolvedValueOnce(anUrl);
+      const expirationDate = new Date(
+        lastModifiedDate.getTime() + 24 * 60 * 60 * 1000,
+      );
+
+      // when
+      const result = await retrieveApiKeysExports(aggregatorId, userId);
+
+      // then
+      expect(result).toEqual({
+        downloadLink: anUrl.href,
+        expirationDate: expirationDate.toISOString(),
+        state: StateEnumReady.DONE,
+      });
+      expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
+        aggregatorId,
+        userId,
+      );
+      expect(mocks.generateDownloadUrl).toHaveBeenCalledExactlyOnceWith(
+        aSuccessFileName,
+        expirationDate,
+      );
+    });
+
+    it("should throw BadRequestError on 0 exports", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([]);
+
+      // when & then
+      await expect(
+        retrieveApiKeysExports(aggregatorId, userId),
+      ).rejects.toThrowError(BadRequestError);
+    });
+
+    it("should throw ManagedInternalError when findExportsFiles rejects", async () => {
+      // given
+      mocks.findExportsFiles.mockRejectedValueOnce(new Error("storage error"));
+
+      // when & then
+      await expect(
+        retrieveApiKeysExports(aggregatorId, userId),
+      ).rejects.toThrowError(ManagedInternalError);
+    });
+
+    it("should return IN_PROGRESS state when most recent export is in progress", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([anInProgressExport]);
+
+      // when
+      const result = await retrieveApiKeysExports(aggregatorId, userId);
+
+      // then
+      expect(result).toEqual({ state: StateEnumNotReady.IN_PROGRESS });
+      expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
+    });
+
+    it("should return FAILED state when most recent export is failed", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([aFailedExport]);
+
+      // when
+      const result = await retrieveApiKeysExports(aggregatorId, userId);
+
+      // then
+      expect(result).toEqual({ state: StateEnumNotReady.FAILED });
+      expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
+    });
+
+    it("should throw ManagedInternalError when DONE export TTL has expired", async () => {
+      // set current time after a 24h expiration window
+      vi.setSystemTime(lastModifiedDate.getTime() + 25 * 60 * 60 * 1000);
+      mocks.findExportsFiles.mockResolvedValueOnce([aDoneExport]);
+
+      // when & then
+      await expect(
+        retrieveApiKeysExports(aggregatorId, userId),
+      ).rejects.toThrowError(ManagedInternalError);
+      expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
+
+      vi.useRealTimers();
+    });
+
+    it("should throw ManagedInternalError when generateDownloadUrl rejects", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([aDoneExport]);
+      mocks.generateDownloadUrl.mockRejectedValueOnce(
+        new Error("download url error"),
+      );
+
+      // when & then
+      await expect(
+        retrieveApiKeysExports(aggregatorId, userId),
+      ).rejects.toThrowError(ManagedInternalError);
     });
   });
 });
