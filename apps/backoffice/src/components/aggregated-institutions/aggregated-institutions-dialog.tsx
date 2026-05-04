@@ -23,8 +23,8 @@ import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/system";
-import { TFunction, useTranslation } from "next-i18next";
-import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "next-i18next";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Controller,
   FormProvider,
@@ -35,20 +35,15 @@ import {
 } from "react-hook-form";
 import { z } from "zod";
 
-const getLocalizedErrorMessages = (t: TFunction) => ({
-  emptyConfirmPassword: t(
-    "routes.aggregated-institutions.exportDialog.fields.errors.emptyConfirmPassword",
-  ),
-  emptyPassword: t(
-    "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
-  ),
-  invalidPassword: t(
-    "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
-  ),
-  passwordDontMatch: t(
-    "routes.aggregated-institutions.exportDialog.fields.errors.passwordDontMatch",
-  ),
-});
+const PasswordErrorCode = {
+  PASSWORD_MISSING: "password_missing",
+  PASSWORD_NOT_COMPLIANT: "password_not_compliant",
+} as const satisfies Record<string, InvalidFormReason>;
+
+const ConfirmPasswordErrorCode = {
+  CONFIRM_PASSWORD_MISSING: "confirm_password_missing",
+  PASSWORD_MISMATCH: "password_mismatch",
+} as const satisfies Record<string, InvalidFormReason>;
 
 export interface AggregatedInstitutionsDialogProps {
   isDownloadReady?: boolean;
@@ -72,7 +67,26 @@ interface PasswordTextFieldProps {
 
 const PasswordTextField = ({ label, name }: PasswordTextFieldProps) => {
   const { control } = useFormContext<FormValues>();
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = useState(false);
+
+  const errorCodeToMessage: Record<InvalidFormReason, string> = useMemo(
+    () => ({
+      [ConfirmPasswordErrorCode.CONFIRM_PASSWORD_MISSING]: t(
+        "routes.aggregated-institutions.exportDialog.fields.errors.emptyConfirmPassword",
+      ),
+      [ConfirmPasswordErrorCode.PASSWORD_MISMATCH]: t(
+        "routes.aggregated-institutions.exportDialog.fields.errors.passwordDontMatch",
+      ),
+      [PasswordErrorCode.PASSWORD_MISSING]: t(
+        "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
+      ),
+      [PasswordErrorCode.PASSWORD_NOT_COMPLIANT]: t(
+        "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
+      ),
+    }),
+    [t],
+  );
 
   return (
     <Controller
@@ -98,7 +112,11 @@ const PasswordTextField = ({ label, name }: PasswordTextFieldProps) => {
           }}
           error={!!error}
           fullWidth
-          helperText={error?.message}
+          helperText={
+            error?.message && error.message in errorCodeToMessage
+              ? errorCodeToMessage[error.message as InvalidFormReason]
+              : null
+          }
           label={label}
           margin="normal"
           type={showPassword ? "text" : "password"}
@@ -108,25 +126,23 @@ const PasswordTextField = ({ label, name }: PasswordTextFieldProps) => {
   );
 };
 
-const getValidationSchema = (t: TFunction) => {
-  const errorMessages = getLocalizedErrorMessages(t);
-
-  return z
-    .object({
-      confirmPassword: z.string().min(1, errorMessages.emptyConfirmPassword),
-      password: z
-        .string()
-        .min(1, errorMessages.emptyPassword)
-        .refine(
-          (password) => AggregatedInstitutionsManageKeysPassword.is(password),
-          errorMessages.invalidPassword,
-        ),
-    })
-    .refine((schema) => schema.password === schema.confirmPassword, {
-      message: errorMessages.passwordDontMatch,
-      path: ["confirmPassword"],
-    });
-};
+const validationSchema = z
+  .object({
+    confirmPassword: z
+      .string()
+      .min(1, ConfirmPasswordErrorCode.CONFIRM_PASSWORD_MISSING),
+    password: z
+      .string()
+      .min(1, PasswordErrorCode.PASSWORD_MISSING)
+      .refine(
+        (password) => AggregatedInstitutionsManageKeysPassword.is(password),
+        PasswordErrorCode.PASSWORD_NOT_COMPLIANT,
+      ),
+  })
+  .refine((schema) => schema.password === schema.confirmPassword, {
+    message: ConfirmPasswordErrorCode.PASSWORD_MISMATCH,
+    path: ["confirmPassword"],
+  });
 
 export const AggregatedInstitutionsDialog = ({
   isDownloadReady,
@@ -142,7 +158,7 @@ export const AggregatedInstitutionsDialog = ({
   const methods = useForm({
     defaultValues: defaultFormValues,
     mode: "onTouched",
-    resolver: zodResolver(getValidationSchema(t)),
+    resolver: zodResolver(validationSchema),
   });
 
   useEffect(() => {
@@ -174,32 +190,30 @@ export const AggregatedInstitutionsDialog = ({
       password: string;
     }>
   >(
-    (errors) => {
-      const errorMessages = getLocalizedErrorMessages(t);
+    ({ confirmPassword, password }) => {
       const reasons = new Set<InvalidFormReason>();
 
-      if (errors?.password?.message === errorMessages.emptyPassword) {
-        reasons.add("password_missing");
+      const maybeConfirmPasswordError = Object.values(
+        ConfirmPasswordErrorCode,
+      ).find((code) => code === confirmPassword?.message);
+
+      const maybePasswordError = Object.values(PasswordErrorCode).find(
+        (code) => code === password?.message,
+      );
+
+      if (maybePasswordError) {
+        reasons.add(maybePasswordError);
       }
-      if (
-        errors?.confirmPassword?.message === errorMessages.emptyConfirmPassword
-      ) {
-        reasons.add("confirm_password_missing");
-      }
-      if (errors?.password?.message === errorMessages.invalidPassword) {
-        reasons.add("password_not_compliant");
-      }
-      if (
-        errors?.confirmPassword?.message === errorMessages.passwordDontMatch
-      ) {
-        reasons.add("password_mismatch");
+
+      if (maybeConfirmPasswordError) {
+        reasons.add(maybeConfirmPasswordError);
       }
 
       if (reasons.size > 0) {
         trackEaFileGenerateInvalidFormEvent(passwordStatus, reasons);
       }
     },
-    [t, passwordStatus],
+    [passwordStatus],
   );
 
   return (
