@@ -7,11 +7,8 @@ import { InstitutionResponse } from "../../generated/selfcare/InstitutionRespons
 import { PageOfUserGroupResource } from "../../generated/selfcare/PageOfUserGroupResource";
 import { ProductResource } from "../../generated/selfcare/ProductResource";
 import { StatusEnum } from "../../generated/selfcare/UserGroupResource";
-import {
-  getSelfcareClient,
-  resetInstance,
-  UserInstitutions,
-} from "../index";
+import { getSelfcareClient, resetInstance, UserInstitutions } from "../index";
+import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -113,14 +110,25 @@ vi.hoisted(() => {
     ...originalEnv,
     SELFCARE_EXTERNAL_API_BASE_URL: "https://example.com",
     SELFCARE_API_KEY: "abc123",
-    SELFCARE_API_MOCKING: "false",
   };
 });
+
+const selfcareExternalApiBaseUrl = process.env
+  .SELFCARE_EXTERNAL_API_BASE_URL as string;
+const selfcareApiKey = process.env.SELFCARE_API_KEY as string;
+const httpAgentConfig: HttpAgentConfig = {
+  FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL: 110000,
+  FETCH_KEEPALIVE_MAX_SOCKETS: 40,
+  FETCH_KEEPALIVE_MAX_FREE_SOCKETS: 10,
+  FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT: 30000,
+  FETCH_KEEPALIVE_TIMEOUT: 60000,
+  FETCH_KEEPALIVE_KEEPALIVE_MSECS: 1000,
+};
 
 beforeEach(() => {
   vi.restoreAllMocks();
   // reset selfcare client instance
-  resetInstance();
+  resetInstance(selfcareExternalApiBaseUrl, selfcareApiKey, httpAgentConfig);
 });
 
 describe("Selfcare Client", () => {
@@ -145,9 +153,11 @@ describe("Selfcare Client", () => {
       });
 
       // when
-      const result = await getSelfcareClient().getUserAuthorizedInstitutions(
-        mocks.aSelfcareUserId,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getUserAuthorizedInstitutions(mocks.aSelfcareUserId)();
 
       // then
       expect(E.isRight(result)).toBeTruthy();
@@ -172,9 +182,11 @@ describe("Selfcare Client", () => {
       });
       isAxiosError.mockReturnValueOnce(true);
 
-      const result = await getSelfcareClient().getUserAuthorizedInstitutions(
-        mocks.aSelfcareUserId,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getUserAuthorizedInstitutions(mocks.aSelfcareUserId)();
 
       expect(getMock).toHaveBeenCalledWith("/users", {
         params: {
@@ -191,9 +203,11 @@ describe("Selfcare Client", () => {
     it("should return an error when received a bad response from selfcare", async () => {
       getMock.mockResolvedValueOnce({ status: 200, data: "" });
 
-      const result = await getSelfcareClient().getUserAuthorizedInstitutions(
-        mocks.aSelfcareUserId,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getUserAuthorizedInstitutions(mocks.aSelfcareUserId)();
 
       expect(getMock).toHaveBeenCalledWith("/users", {
         params: {
@@ -212,9 +226,11 @@ describe("Selfcare Client", () => {
     it("should return the institution found", async () => {
       getMock.mockResolvedValueOnce({ status: 200, data: mocks.institution });
 
-      const result = await getSelfcareClient().getInstitutionById(
-        mocks.institution.id as string,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionById(mocks.institution.id as string)();
 
       expect(getMock).toHaveBeenCalledWith(
         `/institutions/${mocks.institution.id}`,
@@ -239,9 +255,11 @@ describe("Selfcare Client", () => {
         getMock.mockRejectedValueOnce(error);
 
         // when
-        const result = await getSelfcareClient().getInstitutionById(
-          mocks.institution.id as string,
-        )();
+        const result = await getSelfcareClient(
+          selfcareExternalApiBaseUrl,
+          selfcareApiKey,
+          httpAgentConfig,
+        ).getInstitutionById(mocks.institution.id as string)();
 
         // then
         expect(getMock).toHaveBeenCalledOnce();
@@ -266,9 +284,11 @@ describe("Selfcare Client", () => {
     it("should return an error when received a bad response from selfcare", async () => {
       getMock.mockResolvedValueOnce({ status: 200, data: "" });
 
-      const result = await getSelfcareClient().getInstitutionById(
-        mocks.institution.id as string,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionById(mocks.institution.id as string)();
 
       expect(getMock).toHaveBeenCalledWith(
         `/institutions/${mocks.institution.id}`,
@@ -296,7 +316,11 @@ describe("Selfcare Client", () => {
         });
 
         // when
-        const result = await getSelfcareClient().getInstitutionGroups(
+        const result = await getSelfcareClient(
+          selfcareExternalApiBaseUrl,
+          selfcareApiKey,
+          httpAgentConfig,
+        ).getInstitutionGroups(
           institutionId,
           givenParams.size,
           givenParams.page,
@@ -333,8 +357,11 @@ describe("Selfcare Client", () => {
       isAxiosError.mockReturnValueOnce(true);
 
       // when
-      const result =
-        await getSelfcareClient().getInstitutionGroups(institutionId)();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionGroups(institutionId)();
 
       // then
       expect(getMock).toHaveBeenCalledWith("/user-groups", {
@@ -354,8 +381,11 @@ describe("Selfcare Client", () => {
       getMock.mockResolvedValueOnce({ status: 200, data: "" });
 
       // when
-      const result =
-        await getSelfcareClient().getInstitutionGroups(institutionId)();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionGroups(institutionId)();
 
       // then
       expect(getMock).toHaveBeenCalledWith("/user-groups", {
@@ -386,12 +416,11 @@ describe("Selfcare Client", () => {
       });
 
       // when
-      const result = await getSelfcareClient().getInstitutionDelegations(
-        institutionId,
-        size,
-        page,
-        search,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionDelegations(institutionId, size, page, search)();
 
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
@@ -420,8 +449,11 @@ describe("Selfcare Client", () => {
       isAxiosError.mockReturnValueOnce(true);
 
       // when
-      const result =
-        await getSelfcareClient().getInstitutionDelegations(institutionId)();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionDelegations(institutionId)();
 
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
@@ -443,8 +475,11 @@ describe("Selfcare Client", () => {
       getMock.mockResolvedValueOnce({ status: 200, data: "" });
 
       // when
-      const result =
-        await getSelfcareClient().getInstitutionDelegations(institutionId)();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionDelegations(institutionId)();
 
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
@@ -476,10 +511,11 @@ describe("Selfcare Client", () => {
       isAxiosError.mockReturnValueOnce(true);
 
       // when
-      const result = await getSelfcareClient().getInstitutionProducts(
-        institutionId,
-        userId,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionProducts(institutionId, userId)();
 
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
@@ -497,10 +533,11 @@ describe("Selfcare Client", () => {
       getMock.mockResolvedValueOnce({ status: 200, data: "" });
 
       // when
-      const result = await getSelfcareClient().getInstitutionProducts(
-        institutionId,
-        userId,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionProducts(institutionId, userId)();
 
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
@@ -525,10 +562,11 @@ describe("Selfcare Client", () => {
       });
 
       // when
-      const result = await getSelfcareClient().getInstitutionProducts(
-        institutionId,
-        userId,
-      )();
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionProducts(institutionId, userId)();
 
       // then
       expect(getMock).toHaveBeenCalledWith(endpoint, {
