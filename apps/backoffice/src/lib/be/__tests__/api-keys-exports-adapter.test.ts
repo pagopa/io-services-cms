@@ -14,9 +14,14 @@ const mocks = vi.hoisted(() => {
     setTags,
   }));
   const findBlobsByTags = vi.fn();
+  const getProperties = vi.fn();
+  const getBlobClient = vi.fn(() => ({
+    getProperties,
+  }));
   const getContainerClient = vi.fn(() => ({
     findBlobsByTags,
     getBlockBlobClient,
+    getBlobClient,
   }));
   const blobServiceClientConstructor = vi.fn(() => ({
     getContainerClient,
@@ -28,6 +33,7 @@ const mocks = vi.hoisted(() => {
     uploadStream,
     setTags,
     getBlockBlobClient,
+    getProperties,
     findBlobsByTags,
     getContainerClient,
     blobServiceClientConstructor,
@@ -67,6 +73,8 @@ afterEach(() => {
   resetAdapterSingleton();
 });
 
+const mockDate = new Date(2026, 0, 1);
+
 describe("getInstance", () => {
   it("should throw an error when env config is invalid", () => {
     expect(() => ApiKeysExportsAdapter.getInstance({})).toThrowError(
@@ -80,6 +88,7 @@ describe("getInstance", () => {
     const environment = {
       SA_EXT_BLOB_ENDPOINT: "https://account.blob.core.windows.net",
       EXPORTS_API_KEYS_CONTAINER_NAME: "api-keys-exports",
+      EXPORTS_API_KEYS_DURATION_IN_HOURS: 24,
     };
 
     // when
@@ -104,6 +113,7 @@ describe("findExportsFiles", () => {
   const environment = {
     SA_EXT_BLOB_ENDPOINT: "https://account.blob.core.windows.net",
     EXPORTS_API_KEYS_CONTAINER_NAME: "api-keys-exports",
+    EXPORTS_API_KEYS_DURATION_IN_HOURS: 24,
   };
 
   it("should throw ManagedInternalError when blob tags query fails", async () => {
@@ -161,8 +171,18 @@ describe("findExportsFiles", () => {
         },
       ],
       expectedResult: [
-        { fileName: "file-1.zip", state: FileStateEnum.IN_PROGRESS },
-        { fileName: "file-2.zip", state: FileStateEnum.DONE },
+        {
+          fileName: "file-1.zip",
+          state: FileStateEnum.IN_PROGRESS,
+          lastModifiedDate: mockDate,
+          creationDate: mockDate,
+        },
+        {
+          fileName: "file-2.zip",
+          state: FileStateEnum.DONE,
+          lastModifiedDate: mockDate,
+          creationDate: mockDate,
+        },
       ],
     },
     {
@@ -176,7 +196,12 @@ describe("findExportsFiles", () => {
         },
       ],
       expectedResult: [
-        { fileName: "file-1.zip", state: FileStateEnum.IN_PROGRESS },
+        {
+          fileName: "file-1.zip",
+          state: FileStateEnum.IN_PROGRESS,
+          lastModifiedDate: mockDate,
+          creationDate: mockDate,
+        },
       ],
     },
   ])(
@@ -185,6 +210,12 @@ describe("findExportsFiles", () => {
       // given
       const adapter = ApiKeysExportsAdapter.getInstance(environment);
       mocks.findBlobsByTags.mockReturnValueOnce(createAsyncIterable(blobs));
+      blobs.forEach((_) => {
+        mocks.getProperties.mockResolvedValueOnce({
+          createdOn: mockDate,
+          lastModified: mockDate,
+        });
+      });
 
       // when
       const result = await adapter.findExportsFiles(
@@ -196,6 +227,7 @@ describe("findExportsFiles", () => {
       // then
       expect(mocks.findBlobsByTags).toHaveBeenCalledOnce();
       expect(mocks.findBlobsByTags).toHaveBeenCalledWith(expectedQuery);
+      expect(mocks.getProperties).toHaveBeenCalledTimes(blobs.length);
       expect(result).toStrictEqual(expectedResult);
     },
   );
@@ -205,6 +237,7 @@ describe("initializeFile", () => {
   const environment = {
     SA_EXT_BLOB_ENDPOINT: "https://account.blob.core.windows.net",
     EXPORTS_API_KEYS_CONTAINER_NAME: "api-keys-exports",
+    EXPORTS_API_KEYS_DURATION_IN_HOURS: 24,
   };
 
   it("should throw ManagedInternalError when upload fails", async () => {
@@ -256,6 +289,7 @@ describe("finalizeFile", () => {
   const environment = {
     SA_EXT_BLOB_ENDPOINT: "https://account.blob.core.windows.net",
     EXPORTS_API_KEYS_CONTAINER_NAME: "api-keys-exports",
+    EXPORTS_API_KEYS_DURATION_IN_HOURS: 24,
   };
 
   it("should throw ManagedInternalError when uploadStream fails", async () => {
@@ -338,6 +372,7 @@ describe("markFileAsFailed", () => {
   const environment = {
     SA_EXT_BLOB_ENDPOINT: "https://account.blob.core.windows.net",
     EXPORTS_API_KEYS_CONTAINER_NAME: "api-keys-exports",
+    EXPORTS_API_KEYS_DURATION_IN_HOURS: 24,
   };
 
   it("should throw ManagedInternalError when setTags fails", async () => {
