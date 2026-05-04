@@ -1,5 +1,4 @@
 import { Agent, HttpAgentConfig } from "@io-services-cms/fetch-utils";
-import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import axios, { AxiosError, AxiosInstance } from "axios";
@@ -15,7 +14,6 @@ import { PageOfUserGroupResource } from "../generated/selfcare/PageOfUserGroupRe
 import { ProductResource } from "../generated/selfcare/ProductResource";
 import { UserGroupResource } from "../generated/selfcare/UserGroupResource";
 import { UserInstitutionResource } from "../generated/selfcare/UserInstitutionResource";
-import { HealthChecksError } from "./errors";
 
 export const UserInstitutions = t.readonlyArray(
   UserInstitutionResource,
@@ -60,54 +58,34 @@ export interface SelfcareClient {
   ) => TE.TaskEither<Error, UserInstitutions>;
 }
 
-type Config = t.TypeOf<typeof Config>;
-const Config = t.intersection([
-  t.type({
-    SELFCARE_API_KEY: NonEmptyString,
-    SELFCARE_API_MOCKING: BooleanFromString,
-    SELFCARE_EXTERNAL_API_BASE_URL: NonEmptyString,
-  }),
-  HttpAgentConfig,
-]);
-
 const institutionsApi = "/institutions";
 const usersApi = "/users";
 const groupsApi = "/user-groups";
 const delegationsApi = "/delegations";
-let selfcareConfig: Config;
 let selfcareClient: SelfcareClient;
 
-const getSelfcareConfig = (): Config => {
-  if (!selfcareConfig) {
-    const result = Config.decode(process.env);
-
-    if (E.isLeft(result)) {
-      throw new Error(
-        `Error parsing selfcare config. Cause: ${readableReport(result.left)}`,
-      );
-    }
-
-    selfcareConfig = result.right;
-  }
-
-  return selfcareConfig;
-};
-
-const getAxiosInstance = (): AxiosInstance => {
-  const configuration = getSelfcareConfig();
-  const endpoint = `${configuration.SELFCARE_EXTERNAL_API_BASE_URL}`;
+const getAxiosInstance = (
+  url: string,
+  apiKey: string,
+  httpAgentConfig: HttpAgentConfig,
+): AxiosInstance => {
+  const endpoint = `${url}`;
 
   return axios.create({
     baseURL: endpoint,
-    headers: { "Ocp-Apim-Subscription-Key": configuration.SELFCARE_API_KEY },
-    httpAgent: Agent.getHttpAgent(configuration),
-    httpsAgent: Agent.getHttpsAgent(configuration),
+    headers: { "Ocp-Apim-Subscription-Key": apiKey },
+    httpAgent: Agent.getHttpAgent(httpAgentConfig),
+    httpsAgent: Agent.getHttpsAgent(httpAgentConfig),
     timeout: 5000,
   });
 };
 
-const buildSelfcareClient = (): SelfcareClient => {
-  const axiosInstance = getAxiosInstance();
+const buildSelfcareClient = (
+  url: string,
+  apiKey: string,
+  httpAgentConfig: HttpAgentConfig,
+): SelfcareClient => {
+  const axiosInstance = getAxiosInstance(url, apiKey, httpAgentConfig);
 
   const getUserAuthorizedInstitutions: SelfcareClient["getUserAuthorizedInstitutions"] =
     (userId) =>
@@ -297,21 +275,21 @@ const buildSelfcareClient = (): SelfcareClient => {
   };
 };
 
-export const getSelfcareClient = (): SelfcareClient => {
+export const getSelfcareClient = (
+  url: string,
+  apiKey: string,
+  httpAgentConfig: HttpAgentConfig,
+): SelfcareClient => {
   if (!selfcareClient) {
-    selfcareClient = buildSelfcareClient();
+    selfcareClient = buildSelfcareClient(url, apiKey, httpAgentConfig);
   }
   return selfcareClient;
 };
 
-export const resetInstance = () => {
-  selfcareClient = buildSelfcareClient();
+export const resetInstance = (
+  url: string,
+  apiKey: string,
+  httpAgentConfig: HttpAgentConfig,
+) => {
+  selfcareClient = buildSelfcareClient(url, apiKey, httpAgentConfig);
 };
-
-export async function getSelfcareHealth() {
-  try {
-    getSelfcareConfig();
-  } catch (e) {
-    throw new HealthChecksError("selfcare-client", e);
-  }
-}
