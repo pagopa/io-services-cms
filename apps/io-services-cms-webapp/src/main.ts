@@ -7,8 +7,8 @@ import {
 } from "@azure/functions";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
-import { ApimUtils, SelfcareUtils } from "@io-services-cms/external-clients";
-import { Fetch, HttpAgentConfig } from "@io-services-cms/fetch-utils";
+import { ApimUtils } from "@io-services-cms/external-clients";
+import { Fetch } from "@io-services-cms/fetch-utils";
 import {
   Activations,
   LegacyServiceCosmosResource,
@@ -177,21 +177,6 @@ const apimService = ApimUtils.getApimService(
   config.AZURE_APIM_RESOURCE_GROUP,
   config.AZURE_APIM,
   config.AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME,
-);
-
-const httpAgentConfig: HttpAgentConfig = {
-  FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT:
-    config.FETCH_KEEPALIVE_FREE_SOCKET_TIMEOUT,
-  FETCH_KEEPALIVE_KEEPALIVE_MSECS: config.FETCH_KEEPALIVE_KEEPALIVE_MSECS,
-  FETCH_KEEPALIVE_MAX_FREE_SOCKETS: config.FETCH_KEEPALIVE_MAX_FREE_SOCKETS,
-  FETCH_KEEPALIVE_MAX_SOCKETS: config.FETCH_KEEPALIVE_MAX_SOCKETS,
-  FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL: config.FETCH_KEEPALIVE_SOCKET_ACTIVE_TTL,
-  FETCH_KEEPALIVE_TIMEOUT: config.FETCH_KEEPALIVE_TIMEOUT,
-};
-const selfcareClient = SelfcareUtils.getSelfcareClient(
-  config.SELFCARE_EXTERNAL_API_BASE_URL,
-  config.SELFCARE_API_KEY,
-  httpAgentConfig,
 );
 
 // client to interact with cms cosmos db
@@ -514,12 +499,7 @@ export const onSelfcareGroupChangeEntryPoint = (
   context: InvocationContext,
 ) =>
   pipe(
-    {
-      apimService,
-      apimUserGroups: config.APIM_USER_GROUPS,
-      selfcareClient,
-      serviceLifecycleStore,
-    },
+    { apimService, serviceLifecycleStore },
     makeOnSelfcareGroupChangeHandler,
     processBatchOf(GroupChangeEvent),
     RTE.orElseW((e) =>
