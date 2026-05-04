@@ -3,7 +3,9 @@ import {
   BlobSASPermissions,
   BlobServiceClient,
   ContainerClient,
+  generateBlobSASQueryParameters,
 } from "@azure/storage-blob";
+import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
@@ -16,19 +18,19 @@ import {
   FileState,
   FileStateEnum,
 } from "./subscriptions/api-keys-exports-port";
-import { NonNegativeInteger } from "@pagopa/ts-commons/lib/numbers";
 
 type Config = t.TypeOf<typeof Config>;
 const Config = t.type({
   EXPORTS_API_KEYS_CONTAINER_NAME: NonEmptyString,
-  EXPORTS_API_KEYS_DURATION_IN_HOURS: NonNegativeInteger,
+  EXPORTS_API_KEYS_DURATION_IN_HOURS: NumberFromString,
   SA_EXT_BLOB_ENDPOINT: NonEmptyString,
 });
 
 export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
   private blobContainerClient: ContainerClient;
+  private blobServiceClient: BlobServiceClient;
   private static instance: ApiKeysExportsAdapter;
-  public EXPORTS_API_KEYS_DURATION_IN_HOURS: NonNegativeInteger;
+  public EXPORTS_API_KEYS_DURATION_IN_HOURS: NumberFromString;
 
   private constructor(environment: Record<string, unknown>) {
     const result = Config.decode(environment);
@@ -37,11 +39,11 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
         cause: readableReportSimplified(result.left),
       });
     }
-    const blobServiceClient = new BlobServiceClient(
+    this.blobServiceClient = new BlobServiceClient(
       result.right.SA_EXT_BLOB_ENDPOINT,
       new DefaultAzureCredential(),
     );
-    this.blobContainerClient = blobServiceClient.getContainerClient(
+    this.blobContainerClient = this.blobServiceClient.getContainerClient(
       result.right.EXPORTS_API_KEYS_CONTAINER_NAME,
     );
     this.EXPORTS_API_KEYS_DURATION_IN_HOURS =
@@ -106,6 +108,13 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
         const { createdOn: creationDate, lastModified: lastModifiedDate } =
           await blobClient.getProperties();
 
+        if (!state) {
+          // Azure SDK returns only searched tags. To get all tags we perform an additional getTags
+          // on the specific blob
+          const allTags = await blobClient.getTags();
+          blob.tags = allTags.tags;
+        }
+
         if (
           !(creationDate instanceof Date) ||
           !(lastModifiedDate instanceof Date)
@@ -142,17 +151,37 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
     fileName: string,
     expirationDate?: Date,
   ): Promise<URL> {
+    const startsOn = new Date();
     const blobClient = this.blobContainerClient.getBlobClient(fileName);
 
-    // "r" = read permissions
-    const permissions = BlobSASPermissions.parse("r");
+    try {
+      // Request a short-lived User Delegation Key (valid 5 minutes) needed to sign the SAS token
+      // when authenticating via DefaultAzureCredential instead of a storage account key.
+      const userDelegationKey =
+        await this.blobServiceClient.getUserDelegationKey(
+          startsOn,
+          new Date(startsOn.getTime() + 300 * 1000),
+        );
 
-    const sasUrl = await blobClient.generateSasUrl({
-      expiresOn: expirationDate,
-      permissions,
-    });
+      const sasToken = generateBlobSASQueryParameters(
+        {
+          blobName: fileName,
+          containerName: this.blobContainerClient.containerName,
+          expiresOn: expirationDate,
+          permissions: BlobSASPermissions.parse("r"),
+          startsOn,
+        },
+        userDelegationKey,
+        this.blobServiceClient.accountName,
+      );
 
-    return new URL(sasUrl);
+      return new URL(`${blobClient.url}?${sasToken.toString()}`);
+    } catch (error) {
+      throw new ManagedInternalError(
+        `Error generating download URL for file ${fileName}`,
+        error instanceof Error ? error.message : error,
+      );
+    }
   }
 
   async initializeFile(

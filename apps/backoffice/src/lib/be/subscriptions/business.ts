@@ -1,6 +1,9 @@
 import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
 import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
-import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+import {
+  AggregatedInstitutionsManageKeysLinkNotReady,
+  StateEnum as StateEnumNotReady,
+} from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
 import {
   AggregatedInstitutionsManageKeysLinkReady,
   StateEnum as StateEnumReady,
@@ -755,10 +758,14 @@ export async function retrieveApiKeysExports(
         );
       }
       expirationDate = new Date(Date.now() + timeDiff);
-      url = await apiKeysExportsAdapter.generateDownloadUrl(
-        mostRecentExport.fileName,
-        expirationDate,
-      );
+      try {
+        url = await apiKeysExportsAdapter.generateDownloadUrl(
+          mostRecentExport.fileName,
+          expirationDate,
+        );
+      } catch (_err) {
+        throw new ManagedInternalError("Error while generating download URL");
+      }
       return AggregatedInstitutionsManageKeysLinkReady.encode({
         downloadLink: url.href,
         expirationDate: expirationDate.toISOString(),
