@@ -36,13 +36,13 @@ import {
 import { z } from "zod";
 
 const PasswordErrorCode = {
-  PASSWORD_MISSING: "password_missing",
-  PASSWORD_NOT_COMPLIANT: "password_not_compliant",
+  PASSWORD_MISSING: "password_missing", // NOSONAR
+  PASSWORD_NOT_COMPLIANT: "password_not_compliant", // NOSONAR
 } as const satisfies Record<string, InvalidFormReason>;
 
 const ConfirmPasswordErrorCode = {
-  CONFIRM_PASSWORD_MISSING: "confirm_password_missing",
-  PASSWORD_MISMATCH: "password_mismatch",
+  CONFIRM_PASSWORD_MISSING: "confirm_password_missing", // NOSONAR
+  PASSWORD_MISMATCH: "password_mismatch", // NOSONAR
 } as const satisfies Record<string, InvalidFormReason>;
 
 const passwordErrorCodeSchema = z.enum(PasswordErrorCode);
