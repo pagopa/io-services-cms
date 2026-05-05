@@ -1,5 +1,5 @@
 import { DefaultAzureCredential } from "@azure/identity";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import { ManagedInternalError } from "../errors";
 import { FileStateEnum } from "../subscriptions/api-keys-exports-port";
@@ -151,10 +151,18 @@ describe("findExportsFiles", () => {
       createAsyncIterable([
         {
           name: "invalid.zip",
-          tags: { state: "UNKNOWN" },
         },
       ]),
     );
+    mocks.getProperties.mockReturnValueOnce({
+      lastModified: mockDate,
+      createdOn: mockDate,
+    });
+    mocks.getTags.mockResolvedValueOnce({
+      tags: {
+        state: "UNKNOWN",
+      },
+    });
 
     // when and then
     await expect(
@@ -164,6 +172,31 @@ describe("findExportsFiles", () => {
     expect(mocks.findBlobsByTags).toHaveBeenCalledWith(
       "\"institutionId\" = 'institutionId' AND \"userId\" = 'userId'",
     );
+  });
+
+  it("should throw ManagedInternalError when a blob has invalid date properties", async () => {
+    // given
+    const adapter = ApiKeysExportsAdapter.getInstance(environment);
+    mocks.findBlobsByTags.mockReturnValueOnce(
+      createAsyncIterable([
+        { name: "file.zip", tags: { state: StateEnumNotReady.IN_PROGRESS } },
+      ]),
+    );
+    mocks.getProperties.mockResolvedValueOnce({
+      createdOn: "not-a-date",
+      lastModified: "not-a-date",
+    });
+
+    // when and then
+    await expect(
+      adapter.findExportsFiles(
+        "institutionId",
+        "userId",
+        StateEnumNotReady.IN_PROGRESS,
+      ),
+    ).rejects.toThrowError(ManagedInternalError);
+    expect(mocks.findBlobsByTags).toHaveBeenCalledOnce();
+    expect(mocks.getProperties).toHaveBeenCalledOnce();
   });
 
   it.each([

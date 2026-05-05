@@ -1379,6 +1379,21 @@ describe("Manage Keys", () => {
         retrieveApiKeysExports(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
+
+    it("should throw ManagedInternalError when generateDownloadUrl rejects", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([
+        {
+          ...aDoneExport,
+          state: "UNKNOWN",
+        },
+      ]);
+
+      // when & then
+      await expect(
+        retrieveApiKeysExports(aggregatorId, userId),
+      ).rejects.toThrowError(ManagedInternalError);
+    });
   });
 });
 
