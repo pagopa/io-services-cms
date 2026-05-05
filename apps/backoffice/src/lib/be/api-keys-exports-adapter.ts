@@ -50,6 +50,15 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
       result.right.EXPORTS_API_KEYS_DURATION_IN_HOURS;
   }
 
+  public static getInstance(
+    environment: Record<string, unknown>,
+  ): ApiKeysExportsAdapter {
+    if (!ApiKeysExportsAdapter.instance) {
+      ApiKeysExportsAdapter.instance = new ApiKeysExportsAdapter(environment);
+    }
+    return ApiKeysExportsAdapter.instance;
+  }
+
   async finalizeFile(
     aggregatorId: string,
     userId: string,

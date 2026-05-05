@@ -723,7 +723,7 @@ export async function retrieveApiKeysExports(
     exportsFiles.push(
       ...(await apiKeysExportsAdapter.findExportsFiles(aggregatorId, userId)),
     );
-  } catch (_err) {
+  } catch {
     throw new ManagedInternalError("Error while searching for exports");
   }
 
@@ -763,7 +763,7 @@ export async function retrieveApiKeysExports(
           mostRecentExport.fileName,
           expirationDate,
         );
-      } catch (_err) {
+      } catch {
         throw new ManagedInternalError("Error while generating download URL");
       }
       return AggregatedInstitutionsManageKeysLinkReady.encode({
