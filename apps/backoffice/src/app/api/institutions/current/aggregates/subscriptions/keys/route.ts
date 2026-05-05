@@ -25,7 +25,7 @@ export const POST = withJWTAuthHandler(
     }: {
       backofficeUser: BackOfficeUserEnriched;
     },
-  ): Promise<NextResponse<ResponseError | void>> => {
+  ): Promise<NextResponse<ResponseError | undefined>> => {
     if (!backofficeUser.institution.isAggregator) {
       return handleForbiddenErrorResponse(
         "Only aggregators are authorized to request manage keys exports for aggregated institutions",

@@ -1,4 +1,3 @@
-import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
 import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
 import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
@@ -14,6 +13,7 @@ import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import archiver from "archiver";
+import archiverZipEncrypted from "archiver-zip-encrypted";
 import { randomBytes } from "crypto";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
@@ -38,11 +38,7 @@ import {
 
 // Register zip-encrypted format with archiver (once per process)
 try {
-  archiver.registerFormat(
-    "zip-encrypted",
-
-    require("archiver-zip-encrypted"),
-  );
+  archiver.registerFormat("zip-encrypted", archiverZipEncrypted);
 } catch {
   // Format already registered
 }
