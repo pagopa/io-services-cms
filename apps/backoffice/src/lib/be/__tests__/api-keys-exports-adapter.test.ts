@@ -80,10 +80,6 @@ const createAsyncIterable = <T>(items: readonly T[]) => ({
 });
 
 beforeEach(() => {
-  resetAdapterSingleton();
-});
-
-afterEach(() => {
   vi.clearAllMocks();
   resetAdapterSingleton();
 });

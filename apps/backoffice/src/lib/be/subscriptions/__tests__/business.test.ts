@@ -1240,7 +1240,13 @@ describe("Manage Keys", () => {
     };
     const anUrl = new URL("https://localhost");
 
-    vi.useFakeTimers({ now: lastModifiedDate.getTime() + 5000 });
+    beforeEach(() => {
+      vi.useFakeTimers({ now: lastModifiedDate.getTime() + 5000 });
+    });
+
+    afterEach(() => {
+      vi.useRealTimers();
+    });
 
     it("should retrieve api keys exports", async () => {
       // given
