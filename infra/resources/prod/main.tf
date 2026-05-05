@@ -60,6 +60,8 @@ module "storage_account_external" {
   peps_snet_id          = data.azurerm_subnet.private_endpoints_subnet.id
   error_action_group_id = module.monitor.action_group_ids.offcall
 
+  api_keys_exports_duration_in_hours = local.api_keys_exports_duration_in_hours
+
   tags = local.tags
 }
 
@@ -169,8 +171,9 @@ module "backoffice" {
     name                = module.storage_account_external.name
     resource_group_name = module.storage_account_external.resource_group_name
     blob = {
-      primary_blob_endpoint   = module.storage_account_external.blob.primary_blob_endpoint
-      api_keys_container_name = module.storage_account_external.blob.containers.api_keys.name
+      primary_blob_endpoint              = module.storage_account_external.blob.primary_blob_endpoint
+      api_keys_container_name            = module.storage_account_external.blob.containers.api_keys.name
+      api_keys_exports_duration_in_hours = local.api_keys_exports_duration_in_hours
     }
   }
 
