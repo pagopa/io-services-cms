@@ -45,6 +45,13 @@ const ConfirmPasswordErrorCode = {
   PASSWORD_MISMATCH: "password_mismatch",
 } as const satisfies Record<string, InvalidFormReason>;
 
+const passwordErrorCodeSchema = z.enum(PasswordErrorCode);
+const confirmPasswordErrorCodeSchema = z.enum(ConfirmPasswordErrorCode);
+const invalidFormReasonSchema = z.union([
+  passwordErrorCodeSchema,
+  confirmPasswordErrorCodeSchema,
+]);
+
 export interface AggregatedInstitutionsDialogProps {
   isDownloadReady?: boolean;
   isOpen: boolean;
@@ -92,36 +99,36 @@ const PasswordTextField = ({ label, name }: PasswordTextFieldProps) => {
     <Controller
       control={control}
       name={name}
-      render={({ field, fieldState: { error } }) => (
-        <TextField
-          {...field}
-          InputLabelProps={{
-            shrink: true,
-          }}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton
-                  edge="end"
-                  onClick={() => setShowPassword((prev) => !prev)}
-                >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-          error={!!error}
-          fullWidth
-          helperText={
-            error?.message && error.message in errorCodeToMessage
-              ? errorCodeToMessage[error.message as InvalidFormReason]
-              : null
-          }
-          label={label}
-          margin="normal"
-          type={showPassword ? "text" : "password"}
-        />
-      )}
+      render={({ field, fieldState: { error } }) => {
+        const parsed = invalidFormReasonSchema.safeParse(error?.message);
+
+        return (
+          <TextField
+            {...field}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    edge="end"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+            error={!!error}
+            fullWidth
+            helperText={parsed.success ? errorCodeToMessage[parsed.data] : null}
+            label={label}
+            margin="normal"
+            type={showPassword ? "text" : "password"}
+          />
+        );
+      }}
     />
   );
 };
@@ -193,20 +200,19 @@ export const AggregatedInstitutionsDialog = ({
     ({ confirmPassword, password }) => {
       const reasons = new Set<InvalidFormReason>();
 
-      const maybeConfirmPasswordError = Object.values(
-        ConfirmPasswordErrorCode,
-      ).find((code) => code === confirmPassword?.message);
-
-      const maybePasswordError = Object.values(PasswordErrorCode).find(
-        (code) => code === password?.message,
+      const passwordResult = passwordErrorCodeSchema.safeParse(
+        password?.message,
+      );
+      const confirmPasswordResult = confirmPasswordErrorCodeSchema.safeParse(
+        confirmPassword?.message,
       );
 
-      if (maybePasswordError) {
-        reasons.add(maybePasswordError);
+      if (passwordResult.success) {
+        reasons.add(passwordResult.data);
       }
 
-      if (maybeConfirmPasswordError) {
-        reasons.add(maybeConfirmPasswordError);
+      if (confirmPasswordResult.success) {
+        reasons.add(confirmPasswordResult.data);
       }
 
       if (reasons.size > 0) {
