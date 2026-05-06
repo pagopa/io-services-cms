@@ -12,6 +12,8 @@ locals {
   bo_snet_cidr     = "10.20.11.0/24"
   cms_snet_cidr    = "10.20.9.0/24"
 
+  api_keys_exports_duration_in_hours = 48
+
   tags = {
     CreatedBy      = "Terraform"
     Environment    = "Prod"

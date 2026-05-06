@@ -1,4 +1,13 @@
 import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import {
+  AggregatedInstitutionsManageKeysLinkNotReady,
+  StateEnum as StateEnumNotReady,
+} from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+import {
+  AggregatedInstitutionsManageKeysLinkReady,
+  StateEnum as StateEnumReady,
+} from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
@@ -21,6 +30,7 @@ import * as TE from "fp-ts/lib/TaskEither";
 
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
+  BadRequestError,
   ManagedInternalError,
   PreconditionFailedError,
   SubscriptionOwnershipError,
@@ -30,6 +40,7 @@ import {
   getInstitutionDelegations,
   getInstitutionGroups,
 } from "../institutions/selfcare";
+import { FileState, FileStateEnum } from "./api-keys-exports-port";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
@@ -695,4 +706,75 @@ async function retrieveAggregates(
   }
 
   return { aggregatesCounter, enrichedAggregateData };
+}
+
+export async function retrieveApiKeysExports(
+  aggregatorId: string,
+  userId: string,
+): Promise<AggregatedInstitutionsManageKeysLinkMetadata> {
+  const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
+  const exportsFiles: {
+    creationDate: Date;
+    fileName: string;
+    lastModifiedDate: Date;
+    state: FileState;
+  }[] = [];
+
+  try {
+    exportsFiles.push(
+      ...(await apiKeysExportsAdapter.findExportsFiles(aggregatorId, userId)),
+    );
+  } catch {
+    throw new ManagedInternalError("Error while searching for exports");
+  }
+
+  if (exportsFiles.length === 0) {
+    throw new BadRequestError("Bad Request", "Found 0 exports");
+  }
+
+  const mostRecentExport = exportsFiles.reduce((a, b) =>
+    a.lastModifiedDate.getTime() >= b.lastModifiedDate.getTime() ? a : b,
+  );
+
+  let timeRemaining: number;
+  let expirationDate: Date;
+  let url: URL;
+  switch (mostRecentExport.state) {
+    case FileStateEnum.FAILED:
+    case FileStateEnum.IN_PROGRESS:
+      return AggregatedInstitutionsManageKeysLinkNotReady.encode({
+        state: mostRecentExport.state as unknown as StateEnumNotReady,
+      });
+    case FileStateEnum.DONE:
+      timeRemaining =
+        mostRecentExport.lastModifiedDate.getTime() +
+        apiKeysExportsAdapter.EXPORTS_API_KEYS_DURATION_IN_HOURS *
+          60 *
+          60 *
+          1000 -
+        Date.now();
+      if (timeRemaining <= 0) {
+        throw new ManagedInternalError(
+          "Unexpected behaviour: TTL value is different from configured download duration",
+        );
+      }
+      expirationDate = new Date(Date.now() + timeRemaining);
+      try {
+        url = await apiKeysExportsAdapter.generateDownloadUrl(
+          mostRecentExport.fileName,
+          expirationDate,
+        );
+      } catch {
+        throw new ManagedInternalError("Error while generating download URL");
+      }
+      return AggregatedInstitutionsManageKeysLinkReady.encode({
+        downloadLink: url.href,
+        expirationDate: expirationDate.toISOString(),
+        state: FileStateEnum.DONE as unknown as StateEnumReady,
+      });
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = mostRecentExport.state;
+      throw new ManagedInternalError("Unrecognized export state");
+  }
 }

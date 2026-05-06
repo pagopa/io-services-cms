@@ -1,6 +1,8 @@
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
 import { RequestAggregatedInstitutionsManageKeysPayload } from "@/generated/api/RequestAggregatedInstitutionsManageKeysPayload";
 import { ResponseError } from "@/generated/api/ResponseError";
 import {
+  BadRequestError,
   PreconditionFailedError,
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -9,7 +11,11 @@ import {
   handlerErrorLog,
 } from "@/lib/be/errors";
 import { parseBody } from "@/lib/be/req-res-utils";
-import { generateApiKeysExports } from "@/lib/be/subscriptions/business";
+import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
+import {
+  generateApiKeysExports,
+  retrieveApiKeysExports,
+} from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -62,6 +68,47 @@ export const POST = withJWTAuthHandler(
         "RequestAggregatedInstitutionsManageKeysError",
         error,
         `An Error has occurred while requesting manage keys exports for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
+      );
+    }
+  },
+);
+
+/**
+ * @description Retrieve Metadata for Aggregated Institutions Download procedure
+ * @operationId getAggregatedInstitutionsManageKeysLink
+ */
+export const GET = withJWTAuthHandler(
+  async (
+    _request: NextRequest,
+    {
+      backofficeUser,
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+    },
+  ): Promise<
+    NextResponse<AggregatedInstitutionsManageKeysLinkMetadata | ResponseError>
+  > => {
+    if (!backofficeUser.institution.isAggregator) {
+      return handleForbiddenErrorResponse(
+        "Only aggregators are authorized to request metadata about download procedure",
+      );
+    }
+
+    try {
+      const result = await retrieveApiKeysExports(
+        backofficeUser.institution.id,
+        backofficeUser.parameters.userId,
+      );
+      return sanitizedNextResponseJson(result);
+    } catch (error) {
+      if (error instanceof BadRequestError) {
+        handlerErrorLog(error.message, error);
+        return handleBadRequestErrorResponse(error.message);
+      }
+      return handleInternalErrorResponse(
+        "GetAggregatedInstitutionsManageKeysLink",
+        error,
+        `An Error has occurred while getting manage keys exports for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
       );
     }
   },
