@@ -12,8 +12,7 @@ tags:
   - name: featured
     description: Retrieve featured Lists
 security:
-  - ApiKeyAuth: []
-    Bearer: []
+  - Bearer: []
 paths:
   /institutions:
     get:
@@ -242,10 +241,6 @@ paths:
           description: Gateway timeout
 components:
   securitySchemes:
-    ApiKeyAuth:
-      type: apiKey
-      in: header
-      name: X-Functions-Key
     Bearer:
       type: apiKey
       name: Authorization
