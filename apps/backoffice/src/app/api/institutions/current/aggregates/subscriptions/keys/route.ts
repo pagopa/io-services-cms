@@ -108,7 +108,7 @@ export const GET = withJWTAuthHandler(
       return handleInternalErrorResponse(
         "GetAggregatedInstitutionsManageKeysLink",
         error,
-        `An Error has occurred while requesting manage keys exports for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
+        `An Error has occurred while getting manage keys exports for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
       );
     }
   },
