@@ -1139,7 +1139,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkMetadata'
+                $ref: '#/components/schemas/AggregatedInstitutionsManageKeysExportFileMetadata'
         '401':
           description: Unauthorized
         '403':
@@ -1167,6 +1167,30 @@ paths:
       responses:
         '202':
           description: Accepted
+        '400':
+          description: Bad request
+        '401':
+          description: Unauthorized
+        '403':
+          description: Forbidden
+        '429':
+          description: Too many requests
+        '500':
+          description: Internal server error
+    put:
+      tags:
+        - manage-keys
+      operationId: generateDirectDownloadLinkForAggregatedInstitutionsManageKeys
+      description: Generate direct download link for manage keys related to the aggregated institutions allowed to use by the current aggregator
+      security:
+        - cookieAuth: []
+      responses:
+        '201':
+          description: Link generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AggregatedInstitutionsManageKeysExportFileDownloadLink'
         '400':
           description: Bad request
         '401':
@@ -2151,22 +2175,26 @@ components:
           $ref: '#/components/schemas/AggregatedInstitutionsManageKeysPassword'
       required:
         - password
-    AggregatedInstitutionsManageKeysLinkReady:
+    AggregatedInstitutionsManageKeysExportFileDownloadLink:
+      type: object
+      properties:
+        downloadLink:
+          type: string
+      required:
+        - downloadLink
+    AggregatedInstitutionsManageKeysExportFileMetadataReady:
       type: object
       properties:
         state:
           type: string
           enum:
             - DONE
-        downloadLink:
-          type: string
         expirationDate:
           $ref: '#/components/schemas/Timestamp'
       required:
         - state
-        - downloadLink
         - expirationDate
-    AggregatedInstitutionsManageKeysLinkNotReady:
+    AggregatedInstitutionsManageKeysExportFileMetadataNotReady:
       type: object
       properties:
         state:
@@ -2176,10 +2204,10 @@ components:
             - FAILED
       required:
         - state
-    AggregatedInstitutionsManageKeysLinkMetadata:
+    AggregatedInstitutionsManageKeysExportFileMetadata:
       oneOf:
-        - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkReady'
-        - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkNotReady'
+        - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysExportFileMetadataReady'
+        - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysExportFileMetadataNotReady'
     AggregatedInstitutionsManageKeysExportFileState:
       type: string
       enum:
