@@ -1,3 +1,13 @@
+import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
+import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import {
+  AggregatedInstitutionsManageKeysLinkNotReady,
+  StateEnum as StateEnumNotReady,
+} from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+import {
+  AggregatedInstitutionsManageKeysLinkReady,
+  StateEnum as StateEnumReady,
+} from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
@@ -11,22 +21,38 @@ import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
 import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import archiver from "archiver";
+import archiverZipEncrypted from "archiver-zip-encrypted";
+import { randomBytes } from "crypto";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
+import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
+  BadRequestError,
   ManagedInternalError,
   PreconditionFailedError,
   SubscriptionOwnershipError,
   apimErrorToManagedInternalError,
 } from "../errors";
-import { getInstitutionGroups } from "../institutions/selfcare";
+import {
+  getInstitutionDelegations,
+  getInstitutionGroups,
+} from "../institutions/selfcare";
+import { FileState, FileStateEnum } from "./api-keys-exports-port";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
   upsertSubscriptionAuthorizedCIDRs,
 } from "./cosmos";
+
+// Register zip-encrypted format with archiver (once per process)
+try {
+  archiver.registerFormat("zip-encrypted", archiverZipEncrypted);
+} catch {
+  // Format already registered
+}
 
 // Type utility to extract the right side of a TaskEither
 type RightType<T> = T extends TE.TaskEither<unknown, infer R> ? R : never; // TODO: move to an Utils monorepo package
@@ -445,13 +471,10 @@ const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId = async (
   aggregateId: string,
   aggregatorId: string,
 ): Promise<string> => {
-  const aggregatorGroups = await getInstitutionGroups(
-    aggregateId,
-    undefined,
-    undefined,
-    undefined,
-    aggregatorId,
-  );
+  const aggregatorGroups = await getInstitutionGroups({
+    institutionId: aggregateId,
+    parentInstitutionId: aggregatorId,
+  });
 
   // Data inconsistency: if there are no groups or more than one group related to the aggregate and the aggregator, we cannot determine the subscription to retrieve the keys for
   if (aggregatorGroups.totalElements !== 1) {
@@ -465,3 +488,293 @@ const retrieveInstitutionAggregateInstitutionAggregatorSubscriptionId = async (
 
   return subscriptionId;
 };
+
+/**
+ * Generates API keys exports for a given institution and user.
+ * @param aggregatorId The institution id of the aggregator
+ * @param userId The id of the user
+ * @param password The password to use for the export
+ * @returns A promise that resolves when the export is complete
+ * @throws `PreconditionFailedError` if there is already an export in progress
+ * @throws `ManagedInternalError` if there is an error during the export generation
+ */
+export async function generateApiKeysExports(
+  aggregatorId: string,
+  userId: string,
+  password: string,
+): Promise<void> {
+  const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
+  const exportsFiles = await apiKeysExportsAdapter.findExportsFiles(
+    aggregatorId,
+    userId,
+    AggregatedInstitutionsManageKeysExportFileStateEnum.IN_PROGRESS,
+  );
+  if (exportsFiles.length > 0) {
+    throw new PreconditionFailedError(
+      "An export file is already being generated",
+      `There are ${exportsFiles.length} export files in state 'IN_PROGRESS' for institution '${aggregatorId}' and user '${userId}'`,
+    );
+  }
+
+  const fileName = randomBytes(16).toString("hex") + ".zip"; // generate a random string to be used as file name for the export file to avoid conflicts in case of multiple export generation requests
+
+  await apiKeysExportsAdapter.initializeFile(fileName, aggregatorId, userId);
+
+  generateApiKeysExportsInner(aggregatorId, userId, password, fileName).catch(
+    (error) => {
+      // In case of error, we mark the export file as failed to allow the user to retry the export
+      apiKeysExportsAdapter
+        .markFileAsFailed(fileName, aggregatorId, userId)
+        .catch((markFileAsFailedError) => {
+          console.error(
+            `Error marking export file '${fileName}' as failed after an error occurred during the export generation:`,
+            markFileAsFailedError,
+          );
+        });
+      console.error(
+        `Error generating API keys export file '${fileName}' :`,
+        error,
+      );
+    },
+  );
+
+  return Promise.resolve();
+}
+
+async function generateApiKeysExportsInner(
+  aggregatorId: string,
+  userId: string,
+  password: string,
+  fileName: string,
+): Promise<void> {
+  const { aggregateMap, groupsCounter } =
+    await retrieveAggregatorGroups(aggregatorId);
+
+  const { aggregatesCounter, enrichedAggregateData } = await retrieveAggregates(
+    aggregatorId,
+    aggregateMap,
+  );
+
+  if (aggregatesCounter !== groupsCounter) {
+    throw new ManagedInternalError(
+      "Data inconsistency",
+      `The number of aggregates related to the aggregator '${aggregatorId}' is different from the number of groups related to the aggregator. Groups count: ${groupsCounter}, Aggregates count: ${aggregatesCounter}`,
+    );
+  }
+
+  const enrichedAggregateDataWithKeys = [];
+  for (const aggregate of enrichedAggregateData) {
+    const subscriptionManageGroupId = `${ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX}${aggregate.groupId}`;
+    const { primaryKey, secondaryKey } = await listSubscriptionSecrets(
+      subscriptionManageGroupId,
+    );
+
+    if (!primaryKey || !secondaryKey) {
+      throw new ManagedInternalError(
+        "Data inconsistency",
+        `Missing subscription keys for manage-group subscription '${subscriptionManageGroupId}' related to aggregate '${aggregate.aggregateId}' and group '${aggregate.groupId}'`,
+      );
+    }
+
+    enrichedAggregateDataWithKeys.push({
+      fc: aggregate.aggregateFiscalCode,
+      pk: primaryKey,
+      sk: secondaryKey,
+    });
+  }
+
+  const archive = archiver.create(
+    "zip-encrypted" as archiver.Format,
+    {
+      encryptionMethod: "aes256",
+      password,
+      zlib: { level: 8 },
+    } as archiver.ArchiverOptions,
+  );
+
+  try {
+    archive
+      .append(JSON.stringify(enrichedAggregateDataWithKeys), {
+        name: "api-keys.json",
+      })
+      .finalize();
+  } catch (error) {
+    throw new ManagedInternalError(
+      "Error creating export archive",
+      error instanceof Error ? error.message : error,
+    );
+  }
+
+  try {
+    const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(
+      process.env,
+    );
+    await apiKeysExportsAdapter.finalizeFile(
+      aggregatorId,
+      userId,
+      fileName,
+      archive,
+      "application/zip",
+    );
+  } catch (error) {
+    throw error instanceof ManagedInternalError
+      ? error
+      : new ManagedInternalError(
+          "Error uploading export file",
+          error instanceof Error ? error.message : error,
+        );
+  }
+}
+
+async function retrieveAggregatorGroups(aggregatorId: string): Promise<{
+  aggregateMap: Map<string, string>;
+  groupsCounter: number;
+}> {
+  let page = 0;
+  let groupsCounter = 0;
+  const aggregateToGroupMap = new Map<string, string>();
+  while (true) {
+    const aggregatorGroups = await getInstitutionGroups({
+      page: page++,
+      parentInstitutionId: aggregatorId,
+      size: 2000,
+    });
+    aggregatorGroups.content.forEach((group) => {
+      aggregateToGroupMap.set(group.institutionId, group.id);
+    });
+    groupsCounter += aggregatorGroups.content.length;
+
+    if (page >= aggregatorGroups.totalPages) {
+      break;
+    }
+  }
+  return {
+    aggregateMap: aggregateToGroupMap,
+    groupsCounter: groupsCounter,
+  };
+}
+
+async function retrieveAggregates(
+  aggregatorId: string,
+  aggregateToGroupMap: Map<string, string>,
+): Promise<{
+  aggregatesCounter: number;
+  enrichedAggregateData: {
+    aggregateFiscalCode: string;
+    aggregateId: string;
+    groupId: string;
+  }[];
+}> {
+  let aggregatesCounter = 0;
+  const enrichedAggregateData: {
+    aggregateFiscalCode: string;
+    aggregateId: string;
+    groupId: string;
+  }[] = [];
+  let page = 0;
+  while (true) {
+    const aggregates = await getInstitutionDelegations(
+      aggregatorId,
+      10000,
+      page++,
+    ); // we need to retrieve all delegations to make sure that the groups related to the aggregates are included in the export, otherwise we might end up with aggregates without groups in the export file which is an indication of data inconsistency that we want to avoid
+
+    aggregates.delegations.forEach((delegation) => {
+      const groupId = aggregateToGroupMap.get(delegation.institutionId);
+      if (!groupId) {
+        throw new ManagedInternalError(
+          "Data inconsistency",
+          `No group found for aggregate with institution id '${delegation.institutionId}'`,
+        );
+      }
+      if (!delegation.taxCode) {
+        throw new ManagedInternalError(
+          "Data inconsistency",
+          `Missing tax code for delegation with institution id '${delegation.institutionId}'`,
+        );
+      }
+      enrichedAggregateData.push({
+        aggregateFiscalCode: delegation.taxCode,
+        aggregateId: delegation.institutionId,
+        groupId: groupId,
+      });
+    });
+    aggregatesCounter += aggregates.delegations.length;
+    if (page >= aggregates.pageInfo.totalPages) {
+      break;
+    }
+  }
+
+  return { aggregatesCounter, enrichedAggregateData };
+}
+
+export async function retrieveApiKeysExports(
+  aggregatorId: string,
+  userId: string,
+): Promise<AggregatedInstitutionsManageKeysLinkMetadata> {
+  const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
+  const exportsFiles: {
+    creationDate: Date;
+    fileName: string;
+    lastModifiedDate: Date;
+    state: FileState;
+  }[] = [];
+
+  try {
+    exportsFiles.push(
+      ...(await apiKeysExportsAdapter.findExportsFiles(aggregatorId, userId)),
+    );
+  } catch {
+    throw new ManagedInternalError("Error while searching for exports");
+  }
+
+  if (exportsFiles.length === 0) {
+    throw new BadRequestError("Bad Request", "Found 0 exports");
+  }
+
+  const mostRecentExport = exportsFiles.reduce((a, b) =>
+    a.lastModifiedDate.getTime() >= b.lastModifiedDate.getTime() ? a : b,
+  );
+
+  let timeRemaining: number;
+  let expirationDate: Date;
+  let url: URL;
+  switch (mostRecentExport.state) {
+    case FileStateEnum.FAILED:
+    case FileStateEnum.IN_PROGRESS:
+      return AggregatedInstitutionsManageKeysLinkNotReady.encode({
+        state: mostRecentExport.state as unknown as StateEnumNotReady,
+      });
+    case FileStateEnum.DONE:
+      timeRemaining =
+        mostRecentExport.lastModifiedDate.getTime() +
+        apiKeysExportsAdapter.EXPORTS_API_KEYS_DURATION_IN_HOURS *
+          60 *
+          60 *
+          1000 -
+        Date.now();
+      if (timeRemaining <= 0) {
+        throw new ManagedInternalError(
+          "Unexpected behaviour: TTL value is different from configured download duration",
+        );
+      }
+      expirationDate = new Date(Date.now() + timeRemaining);
+      try {
+        url = await apiKeysExportsAdapter.generateDownloadUrl(
+          mostRecentExport.fileName,
+          expirationDate,
+        );
+      } catch {
+        throw new ManagedInternalError("Error while generating download URL");
+      }
+      return AggregatedInstitutionsManageKeysLinkReady.encode({
+        downloadLink: url.href,
+        expirationDate: expirationDate.toISOString(),
+        state: FileStateEnum.DONE as unknown as StateEnumReady,
+      });
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = mostRecentExport.state;
+      throw new ManagedInternalError("Unrecognized export state");
+  }
+}

@@ -43,6 +43,11 @@ variable "resource_group_name" {
   description = "Resource group name for the Function App services"
 }
 
+variable "api_keys_exports_duration_in_hours" {
+  type        = number
+  description = "Duration in hours for which the last modified delete policy is dependent"
+}
+
 ################
 #  Networking  #
 ################

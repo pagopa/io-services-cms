@@ -127,8 +127,9 @@ variable "sa_ext" {
     name                = string
     resource_group_name = string
     blob = object({
-      primary_blob_endpoint   = string
-      api_keys_container_name = string
+      primary_blob_endpoint              = string
+      api_keys_container_name            = string
+      api_keys_exports_duration_in_hours = number
     })
   })
   description = "Storage account information for the delegated access storage account"
