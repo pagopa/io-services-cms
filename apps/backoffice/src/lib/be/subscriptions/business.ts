@@ -1,3 +1,4 @@
+import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
 import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
@@ -18,7 +19,6 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
-import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
   ManagedInternalError,
