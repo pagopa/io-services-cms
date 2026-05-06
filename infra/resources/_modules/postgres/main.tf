@@ -5,7 +5,7 @@ ephemeral "random_password" "password" {
 
 module "cms_postgres_flexible_server" {
   source  = "pagopa-dx/azure-postgres-server/azurerm"
-  version = "~> 1"
+  version = "~> 3.0"
 
   environment = {
     prefix          = var.prefix
