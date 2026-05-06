@@ -1,3 +1,4 @@
+import { PasswordTextField } from "@/components/forms/controllers/password-field-controller";
 import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
 import {
   GeneratePasswordStatus,
@@ -8,30 +9,25 @@ import {
   trackEaFileGeneratePasswordEvent,
 } from "@/utils/mix-panel";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
-import { CircularProgress, TextField } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import Typography from "@mui/material/Typography";
 import { Box } from "@mui/system";
-import { useTranslation } from "next-i18next";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { TFunction, useTranslation } from "next-i18next";
+import { useCallback, useEffect } from "react";
 import {
-  Controller,
+  FieldError,
   FormProvider,
-  Path,
   SubmitErrorHandler,
   useForm,
-  useFormContext,
 } from "react-hook-form";
 import { z } from "zod";
 
@@ -52,6 +48,23 @@ const invalidFormReasonSchema = z.union([
   confirmPasswordErrorCodeSchema,
 ]);
 
+const getErrorCodeToMessage = (
+  t: TFunction,
+): Record<InvalidFormReason, string> => ({
+  [ConfirmPasswordErrorCode.CONFIRM_PASSWORD_MISSING]: t(
+    "routes.aggregated-institutions.exportDialog.fields.errors.emptyConfirmPassword",
+  ),
+  [ConfirmPasswordErrorCode.PASSWORD_MISMATCH]: t(
+    "routes.aggregated-institutions.exportDialog.fields.errors.passwordDontMatch",
+  ),
+  [PasswordErrorCode.PASSWORD_MISSING]: t(
+    "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
+  ),
+  [PasswordErrorCode.PASSWORD_NOT_COMPLIANT]: t(
+    "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
+  ),
+});
+
 export interface AggregatedInstitutionsDialogProps {
   isDownloadReady?: boolean;
   isOpen: boolean;
@@ -66,72 +79,6 @@ const defaultFormValues = {
 };
 
 type FormValues = typeof defaultFormValues;
-
-interface PasswordTextFieldProps {
-  label: string;
-  name: Path<FormValues>;
-}
-
-const PasswordTextField = ({ label, name }: PasswordTextFieldProps) => {
-  const { control } = useFormContext<FormValues>();
-  const { t } = useTranslation();
-  const [showPassword, setShowPassword] = useState(false);
-
-  const errorCodeToMessage: Record<InvalidFormReason, string> = useMemo(
-    () => ({
-      [ConfirmPasswordErrorCode.CONFIRM_PASSWORD_MISSING]: t(
-        "routes.aggregated-institutions.exportDialog.fields.errors.emptyConfirmPassword",
-      ),
-      [ConfirmPasswordErrorCode.PASSWORD_MISMATCH]: t(
-        "routes.aggregated-institutions.exportDialog.fields.errors.passwordDontMatch",
-      ),
-      [PasswordErrorCode.PASSWORD_MISSING]: t(
-        "routes.aggregated-institutions.exportDialog.fields.errors.emptyPassword",
-      ),
-      [PasswordErrorCode.PASSWORD_NOT_COMPLIANT]: t(
-        "routes.aggregated-institutions.exportDialog.fields.errors.invalidPassword",
-      ),
-    }),
-    [t],
-  );
-
-  return (
-    <Controller
-      control={control}
-      name={name}
-      render={({ field, fieldState: { error } }) => {
-        const parsed = invalidFormReasonSchema.safeParse(error?.message);
-
-        return (
-          <TextField
-            {...field}
-            InputLabelProps={{
-              shrink: true,
-            }}
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    edge="end"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? <VisibilityOff /> : <Visibility />}
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-            error={!!error}
-            fullWidth
-            helperText={parsed.success ? errorCodeToMessage[parsed.data] : null}
-            label={label}
-            margin="normal"
-            type={showPassword ? "text" : "password"}
-          />
-        );
-      }}
-    />
-  );
-};
 
 const validationSchema = z
   .object({
@@ -222,6 +169,21 @@ export const AggregatedInstitutionsDialog = ({
     [passwordStatus],
   );
 
+  const handleOnError = useCallback(
+    (error?: FieldError) => {
+      const errorCodeToMessage = getErrorCodeToMessage(t);
+
+      const maybeErrorCode = invalidFormReasonSchema.safeParse(error?.message);
+
+      if (maybeErrorCode.success) {
+        return errorCodeToMessage[maybeErrorCode.data];
+      }
+
+      return error?.message;
+    },
+    [t],
+  );
+
   return (
     <Dialog fullWidth onClose={handleClose} open={isOpen}>
       <FormProvider {...methods}>
@@ -252,17 +214,19 @@ export const AggregatedInstitutionsDialog = ({
                 </Typography>
               </ListItem>
             </List>
-            <PasswordTextField
+            <PasswordTextField<FormValues>
               label={t(
                 "routes.aggregated-institutions.exportDialog.fields.newPassword",
               )}
               name="password"
+              onError={handleOnError}
             />
-            <PasswordTextField
+            <PasswordTextField<FormValues>
               label={t(
                 "routes.aggregated-institutions.exportDialog.fields.confirmPassword",
               )}
               name="confirmPassword"
+              onError={handleOnError}
             />
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="body2">
