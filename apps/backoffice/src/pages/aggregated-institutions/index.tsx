@@ -11,7 +11,7 @@ import { PageHeader } from "@/components/headers";
 import { buildSnackbarItem } from "@/components/notification";
 import { TableRowMenuAction, TableViewColumn } from "@/components/table-view";
 import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
-import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import { AggregatedInstitutionsManageKeysPassword } from "@/generated/api/AggregatedInstitutionsManageKeysPassword";
 import { SubscriptionKeyTypeEnum } from "@/generated/api/SubscriptionKeyType";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
@@ -77,7 +77,7 @@ export default function AggregatedInstitutions() {
   const { fetchData: fetchRequestKeys, loading: fetchingRequestKeys } =
     useFetch();
   const { data: downloadLinkData, fetchData: fetchDownloadLink } =
-    useFetch<AggregatedInstitutionsManageKeysLinkMetadata>();
+    useFetch<AggregatedInstitutionsManageKeysExportFileMetadata>();
 
   const [aggregatedInstitutions, setAggregatedInstitutions] =
     useState<AggregatedInstitutionListItem[]>();
@@ -370,7 +370,7 @@ export default function AggregatedInstitutions() {
     fetchDownloadLink(
       "getAggregatedInstitutionsManageKeysLink",
       {},
-      AggregatedInstitutionsManageKeysLinkMetadata,
+      AggregatedInstitutionsManageKeysExportFileMetadata,
     );
   }, [fetchDownloadLink]);
 

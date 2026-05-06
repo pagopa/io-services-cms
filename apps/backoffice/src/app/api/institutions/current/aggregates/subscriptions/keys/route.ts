@@ -1,4 +1,4 @@
-import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import { RequestAggregatedInstitutionsManageKeysPayload } from "@/generated/api/RequestAggregatedInstitutionsManageKeysPayload";
 import { ResponseError } from "@/generated/api/ResponseError";
 import {
@@ -86,7 +86,9 @@ export const GET = withJWTAuthHandler(
       backofficeUser: BackOfficeUserEnriched;
     },
   ): Promise<
-    NextResponse<AggregatedInstitutionsManageKeysLinkMetadata | ResponseError>
+    NextResponse<
+      AggregatedInstitutionsManageKeysExportFileMetadata | ResponseError
+    >
   > => {
     if (!backofficeUser.institution.isAggregator) {
       return handleForbiddenErrorResponse(

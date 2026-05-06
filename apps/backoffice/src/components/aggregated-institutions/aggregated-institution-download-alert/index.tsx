@@ -1,4 +1,4 @@
-import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import { Download, RefreshOutlined } from "@mui/icons-material";
 import {
   Alert,
@@ -7,11 +7,11 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface AggregatedInstitutionDownloadAlertProps {
-  data?: AggregatedInstitutionsManageKeysLinkMetadata;
+  data?: AggregatedInstitutionsManageKeysExportFileMetadata;
   onRefresh: () => void;
 }
 

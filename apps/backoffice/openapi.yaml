@@ -2191,9 +2191,12 @@ components:
             - DONE
         expirationDate:
           $ref: '#/components/schemas/Timestamp'
+        downloadLink: # TODO: remove me when FE will be able to handle the absence of this property in case of file not ready
+          type: string
       required:
         - state
         - expirationDate
+        - downloadLink
     AggregatedInstitutionsManageKeysExportFileMetadataNotReady:
       type: object
       properties:

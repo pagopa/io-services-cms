@@ -1,13 +1,13 @@
-import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
-import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import {
-  AggregatedInstitutionsManageKeysLinkNotReady,
+  AggregatedInstitutionsManageKeysExportFileMetadataNotReady,
   StateEnum as StateEnumNotReady,
-} from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
+} from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadataNotReady";
 import {
-  AggregatedInstitutionsManageKeysLinkReady,
+  AggregatedInstitutionsManageKeysExportFileMetadataReady,
   StateEnum as StateEnumReady,
-} from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
+} from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadataReady";
+import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
 import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
@@ -711,7 +711,7 @@ async function retrieveAggregates(
 export async function retrieveApiKeysExports(
   aggregatorId: string,
   userId: string,
-): Promise<AggregatedInstitutionsManageKeysLinkMetadata> {
+): Promise<AggregatedInstitutionsManageKeysExportFileMetadata> {
   const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
   const exportsFiles: {
     creationDate: Date;
@@ -742,7 +742,7 @@ export async function retrieveApiKeysExports(
   switch (mostRecentExport.state) {
     case FileStateEnum.FAILED:
     case FileStateEnum.IN_PROGRESS:
-      return AggregatedInstitutionsManageKeysLinkNotReady.encode({
+      return AggregatedInstitutionsManageKeysExportFileMetadataNotReady.encode({
         state: mostRecentExport.state as unknown as StateEnumNotReady,
       });
     case FileStateEnum.DONE:
@@ -767,7 +767,7 @@ export async function retrieveApiKeysExports(
       } catch {
         throw new ManagedInternalError("Error while generating download URL");
       }
-      return AggregatedInstitutionsManageKeysLinkReady.encode({
+      return AggregatedInstitutionsManageKeysExportFileMetadataReady.encode({
         downloadLink: url.href,
         expirationDate: expirationDate.toISOString(),
         state: FileStateEnum.DONE as unknown as StateEnumReady,
