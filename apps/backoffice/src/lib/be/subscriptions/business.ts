@@ -773,6 +773,8 @@ export async function retrieveApiKeysExports(
         state: FileStateEnum.DONE as unknown as StateEnumReady,
       });
     default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = mostRecentExport.state;
       throw new ManagedInternalError("Unrecognized export state");
   }
 }
