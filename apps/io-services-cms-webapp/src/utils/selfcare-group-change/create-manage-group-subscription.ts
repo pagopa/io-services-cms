@@ -13,14 +13,14 @@ import { GroupChangeEvent, GroupCreateEvent } from "./types";
 export const createSubscriptionForGroup =
   (
     apimService: ApimUtils.ApimService,
-    selfcareService: SelfcareUtils.SelfcareClient,
+    selfcareClient: SelfcareUtils.SelfcareClient,
     apimUserGroups: readonly string[],
   ) =>
   (group: GroupChangeEvent): TE.TaskEither<Error, void> =>
     shouldCreateManageGroupSubscription(group)
       ? createManageGroupSubscription(
           apimService,
-          selfcareService,
+          selfcareClient,
           group,
           apimUserGroups,
         )
