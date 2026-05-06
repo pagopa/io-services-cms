@@ -13,6 +13,7 @@ tags:
     description: Retrieve featured Lists
 security:
   - ApiKeyAuth: []
+    Bearer: []
 paths:
   /institutions:
     get:
@@ -245,6 +246,10 @@ components:
       type: apiKey
       in: header
       name: X-Functions-Key
+    Bearer:
+      type: apiKey
+      name: Authorization
+      in: header
   schemas:
     InstitutionsResource:
       allOf:
