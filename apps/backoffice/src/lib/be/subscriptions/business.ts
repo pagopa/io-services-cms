@@ -40,6 +40,7 @@ import {
   getInstitutionDelegations,
   getInstitutionGroups,
 } from "../institutions/selfcare";
+import { FileState, FileStateEnum } from "./api-keys-exports-port";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
@@ -716,7 +717,7 @@ export async function retrieveApiKeysExports(
     creationDate: Date;
     fileName: string;
     lastModifiedDate: Date;
-    state: StateEnumNotReady | StateEnumReady;
+    state: FileState;
   }[] = [];
 
   try {
@@ -735,29 +736,29 @@ export async function retrieveApiKeysExports(
     a.lastModifiedDate.getTime() >= b.lastModifiedDate.getTime() ? a : b,
   );
 
-  let timeDiff: number;
+  let timeRemaining: number;
   let expirationDate: Date;
   let url: URL;
   switch (mostRecentExport.state) {
-    case StateEnumNotReady.FAILED:
-    case StateEnumNotReady.IN_PROGRESS:
+    case FileStateEnum.FAILED:
+    case FileStateEnum.IN_PROGRESS:
       return AggregatedInstitutionsManageKeysLinkNotReady.encode({
-        state: mostRecentExport.state,
+        state: mostRecentExport.state as unknown as StateEnumNotReady,
       });
-    case StateEnumReady.DONE:
-      timeDiff =
+    case FileStateEnum.DONE:
+      timeRemaining =
         mostRecentExport.lastModifiedDate.getTime() +
         apiKeysExportsAdapter.EXPORTS_API_KEYS_DURATION_IN_HOURS *
           60 *
           60 *
           1000 -
         Date.now();
-      if (timeDiff <= 0) {
+      if (timeRemaining <= 0) {
         throw new ManagedInternalError(
           "Unexpected behaviour: TTL value is different from configured download duration",
         );
       }
-      expirationDate = new Date(Date.now() + timeDiff);
+      expirationDate = new Date(Date.now() + timeRemaining);
       try {
         url = await apiKeysExportsAdapter.generateDownloadUrl(
           mostRecentExport.fileName,
@@ -769,7 +770,7 @@ export async function retrieveApiKeysExports(
       return AggregatedInstitutionsManageKeysLinkReady.encode({
         downloadLink: url.href,
         expirationDate: expirationDate.toISOString(),
-        state: StateEnumReady.DONE,
+        state: FileStateEnum.DONE as unknown as StateEnumReady,
       });
     default:
       throw new ManagedInternalError("Unrecognized export state");

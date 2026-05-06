@@ -1,6 +1,4 @@
 import { SubscriptionCIDRsModel } from "@pagopa/io-functions-commons/dist/src/models/subscription_cidrs";
-import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
-import { StateEnum as StateEnumReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
@@ -20,6 +18,7 @@ import {
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "../business";
 import { BadRequestError, ManagedInternalError } from "../../errors";
+import { FileStateEnum } from "../api-keys-exports-port";
 
 const mocks: {
   anOwnerId: string;
@@ -1221,21 +1220,21 @@ describe("Manage Keys", () => {
     const anInProgressExport = {
       creationDate,
       lastModifiedDate: creationDate,
-      state: StateEnumNotReady.IN_PROGRESS,
+      state: FileStateEnum.IN_PROGRESS,
       fileName: anInProgressFileName,
     };
 
     const aFailedExport = {
       creationDate,
       lastModifiedDate,
-      state: StateEnumNotReady.FAILED,
+      state: FileStateEnum.FAILED,
       fileName: aFailedFileName,
     };
 
     const aDoneExport = {
       creationDate,
       lastModifiedDate,
-      state: StateEnumReady.DONE,
+      state: FileStateEnum.DONE,
       fileName: aSuccessFileName,
     };
     const anUrl = new URL("https://localhost");
@@ -1263,7 +1262,7 @@ describe("Manage Keys", () => {
       expect(result).toEqual({
         downloadLink: anUrl.href,
         expirationDate: expirationDate.toISOString(),
-        state: StateEnumReady.DONE,
+        state: FileStateEnum.DONE,
       });
       expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
         aggregatorId,
@@ -1297,7 +1296,7 @@ describe("Manage Keys", () => {
       expect(result).toEqual({
         downloadLink: anUrl.href,
         expirationDate: expirationDate.toISOString(),
-        state: StateEnumReady.DONE,
+        state: FileStateEnum.DONE,
       });
       expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
         aggregatorId,
@@ -1337,7 +1336,7 @@ describe("Manage Keys", () => {
       const result = await retrieveApiKeysExports(aggregatorId, userId);
 
       // then
-      expect(result).toEqual({ state: StateEnumNotReady.IN_PROGRESS });
+      expect(result).toEqual({ state: FileStateEnum.IN_PROGRESS });
       expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
     });
 
@@ -1349,7 +1348,7 @@ describe("Manage Keys", () => {
       const result = await retrieveApiKeysExports(aggregatorId, userId);
 
       // then
-      expect(result).toEqual({ state: StateEnumNotReady.FAILED });
+      expect(result).toEqual({ state: FileStateEnum.FAILED });
       expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
     });
 

@@ -179,7 +179,7 @@ describe("findExportsFiles", () => {
     const adapter = ApiKeysExportsAdapter.getInstance(environment);
     mocks.findBlobsByTags.mockReturnValueOnce(
       createAsyncIterable([
-        { name: "file.zip", tags: { state: StateEnumNotReady.IN_PROGRESS } },
+        { name: "file.zip", tags: { state: FileStateEnum.IN_PROGRESS } },
       ]),
     );
     mocks.getProperties.mockResolvedValueOnce({
@@ -192,7 +192,7 @@ describe("findExportsFiles", () => {
       adapter.findExportsFiles(
         "institutionId",
         "userId",
-        StateEnumNotReady.IN_PROGRESS,
+        FileStateEnum.IN_PROGRESS,
       ),
     ).rejects.toThrowError(ManagedInternalError);
     expect(mocks.findBlobsByTags).toHaveBeenCalledOnce();
