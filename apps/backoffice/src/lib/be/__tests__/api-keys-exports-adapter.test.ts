@@ -1,9 +1,8 @@
-import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
-import { StateEnum as StateEnumReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import { DefaultAzureCredential } from "@azure/identity";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import { ManagedInternalError } from "../errors";
+import { FileStateEnum } from "../subscriptions/api-keys-exports-port";
 
 const mocks = vi.hoisted(() => {
   const upload = vi.fn();
@@ -154,30 +153,30 @@ describe("findExportsFiles", () => {
       blobs: [
         {
           name: "file-1.zip",
-          tags: { state: StateEnumNotReady.IN_PROGRESS },
+          tags: { state: FileStateEnum.IN_PROGRESS },
         },
         {
           name: "file-2.zip",
-          tags: { state: StateEnumReady.DONE },
+          tags: { state: FileStateEnum.DONE },
         },
       ],
       expectedResult: [
-        { fileName: "file-1.zip", state: StateEnumNotReady.IN_PROGRESS },
-        { fileName: "file-2.zip", state: StateEnumReady.DONE },
+        { fileName: "file-1.zip", state: FileStateEnum.IN_PROGRESS },
+        { fileName: "file-2.zip", state: FileStateEnum.DONE },
       ],
     },
     {
-      state: StateEnumNotReady.IN_PROGRESS,
+      state: FileStateEnum.IN_PROGRESS,
       expectedQuery:
         "\"institutionId\" = 'institutionId' AND \"userId\" = 'userId' AND \"state\" = 'IN_PROGRESS'",
       blobs: [
         {
           name: "file-1.zip",
-          tags: { state: StateEnumNotReady.IN_PROGRESS },
+          tags: { state: FileStateEnum.IN_PROGRESS },
         },
       ],
       expectedResult: [
-        { fileName: "file-1.zip", state: StateEnumNotReady.IN_PROGRESS },
+        { fileName: "file-1.zip", state: FileStateEnum.IN_PROGRESS },
       ],
     },
   ])(
@@ -224,7 +223,7 @@ describe("initializeFile", () => {
       tags: {
         institutionId: "institutionId",
         userId: "userId",
-        state: StateEnumNotReady.IN_PROGRESS,
+        state: FileStateEnum.IN_PROGRESS,
       },
     });
   });
@@ -247,7 +246,7 @@ describe("initializeFile", () => {
       tags: {
         institutionId: "institutionId",
         userId: "userId",
-        state: StateEnumNotReady.IN_PROGRESS,
+        state: FileStateEnum.IN_PROGRESS,
       },
     });
   });
@@ -285,7 +284,7 @@ describe("finalizeFile", () => {
         tags: {
           institutionId: "aggregatorId",
           userId: "userId",
-          state: StateEnumReady.DONE,
+          state: FileStateEnum.DONE,
         },
         blobHTTPHeaders: {
           blobContentType: "application/zip",
@@ -325,7 +324,7 @@ describe("finalizeFile", () => {
         tags: {
           institutionId: "aggregatorId",
           userId: "userId",
-          state: StateEnumReady.DONE,
+          state: FileStateEnum.DONE,
         },
         blobHTTPHeaders: {
           blobContentType: "application/zip",
@@ -347,14 +346,16 @@ describe("markFileAsFailed", () => {
     mocks.setTags.mockRejectedValueOnce(new Error("set tags failed"));
 
     // when and then
-    await expect(adapter.markFileAsFailed("file.zip")).rejects.toThrowError(
-      "Error marking file `file.zip` as failed",
-    );
+    await expect(
+      adapter.markFileAsFailed("file.zip", "aggregatorId", "userId"),
+    ).rejects.toThrowError("Error marking file `file.zip` as failed");
     expect(mocks.getBlockBlobClient).toHaveBeenCalledOnce();
     expect(mocks.getBlockBlobClient).toHaveBeenCalledWith("file.zip");
     expect(mocks.setTags).toHaveBeenCalledOnce();
     expect(mocks.setTags).toHaveBeenCalledWith({
-      state: StateEnumNotReady.FAILED,
+      state: FileStateEnum.FAILED,
+      institutionId: "aggregatorId",
+      userId: "userId",
     });
   });
 
@@ -364,14 +365,18 @@ describe("markFileAsFailed", () => {
     mocks.setTags.mockResolvedValueOnce(undefined);
 
     // when
-    await expect(adapter.markFileAsFailed("file.zip")).resolves.toBeUndefined();
+    await expect(
+      adapter.markFileAsFailed("file.zip", "aggregatorId", "userId"),
+    ).resolves.toBeUndefined();
 
     // then
     expect(mocks.getBlockBlobClient).toHaveBeenCalledOnce();
     expect(mocks.getBlockBlobClient).toHaveBeenCalledWith("file.zip");
     expect(mocks.setTags).toHaveBeenCalledOnce();
     expect(mocks.setTags).toHaveBeenCalledWith({
-      state: StateEnumNotReady.FAILED,
+      state: FileStateEnum.FAILED,
+      institutionId: "aggregatorId",
+      userId: "userId",
     });
   });
 });

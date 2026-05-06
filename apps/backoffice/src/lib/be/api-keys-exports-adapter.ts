@@ -1,5 +1,3 @@
-import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
-import { StateEnum as StateEnumReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient, ContainerClient } from "@azure/storage-blob";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
@@ -11,7 +9,8 @@ import Stream from "stream";
 import { ManagedInternalError } from "./errors";
 import {
   ApiKeysExportsPort,
-  StateEnum,
+  FileState,
+  FileStateEnum,
 } from "./subscriptions/api-keys-exports-port";
 
 type Config = t.TypeOf<typeof Config>;
@@ -67,7 +66,7 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
         },
         tags: {
           institutionId: aggregatorId,
-          state: StateEnumReady.DONE,
+          state: FileStateEnum.DONE,
           userId,
         },
       });
@@ -82,16 +81,16 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
   async findExportsFiles(
     institutionId: string,
     userId: string,
-    state?: StateEnum,
+    state?: FileState,
   ): Promise<
     {
       fileName: string;
-      state?: StateEnum;
+      state?: FileState;
     }[]
   > {
     const blobs: {
       fileName: string;
-      state?: StateEnum;
+      state?: FileState;
     }[] = [];
     const tagQuery =
       `"institutionId" = '${institutionId}' AND "userId" = '${userId}'` +
@@ -100,7 +99,7 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
       const result = this.blobContainerClient.findBlobsByTags(tagQuery);
 
       for await (const blob of result) {
-        const stateResult = StateEnum.decode(blob.tags?.state);
+        const stateResult = FileState.decode(blob.tags?.state);
         if (E.isLeft(stateResult)) {
           throw new Error(
             `Blob ${blob.name} has an invalid state tag: ${blob.tags?.state}`,
@@ -110,7 +109,7 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
       }
     } catch (error) {
       throw new ManagedInternalError(
-        "Errore durante la ricerca dei file di esportazione delle chiavi API",
+        "Error finding exports files",
         error instanceof Error ? error.message : error,
       );
     }
@@ -130,7 +129,7 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
       await blockBlobClient.upload("", 0, {
         tags: {
           institutionId,
-          state: StateEnumNotReady.IN_PROGRESS,
+          state: FileStateEnum.IN_PROGRESS,
           userId,
         },
       });
@@ -142,12 +141,18 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
     }
   }
 
-  async markFileAsFailed(fileName: string): Promise<void> {
+  async markFileAsFailed(
+    fileName: string,
+    institutionId: string,
+    userId: string,
+  ): Promise<void> {
     const blockBlobClient =
       this.blobContainerClient.getBlockBlobClient(fileName);
     try {
       await blockBlobClient.setTags({
-        state: StateEnumNotReady.FAILED,
+        institutionId,
+        state: FileStateEnum.FAILED,
+        userId,
       });
     } catch (error) {
       throw new ManagedInternalError(

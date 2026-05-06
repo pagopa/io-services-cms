@@ -1194,7 +1194,11 @@ describe("Manage Keys", () => {
 
       // then
       expect(mocks.markFileAsFailed).toHaveBeenCalledOnce();
-      expect(mocks.markFileAsFailed).toHaveBeenCalledWith(fakeFileName);
+      expect(mocks.markFileAsFailed).toHaveBeenCalledWith(
+        fakeFileName,
+        aggregatorId,
+        userId,
+      );
     });
   });
 });

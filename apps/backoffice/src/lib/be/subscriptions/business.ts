@@ -1,4 +1,3 @@
-import { StateEnum as StateEnumNotReady } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
 import { Cidr } from "@/generated/api/Cidr";
 import { Group } from "@/generated/api/Group";
 import { StateEnum, Subscription } from "@/generated/api/Subscription";
@@ -19,6 +18,7 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 
+import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
   ManagedInternalError,
@@ -496,7 +496,7 @@ export async function generateApiKeysExports(
   const exportsFiles = await apiKeysExportsAdapter.findExportsFiles(
     aggregatorId,
     userId,
-    StateEnumNotReady.IN_PROGRESS, // TODO: consider if we want to create a typescript enum with all the possible states of the export file (not ready, ready, failed) to avoid importing StateEnum from the generated API models which contains also states that are not relevant for the export files
+    AggregatedInstitutionsManageKeysExportFileStateEnum.IN_PROGRESS,
   );
   if (exportsFiles.length > 0) {
     throw new PreconditionFailedError(
@@ -513,7 +513,7 @@ export async function generateApiKeysExports(
     (error) => {
       // In case of error, we mark the export file as failed to allow the user to retry the export
       apiKeysExportsAdapter
-        .markFileAsFailed(fileName)
+        .markFileAsFailed(fileName, aggregatorId, userId)
         .catch((markFileAsFailedError) => {
           console.error(
             `Error marking export file '${fileName}' as failed after an error occurred during the export generation:`,

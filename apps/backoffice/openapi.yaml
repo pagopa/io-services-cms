@@ -2180,6 +2180,12 @@ components:
       oneOf:
         - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkReady'
         - $ref: '#/components/schemas/AggregatedInstitutionsManageKeysLinkNotReady'
+    AggregatedInstitutionsManageKeysExportFileState:
+      type: string
+      enum:
+        - DONE
+        - IN_PROGRESS
+        - FAILED
     AggregatedInstitutionsManageKeysPassword:
       type: string
       pattern: ^(?=.*[0-9])(?=.*[A-Z])[a-zA-Z0-9]{12,64}$

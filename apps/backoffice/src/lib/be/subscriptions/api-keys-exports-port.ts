@@ -1,15 +1,13 @@
-import { StateEnum as StateEnumFailed } from "@/generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
-import { StateEnum as StateEnumSuccess } from "@/generated/api/AggregatedInstitutionsManageKeysLinkReady";
-import { enumType } from "@pagopa/ts-commons/lib/types";
-import * as t from "io-ts";
+import {
+  AggregatedInstitutionsManageKeysExportFileState,
+  AggregatedInstitutionsManageKeysExportFileStateEnum,
+} from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
 import Stream from "stream";
 
-// TODO: add to openapi spec as unused definition
-export const StateEnum = t.union([
-  enumType<StateEnumFailed>(StateEnumFailed, "state"),
-  enumType<StateEnumSuccess>(StateEnumSuccess, "state"),
-]);
-export type StateEnum = t.TypeOf<typeof StateEnum>;
+export const FileState = AggregatedInstitutionsManageKeysExportFileState;
+export type FileState = AggregatedInstitutionsManageKeysExportFileState;
+export const FileStateEnum =
+  AggregatedInstitutionsManageKeysExportFileStateEnum;
 
 export interface ApiKeysExportsPort {
   finalizeFile(
@@ -23,11 +21,11 @@ export interface ApiKeysExportsPort {
   findExportsFiles(
     institutionId: string,
     userId: string,
-    state?: StateEnum,
+    state?: FileState,
   ): Promise<
     {
       fileName: string;
-      state?: StateEnum;
+      state?: FileState;
     }[]
   >;
 
@@ -37,5 +35,9 @@ export interface ApiKeysExportsPort {
     userId: string,
   ): Promise<void>;
 
-  markFileAsFailed(fileName: string): Promise<void>;
+  markFileAsFailed(
+    fileName: string,
+    institutionId: string,
+    userId: string,
+  ): Promise<void>;
 }
