@@ -1,4 +1,4 @@
-import { ApimUtils } from "@io-services-cms/external-clients";
+import { ApimUtils, SelfcareUtils } from "@io-services-cms/external-clients";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import * as TE from "fp-ts/lib/TaskEither";
 
@@ -9,18 +9,29 @@ import { GroupChangeEvent } from "./types";
 
 interface HandlerDependencies {
   apimService: ApimUtils.ApimService;
+  apimUserGroups: readonly string[];
+  selfcareClient: SelfcareUtils.SelfcareClient;
   serviceLifecycleStore: ServiceLifecycle.LifecycleStore;
 }
 
 export const handleGroupChangeEvent =
-  ({ apimService, serviceLifecycleStore }: HandlerDependencies) =>
+  ({
+    apimService,
+    apimUserGroups,
+    selfcareClient,
+    serviceLifecycleStore,
+  }: HandlerDependencies) =>
   (item: GroupChangeEvent): TE.TaskEither<Error, void> => {
     if (item.productId !== "prod-io") {
       return TE.right(void 0);
     }
 
     const tasks: readonly TE.TaskEither<Error, void>[] = [
-      createSubscriptionForGroup(apimService)(item),
+      createSubscriptionForGroup(
+        apimService,
+        selfcareClient,
+        apimUserGroups,
+      )(item),
       syncSubscription(apimService)(item),
       syncServices(serviceLifecycleStore)(item),
     ];

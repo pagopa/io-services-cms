@@ -139,6 +139,7 @@ export const CosmosLegacyConfig = t.type({
 
 // Apim configuration
 export const ApimConfig = t.type({
+  APIM_USER_GROUPS: NonEmptyString,
   AZURE_APIM: NonEmptyString,
   AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
   AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME: NonEmptyString,
@@ -316,6 +317,18 @@ export type TestFiscalCodeConfiguration = t.TypeOf<
   typeof TestFiscalCodeConfiguration
 >;
 
+export type SelfcareClientConfig = t.TypeOf<typeof SelfcareClientConfig>;
+export const SelfcareClientConfig = t.intersection([
+  t.type({
+    SELFCARE_API_KEY: NonEmptyString,
+    SELFCARE_EXTERNAL_API_BASE_URL: NonEmptyString,
+  }),
+  t.type({
+    APIM_USER_GROUPS: CommaSeparatedListOf(NonEmptyString),
+  }),
+  HttpAgentConfig,
+]);
+
 // Global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -332,6 +345,7 @@ export const IConfig = t.intersection([
       ApimConfig,
       QueueConfig,
       ServiceIdQualityCheckExclusionList,
+      SelfcareClientConfig,
     ]),
     t.intersection([
       CosmosLegacyConfig,

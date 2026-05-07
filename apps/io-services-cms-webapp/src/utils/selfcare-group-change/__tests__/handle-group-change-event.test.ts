@@ -14,6 +14,10 @@ const mocks = vi.hoisted(() => ({
   createSubscriptionForGroupTask: vi.fn(),
   syncSubscriptionTask: vi.fn(),
   syncServicesTask: vi.fn(),
+  SelfcareUtils: {
+    getSelfcareClient: vi.fn().mockReturnValue({}),
+  },
+  apimUserGroups: ["apigroup1", "apigroup2"],
 }));
 
 vi.mock("../create-manage-group-subscription", () => ({
@@ -57,6 +61,8 @@ describe("handleGroupChangeEvent", () => {
     const result = await handleGroupChangeEvent({
       apimService,
       serviceLifecycleStore,
+      selfcareClient: mocks.SelfcareUtils.getSelfcareClient(),
+      apimUserGroups: mocks.apimUserGroups,
     })(item)();
 
     expect(result).toEqual(E.right(void 0));
@@ -77,12 +83,16 @@ describe("handleGroupChangeEvent", () => {
     const result = await handleGroupChangeEvent({
       apimService,
       serviceLifecycleStore,
+      selfcareClient: mocks.SelfcareUtils.getSelfcareClient(),
+      apimUserGroups: mocks.apimUserGroups,
     })(item)();
 
     expect(result).toEqual(E.right(void 0));
 
     expect(mocks.createSubscriptionForGroup).toHaveBeenCalledExactlyOnceWith(
       apimService,
+      mocks.SelfcareUtils.getSelfcareClient(),
+      mocks.apimUserGroups,
     );
     expect(
       mocks.createSubscriptionForGroupTask,
@@ -113,6 +123,8 @@ describe("handleGroupChangeEvent", () => {
     const result = await handleGroupChangeEvent({
       apimService,
       serviceLifecycleStore,
+      selfcareClient: mocks.SelfcareUtils.getSelfcareClient(),
+      apimUserGroups: mocks.apimUserGroups,
     })(item)();
 
     expect(result).toEqual(E.left(expectedError));
@@ -147,6 +159,8 @@ describe("handleGroupChangeEvent", () => {
     const result = await handleGroupChangeEvent({
       apimService,
       serviceLifecycleStore,
+      selfcareClient: mocks.SelfcareUtils.getSelfcareClient(),
+      apimUserGroups: mocks.apimUserGroups,
     })(item)();
 
     expect(result).toEqual(E.left(expectedError));
