@@ -14,5 +14,7 @@ module "pgres_snet" {
       ]
     }
   }
+
+  service_endpoints = ["Microsoft.Storage"]
 }
 

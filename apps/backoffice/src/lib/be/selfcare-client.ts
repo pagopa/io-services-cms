@@ -1,4 +1,5 @@
 import { StateEnum } from "@/generated/api/Group";
+import { DelegationResponse } from "@/generated/selfcare/DelegationResponse";
 import { DelegationWithPaginationResponse } from "@/generated/selfcare/DelegationWithPaginationResponse";
 import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import { UserGroupResource } from "@/generated/selfcare/UserGroupResource";
@@ -31,6 +32,27 @@ export const InstitutionProducts = t.readonlyArray(
 );
 export type InstitutionProducts = t.TypeOf<typeof InstitutionProducts>;
 
+const PageInfoStrict = t.type({
+  pageNo: t.number,
+  pageSize: t.number,
+  totalElements: t.number,
+  totalPages: t.number,
+});
+type PageInfoStrict = t.TypeOf<typeof PageInfoStrict>;
+
+export const DelegationWithPaginationResponseStrict = t.intersection([
+  DelegationWithPaginationResponse,
+  t.type({
+    pageInfo: PageInfoStrict,
+  }),
+  t.type({
+    delegations: t.readonlyArray(DelegationResponse),
+  }),
+]);
+export type DelegationWithPaginationResponseStrict = t.TypeOf<
+  typeof DelegationWithPaginationResponseStrict
+>;
+
 export interface SelfcareClient {
   getGroup: (
     id: NonEmptyString,
@@ -43,14 +65,14 @@ export interface SelfcareClient {
     size?: number,
     page?: number,
     search?: string,
-  ) => TE.TaskEither<Error, DelegationWithPaginationResponse>;
-  getInstitutionGroups: (
-    institutionId: string,
-    size?: number,
-    page?: number,
-    state?: GroupFilter,
-    parentInstitutionId?: string,
-  ) => TE.TaskEither<Error, PageOfUserGroupResource>;
+  ) => TE.TaskEither<Error, DelegationWithPaginationResponseStrict>;
+  getInstitutionGroups: (params: {
+    institutionId?: string;
+    page?: number;
+    parentInstitutionId?: string;
+    size?: number;
+    state?: GroupFilter;
+  }) => TE.TaskEither<Error, PageOfUserGroupResource>;
   getInstitutionProducts: (
     institutionId: string,
     userId: string,
@@ -170,13 +192,13 @@ const buildSelfcareClient = (): SelfcareClient => {
       ),
     );
 
-  const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = (
+  const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = ({
     institutionId,
-    size?,
-    page?,
+    page,
+    parentInstitutionId,
+    size,
     state = StateEnum.ACTIVE,
-    parentInstitutionId?,
-  ) =>
+  }) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -254,7 +276,7 @@ const buildSelfcareClient = (): SelfcareClient => {
         TE.chainEitherK((response) =>
           pipe(
             response.data,
-            DelegationWithPaginationResponse.decode,
+            DelegationWithPaginationResponseStrict.decode,
             E.mapLeft((e) => pipe(e, readableReport, E.toError)),
           ),
         ),

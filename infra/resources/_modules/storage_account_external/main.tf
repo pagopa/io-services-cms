@@ -42,7 +42,7 @@ resource "azurerm_storage_management_policy" "ext_sa_mgmt_policy" {
     }
     actions {
       base_blob {
-        delete_after_days_since_modification_greater_than = 2
+        delete_after_days_since_modification_greater_than = var.api_keys_exports_duration_in_hours / 24
       }
     }
   }
