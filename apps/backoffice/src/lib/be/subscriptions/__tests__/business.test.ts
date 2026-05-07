@@ -1528,6 +1528,21 @@ describe("Manage Keys", () => {
         retrieveApiKeysExportMetadata(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
+
+    it("should throw ManagedInternalError when export as UNKNOWN state", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([
+        {
+          ...aDoneExport,
+          state: "UNKNOWN",
+        },
+      ]);
+
+      // when & then
+      await expect(
+        retrieveApiKeysExportMetadata(aggregatorId, userId),
+      ).rejects.toThrowError(ManagedInternalError);
+    });
   });
 });
 
