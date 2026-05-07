@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.4.0
+
+### Minor Changes
+
+- 9ade29a5: add api keys exports file generation use case
+
 ## 2.3.0
 
 ### Minor Changes
