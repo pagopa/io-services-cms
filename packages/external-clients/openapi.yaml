@@ -6,3 +6,19 @@ components:
   schemas:
     SubscriptionKeyType:
       $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/SubscriptionKeyType'
+    ResponseError:
+      $ref: 'https://raw.githubusercontent.com/pagopa/io-services-cms/master/packages/io-services-cms-models/openapi/commons-schemas.yaml#/ResponseError'
+    Group:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        state:
+          type: string
+          enum: [ACTIVE, SUSPENDED, DELETED]
+      required:
+        - id
+        - name
+        - state
