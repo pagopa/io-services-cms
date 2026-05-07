@@ -1,3 +1,4 @@
+import { AggregatedInstitutionsManageKeysExportFileDownloadLink } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileDownloadLink";
 import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import {
   AggregatedInstitutionsManageKeysExportFileMetadataNotReady,
@@ -708,10 +709,10 @@ async function retrieveAggregates(
   return { aggregatesCounter, enrichedAggregateData };
 }
 
-export async function retrieveApiKeysExports(
+export async function updateApiKeysExportsDownloadLink(
   aggregatorId: string,
   userId: string,
-): Promise<AggregatedInstitutionsManageKeysExportFileMetadata> {
+): Promise<AggregatedInstitutionsManageKeysExportFileDownloadLink> {
   const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
   const exportsFiles: {
     creationDate: Date;
@@ -742,9 +743,10 @@ export async function retrieveApiKeysExports(
   switch (mostRecentExport.state) {
     case FileStateEnum.FAILED:
     case FileStateEnum.IN_PROGRESS:
-      return AggregatedInstitutionsManageKeysExportFileMetadataNotReady.encode({
-        state: mostRecentExport.state as unknown as StateEnumNotReady,
-      });
+      throw new BadRequestError(
+        "Bad Request",
+        "Can not update download link on uncompleted export",
+      );
     case FileStateEnum.DONE:
       timeRemaining =
         mostRecentExport.lastModifiedDate.getTime() +
@@ -767,10 +769,8 @@ export async function retrieveApiKeysExports(
       } catch {
         throw new ManagedInternalError("Error while generating download URL");
       }
-      return AggregatedInstitutionsManageKeysExportFileMetadataReady.encode({
+      return AggregatedInstitutionsManageKeysExportFileDownloadLink.encode({
         downloadLink: url.href,
-        expirationDate: expirationDate.toISOString(),
-        state: FileStateEnum.DONE as unknown as StateEnumReady,
       });
     default:
       // eslint-disable-next-line no-case-declarations

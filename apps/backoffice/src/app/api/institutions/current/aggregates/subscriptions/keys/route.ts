@@ -14,7 +14,7 @@ import { parseBody } from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   generateApiKeysExports,
-  retrieveApiKeysExports,
+  updateApiKeysExportsDownloadLink,
 } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
@@ -74,10 +74,10 @@ export const POST = withJWTAuthHandler(
 );
 
 /**
- * @description Retrieve Metadata for Aggregated Institutions Download procedure
- * @operationId getAggregatedInstitutionsManageKeysLink
+ * @description Generate download link for Aggregated Institutions API Keys export
+ * @operationId generateDirectDownloadLinkForAggregatedInstitutionsManageKeys
  */
-export const GET = withJWTAuthHandler(
+export const PUT = withJWTAuthHandler(
   async (
     _request: NextRequest,
     {
@@ -92,25 +92,25 @@ export const GET = withJWTAuthHandler(
   > => {
     if (!backofficeUser.institution.isAggregator) {
       return handleForbiddenErrorResponse(
-        "Only aggregators are authorized to request metadata about download procedure",
+        "Only aggregators are authorized to request link about download procedure",
       );
     }
 
     try {
-      const result = await retrieveApiKeysExports(
+      const result = await updateApiKeysExportsDownloadLink(
         backofficeUser.institution.id,
         backofficeUser.parameters.userId,
       );
-      return sanitizedNextResponseJson(result);
+      return sanitizedNextResponseJson(result, 201);
     } catch (error) {
       if (error instanceof BadRequestError) {
         handlerErrorLog(error.message, error);
         return handleBadRequestErrorResponse(error.message);
       }
       return handleInternalErrorResponse(
-        "GetAggregatedInstitutionsManageKeysLink",
+        "GenerateDirectDownloadLinkForAggregatedInstitutionsManageKeys",
         error,
-        `An Error has occurred while getting manage keys exports for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
+        `An Error has occurred while generating download link for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
       );
     }
   },

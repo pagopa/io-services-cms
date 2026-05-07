@@ -10,10 +10,10 @@ import {
   getManageSubscriptions,
   regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
   regenerateManageSubscriptionApiKey,
-  retrieveApiKeysExports,
   retrieveInstitutionAggregateManageSubscriptionsKeys,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
+  updateApiKeysExportsDownloadLink,
   upsertManageSubscription,
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "../business";
@@ -1209,7 +1209,7 @@ describe("Manage Keys", () => {
     });
   });
 
-  describe("retrieveApiKeysExports", () => {
+  describe("updateApiKeysExportsDownloadLink", () => {
     const aggregatorId = "aggregatorId";
     const userId = "userId";
     const creationDate = new Date(2026, 0, 1);
@@ -1247,7 +1247,7 @@ describe("Manage Keys", () => {
       vi.useRealTimers();
     });
 
-    it("should retrieve api keys exports", async () => {
+    it("should generate download link for api keys exports", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([aDoneExport]);
       mocks.generateDownloadUrl.mockResolvedValueOnce(anUrl);
@@ -1256,13 +1256,14 @@ describe("Manage Keys", () => {
       );
 
       // when
-      const result = await retrieveApiKeysExports(aggregatorId, userId);
+      const result = await updateApiKeysExportsDownloadLink(
+        aggregatorId,
+        userId,
+      );
 
       // then
       expect(result).toEqual({
         downloadLink: anUrl.href,
-        expirationDate: expirationDate.toISOString(),
-        state: FileStateEnum.DONE,
       });
       expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
         aggregatorId,
@@ -1290,13 +1291,14 @@ describe("Manage Keys", () => {
       );
 
       // when
-      const result = await retrieveApiKeysExports(aggregatorId, userId);
+      const result = await updateApiKeysExportsDownloadLink(
+        aggregatorId,
+        userId,
+      );
 
       // then
       expect(result).toEqual({
         downloadLink: anUrl.href,
-        expirationDate: expirationDate.toISOString(),
-        state: FileStateEnum.DONE,
       });
       expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
         aggregatorId,
@@ -1314,7 +1316,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        retrieveApiKeysExports(aggregatorId, userId),
+        updateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(BadRequestError);
     });
 
@@ -1324,31 +1326,33 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        retrieveApiKeysExports(aggregatorId, userId),
+        updateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
 
-    it("should return IN_PROGRESS state when most recent export is in progress", async () => {
+    it("should return BadRequestError on IN_PROGRESS state when most recent export is in progress", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([anInProgressExport]);
 
       // when
-      const result = await retrieveApiKeysExports(aggregatorId, userId);
+      await expect(
+        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+      ).rejects.toThrowError(BadRequestError);
 
       // then
-      expect(result).toEqual({ state: FileStateEnum.IN_PROGRESS });
       expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
     });
 
-    it("should return FAILED state when most recent export is failed", async () => {
+    it("should return BadRequestError on FAILED state when most recent export has failed", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([aFailedExport]);
 
       // when
-      const result = await retrieveApiKeysExports(aggregatorId, userId);
+      await expect(
+        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+      ).rejects.toThrowError(BadRequestError);
 
       // then
-      expect(result).toEqual({ state: FileStateEnum.FAILED });
       expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
     });
 
@@ -1359,7 +1363,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        retrieveApiKeysExports(aggregatorId, userId),
+        updateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
       expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
 
@@ -1375,7 +1379,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        retrieveApiKeysExports(aggregatorId, userId),
+        updateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
 
@@ -1390,7 +1394,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        retrieveApiKeysExports(aggregatorId, userId),
+        updateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
   });
