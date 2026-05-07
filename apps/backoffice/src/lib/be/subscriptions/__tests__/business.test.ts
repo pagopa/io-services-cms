@@ -10,6 +10,7 @@ import {
   getManageSubscriptions,
   regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
   regenerateManageSubscriptionApiKey,
+  retrieveApiKeysExportMetadata,
   retrieveInstitutionAggregateManageSubscriptionsKeys,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
@@ -17,7 +18,11 @@ import {
   upsertManageSubscription,
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "../business";
-import { BadRequestError, ManagedInternalError } from "../../errors";
+import {
+  BadRequestError,
+  ManagedInternalError,
+  NotFoundError,
+} from "../../errors";
 import { FileStateEnum } from "../api-keys-exports-port";
 
 const mocks: {
@@ -1214,28 +1219,26 @@ describe("Manage Keys", () => {
     const userId = "userId";
     const creationDate = new Date(2026, 0, 1);
     const lastModifiedDate = new Date(2026, 0, 2);
-    const aSuccessFileName = "file_success.zip";
-    const aFailedFileName = "file_failed.zip";
-    const anInProgressFileName = "file_wip.zip";
+    const fileName = "file_success.zip";
     const anInProgressExport = {
       creationDate,
       lastModifiedDate: creationDate,
       state: FileStateEnum.IN_PROGRESS,
-      fileName: anInProgressFileName,
+      fileName,
     };
 
     const aFailedExport = {
       creationDate,
       lastModifiedDate,
       state: FileStateEnum.FAILED,
-      fileName: aFailedFileName,
+      fileName,
     };
 
     const aDoneExport = {
       creationDate,
       lastModifiedDate,
       state: FileStateEnum.DONE,
-      fileName: aSuccessFileName,
+      fileName,
     };
     const anUrl = new URL("https://localhost");
 
@@ -1270,7 +1273,7 @@ describe("Manage Keys", () => {
         userId,
       );
       expect(mocks.generateDownloadUrl).toHaveBeenCalledExactlyOnceWith(
-        aSuccessFileName,
+        fileName,
         expirationDate,
       );
     });
@@ -1305,7 +1308,7 @@ describe("Manage Keys", () => {
         userId,
       );
       expect(mocks.generateDownloadUrl).toHaveBeenCalledExactlyOnceWith(
-        aSuccessFileName,
+        fileName,
         expirationDate,
       );
     });
@@ -1383,7 +1386,7 @@ describe("Manage Keys", () => {
       ).rejects.toThrowError(ManagedInternalError);
     });
 
-    it("should throw ManagedInternalError when generateDownloadUrl rejects", async () => {
+    it("should throw ManagedInternalError when export as UNKNOWN state", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([
         {
@@ -1395,6 +1398,134 @@ describe("Manage Keys", () => {
       // when & then
       await expect(
         updateApiKeysExportsDownloadLink(aggregatorId, userId),
+      ).rejects.toThrowError(ManagedInternalError);
+    });
+  });
+
+  describe("retrieveApiKeysExportMetadata", () => {
+    const aggregatorId = "aggregatorId";
+    const userId = "userId";
+    const creationDate = new Date(2026, 0, 1);
+    const lastModifiedDate = new Date(2026, 0, 2);
+    const fileName = "file_success.zip";
+    const anInProgressExport = {
+      creationDate,
+      lastModifiedDate: creationDate,
+      state: FileStateEnum.IN_PROGRESS,
+      fileName,
+    };
+
+    const aFailedExport = {
+      creationDate,
+      lastModifiedDate,
+      state: FileStateEnum.FAILED,
+      fileName,
+    };
+
+    const aDoneExport = {
+      creationDate,
+      lastModifiedDate,
+      state: FileStateEnum.DONE,
+      fileName,
+    };
+
+    it("should get metadata for completed api keys exports", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([aDoneExport]);
+      const expirationDate = new Date(
+        lastModifiedDate.getTime() + 24 * 60 * 60 * 1000,
+      );
+
+      // when
+      const result = await retrieveApiKeysExportMetadata(aggregatorId, userId);
+
+      // then
+      expect(result).toEqual({
+        downloadLink: "",
+        state: FileStateEnum.DONE,
+        expirationDate: expirationDate.toISOString(),
+      });
+      expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
+        aggregatorId,
+        userId,
+      );
+    });
+
+    it.each`
+      scenario               | state
+      ${"IN_PROGRESS state"} | ${FileStateEnum.IN_PROGRESS}
+      ${"FAILED state"}      | ${FileStateEnum.FAILED}
+    `(
+      "should return $scenario when most recent export is in $scenario",
+      async ({ state }) => {
+        // given
+        mocks.findExportsFiles.mockResolvedValueOnce([
+          { ...anInProgressExport, state },
+        ]);
+
+        // when
+        const result = await retrieveApiKeysExportMetadata(
+          aggregatorId,
+          userId,
+        );
+
+        // then
+        expect(result).toEqual({
+          state,
+        });
+        expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
+          aggregatorId,
+          userId,
+        );
+      },
+    );
+
+    it("should retrieve most recent api keys exports metadata", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([
+        aDoneExport,
+        // failed export 5 minutes before
+        {
+          ...aFailedExport,
+          lastModifiedDate: new Date(lastModifiedDate.getTime() - 300 * 1000),
+        },
+      ]);
+      const expirationDate = new Date(
+        lastModifiedDate.getTime() + 24 * 60 * 60 * 1000,
+      );
+
+      // when
+      const result = await retrieveApiKeysExportMetadata(aggregatorId, userId);
+
+      // then
+      expect(result).toEqual({
+        downloadLink: "",
+        state: FileStateEnum.DONE,
+        expirationDate: expirationDate.toISOString(),
+      });
+      expect(mocks.findExportsFiles).toHaveBeenCalledExactlyOnceWith(
+        aggregatorId,
+        userId,
+      );
+    });
+
+    it("should throw NotFoundError on 0 exports", async () => {
+      // given
+      mocks.findExportsFiles.mockResolvedValueOnce([]);
+
+      // when & then
+      await expect(
+        retrieveApiKeysExportMetadata(aggregatorId, userId),
+      ).rejects.toThrowError(NotFoundError);
+    });
+
+    it("should throw ManagedInternalError when findExportsFiles rejects", async () => {
+      // given
+      mocks.findExportsFiles.mockRejectedValueOnce(new Error("storage error"));
+
+      // when & then
+      await expect(
+        retrieveApiKeysExportMetadata(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
   });
