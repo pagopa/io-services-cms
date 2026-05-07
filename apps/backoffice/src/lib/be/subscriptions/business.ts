@@ -33,6 +33,7 @@ import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
   BadRequestError,
   ManagedInternalError,
+  NotFoundError,
   PreconditionFailedError,
   SubscriptionOwnershipError,
   apimErrorToManagedInternalError,
@@ -771,6 +772,62 @@ export async function updateApiKeysExportsDownloadLink(
       }
       return AggregatedInstitutionsManageKeysExportFileDownloadLink.encode({
         downloadLink: url.href,
+      });
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = mostRecentExport.state;
+      throw new ManagedInternalError("Unrecognized export state");
+  }
+}
+
+export async function retrieveApiKeysExportMetadata(
+  aggregatorId: string,
+  userId: string,
+): Promise<AggregatedInstitutionsManageKeysExportFileMetadata> {
+  const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
+  const exportsFiles: {
+    creationDate: Date;
+    fileName: string;
+    lastModifiedDate: Date;
+    state: FileState;
+  }[] = [];
+
+  try {
+    exportsFiles.push(
+      ...(await apiKeysExportsAdapter.findExportsFiles(aggregatorId, userId)),
+    );
+  } catch {
+    throw new ManagedInternalError("Error while searching for exports");
+  }
+
+  if (exportsFiles.length === 0) {
+    throw new NotFoundError("Not Found", "Found 0 exports");
+  }
+
+  const mostRecentExport = exportsFiles.reduce((a, b) =>
+    a.lastModifiedDate.getTime() >= b.lastModifiedDate.getTime() ? a : b,
+  );
+
+  let expirationDate: Date;
+  switch (mostRecentExport.state) {
+    case FileStateEnum.FAILED:
+    case FileStateEnum.IN_PROGRESS:
+      return AggregatedInstitutionsManageKeysExportFileMetadataNotReady.encode({
+        state: mostRecentExport.state as unknown as StateEnumNotReady,
+      });
+    case FileStateEnum.DONE:
+      expirationDate = new Date(
+        mostRecentExport.lastModifiedDate.getTime() +
+          apiKeysExportsAdapter.EXPORTS_API_KEYS_DURATION_IN_HOURS *
+            60 *
+            60 *
+            1000,
+      );
+      return AggregatedInstitutionsManageKeysExportFileMetadataReady.encode({
+        // TODO: remove this after openapi refactor
+        downloadLink: "",
+        expirationDate: expirationDate.toISOString(),
+        state: mostRecentExport.state as unknown as StateEnumReady,
       });
     default:
       // eslint-disable-next-line no-case-declarations

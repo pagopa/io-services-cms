@@ -86,6 +86,19 @@ export class BadRequestError extends Error {
   }
 }
 
+export class NotFoundError extends Error {
+  additionalDetails?: string;
+  constructor(message: string, additionalDetails?: unknown) {
+    super("Not Found");
+    this.name = "NotFoundError";
+    this.message = message;
+    this.additionalDetails =
+      typeof additionalDetails === "string"
+        ? additionalDetails
+        : JSON.stringify(additionalDetails);
+  }
+}
+
 export class HealthChecksError extends Error {
   externalServiceName: string;
   innerError: unknown;
