@@ -4,11 +4,11 @@ import { InstitutionResponse } from "@io-services-cms/external-clients/generated
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as RA from "fp-ts/ReadonlyArray";
 import * as TE from "fp-ts/TaskEither";
-import { pipe } from "fp-ts/function";
+import { flow, pipe } from "fp-ts/function";
 
 export const createApimUser =
   (apimService: ApimUtils.ApimService, apimUserGroups: readonly string[]) =>
-  (institution: InstitutionResponse): TE.TaskEither<Error, void> =>
+  (institution: InstitutionResponse): TE.TaskEither<Error, UserContract> =>
     pipe(
       apimService.createOrUpdateUser({
         email: ApimUtils.formatEmailForOrganization(institution.id),
@@ -34,7 +34,14 @@ export const createApimUser =
           TE.sequenceSeqArray,
         ),
       ),
-      TE.map(() => void 0),
+      TE.chain(
+        flow(
+          RA.last,
+          TE.fromOption(
+            () => new Error("Failed to retrieve the created user."),
+          ),
+        ),
+      ),
     );
 
 const createUserGroup =
