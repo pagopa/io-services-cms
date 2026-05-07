@@ -31,13 +31,13 @@ const shouldCreateManageGroupSubscription = (group: GroupChangeEvent) =>
 
 const createManageGroupSubscription = (
   apimService: ApimUtils.ApimService,
-  selfcareService: SelfcareUtils.SelfcareClient,
+  selfcareClient: SelfcareUtils.SelfcareClient,
   group: GroupChangeEvent,
   apimUserGroups: readonly string[],
 ): TE.TaskEither<Error, void> =>
   pipe(
     group.institutionId,
-    getOrCreateApimUser(apimService, selfcareService, apimUserGroups),
+    getOrCreateApimUser(apimService, selfcareClient, apimUserGroups),
     TE.chain((user) => TE.fromEither(getIdFromUser(user))),
     TE.chain((userId) =>
       apimService.upsertSubscription(
@@ -58,7 +58,7 @@ const createManageGroupSubscription = (
 const getOrCreateApimUser =
   (
     apimService: ApimUtils.ApimService,
-    selfcareService: SelfcareUtils.SelfcareClient,
+    selfcareClient: SelfcareUtils.SelfcareClient,
     apimUserGroups: readonly string[],
   ) =>
   (institutionId: string): TE.TaskEither<Error, UserContract> =>
@@ -69,7 +69,7 @@ const getOrCreateApimUser =
           () =>
             pipe(
               institutionId,
-              getInstitutionById(selfcareService),
+              getInstitutionById(selfcareClient),
               TE.chain((institution) =>
                 createApimUser(apimService, apimUserGroups)(institution),
               ),
@@ -102,10 +102,10 @@ const getIdFromUser = (user: UserContract): E.Either<Error, string> =>
   );
 
 const getInstitutionById =
-  (selfcareService: SelfcareUtils.SelfcareClient) => (institutionId: string) =>
+  (selfcareClient: SelfcareUtils.SelfcareClient) => (institutionId: string) =>
     pipe(
       institutionId,
-      selfcareService.getInstitutionById,
+      selfcareClient.getInstitutionById,
       TE.mapLeft(
         (err) =>
           new Error(
