@@ -32,9 +32,6 @@ export interface SelfcareClient {
 }
 
 const institutionsApi = "/institutions";
-const usersApi = "/users";
-const groupsApi = "/user-groups";
-const delegationsApi = "/delegations";
 let selfcareClient: SelfcareClient;
 
 const getAxiosInstance = (
