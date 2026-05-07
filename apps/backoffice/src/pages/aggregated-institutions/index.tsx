@@ -368,7 +368,7 @@ export default function AggregatedInstitutions() {
 
   const fetchAggregatedInstitutionsManageKeysLink = useCallback(() => {
     fetchDownloadLink(
-      "getAggregatedInstitutionsManageKeysLink",
+      "getAggregatedInstitutionsManageKeysMetadata",
       {},
       AggregatedInstitutionsManageKeysExportFileMetadata,
     );
