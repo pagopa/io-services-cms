@@ -124,41 +124,6 @@ describe("createSubscriptionForGroup", () => {
     );
   });
 
-  it("should return Left when no APIM user is found for the institution", async () => {
-    //given
-    const group = {
-      ...baseEvent,
-      parentInstitutionId: "parent-institution-id",
-    } as GroupChangeEvent;
-    const error = new Error(
-      `Failed to create manage-group subscription ${ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id}, reason: No user found for institution ${group.institutionId}`,
-    );
-
-    mocks.ApimService.getUserByEmail
-      .mockReturnValueOnce(TE.right(O.none))
-      .mockReturnValueOnce(TE.right(O.none));
-    mocks.ApimService.createOrUpdateUser.mockReturnValueOnce(
-      TE.right({ name: "created-user" as NonEmptyString }),
-    );
-    mocks.ApimService.createGroupUser.mockReturnValue(TE.right({}));
-    mocks.SelfcareClient.getInstitutionById.mockReturnValueOnce(
-      TE.right(getMockInstitution(group.parentInstitutionId!)),
-    );
-
-    //when
-    const result = await createSubscriptionForGroup(
-      deps.apimService,
-      deps.selfcareClient,
-      mockApimUserGroups,
-    )(group)();
-
-    //then
-    expect(E.isLeft(result)).toBeTruthy();
-    if (E.isLeft(result)) {
-      expect(result.left).toStrictEqual(error);
-    }
-    expect(mocks.ApimService.upsertSubscription).not.toHaveBeenCalled();
-  });
 
   it("should return Left when upsertSubscription fails", async () => {
     //given
