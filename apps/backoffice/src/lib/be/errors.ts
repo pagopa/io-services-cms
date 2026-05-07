@@ -73,6 +73,19 @@ export class PreconditionFailedError extends Error {
   }
 }
 
+export class BadRequestError extends Error {
+  additionalDetails?: string;
+  constructor(message: string, additionalDetails?: unknown) {
+    super("Bad Request");
+    this.name = "BadRequestError";
+    this.message = message;
+    this.additionalDetails =
+      typeof additionalDetails === "string"
+        ? additionalDetails
+        : JSON.stringify(additionalDetails);
+  }
+}
+
 export class HealthChecksError extends Error {
   externalServiceName: string;
   innerError: unknown;

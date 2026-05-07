@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 3.1.0
+
+### Minor Changes
+
+- fcf9cf5c: Replace ApiKeyAuth with Bearer token authentication in external OpenAPI spec
+
 ## 3.0.1
 
 ### Patch Changes

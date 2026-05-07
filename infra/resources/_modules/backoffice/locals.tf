@@ -70,8 +70,9 @@ locals {
       // Group ApiKey feature
       GROUP_AUTHZ_ENABLED = true
 
-      SA_EXT_BLOB_ENDPOINT            = var.sa_ext.blob.primary_blob_endpoint
-      EXPORTS_API_KEYS_CONTAINER_NAME = var.sa_ext.blob.api_keys_container_name
+      SA_EXT_BLOB_ENDPOINT               = var.sa_ext.blob.primary_blob_endpoint
+      EXPORTS_API_KEYS_CONTAINER_NAME    = var.sa_ext.blob.api_keys_container_name
+      EXPORTS_API_KEYS_DURATION_IN_HOURS = var.sa_ext.blob.api_keys_exports_duration_in_hours
     }
 
     prod_app_setting = {

@@ -208,16 +208,12 @@ describe("Selfcare Institutions", () => {
 
       // when and then
       await expect(() =>
-        getInstitutionGroups(institutionId),
+        getInstitutionGroups({ institutionId }),
       ).rejects.toThrowError("Error calling selfcare getInstitutionGroups API");
       expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+      expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
         institutionId,
-        undefined,
-        undefined,
-        undefined,
-        undefined,
-      );
+      });
       expect(mocks.isAxiosError).not.toHaveBeenCalled();
     });
 
@@ -237,22 +233,22 @@ describe("Selfcare Institutions", () => {
 
         // when and then
         await expect(
-          getInstitutionGroups(
+          getInstitutionGroups({
             institutionId,
-            givenParams.size,
-            givenParams.page,
-            givenParams.state,
-            givenParams.parentInstitutionId,
-          ),
+            size: givenParams.size,
+            page: givenParams.page,
+            state: givenParams.state,
+            parentInstitutionId: givenParams.parentInstitutionId,
+          }),
         ).resolves.toStrictEqual(expectedInstitutionGroups);
         expect(mocks.getInstitutionGroups).toHaveBeenCalledOnce();
-        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith(
+        expect(mocks.getInstitutionGroups).toHaveBeenCalledWith({
           institutionId,
-          expectedParams.size,
-          expectedParams.page,
-          expectedParams.state,
-          expectedParams.parentInstitutionId,
-        );
+          size: expectedParams.size,
+          page: expectedParams.page,
+          state: expectedParams.state,
+          parentInstitutionId: expectedParams.parentInstitutionId,
+        });
         expect(mocks.isAxiosError).not.toHaveBeenCalled();
       },
     );
