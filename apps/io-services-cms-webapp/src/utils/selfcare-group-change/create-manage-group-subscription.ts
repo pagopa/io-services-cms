@@ -63,7 +63,7 @@ const getOrCreateApimUser =
   ) =>
   (institutionId: string): TE.TaskEither<Error, UserContract> =>
     pipe(
-      getApimUserOrNoneFromInstitutionId(apimService, institutionId),
+      getApimUserFromInstitutionId(apimService, institutionId),
       TE.chain(
         O.fold(
           () =>
@@ -73,9 +73,6 @@ const getOrCreateApimUser =
               TE.chain((institution) =>
                 createApimUser(apimService, apimUserGroups)(institution),
               ),
-              TE.chain(() =>
-                getApimUserFromInstitutionId(apimService, institutionId),
-              ),
             ),
           TE.right,
         ),
@@ -83,19 +80,6 @@ const getOrCreateApimUser =
     );
 
 const getApimUserFromInstitutionId = (
-  apimService: ApimUtils.ApimService,
-  institutionId: string,
-): TE.TaskEither<Error, UserContract> =>
-  pipe(
-    getApimUserOrNoneFromInstitutionId(apimService, institutionId),
-    TE.chain(
-      TE.fromOption(
-        () => new Error(`No user found for institution ${institutionId}`),
-      ),
-    ),
-  );
-
-const getApimUserOrNoneFromInstitutionId = (
   apimService: ApimUtils.ApimService,
   institutionId: string,
 ): TE.TaskEither<Error, O.Option<UserContract>> =>
