@@ -54,7 +54,7 @@ export const GET = withJWTAuthHandler(
     } catch (error) {
       if (error instanceof NotFoundError) {
         handlerErrorLog(error.message, error);
-        return handleNotFoundErrorResponse("Export not found", error.message);
+        return handleNotFoundErrorResponse("Export not found", error);
       }
       return handleInternalErrorResponse(
         "GetAggregatedInstitutionsManageKeysMetadata",

@@ -179,7 +179,7 @@ export const handleNotFoundErrorResponse = (
   error: unknown,
 ): NextResponse<ResponseError> => {
   let detail = "Something went wrong";
-  if (error instanceof ManagedInternalError) {
+  if (error instanceof NotFoundError || error instanceof ManagedInternalError) {
     detail = error.message;
   }
   return NextResponse.json(
