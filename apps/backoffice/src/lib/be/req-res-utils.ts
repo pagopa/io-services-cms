@@ -3,7 +3,7 @@ import {
   NonNegativeInteger,
   NonNegativeIntegerFromString,
 } from "@pagopa/ts-commons/lib/numbers";
-import { readableReport } from "@pagopa/ts-commons/lib/reporters";
+import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
 import { pipe } from "fp-ts/lib/function";
@@ -105,7 +105,7 @@ export const parseBody = async <T>(
   }
   const maybeServicePayload = decoder.decode(jsonBody);
   if (maybeServicePayload._tag === "Left") {
-    throw new Error(readableReport(maybeServicePayload.left));
+    throw new Error(readableReportSimplified(maybeServicePayload.left));
   }
   return maybeServicePayload.right;
 };

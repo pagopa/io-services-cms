@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.11.0
+
+### Minor Changes
+
+- 67d6b8ef: Add Selfcare Client
+
 ## 1.10.0
 
 ### Minor Changes

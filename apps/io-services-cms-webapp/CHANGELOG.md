@@ -1,5 +1,13 @@
 # io-services-cms-webapp
 
+## 2.1.1
+
+### Patch Changes
+
+- aaa610f6: Create APIM user on Selfcare group creation event if not present
+- Updated dependencies [67d6b8ef]
+  - @io-services-cms/external-clients@1.11.0
+
 ## 2.1.0
 
 ### Minor Changes

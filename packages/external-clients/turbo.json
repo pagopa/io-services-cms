@@ -1,0 +1,18 @@
+{
+  "extends": ["//"],
+  "tasks": {
+    "generate:api-definitions": {
+      "inputs": ["openapi.yaml"],
+      "outputs": ["src/generated/api/**"],
+      "outputLogs": "errors-only"
+    },
+    "generate:selfcare-api-models": {
+      "inputs": ["openapi-selfcare.json"],
+      "outputs": ["src/generated/selfcare/**"],
+      "outputLogs": "errors-only"
+    },
+    "generate": {
+      "dependsOn": ["generate:api-definitions", "generate:selfcare-api-models"]
+    }
+  }
+}

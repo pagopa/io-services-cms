@@ -41,6 +41,9 @@
     "REQUEST_HISTORICIZATION_QUEUE": "request-historicization",
     "REQUEST_VALIDATION_QUEUE": "request-validation",
     "REQUEST_DELETION_QUEUE": "request-deletion",
-    "REQUEST_DETAIL_QUEUE": "request-detail"
+    "REQUEST_DETAIL_QUEUE": "request-detail",
+    "SELFCARE_API_KEY": "<selfcare-api-key>",
+    "SELFCARE_EXTERNAL_API_BASE_URL": "<selfcare-external-api-base-url>",
+    "APIM_USER_GROUPS": "<comma-separated-list-of-groups>",
   }
 }

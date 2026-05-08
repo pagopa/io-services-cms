@@ -59,6 +59,9 @@ const mocks = vi.hoisted(() => {
       getApimClient: vi.fn(() => {}),
       getApimService: vi.fn().mockReturnValue({}),
     },
+    SelfcareUtils: {
+      getSelfcareClient: vi.fn().mockReturnValue({}),
+    },
     makeCosmosPagedHelper: vi.fn((...args: any[]) => mockPagedHelper),
     makeCosmosHelper: vi.fn().mockReturnValue(mockCosmosHelperTest),
     getCmsCosmosDatabase: vi.fn().mockReturnValue({
@@ -159,6 +162,9 @@ vi.mock("../config", () => {
 vi.mock("@io-services-cms/external-clients", () => ({
   ApimUtils: {
     ...mocks.ApimUtils,
+  },
+  SelfcareUtils: {
+    ...mocks.SelfcareUtils,
   },
 }));
 

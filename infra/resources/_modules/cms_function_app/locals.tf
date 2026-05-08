@@ -67,6 +67,7 @@ locals {
       AZURE_APIM_RESOURCE_GROUP            = local.apim.resource_group_name
       AZURE_APIM_SUBSCRIPTION_PRODUCT_NAME = local.apim.product_name
       AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
+      APIM_USER_GROUPS                     = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
 
       # PostgreSQL 
       REVIEWER_DB_HOST     = var.pgres_cms_fqdn
