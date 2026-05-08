@@ -355,7 +355,7 @@ describe("getAggregatedInstitutionsManageKeysMetadata", () => {
     expect(result.status).toBe(404);
     const body = await result.json();
     expect(body.title).toEqual("Export not found");
-    expect(body.detail).toEqual("Something went wrong");
+    expect(body.detail).toEqual("Export not found");
     expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledOnce();
     expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,
