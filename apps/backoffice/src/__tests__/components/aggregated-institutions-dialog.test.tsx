@@ -2,6 +2,19 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AggregatedInstitutionsDialog } from "../../components/aggregated-institutions/aggregated-institutions-dialog";
+import {
+  trackEaFileGeneratePasswordCloseEvent,
+  trackEaFileGeneratePasswordConfirmEvent,
+  trackEaFileGeneratePasswordEvent,
+  trackEaFileGenerateInvalidFormEvent,
+} from "../../utils/mix-panel";
+
+vi.mock("../../utils/mix-panel", () => ({
+  trackEaFileGeneratePasswordCloseEvent: vi.fn(),
+  trackEaFileGeneratePasswordConfirmEvent: vi.fn(),
+  trackEaFileGeneratePasswordEvent: vi.fn(),
+  trackEaFileGenerateInvalidFormEvent: vi.fn(),
+}));
 
 vi.mock("next-i18next", () => ({
   useTranslation: () => ({
@@ -180,5 +193,274 @@ describe("[AggregatedInstitutionsDialog] Component", () => {
     fireEvent.click(screen.getByRole("button", { name: "buttons.cancel" }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("[AggregatedInstitutionsDialog] Tracking events", () => {
+  const onClose = vi.fn();
+  const onConfirm = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  const renderComponent = (
+    props?: Partial<React.ComponentProps<typeof AggregatedInstitutionsDialog>>,
+  ) =>
+    render(
+      <AggregatedInstitutionsDialog
+        isOpen
+        onClose={onClose}
+        onConfirm={onConfirm}
+        {...props}
+      />,
+    );
+
+  it("should fire passwordEvent with 'new_password' when dialog opens without existing download", () => {
+    renderComponent();
+
+    expect(vi.mocked(trackEaFileGeneratePasswordEvent)).toHaveBeenCalledWith(
+      "new_password",
+    );
+    expect(vi.mocked(trackEaFileGeneratePasswordEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).not.toHaveBeenCalled();
+  });
+
+  it("should fire passwordEvent with 'replacement' when dialog opens with an existing download", () => {
+    renderComponent({ isDownloadReady: true });
+
+    expect(vi.mocked(trackEaFileGeneratePasswordEvent)).toHaveBeenCalledWith(
+      "replacement",
+    );
+    expect(vi.mocked(trackEaFileGeneratePasswordEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).not.toHaveBeenCalled();
+  });
+
+  it("should fire cancelEvent when the cancel button is clicked", () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByRole("button", { name: "buttons.cancel" }));
+
+    expect(
+      vi.mocked(trackEaFileGeneratePasswordCloseEvent),
+    ).toHaveBeenCalledWith("new_password");
+    expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).not.toHaveBeenCalled();
+  });
+
+  it("should fire confirmEvent when a valid password is submitted", async () => {
+    renderComponent();
+
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.newPassword",
+      ),
+      { target: { value: "ValidPassword1" } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.confirmPassword",
+      ),
+      { target: { value: "ValidPassword1" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "buttons.confirm" }));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEaFileGeneratePasswordConfirmEvent),
+      ).toHaveBeenCalledWith("new_password");
+      expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should fire missingEvent when required fields are empty on submit", async () => {
+    renderComponent();
+
+    fireEvent.click(screen.getByRole("button", { name: "buttons.confirm" }));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEaFileGenerateInvalidFormEvent),
+      ).toHaveBeenCalledWith(
+        "new_password",
+        new Set(["password_missing", "confirm_password_missing"]),
+      );
+      expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should fire notCompliantEvent when the password does not meet security rules", async () => {
+    renderComponent();
+
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.newPassword",
+      ),
+      { target: { value: "lowercaseonly" } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.confirmPassword",
+      ),
+      { target: { value: "lowercaseonly" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "buttons.confirm" }));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEaFileGenerateInvalidFormEvent),
+      ).toHaveBeenCalledWith("new_password", new Set(["password_not_compliant"]));
+      expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should fire unmatchedEvent when the passwords do not match", async () => {
+    renderComponent();
+
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.newPassword",
+      ),
+      { target: { value: "ValidPassword1" } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.confirmPassword",
+      ),
+      { target: { value: "AnotherPassword1" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "buttons.confirm" }));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEaFileGenerateInvalidFormEvent),
+      ).toHaveBeenCalledWith("new_password", new Set(["password_mismatch"]));
+      expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should fire cancelEvent with 'replacement' when cancel is clicked and a download is already available", () => {
+    renderComponent({ isDownloadReady: true });
+
+    fireEvent.click(screen.getByRole("button", { name: "buttons.cancel" }));
+
+    expect(
+      vi.mocked(trackEaFileGeneratePasswordCloseEvent),
+    ).toHaveBeenCalledWith("replacement");
+    expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).not.toHaveBeenCalled();
+  });
+
+  it("should fire confirmEvent with 'replacement' when a valid password is submitted and a download is already available", async () => {
+    renderComponent({ isDownloadReady: true });
+
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.newPassword",
+      ),
+      { target: { value: "ValidPassword1" } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.confirmPassword",
+      ),
+      { target: { value: "ValidPassword1" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "buttons.confirm" }));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEaFileGeneratePasswordConfirmEvent),
+      ).toHaveBeenCalledWith("replacement");
+      expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should fire missingEvent with 'replacement' when required fields are empty and a download is already available", async () => {
+    renderComponent({ isDownloadReady: true });
+
+    fireEvent.click(screen.getByRole("button", { name: "buttons.confirm" }));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEaFileGenerateInvalidFormEvent),
+      ).toHaveBeenCalledWith(
+        "replacement",
+        new Set(["password_missing", "confirm_password_missing"]),
+      );
+      expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should fire notCompliantEvent with 'replacement' when the password does not meet security rules and a download is already available", async () => {
+    renderComponent({ isDownloadReady: true });
+
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.newPassword",
+      ),
+      { target: { value: "lowercaseonly" } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.confirmPassword",
+      ),
+      { target: { value: "lowercaseonly" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "buttons.confirm" }));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEaFileGenerateInvalidFormEvent),
+      ).toHaveBeenCalledWith("replacement", new Set(["password_not_compliant"]));
+      expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    });
+  });
+
+  it("should fire unmatchedEvent with 'replacement' when the passwords do not match and a download is already available", async () => {
+    renderComponent({ isDownloadReady: true });
+
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.newPassword",
+      ),
+      { target: { value: "ValidPassword1" } },
+    );
+    fireEvent.change(
+      screen.getByLabelText(
+        "routes.aggregated-institutions.exportDialog.fields.confirmPassword",
+      ),
+      { target: { value: "AnotherPassword1" } },
+    );
+    fireEvent.click(screen.getByRole("button", { name: "buttons.confirm" }));
+
+    await waitFor(() => {
+      expect(
+        vi.mocked(trackEaFileGenerateInvalidFormEvent),
+      ).toHaveBeenCalledWith("replacement", new Set(["password_mismatch"]));
+      expect(vi.mocked(trackEaFileGenerateInvalidFormEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileGeneratePasswordCloseEvent)).not.toHaveBeenCalled();
+      expect(vi.mocked(trackEaFileGeneratePasswordConfirmEvent)).not.toHaveBeenCalled();
+    });
   });
 });

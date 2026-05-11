@@ -6,6 +6,12 @@ import mixpanel from "mixpanel-browser";
 export type TechEventResult = "error" | "success";
 
 type ApiKeyType = "primary" | "secondary";
+export type GeneratePasswordStatus = "new_password" | "replacement";
+export type InvalidFormReason =
+  | "confirm_password_missing"
+  | "password_mismatch"
+  | "password_missing"
+  | "password_not_compliant";
 
 interface MixPanelEventsStructure {
   readonly IO_BO_APIKEY_PAGE: Record<string, never>;
@@ -82,6 +88,26 @@ interface MixPanelEventsStructure {
     keyType: ApiKeyType;
   };
   readonly IO_BO_EA_GET_ALL_MANAGE_KEYS: { result: TechEventResult };
+  readonly IO_BO_EA_FILE_GENERATE_START: Record<string, never>;
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_CLOSE: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PASSWORD_CONFIRM: {
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_INVALID_FORM: {
+    reason: string;
+    status: GeneratePasswordStatus;
+  };
+  readonly IO_BO_EA_FILE_GENERATE_PROGRESS: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_GENERATE_REFRESH: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_GENERATE_END: { result: TechEventResult };
+  readonly IO_BO_EA_FILE_GENERATE_COMPLETED: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_DOWNLOAD: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_GENERATE_ERROR: Record<string, unknown>;
 }
 
 export const mixpanelSetup = () => {
@@ -99,9 +125,9 @@ type MixPanelEvents<T extends keyof MixPanelEventsStructure> =
 
 const logToMixpanel = <T extends keyof MixPanelEventsStructure>(
   operationId: T,
-  eventCategory: "TECH" | "UX",
+  eventCategory: "KO" | "TECH" | "UX",
   mixpanelEventData: MixPanelEvents<T>,
-  eventType?: "action" | "screen_view",
+  eventType?: "action" | "error" | "screen_view",
 ) => {
   const categorizedEventData = {
     eventCategory,
@@ -407,4 +433,77 @@ export const trackEaManageKeyRegenerateEvent = (
 
 export const trackEaGetAllManageKeysEvent = (result: TechEventResult) => {
   logToMixpanel("IO_BO_EA_GET_ALL_MANAGE_KEYS", "UX", { result }, "action");
+};
+
+export const trackEaFileGenerateStartEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_START", "UX", {}, "action");
+};
+
+export const trackEaFileGeneratePasswordEvent = (
+  status: GeneratePasswordStatus,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD",
+    "UX",
+    { status },
+    "screen_view",
+  );
+};
+
+export const trackEaFileGeneratePasswordCloseEvent = (
+  status: GeneratePasswordStatus,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD_CLOSE",
+    "UX",
+    { status },
+    "action",
+  );
+};
+
+export const trackEaFileGeneratePasswordConfirmEvent = (
+  status: GeneratePasswordStatus,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_PASSWORD_CONFIRM",
+    "UX",
+    { status },
+    "action",
+  );
+};
+
+export const trackEaFileGenerateInvalidFormEvent = (
+  status: GeneratePasswordStatus,
+  reasons: Set<InvalidFormReason>,
+) => {
+  logToMixpanel(
+    "IO_BO_EA_FILE_GENERATE_INVALID_FORM",
+    "KO",
+    { reason: Array.from(reasons).join(","), status },
+    "error",
+  );
+};
+
+export const trackEaFileGenerateProgressEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_PROGRESS", "UX", {}, "screen_view");
+};
+
+export const trackEaFileGenerateRefreshEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_REFRESH", "UX", {}, "action");
+};
+
+export const trackEaFileGenerateEndEvent = (result: TechEventResult) => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_END", "TECH", { result });
+};
+
+export const trackEaFileGenerateCompletedEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_COMPLETED", "UX", {}, "screen_view");
+};
+
+export const trackEaFileGenerateDownloadEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_DOWNLOAD", "UX", {}, "action");
+};
+
+export const trackEaFileGenerateErrorEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_GENERATE_ERROR", "KO", {}, "screen_view");
 };

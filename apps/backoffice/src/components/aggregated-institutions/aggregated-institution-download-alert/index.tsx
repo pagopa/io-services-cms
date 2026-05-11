@@ -1,4 +1,12 @@
 import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import {
+  trackEaFileGenerateCompletedEvent,
+  trackEaFileGenerateDownloadEvent,
+  trackEaFileGenerateEndEvent,
+  trackEaFileGenerateErrorEvent,
+  trackEaFileGenerateProgressEvent,
+  trackEaFileGenerateRefreshEvent,
+} from "@/utils/mix-panel";
 import { Download, RefreshOutlined } from "@mui/icons-material";
 import {
   Alert,
@@ -7,7 +15,7 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface AggregatedInstitutionDownloadAlertProps {
@@ -21,6 +29,24 @@ export const AggregatedInstitutionDownloadAlert = ({
 }: AggregatedInstitutionDownloadAlertProps) => {
   const { i18n, t } = useTranslation();
 
+  useEffect(() => {
+    switch (data?.state) {
+      case "DONE":
+        trackEaFileGenerateCompletedEvent();
+        trackEaFileGenerateEndEvent("success");
+        break;
+      case "IN_PROGRESS":
+        trackEaFileGenerateProgressEvent();
+        break;
+      case "FAILED":
+        trackEaFileGenerateErrorEvent();
+        trackEaFileGenerateEndEvent("error");
+        break;
+      default:
+        break;
+    }
+  }, [data?.state]);
+
   const alertProps = useMemo<AlertProps | undefined>(() => {
     switch (data?.state) {
       case "DONE":
@@ -30,6 +56,7 @@ export const AggregatedInstitutionDownloadAlert = ({
               component="a"
               download="I tuoi enti.json"
               href={data.downloadLink}
+              onClick={trackEaFileGenerateDownloadEvent}
               startIcon={<Download />}
               variant="naked"
             >
@@ -66,7 +93,10 @@ export const AggregatedInstitutionDownloadAlert = ({
         return {
           action: (
             <Button
-              onClick={onRefresh}
+              onClick={() => {
+                trackEaFileGenerateRefreshEvent();
+                onRefresh();
+              }}
               startIcon={<RefreshOutlined />}
               variant="naked"
             >

@@ -1,9 +1,26 @@
 /// <reference types="@testing-library/jest-dom" />
 import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AggregatedInstitutionDownloadAlert } from "../../components/aggregated-institutions/aggregated-institution-download-alert";
 import { StateEnum as NotReadyStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysLinkNotReady";
 import { StateEnum as ReadyStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysLinkReady";
+import {
+  trackEaFileGenerateCompletedEvent,
+  trackEaFileGenerateDownloadEvent,
+  trackEaFileGenerateEndEvent,
+  trackEaFileGenerateErrorEvent,
+  trackEaFileGenerateProgressEvent,
+  trackEaFileGenerateRefreshEvent,
+} from "../../utils/mix-panel";
+
+vi.mock("../../utils/mix-panel", () => ({
+  trackEaFileGenerateCompletedEvent: vi.fn(),
+  trackEaFileGenerateDownloadEvent: vi.fn(),
+  trackEaFileGenerateEndEvent: vi.fn(),
+  trackEaFileGenerateErrorEvent: vi.fn(),
+  trackEaFileGenerateProgressEvent: vi.fn(),
+  trackEaFileGenerateRefreshEvent: vi.fn(),
+}));
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -87,6 +104,7 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
     );
 
     expect(onRefresh).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGenerateRefreshEvent)).toHaveBeenCalledTimes(1);
   });
 
   it("should render the failure state without actions", () => {
@@ -109,5 +127,108 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
     ).toBeInTheDocument();
     expect(screen.queryByRole("button")).not.toBeInTheDocument();
     expect(screen.queryByRole("link")).not.toBeInTheDocument();
+  });
+});
+
+describe("[AggregatedInstitutionDownloadAlert] Tracking events", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("should not fire any tracking event when data is undefined", () => {
+    render(
+      <AggregatedInstitutionDownloadAlert data={undefined} onRefresh={vi.fn()} />,
+    );
+
+    expect(vi.mocked(trackEaFileGenerateCompletedEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateProgressEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateErrorEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateEndEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateRefreshEvent)).not.toHaveBeenCalled();
+  });
+
+  it("should fire progressEvent when state is IN_PROGRESS", () => {
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{ state: NotReadyStateEnum.IN_PROGRESS }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    expect(vi.mocked(trackEaFileGenerateProgressEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGenerateCompletedEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateErrorEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateEndEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateRefreshEvent)).not.toHaveBeenCalled();
+  });
+
+  it("should fire completedEvent and endEvent(success) when state is DONE", () => {
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{
+          downloadLink: "https://example.com/manage-keys.json",
+          expirationDate: "2026-04-15T10:00:00",
+          state: ReadyStateEnum.DONE,
+        }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    expect(vi.mocked(trackEaFileGenerateCompletedEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGenerateEndEvent)).toHaveBeenCalledWith("success");
+    expect(vi.mocked(trackEaFileGenerateProgressEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateErrorEvent)).not.toHaveBeenCalled();
+  });
+
+  it("should fire errorEvent and endEvent(error) when state is FAILED", () => {
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{ state: NotReadyStateEnum.FAILED }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    expect(vi.mocked(trackEaFileGenerateErrorEvent)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(trackEaFileGenerateEndEvent)).toHaveBeenCalledWith("error");
+    expect(vi.mocked(trackEaFileGenerateCompletedEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateProgressEvent)).not.toHaveBeenCalled();
+  });
+
+  it("should fire downloadEvent when the download link is clicked", () => {
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{
+          downloadLink: "https://example.com/manage-keys.json",
+          expirationDate: "2026-04-15T10:00:00",
+          state: ReadyStateEnum.DONE,
+        }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("link", {
+        name: "routes.aggregated-institutions.downloadAlert.success.action",
+      }),
+    );
+
+    expect(vi.mocked(trackEaFileGenerateDownloadEvent)).toHaveBeenCalledTimes(1);
+  });
+
+  it("should fire refreshEvent when the refresh button is clicked", () => {
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{ state: NotReadyStateEnum.IN_PROGRESS }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "routes.aggregated-institutions.downloadAlert.inProgress.action",
+      }),
+    );
+
+    expect(vi.mocked(trackEaFileGenerateRefreshEvent)).toHaveBeenCalledTimes(1);
   });
 });
