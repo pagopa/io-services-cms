@@ -132,6 +132,8 @@ module "cms_function_app" {
   activations_event_hub_connection_string_name          = module.key_vault.secrets_name.activations_event_hub_connection_string
   eh_sc_connectionstring_name                           = module.key_vault.secrets_name.eh_sc_connectionstring
   pdv_tokenizer_api_key_name                            = module.key_vault.secrets_name.pdv_tokenizer_api_key
+  selfcare_api_key_name                                 = module.key_vault.secrets_name.selfcare_api_key
+
 
   error_action_group_id = module.monitor.action_group_ids.oncall
 
