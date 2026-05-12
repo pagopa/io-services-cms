@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.1.2
+
+### Patch Changes
+
+- df64dfa1: Add `axios` dependency
+
 ## 2.1.1
 
 ### Patch Changes
