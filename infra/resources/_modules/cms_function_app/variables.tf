@@ -160,6 +160,11 @@ variable "pdv_tokenizer_api_key_name" {
   description = "PDV token"
 }
 
+variable "selfcare_api_key_name" {
+  type        = string
+  description = "Selfcare API Key Name"
+}
+
 
 ################
 #  Monitoring  #

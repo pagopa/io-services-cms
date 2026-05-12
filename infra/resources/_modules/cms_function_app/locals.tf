@@ -69,6 +69,10 @@ locals {
       AZURE_SUBSCRIPTION_ID                = data.azurerm_subscription.current.subscription_id
       APIM_USER_GROUPS                     = "apimessagewrite,apiinforead,apimessageread,apilimitedprofileread,apiservicewrite"
 
+      # Selfcare
+      SELFCARE_API_KEY               = data.azurerm_key_vault_secret.selfcare_api_key.value
+      SELFCARE_EXTERNAL_API_BASE_URL = "https://api.selfcare.pagopa.it/external/v2"
+
       # PostgreSQL 
       REVIEWER_DB_HOST     = var.pgres_cms_fqdn
       REVIEWER_DB_NAME     = "reviewer"
