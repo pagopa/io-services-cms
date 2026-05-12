@@ -339,7 +339,6 @@ describe("getAggregatedInstitutionsManageKeysLink", () => {
     } as unknown as BackOfficeUser;
     const exportMetadata = {
       state: "DONE",
-      downloadLink: "https://example.com/export.zip",
       expirationDate: "2026-01-01T00:00:00.000Z",
     };
     mocks.retrieveApiKeysExports.mockResolvedValueOnce(exportMetadata);

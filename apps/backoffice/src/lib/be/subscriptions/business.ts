@@ -738,7 +738,6 @@ export async function retrieveApiKeysExports(
 
   let timeRemaining: number;
   let expirationDate: Date;
-  let url: URL;
   switch (mostRecentExport.state) {
     case FileStateEnum.FAILED:
     case FileStateEnum.IN_PROGRESS:
@@ -759,16 +758,7 @@ export async function retrieveApiKeysExports(
         );
       }
       expirationDate = new Date(Date.now() + timeRemaining);
-      try {
-        url = await apiKeysExportsAdapter.generateDownloadUrl(
-          mostRecentExport.fileName,
-          expirationDate,
-        );
-      } catch {
-        throw new ManagedInternalError("Error while generating download URL");
-      }
       return AggregatedInstitutionsManageKeysExportFileMetadataReady.encode({
-        downloadLink: url.href,
         expirationDate: expirationDate.toISOString(),
         state: FileStateEnum.DONE as unknown as StateEnumReady,
       });

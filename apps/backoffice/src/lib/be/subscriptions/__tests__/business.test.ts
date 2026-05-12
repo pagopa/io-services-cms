@@ -1250,7 +1250,6 @@ describe("Manage Keys", () => {
     it("should retrieve api keys exports", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([aDoneExport]);
-      mocks.generateDownloadUrl.mockResolvedValueOnce(anUrl);
       const expirationDate = new Date(
         lastModifiedDate.getTime() + 24 * 60 * 60 * 1000,
       );
@@ -1260,7 +1259,6 @@ describe("Manage Keys", () => {
 
       // then
       expect(result).toEqual({
-        downloadLink: anUrl.href,
         expirationDate: expirationDate.toISOString(),
         state: FileStateEnum.DONE,
       });
@@ -1268,10 +1266,7 @@ describe("Manage Keys", () => {
         aggregatorId,
         userId,
       );
-      expect(mocks.generateDownloadUrl).toHaveBeenCalledExactlyOnceWith(
-        aSuccessFileName,
-        expirationDate,
-      );
+      expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
     });
 
     it("should retrieve most recent api keys exports", async () => {
@@ -1284,7 +1279,6 @@ describe("Manage Keys", () => {
           lastModifiedDate: new Date(lastModifiedDate.getTime() - 300 * 1000),
         },
       ]);
-      mocks.generateDownloadUrl.mockResolvedValueOnce(anUrl);
       const expirationDate = new Date(
         lastModifiedDate.getTime() + 24 * 60 * 60 * 1000,
       );
@@ -1294,7 +1288,6 @@ describe("Manage Keys", () => {
 
       // then
       expect(result).toEqual({
-        downloadLink: anUrl.href,
         expirationDate: expirationDate.toISOString(),
         state: FileStateEnum.DONE,
       });
@@ -1302,10 +1295,7 @@ describe("Manage Keys", () => {
         aggregatorId,
         userId,
       );
-      expect(mocks.generateDownloadUrl).toHaveBeenCalledExactlyOnceWith(
-        aSuccessFileName,
-        expirationDate,
-      );
+      expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
     });
 
     it("should throw BadRequestError on 0 exports", async () => {
@@ -1366,20 +1356,7 @@ describe("Manage Keys", () => {
       vi.useRealTimers();
     });
 
-    it("should throw ManagedInternalError when generateDownloadUrl rejects", async () => {
-      // given
-      mocks.findExportsFiles.mockResolvedValueOnce([aDoneExport]);
-      mocks.generateDownloadUrl.mockRejectedValueOnce(
-        new Error("download url error"),
-      );
-
-      // when & then
-      await expect(
-        retrieveApiKeysExports(aggregatorId, userId),
-      ).rejects.toThrowError(ManagedInternalError);
-    });
-
-    it("should throw ManagedInternalError when generateDownloadUrl rejects", async () => {
+    it("should throw ManagedInternalError when unrecognized export state is returned", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([
         {
