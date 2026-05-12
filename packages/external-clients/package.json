@@ -42,7 +42,7 @@
     "prettier": "catalog:"
   },
   "peerDependencies": {
-    "axios": "^1.6.5"
+    "axios": "catalog:"
   },
   "imports": {
     "#package.json": "./package.json"

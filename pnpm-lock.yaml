@@ -18,6 +18,9 @@ catalogs:
     '@types/node':
       specifier: ^22
       version: 22.19.17
+    axios:
+      specifier: ^1.6.5
+      version: 1.6.5
     prettier:
       specifier: ^3.5.3
       version: 3.5.3
@@ -190,7 +193,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       axios:
-        specifier: ^1.6.5
+        specifier: 'catalog:'
         version: 1.6.5
       fp-ts:
         specifier: ^2.16.5
@@ -362,7 +365,7 @@ importers:
         specifier: ^5.7.7
         version: 5.7.7
       axios:
-        specifier: ^1.6.5
+        specifier: 'catalog:'
         version: 1.6.5
       azure-storage:
         specifier: ^2.10.5
@@ -441,7 +444,7 @@ importers:
         specifier: ^13.1.1
         version: 13.1.2(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))
       axios:
-        specifier: ^1.6.5
+        specifier: 'catalog:'
         version: 1.6.5
       fp-ts:
         specifier: ^2.16.5

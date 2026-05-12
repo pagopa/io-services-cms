@@ -48,7 +48,7 @@
     "adf-to-md": "^1.2.1",
     "applicationinsights": "^2.9.5",
     "avsc": "^5.7.7",
-    "axios": "^1.6.5",
+    "axios": "catalog:",
     "azure-storage": "^2.10.5",
     "fp-ts": "^2.16.5",
     "io-ts": "^2.2.21",
