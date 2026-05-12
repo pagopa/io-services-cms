@@ -18,6 +18,9 @@ catalogs:
     '@types/node':
       specifier: ^22
       version: 22.19.17
+    axios:
+      specifier: ^1.6.5
+      version: 1.6.5
     prettier:
       specifier: ^3.5.3
       version: 3.5.3
@@ -190,7 +193,7 @@ importers:
         specifier: ^2.0.0
         version: 2.0.0
       axios:
-        specifier: ^1.6.5
+        specifier: 'catalog:'
         version: 1.6.5
       fp-ts:
         specifier: ^2.16.5
@@ -361,6 +364,9 @@ importers:
       avsc:
         specifier: ^5.7.7
         version: 5.7.7
+      axios:
+        specifier: 'catalog:'
+        version: 1.6.5
       azure-storage:
         specifier: ^2.10.5
         version: 2.10.7
@@ -459,6 +465,9 @@ importers:
       '@pagopa/openapi-codegen-ts':
         specifier: ^13.1.0
         version: 13.1.0(chokidar@3.6.0)
+      axios:
+        specifier: 'catalog:'
+        version: 1.6.5
       prettier:
         specifier: 'catalog:'
         version: 3.5.3
@@ -8334,7 +8343,7 @@ packages:
 
   uuid@3.4.0:
     resolution: {integrity: sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==}
-    deprecated: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+    deprecated: Please upgrade  to version 7 or higher.  Older versions may use Math.random() in certain circumstances, which is known to be problematic.  See https://v8.dev/blog/math-random for details.
     hasBin: true
 
   uuid@8.3.2:
