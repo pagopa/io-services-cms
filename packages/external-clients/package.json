@@ -41,6 +41,9 @@
     "@pagopa/openapi-codegen-ts": "^13.1.0",
     "prettier": "catalog:"
   },
+  "peerDependencies": {
+    "axios": "^1.6.5"
+  },
   "imports": {
     "#package.json": "./package.json"
   }
