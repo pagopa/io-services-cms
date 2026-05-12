@@ -20,6 +20,8 @@ export const isInstitutionIdSameAsCaller = (
 
 export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
   const isAdmin = (): boolean => user.institution.role === SelfcareRoles.admin;
+  const isAdminAggregator = (): boolean =>
+    user.institution.role === SelfcareRoles.adminAggregator;
   return {
     /**
      * Check if the user has at least one group
@@ -34,6 +36,11 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
      * @returns a boolean indicating whether the user is admin or not
      */
     isAdmin,
+    /**
+     * Check if the user role is admin aggregator
+     * @returns a boolean indicating whether the user is admin aggregator or not
+     */
+    isAdminAggregator,
     /**
      * Checks if a group is allowed based on user permissions, optionally verifying its active state
      * @param groupId - The group identifier to check

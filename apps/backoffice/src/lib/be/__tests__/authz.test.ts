@@ -93,6 +93,24 @@ describe("userAuthz", () => {
     );
   });
 
+  describe("isAdminAggregator", () => {
+    it.each`
+      expectedResult | role
+      ${true}        | ${SelfcareRoles.adminAggregator}
+      ${false}       | ${SelfcareRoles.admin}
+      ${false}       | ${SelfcareRoles.operator}
+    `(
+      'should return $expectedResult for "$role" user',
+      ({ expectedResult, role }) => {
+        expect(
+          userAuthz({
+            institution: { role },
+          } as BackOfficeUser).isAdminAggregator(),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
   describe("isInstitutionAllowed", () => {
     it.each`
       scenario                                 | expectedResult | allowedInstitutionId | providedInstitutionId
