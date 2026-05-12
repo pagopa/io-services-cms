@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.4.2
+
+### Patch Changes
+
+- 7097ae35: Implement tracking strategy in "Download API keys" flow
+
 ## 2.4.1
 
 ### Patch Changes
