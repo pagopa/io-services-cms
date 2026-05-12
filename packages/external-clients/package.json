@@ -39,6 +39,7 @@
   },
   "devDependencies": {
     "@pagopa/openapi-codegen-ts": "^13.1.0",
+    "axios": "catalog:",
     "prettier": "catalog:"
   },
   "peerDependencies": {
