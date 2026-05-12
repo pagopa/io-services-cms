@@ -361,6 +361,9 @@ importers:
       avsc:
         specifier: ^5.7.7
         version: 5.7.7
+      axios:
+        specifier: ^1.6.5
+        version: 1.6.5
       azure-storage:
         specifier: ^2.10.5
         version: 2.10.7
