@@ -79,7 +79,7 @@ export const updateManageSubscriptionAuthorizedCidrsHandler = async (
 ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
   const allowed =
     userAuthz(backofficeUser).isAdmin() ||
-    (userAuthz(backofficeUser).isAdminAggregator() &&
+    (userAuthz(backofficeUser).isAggregatorAdmin() &&
       backofficeUser.permissions.selcGroups?.some(
         (group) =>
           ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id ===

@@ -29,7 +29,7 @@ export const regenerateManageSubscriptionKeyHandler = async (
 ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
   const allowed =
     userAuthz(backofficeUser).isAdmin() ||
-    (userAuthz(backofficeUser).isAdminAggregator() &&
+    (userAuthz(backofficeUser).isAggregatorAdmin() &&
       backofficeUser.permissions.selcGroups?.some(
         (group) =>
           // Since the subscriptionId is in the format "MANAGE-GROUP-{groupId}"

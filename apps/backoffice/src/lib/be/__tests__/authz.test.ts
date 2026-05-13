@@ -93,7 +93,7 @@ describe("userAuthz", () => {
     );
   });
 
-  describe("isAdminAggregator", () => {
+  describe("isAggregatorAdmin", () => {
     it.each`
       expectedResult | role
       ${true}        | ${SelfcareRoles.adminAggregator}
@@ -105,7 +105,7 @@ describe("userAuthz", () => {
         expect(
           userAuthz({
             institution: { role },
-          } as BackOfficeUser).isAdminAggregator(),
+          } as BackOfficeUser).isAggregatorAdmin(),
         ).toBe(expectedResult);
       },
     );
