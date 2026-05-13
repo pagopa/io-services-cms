@@ -41,6 +41,32 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
      * @returns a boolean indicating whether the user is an aggregator admin or not
      */
     isAggregatorAdmin,
+
+    /**
+     * Check if the user role is `admin_aggregator` and allowed on a specific group
+     * @param groupId - The group identifier to check
+     * @param checkActive - Optional flag to enforce active state check on group
+     * @returns a boolean indicating whether the user is an aggregator admin allowed on the group or not
+     */
+    isAggregatorAdminAllowedOnGroup: (
+      groupId: string,
+      checkActive?: boolean,
+    ): boolean => {
+      const { selcGroups } = user.permissions;
+      if (!isAggregatorAdmin() || !selcGroups || selcGroups.length === 0) {
+        return false;
+      }
+      return selcGroups.some((group) => {
+        if (typeof group === "string") {
+          return group === groupId;
+        } else {
+          return checkActive
+            ? group.id === groupId && group.state === StateEnum.ACTIVE
+            : group.id === groupId;
+        }
+      });
+    },
+
     /**
      * Checks if a group is allowed based on user permissions, optionally verifying its active state
      * @param groupId - The group identifier to check

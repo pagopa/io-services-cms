@@ -111,6 +111,32 @@ describe("userAuthz", () => {
     );
   });
 
+  describe("isAggregatorAdminAllowedOnGroup", () => {
+    it.each`
+      scenario                                                                          | expectedResult | role                             | selcGroups                                                  | groupId                | checkActive
+      ${"It is an Aggregator Admin and the group is allowed"}                           | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
+      ${"It is an Aggregator Admin and the group is both allowed and active (checked)"} | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${true}
+      ${"It is an Aggregator Admin and the group is allowed (explicitly unchecked)"}    | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${false}
+      ${"It is an Aggregator Admin and the group is allowed but not active"}            | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "DELETED" }]} | ${"groupId"}           | ${true}
+      ${"It is an Aggregator Admin and the group is allowed (groupId as string)"}       | ${true}        | ${SelfcareRoles.adminAggregator} | ${["groupId"]}                                              | ${"groupId"}           | ${undefined}
+      ${"It is an Aggregator Admin but the group does not match"}                       | ${false}       | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"different_groupId"} | ${undefined}
+      ${"It is an Aggregator Admin and there are no groups"}                            | ${false}       | ${SelfcareRoles.adminAggregator} | ${undefined}                                                | ${"groupId"}           | ${undefined}
+      ${"It is an Aggregator Admin and the group list is empty"}                        | ${false}       | ${SelfcareRoles.adminAggregator} | ${[]}                                                       | ${"groupId"}           | ${undefined}
+      ${"It is an Operator and the group is active"}                                    | ${false}       | ${SelfcareRoles.operator}        | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
+      ${"It is an Admin and the group is active"}                                       | ${false}       | ${SelfcareRoles.admin}           | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
+    `(
+      'should return $expectedResult for "$role" user with selcGroups: $selcGroups and groupId: $groupId',
+      ({ expectedResult, role, selcGroups, groupId }) => {
+        expect(
+          userAuthz({
+            institution: { role },
+            permissions: { selcGroups },
+          } as BackOfficeUser).isAggregatorAdminAllowedOnGroup(groupId),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
   describe("isInstitutionAllowed", () => {
     it.each`
       scenario                                 | expectedResult | allowedInstitutionId | providedInstitutionId
