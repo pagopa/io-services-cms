@@ -710,7 +710,7 @@ async function retrieveAggregates(
   return { aggregatesCounter, enrichedAggregateData };
 }
 
-export async function updateApiKeysExportsDownloadLink(
+export async function generateApiKeysExportsDownloadLink(
   aggregatorId: string,
   userId: string,
 ): Promise<AggregatedInstitutionsManageKeysExportFileDownloadLink> {

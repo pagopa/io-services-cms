@@ -17,7 +17,7 @@ import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   generateApiKeysExports,
   retrieveApiKeysExportMetadata,
-  updateApiKeysExportsDownloadLink,
+  generateApiKeysExportsDownloadLink,
 } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
@@ -143,7 +143,7 @@ export const PUT = withJWTAuthHandler(
     }
 
     try {
-      const result = await updateApiKeysExportsDownloadLink(
+      const result = await generateApiKeysExportsDownloadLink(
         backofficeUser.institution.id,
         backofficeUser.parameters.userId,
       );

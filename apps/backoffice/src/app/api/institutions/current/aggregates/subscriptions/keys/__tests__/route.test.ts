@@ -15,7 +15,7 @@ const mocks: {
   generateApiKeysExports: Mock<any>;
   parseBody: Mock<any>;
   retrieveApiKeysExportMetadata: Mock<any>;
-  updateApiKeysExportsDownloadLink: Mock<any>;
+  generateApiKeysExportsDownloadLink: Mock<any>;
   sanitizedNextResponseJson: Mock<any>;
   sanitizedResponse: NextResponse;
   withJWTAuthHandler: Mock<any>;
@@ -28,7 +28,7 @@ const mocks: {
   generateApiKeysExports: vi.fn(),
   parseBody: vi.fn(),
   retrieveApiKeysExportMetadata: vi.fn(),
-  updateApiKeysExportsDownloadLink: vi.fn(),
+  generateApiKeysExportsDownloadLink: vi.fn(),
   sanitizedNextResponseJson: vi.fn(),
   sanitizedResponse: "sanitizedResponse" as unknown as NextResponse,
   withJWTAuthHandler: vi.fn(
@@ -61,7 +61,7 @@ vi.mock("@/lib/be/sanitize", () => ({
 vi.mock("@/lib/be/subscriptions/business", () => ({
   generateApiKeysExports: mocks.generateApiKeysExports,
   retrieveApiKeysExportMetadata: mocks.retrieveApiKeysExportMetadata,
-  updateApiKeysExportsDownloadLink: mocks.updateApiKeysExportsDownloadLink,
+  generateApiKeysExportsDownloadLink: mocks.generateApiKeysExportsDownloadLink,
 }));
 
 vi.mock("@/lib/be/errors", async () => {
@@ -226,7 +226,7 @@ describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => 
     expect(body.detail).toEqual(
       "Only aggregators are authorized to request link about download procedure",
     );
-    expect(mocks.updateApiKeysExportsDownloadLink).not.toHaveBeenCalled();
+    expect(mocks.generateApiKeysExportsDownloadLink).not.toHaveBeenCalled();
   });
 
   it("should return 400 when updateApiKeysExportsDownloadLink throws a BadRequestError", async () => {
@@ -236,7 +236,7 @@ describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => 
       institution: { ...mocks.backofficeUser.institution, isAggregator: true },
     } as unknown as BackOfficeUser;
     const errorMessage = "Bad Request";
-    mocks.updateApiKeysExportsDownloadLink.mockRejectedValueOnce(
+    mocks.generateApiKeysExportsDownloadLink.mockRejectedValueOnce(
       new BadRequestError(errorMessage, "Bad Request"),
     );
     const request = new NextRequest("http://localhost", { method: "PUT" });
@@ -248,20 +248,20 @@ describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => 
     expect(result.status).toBe(400);
     const body = await result.json();
     expect(body.detail).toEqual(errorMessage);
-    expect(mocks.updateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
-    expect(mocks.updateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,
       mocks.backofficeUser.parameters.userId,
     );
   });
 
-  it("should return 500 when updateApiKeysExportsDownloadLink throws an unexpected error", async () => {
+  it("should return 500 when generateApiKeysExportsDownloadLink throws an unexpected error", async () => {
     // given
     mocks.backofficeUser = {
       ...mocks.backofficeUser,
       institution: { ...mocks.backofficeUser.institution, isAggregator: true },
     } as unknown as BackOfficeUser;
-    mocks.updateApiKeysExportsDownloadLink.mockRejectedValueOnce(
+    mocks.generateApiKeysExportsDownloadLink.mockRejectedValueOnce(
       new Error("unexpected error"),
     );
     const request = new NextRequest("http://localhost", { method: "PUT" });
@@ -275,8 +275,8 @@ describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => 
     expect(body.title).toEqual(
       "GenerateDirectDownloadLinkForAggregatedInstitutionsManageKeys",
     );
-    expect(mocks.updateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
-    expect(mocks.updateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,
       mocks.backofficeUser.parameters.userId,
     );
@@ -291,7 +291,7 @@ describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => 
     const exportMetadata = {
       downloadLink: "https://example.com/export.zip",
     };
-    mocks.updateApiKeysExportsDownloadLink.mockResolvedValueOnce(
+    mocks.generateApiKeysExportsDownloadLink.mockResolvedValueOnce(
       exportMetadata,
     );
     mocks.sanitizedNextResponseJson.mockReturnValueOnce(
@@ -308,8 +308,8 @@ describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => 
       exportMetadata,
       201,
     );
-    expect(mocks.updateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
-    expect(mocks.updateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,
       mocks.backofficeUser.parameters.userId,
     );

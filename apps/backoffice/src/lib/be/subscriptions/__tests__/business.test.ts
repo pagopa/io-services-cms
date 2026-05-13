@@ -14,7 +14,7 @@ import {
   retrieveInstitutionAggregateManageSubscriptionsKeys,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
-  updateApiKeysExportsDownloadLink,
+  generateApiKeysExportsDownloadLink,
   upsertManageSubscription,
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "../business";
@@ -1214,7 +1214,7 @@ describe("Manage Keys", () => {
     });
   });
 
-  describe("updateApiKeysExportsDownloadLink", () => {
+  describe("generateApiKeysExportsDownloadLink", () => {
     const aggregatorId = "aggregatorId";
     const userId = "userId";
     const creationDate = new Date(2026, 0, 1);
@@ -1259,7 +1259,7 @@ describe("Manage Keys", () => {
       );
 
       // when
-      const result = await updateApiKeysExportsDownloadLink(
+      const result = await generateApiKeysExportsDownloadLink(
         aggregatorId,
         userId,
       );
@@ -1294,7 +1294,7 @@ describe("Manage Keys", () => {
       );
 
       // when
-      const result = await updateApiKeysExportsDownloadLink(
+      const result = await generateApiKeysExportsDownloadLink(
         aggregatorId,
         userId,
       );
@@ -1319,7 +1319,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+        generateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(BadRequestError);
     });
 
@@ -1329,7 +1329,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+        generateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
 
@@ -1339,7 +1339,7 @@ describe("Manage Keys", () => {
 
       // when
       await expect(
-        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+        generateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(BadRequestError);
 
       // then
@@ -1352,7 +1352,7 @@ describe("Manage Keys", () => {
 
       // when
       await expect(
-        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+        generateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(BadRequestError);
 
       // then
@@ -1366,7 +1366,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+        generateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
       expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
 
@@ -1382,7 +1382,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+        generateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
 
@@ -1397,7 +1397,7 @@ describe("Manage Keys", () => {
 
       // when & then
       await expect(
-        updateApiKeysExportsDownloadLink(aggregatorId, userId),
+        generateApiKeysExportsDownloadLink(aggregatorId, userId),
       ).rejects.toThrowError(ManagedInternalError);
     });
   });
