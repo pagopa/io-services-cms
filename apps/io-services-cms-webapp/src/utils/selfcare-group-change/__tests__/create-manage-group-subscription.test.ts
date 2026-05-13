@@ -6,7 +6,10 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createSubscriptionForGroup } from "../create-manage-group-subscription";
+import {
+  AGGREGATOR_MANAGE_GROUP_DISPLAY_NAME_PREFIX,
+  createSubscriptionForGroup,
+} from "../create-manage-group-subscription";
 import { GroupChangeEvent } from "../types";
 
 const getMockInstitution = (institutionId: string) => ({
@@ -51,7 +54,7 @@ describe("createSubscriptionForGroup", () => {
   const baseEvent = {
     id: "group-id",
     institutionId: "institution-id",
-    name: "group name",
+    name: `${AGGREGATOR_MANAGE_GROUP_DISPLAY_NAME_PREFIX}group name`,
     productId: "prod-io",
     status: "ACTIVE",
   } as GroupChangeEvent;
@@ -123,7 +126,6 @@ describe("createSubscriptionForGroup", () => {
       group.name,
     );
   });
-
 
   it("should return Left when upsertSubscription fails", async () => {
     //given

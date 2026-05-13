@@ -5,10 +5,14 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import * as B from "fp-ts/lib/boolean";
 import { flow, pipe } from "fp-ts/lib/function";
 
 import { createApimUser } from "./auth";
 import { GroupChangeEvent, GroupCreateEvent } from "./types";
+
+/** Prefix required for MANAGE GROUP subscription display names. */
+export const AGGREGATOR_MANAGE_GROUP_DISPLAY_NAME_PREFIX = "Ente Aggregatore ";
 
 export const createSubscriptionForGroup =
   (
@@ -38,12 +42,45 @@ const createManageGroupSubscription = (
   pipe(
     group.institutionId,
     getOrCreateApimUser(apimService, selfcareClient, apimUserGroups),
-    TE.chain((user) => TE.fromEither(getIdFromUser(user))),
-    TE.chain((userId) =>
+    TE.bind("userId", (user) => TE.fromEither(getIdFromUser(user))),
+    // MANAGE GROUP display name must follow a custom naming convention.
+    // If it doesn't, we fetch the institution description from Selfcare and prepend
+    // the prefix before creating the subscription
+    TE.bind("formattedDisplayName", (_) =>
+      pipe(
+        group.name.startsWith(AGGREGATOR_MANAGE_GROUP_DISPLAY_NAME_PREFIX),
+        B.fold(
+          () =>
+            pipe(
+              getInstitutionById(selfcareClient)(group.institutionId),
+              TE.chain((institution) =>
+                pipe(
+                  institution.description,
+                  O.fromNullable,
+                  O.fold(
+                    () =>
+                      TE.left(
+                        Error(
+                          "Unexpected empty institution description while trying to format display name",
+                        ),
+                      ),
+                    (institutionDescription) =>
+                      TE.right(
+                        `${AGGREGATOR_MANAGE_GROUP_DISPLAY_NAME_PREFIX}${institutionDescription}`,
+                      ),
+                  ),
+                ),
+              ),
+            ),
+          () => TE.right(group.name),
+        ),
+      ),
+    ),
+    TE.chain(({ formattedDisplayName, userId }) =>
       apimService.upsertSubscription(
         userId,
         ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id,
-        group.name,
+        formattedDisplayName,
       ),
     ),
     TE.mapLeft(
