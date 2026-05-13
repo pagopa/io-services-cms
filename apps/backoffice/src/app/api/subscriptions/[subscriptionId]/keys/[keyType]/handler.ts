@@ -29,7 +29,7 @@ export const regenerateManageSubscriptionKeyHandler = async (
 ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
   const allowed =
     userAuthz(backofficeUser).isAdmin() ||
-    userAuthz(backofficeUser).isAggregatorAdminAllowedOnGroup(
+    userAuthz(backofficeUser).isAnAggregatorAdminAllowedOnGroup(
       params.subscriptionId.substring(
         ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
       ),

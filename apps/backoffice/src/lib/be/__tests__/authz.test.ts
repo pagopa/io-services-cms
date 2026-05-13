@@ -111,7 +111,7 @@ describe("userAuthz", () => {
     );
   });
 
-  describe("isAggregatorAdminAllowedOnGroup", () => {
+  describe("isAnAggregatorAdminAllowedOnGroup", () => {
     it.each`
       scenario                                                                          | expectedResult | role                             | selcGroups                                                  | groupId                | checkActive
       ${"It is an Aggregator Admin and the group is allowed"}                           | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
@@ -131,7 +131,7 @@ describe("userAuthz", () => {
           userAuthz({
             institution: { role },
             permissions: { selcGroups },
-          } as BackOfficeUser).isAggregatorAdminAllowedOnGroup(groupId),
+          } as BackOfficeUser).isAnAggregatorAdminAllowedOnGroup(groupId),
         ).toBe(expectedResult);
       },
     );

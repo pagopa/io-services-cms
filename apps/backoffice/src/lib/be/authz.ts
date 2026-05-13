@@ -48,7 +48,7 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
      * @param checkActive - Optional flag to enforce active state check on group
      * @returns a boolean indicating whether the user is an aggregator admin allowed on the group or not
      */
-    isAggregatorAdminAllowedOnGroup: (
+    isAnAggregatorAdminAllowedOnGroup: (
       groupId: string,
       checkActive?: boolean,
     ): boolean => {

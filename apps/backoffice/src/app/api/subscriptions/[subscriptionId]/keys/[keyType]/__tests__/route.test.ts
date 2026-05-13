@@ -14,17 +14,17 @@ const {
   userAuthzMock,
   isGroupAllowedMock,
   isAdminMock,
-  isAggregatorAdminAllowedOnGroupMock,
+  isAnAggregatorAdminAllowedOnGroupMock,
   regenerateManageSubscritionApiKeyMock,
   withJWTAuthHandlerMock,
 } = vi.hoisted(() => ({
   isGroupAllowedMock: vi.fn(() => true),
   isAdminMock: vi.fn(() => true),
-  isAggregatorAdminAllowedOnGroupMock: vi.fn(() => false),
+  isAnAggregatorAdminAllowedOnGroupMock: vi.fn(() => false),
   userAuthzMock: vi.fn(() => ({
     isGroupAllowed: isGroupAllowedMock,
     isAdmin: isAdminMock,
-    isAggregatorAdminAllowedOnGroup: isAggregatorAdminAllowedOnGroupMock,
+    isAnAggregatorAdminAllowedOnGroup: isAnAggregatorAdminAllowedOnGroupMock,
   })),
   regenerateManageSubscritionApiKeyMock: vi.fn(),
   withJWTAuthHandlerMock: vi.fn(
@@ -89,7 +89,7 @@ describe("regenerateManageSubscriptionKey", () => {
     const groupId = "groupId";
     const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
     isAdminMock.mockReturnValueOnce(false);
-    isAggregatorAdminAllowedOnGroupMock.mockReturnValueOnce(false);
+    isAnAggregatorAdminAllowedOnGroupMock.mockReturnValueOnce(false);
 
     // when
     const result = await PUT(nextRequest, {
@@ -105,7 +105,7 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(isAdminMock).toHaveBeenCalledOnce();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(isAggregatorAdminAllowedOnGroupMock).toHaveBeenCalledExactlyOnceWith(
+    expect(isAnAggregatorAdminAllowedOnGroupMock).toHaveBeenCalledExactlyOnceWith(
       groupId
     );
     expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
@@ -132,7 +132,7 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledOnce();
     expect(isAdminMock).toHaveBeenCalledWith();
-    expect(isAggregatorAdminAllowedOnGroupMock).not.toHaveBeenCalled(); // short-circuit admin check
+    expect(isAnAggregatorAdminAllowedOnGroupMock).not.toHaveBeenCalled(); // short-circuit admin check
     expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
   });
 
@@ -143,7 +143,7 @@ describe("regenerateManageSubscriptionKey", () => {
     const groupId = "groupId";
     const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
     isAdminMock.mockReturnValueOnce(false);
-    isAggregatorAdminAllowedOnGroupMock.mockReturnValueOnce(true);
+    isAnAggregatorAdminAllowedOnGroupMock.mockReturnValueOnce(true);
     backofficeUserMock.permissions.selcGroups = [{ id: groupId }];
 
     const expectedResponse = { foo: "bar" };
@@ -165,7 +165,7 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(isAdminMock).toHaveBeenCalledOnce();
     expect(isAdminMock).toHaveBeenCalledWith();
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-    expect(isAggregatorAdminAllowedOnGroupMock).toHaveBeenCalledExactlyOnceWith(
+    expect(isAnAggregatorAdminAllowedOnGroupMock).toHaveBeenCalledExactlyOnceWith(
       groupId
     );
     expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledOnce();
