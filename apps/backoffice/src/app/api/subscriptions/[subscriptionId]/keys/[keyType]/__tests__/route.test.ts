@@ -14,14 +14,17 @@ const {
   userAuthzMock,
   isGroupAllowedMock,
   isAdminMock,
+  isAdminAggregatorMock,
   regenerateManageSubscritionApiKeyMock,
   withJWTAuthHandlerMock,
 } = vi.hoisted(() => ({
   isGroupAllowedMock: vi.fn(() => true),
   isAdminMock: vi.fn(() => true),
+  isAdminAggregatorMock: vi.fn(() => false),
   userAuthzMock: vi.fn(() => ({
     isGroupAllowed: isGroupAllowedMock,
     isAdmin: isAdminMock,
+    isAdminAggregator: isAdminAggregatorMock,
   })),
   regenerateManageSubscritionApiKeyMock: vi.fn(),
   withJWTAuthHandlerMock: vi.fn(
@@ -72,9 +75,10 @@ describe("regenerateManageSubscriptionKey", () => {
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
     expect(jsonBody.detail).toEqual("Role not authorized");
-    expect(userAuthzMock).toHaveBeenCalledOnce();
+    expect(userAuthzMock).toHaveBeenCalledTimes(2);
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledOnce();
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledWith();
     expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
   });
@@ -100,6 +104,7 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledOnce();
     expect(isAdminMock).toHaveBeenCalledWith();
+    expect(isAdminAggregatorMock).not.toHaveBeenCalled(); // short-circuit admin check
     expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
   });
 
