@@ -31,9 +31,9 @@ import * as TE from "fp-ts/lib/TaskEither";
 
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
-  BadRequestError,
+  ExportFileNotFoundError,
+  ExportFileNotReadyError,
   ManagedInternalError,
-  NotFoundError,
   PreconditionFailedError,
   SubscriptionOwnershipError,
   apimErrorToManagedInternalError,
@@ -731,7 +731,7 @@ export async function generateApiKeysExportsDownloadLink(
   }
 
   if (exportsFiles.length === 0) {
-    throw new BadRequestError("Bad Request", "Found 0 exports");
+    throw new ExportFileNotFoundError("Bad Request", "Found 0 exports");
   }
 
   const mostRecentExport = exportsFiles.reduce((a, b) =>
@@ -744,7 +744,7 @@ export async function generateApiKeysExportsDownloadLink(
   switch (mostRecentExport.state) {
     case FileStateEnum.FAILED:
     case FileStateEnum.IN_PROGRESS:
-      throw new BadRequestError(
+      throw new ExportFileNotReadyError(
         "Bad Request",
         "Can not update download link on uncompleted export",
       );
@@ -801,7 +801,7 @@ export async function retrieveApiKeysExportMetadata(
   }
 
   if (exportsFiles.length === 0) {
-    throw new NotFoundError("Not Found", "Found 0 exports");
+    throw new ExportFileNotFoundError("Not Found", "Found 0 exports");
   }
 
   const mostRecentExport = exportsFiles.reduce((a, b) =>

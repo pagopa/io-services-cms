@@ -73,11 +73,11 @@ export class PreconditionFailedError extends Error {
   }
 }
 
-export class BadRequestError extends Error {
+export class ExportFileNotReadyError extends ManagedInternalError {
   additionalDetails?: string;
   constructor(message: string, additionalDetails?: unknown) {
-    super("Bad Request");
-    this.name = "BadRequestError";
+    super("Export File not ready");
+    this.name = "ExportFileNotReadyError";
     this.message = message;
     this.additionalDetails =
       typeof additionalDetails === "string"
@@ -86,11 +86,11 @@ export class BadRequestError extends Error {
   }
 }
 
-export class NotFoundError extends Error {
+export class ExportFileNotFoundError extends ManagedInternalError {
   additionalDetails?: string;
   constructor(message: string, additionalDetails?: unknown) {
-    super("Not Found");
-    this.name = "NotFoundError";
+    super("Export File Not Found");
+    this.name = "ExportFileNotFoundError";
     this.message = message;
     this.additionalDetails =
       typeof additionalDetails === "string"
@@ -179,7 +179,7 @@ export const handleNotFoundErrorResponse = (
   error: unknown,
 ): NextResponse<ResponseError> => {
   let detail = "Something went wrong";
-  if (error instanceof NotFoundError || error instanceof ManagedInternalError) {
+  if (error instanceof ManagedInternalError) {
     detail = error.message;
   }
   return NextResponse.json(

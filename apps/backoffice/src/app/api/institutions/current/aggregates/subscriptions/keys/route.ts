@@ -2,8 +2,8 @@ import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/
 import { RequestAggregatedInstitutionsManageKeysPayload } from "@/generated/api/RequestAggregatedInstitutionsManageKeysPayload";
 import { ResponseError } from "@/generated/api/ResponseError";
 import {
-  BadRequestError,
-  NotFoundError,
+  ExportFileNotFoundError,
+  ExportFileNotReadyError,
   PreconditionFailedError,
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
@@ -16,8 +16,8 @@ import { parseBody } from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   generateApiKeysExports,
-  retrieveApiKeysExportMetadata,
   generateApiKeysExportsDownloadLink,
+  retrieveApiKeysExportMetadata,
 } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
@@ -52,7 +52,7 @@ export const GET = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(result);
     } catch (error) {
-      if (error instanceof NotFoundError) {
+      if (error instanceof ExportFileNotFoundError) {
         handlerErrorLog(error.message, error);
         return handleNotFoundErrorResponse("Export not found", error);
       }
@@ -149,7 +149,10 @@ export const PUT = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(result, 201);
     } catch (error) {
-      if (error instanceof BadRequestError) {
+      if (
+        error instanceof ExportFileNotFoundError ||
+        error instanceof ExportFileNotReadyError
+      ) {
         handlerErrorLog(error.message, error);
         return handleBadRequestErrorResponse(error.message);
       }
