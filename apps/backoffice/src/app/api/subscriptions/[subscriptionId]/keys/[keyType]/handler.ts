@@ -29,14 +29,11 @@ export const regenerateManageSubscriptionKeyHandler = async (
 ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
   const allowed =
     userAuthz(backofficeUser).isAdmin() ||
-    (userAuthz(backofficeUser).isAggregatorAdmin() &&
-      backofficeUser.permissions.selcGroups?.some(
-        (group) =>
-          // Since the subscriptionId is in the format "MANAGE-GROUP-{groupId}"
-          // we need to add the prefix to the groupId in order to match it with the subscriptionId
-          ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id ===
-          params.subscriptionId,
-      ));
+    userAuthz(backofficeUser).isAggregatorAdminAllowedOnGroup(
+      params.subscriptionId.substring(
+        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+      ),
+    );
 
   if (!allowed) {
     return handleForbiddenErrorResponse("Role not authorized");
