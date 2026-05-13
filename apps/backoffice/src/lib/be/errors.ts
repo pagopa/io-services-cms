@@ -88,10 +88,9 @@ export class ExportFileNotReadyError extends ManagedInternalError {
 
 export class ExportFileNotFoundError extends ManagedInternalError {
   additionalDetails?: string;
-  constructor(message: string, additionalDetails?: unknown) {
+  constructor(additionalDetails?: unknown) {
     super("Export File Not Found");
     this.name = "ExportFileNotFoundError";
-    this.message = message;
     this.additionalDetails =
       typeof additionalDetails === "string"
         ? additionalDetails

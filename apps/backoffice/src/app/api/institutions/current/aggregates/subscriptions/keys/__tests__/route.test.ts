@@ -261,9 +261,8 @@ describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => 
       ...mocks.backofficeUser,
       institution: { ...mocks.backofficeUser.institution, isAggregator: true },
     } as unknown as BackOfficeUser;
-    const errorMessage = "Bad Request";
     mocks.generateApiKeysExportsDownloadLink.mockRejectedValueOnce(
-      new ExportFileNotFoundError(errorMessage, "Bad Request"),
+      new ExportFileNotFoundError(),
     );
     const request = new NextRequest("http://localhost", { method: "PUT" });
 
@@ -273,7 +272,7 @@ describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => 
     // then
     expect(result.status).toBe(400);
     const body = await result.json();
-    expect(body.detail).toEqual(errorMessage);
+    expect(body.detail).toEqual("Export File Not Found");
     expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
     expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,
@@ -370,7 +369,7 @@ describe("getAggregatedInstitutionsManageKeysMetadata", () => {
       institution: { ...mocks.backofficeUser.institution, isAggregator: true },
     } as unknown as BackOfficeUser;
     mocks.retrieveApiKeysExportMetadata.mockRejectedValueOnce(
-      new ExportFileNotFoundError("Export not found", "details"),
+      new ExportFileNotFoundError(),
     );
     const request = new NextRequest("http://localhost", { method: "GET" });
 
@@ -381,7 +380,7 @@ describe("getAggregatedInstitutionsManageKeysMetadata", () => {
     expect(result.status).toBe(404);
     const body = await result.json();
     expect(body.title).toEqual("Export not found");
-    expect(body.detail).toEqual("Export not found");
+    expect(body.detail).toEqual("Export File Not Found");
     expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledOnce();
     expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,

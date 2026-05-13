@@ -731,7 +731,7 @@ export async function generateApiKeysExportsDownloadLink(
   }
 
   if (exportsFiles.length === 0) {
-    throw new ExportFileNotFoundError("Bad Request", "Found 0 exports");
+    throw new ExportFileNotFoundError("Found 0 exports");
   }
 
   const mostRecentExport = exportsFiles.reduce((a, b) =>
@@ -745,8 +745,7 @@ export async function generateApiKeysExportsDownloadLink(
     case FileStateEnum.FAILED:
     case FileStateEnum.IN_PROGRESS:
       throw new ExportFileNotReadyError(
-        "Bad Request",
-        "Can not update download link on uncompleted export",
+        `Can not generate download link on ${mostRecentExport.state} export: ${mostRecentExport.fileName}`,
       );
     case FileStateEnum.DONE:
       timeRemaining =
@@ -801,7 +800,7 @@ export async function retrieveApiKeysExportMetadata(
   }
 
   if (exportsFiles.length === 0) {
-    throw new ExportFileNotFoundError("Not Found", "Found 0 exports");
+    throw new ExportFileNotFoundError("Found 0 exports");
   }
 
   const mostRecentExport = exportsFiles.reduce((a, b) =>

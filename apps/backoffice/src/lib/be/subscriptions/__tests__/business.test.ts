@@ -19,9 +19,9 @@ import {
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "../business";
 import {
-  BadRequestError,
+  ExportFileNotFoundError,
+  ExportFileNotReadyError,
   ManagedInternalError,
-  NotFoundError,
 } from "../../errors";
 import { FileStateEnum } from "../api-keys-exports-port";
 
@@ -1313,14 +1313,14 @@ describe("Manage Keys", () => {
       );
     });
 
-    it("should throw BadRequestError on 0 exports", async () => {
+    it("should throw ExportFileNotFoundError on 0 exports", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([]);
 
       // when & then
       await expect(
         generateApiKeysExportsDownloadLink(aggregatorId, userId),
-      ).rejects.toThrowError(BadRequestError);
+      ).rejects.toThrowError(ExportFileNotFoundError);
     });
 
     it("should throw ManagedInternalError when findExportsFiles rejects", async () => {
@@ -1333,27 +1333,27 @@ describe("Manage Keys", () => {
       ).rejects.toThrowError(ManagedInternalError);
     });
 
-    it("should return BadRequestError on IN_PROGRESS state when most recent export is in progress", async () => {
+    it("should return ExportFileNotReadyError on IN_PROGRESS state when most recent export is in progress", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([anInProgressExport]);
 
       // when
       await expect(
         generateApiKeysExportsDownloadLink(aggregatorId, userId),
-      ).rejects.toThrowError(BadRequestError);
+      ).rejects.toThrowError(ExportFileNotReadyError);
 
       // then
       expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
     });
 
-    it("should return BadRequestError on FAILED state when most recent export has failed", async () => {
+    it("should return ExportFileNotReadyError on FAILED state when most recent export has failed", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([aFailedExport]);
 
       // when
       await expect(
         generateApiKeysExportsDownloadLink(aggregatorId, userId),
-      ).rejects.toThrowError(BadRequestError);
+      ).rejects.toThrowError(ExportFileNotReadyError);
 
       // then
       expect(mocks.generateDownloadUrl).not.toHaveBeenCalled();
@@ -1509,14 +1509,14 @@ describe("Manage Keys", () => {
       );
     });
 
-    it("should throw NotFoundError on 0 exports", async () => {
+    it("should throw ExportFileNotFoundError on 0 exports", async () => {
       // given
       mocks.findExportsFiles.mockResolvedValueOnce([]);
 
       // when & then
       await expect(
         retrieveApiKeysExportMetadata(aggregatorId, userId),
-      ).rejects.toThrowError(NotFoundError);
+      ).rejects.toThrowError(ExportFileNotFoundError);
     });
 
     it("should throw ManagedInternalError when findExportsFiles rejects", async () => {
