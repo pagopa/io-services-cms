@@ -7,7 +7,7 @@ import { PUT } from "../route";
 
 const backofficeUserMock = {
   parameters: { userId: "userId" },
-  permissions: {}
+  permissions: {},
 } as BackOfficeUser;
 
 const {
@@ -15,37 +15,38 @@ const {
   isGroupAllowedMock,
   isAdminMock,
   regenerateManageSubscritionApiKeyMock,
-  withJWTAuthHandlerMock
+  withJWTAuthHandlerMock,
 } = vi.hoisted(() => ({
   isGroupAllowedMock: vi.fn(() => true),
   isAdminMock: vi.fn(() => true),
   userAuthzMock: vi.fn(() => ({
     isGroupAllowed: isGroupAllowedMock,
-    isAdmin: isAdminMock
+    isAdmin: isAdminMock,
   })),
   regenerateManageSubscritionApiKeyMock: vi.fn(),
   withJWTAuthHandlerMock: vi.fn(
     (
       handler: (
         nextRequest: NextRequest,
-        context: { backofficeUser: BackOfficeUser; params: any }
-      ) => Promise<NextResponse> | Promise<Response>
-    ) => async (nextRequest: NextRequest, { params }: { params: {} }) =>
-      handler(nextRequest, {
-        backofficeUser: backofficeUserMock,
-        params
-      })
-  )
+        context: { backofficeUser: BackOfficeUser; params: any },
+      ) => Promise<NextResponse> | Promise<Response>,
+    ) =>
+      async (nextRequest: NextRequest, { params }: { params: {} }) =>
+        handler(nextRequest, {
+          backofficeUser: backofficeUserMock,
+          params,
+        }),
+  ),
 }));
 
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock
+  withJWTAuthHandler: withJWTAuthHandlerMock,
 }));
 vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock
+  userAuthz: userAuthzMock,
 }));
 vi.mock("@/lib/be/subscriptions/business", () => ({
-  regenerateManageSubscriptionApiKey: regenerateManageSubscritionApiKeyMock
+  regenerateManageSubscriptionApiKey: regenerateManageSubscritionApiKeyMock,
 }));
 
 afterEach(() => {
@@ -64,7 +65,7 @@ describe("regenerateManageSubscriptionKey", () => {
 
     // when
     const result = await PUT(nextRequest, {
-      params: { subscriptionId }
+      params: { subscriptionId },
     });
 
     // then
@@ -88,7 +89,7 @@ describe("regenerateManageSubscriptionKey", () => {
 
     // when
     const result = await PUT(nextRequest, {
-      params: { subscriptionId, keyType }
+      params: { subscriptionId, keyType },
     });
 
     // then
@@ -111,12 +112,12 @@ describe("regenerateManageSubscriptionKey", () => {
     isGroupAllowedMock.mockReturnValueOnce(true);
     const expectedResponse = { foo: "bar" };
     regenerateManageSubscritionApiKeyMock.mockResolvedValueOnce(
-      expectedResponse
+      expectedResponse,
     );
 
     // when
     const result = await PUT(nextRequest, {
-      params: { subscriptionId, keyType }
+      params: { subscriptionId, keyType },
     });
 
     // then
@@ -131,7 +132,7 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
       subscriptionId,
-      keyType
+      keyType,
     );
   });
 
@@ -152,7 +153,7 @@ describe("regenerateManageSubscriptionKey", () => {
 
       // when
       const result = await PUT(nextRequest, {
-        params: { subscriptionId, keyType }
+        params: { subscriptionId, keyType },
       });
 
       // then
@@ -168,8 +169,8 @@ describe("regenerateManageSubscriptionKey", () => {
       expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
         backofficeUserMock.parameters.userId,
         subscriptionId,
-        keyType
+        keyType,
       );
-    }
+    },
   );
 });
