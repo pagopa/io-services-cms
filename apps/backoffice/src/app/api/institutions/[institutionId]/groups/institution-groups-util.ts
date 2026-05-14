@@ -11,6 +11,7 @@ import {
   handlerErrorLog,
 } from "@/lib/be/errors";
 import {
+  DomainGroup,
   retrieveInstitutionGroups,
   retrieveUnboundInstitutionGroups,
 } from "@/lib/be/institutions/business";
@@ -33,7 +34,7 @@ export const institutionGroupBaseHandler = async (
     params,
   }: {
     backofficeUser: BackOfficeUserEnriched;
-    groupHandler: (groups: Group[]) => NextResponse<unknown>; //TODO improve typing
+    groupHandler: (groups: DomainGroup[]) => NextResponse<unknown>; //TODO improve typing
     params: { institutionId: string };
   },
   //TODO improve typing
@@ -56,7 +57,7 @@ export const institutionGroupBaseHandler = async (
     }
 
     try {
-      let groups: Group[];
+      let groups: DomainGroup[];
       switch (maybeFilter.right) {
         case GroupFilterTypeEnum.ALL:
           if (userAuthz.hasSelcGroups()) {
@@ -94,3 +95,12 @@ export const institutionGroupBaseHandler = async (
     return handleInternalErrorResponse("InstitutionGroupsError", error);
   }
 };
+
+export const toGroupResponse = (group: DomainGroup): Group => ({
+  id: group.id,
+  name: group.name,
+  state: group.state,
+});
+
+export const toGroupsResponse = (groups: DomainGroup[]): Group[] =>
+  groups.map(toGroupResponse);

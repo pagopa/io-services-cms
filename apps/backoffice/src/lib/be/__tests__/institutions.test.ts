@@ -67,6 +67,7 @@ const mocks: {
         description: "institutionGroups description",
         id: "institutionGroupsID",
         institutionId: "institutionGroupsInstID",
+        parentInstitutionId: "institutionGroupsParentInstID",
         name: "institutionGroupsName",
         productId: "institutionGroupsProdID",
         status: "ACTIVE" as StatusEnum,
@@ -75,6 +76,7 @@ const mocks: {
         description: "institutionGroupsDescription2",
         id: "institutionGroupsID2",
         institutionId: "institutionGroupsInstID2",
+        parentInstitutionId: "institutionGroupsParentInstID2",
         name: "institutionGroupsName2",
         productId: "institutionGroupsProdID2",
         status: "DELETED" as StatusEnum,
@@ -244,11 +246,13 @@ describe("Institutions", () => {
         ...(mocks.institutionGroups.content?.map((userGroupResources) => ({
           id: userGroupResources.id,
           name: userGroupResources.name,
+          parentInstitutionId: userGroupResources.parentInstitutionId,
           state: userGroupResources.status,
         })) as any[]),
         ...(mocks.institutionGroups.content?.map((userGroupResources) => ({
           id: userGroupResources.id,
           name: userGroupResources.name,
+          parentInstitutionId: userGroupResources.parentInstitutionId,
           state: userGroupResources.status,
         })) as any[]),
       ]);
@@ -374,6 +378,8 @@ describe("Institutions", () => {
           id: (mocks.institutionGroups.content as any[])[0].id,
           name: (mocks.institutionGroups.content as any[])[0].name,
           state: (mocks.institutionGroups.content as any[])[0].status,
+          parentInstitutionId: (mocks.institutionGroups.content as any[])[0]
+            .parentInstitutionId,
         },
       ]);
       expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();

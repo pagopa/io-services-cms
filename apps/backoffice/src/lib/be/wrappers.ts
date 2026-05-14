@@ -1,5 +1,4 @@
 import { auth } from "@/auth";
-import { Group } from "@/generated/api/Group";
 import { NextRequest, NextResponse } from "next/server";
 
 import {
@@ -8,7 +7,10 @@ import {
 } from "../../../types/next-auth";
 import { userAuthz } from "./authz";
 import { handleUnauthorizedErrorResponse } from "./errors";
-import { retrieveInstitutionGroups } from "./institutions/business";
+import {
+  DomainGroup,
+  retrieveInstitutionGroups,
+} from "./institutions/business";
 
 export const withJWTAuthHandler =
   (
@@ -67,6 +69,6 @@ export const withJWTAuthHandler =
 
 export type BackOfficeUserEnriched = {
   permissions: {
-    selcGroups?: Group[];
+    selcGroups?: DomainGroup[];
   } & Omit<BackOfficeUserPermissions, "selcGroups">;
 } & Omit<BackOfficeUser, "permissions">;

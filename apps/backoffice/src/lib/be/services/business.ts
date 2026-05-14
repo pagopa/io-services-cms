@@ -2,7 +2,6 @@
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
 import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
-import { Group } from "@/generated/api/Group";
 import { MigrationData } from "@/generated/api/MigrationData";
 import { MigrationDelegateList } from "@/generated/api/MigrationDelegateList";
 import { MigrationItemList } from "@/generated/api/MigrationItemList";
@@ -24,7 +23,11 @@ import {
   handleBadRequestErrorResponse,
   handleInternalErrorResponse,
 } from "../errors";
-import { getGroup, retrieveInstitutionGroups } from "../institutions/business";
+import {
+  DomainGroup,
+  getGroup,
+  retrieveInstitutionGroups,
+} from "../institutions/business";
 import { logger } from "../logger";
 import { BackOfficeUserEnriched } from "../wrappers";
 import { getSubscriptions } from "./apim";
@@ -128,9 +131,9 @@ export const retrieveServiceList = async (
                   retrieveInstitutionGroups(backofficeUser.institution.id, "*"),
                 E.toError,
               )
-            : TE.right(backofficeUser.permissions.selcGroups),
+            : TE.right(backofficeUser.permissions.selcGroups ?? []),
         ),
-        TE.map((groups) => reduceGrops(groups ?? [])),
+        TE.map(reduceGrops),
       ),
     ),
     // get services from services-lifecycle cosmos containee and map to ServiceListItem
@@ -300,8 +303,8 @@ export async function forwardIoServicesCmsRequest<
     ) {
       if ("metadata" in result.right.value) {
         // case single service
-        const groupIdToGroupMap: Map<Group["id"], Group> = result.right.value
-          .metadata.group_id
+        const groupIdToGroupMap: Map<DomainGroup["id"], DomainGroup> = result
+          .right.value.metadata.group_id
           ? new Map([
               [
                 result.right.value.metadata.group_id,

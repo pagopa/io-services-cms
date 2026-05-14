@@ -1,4 +1,3 @@
-import { Group } from "@/generated/api/Group";
 import {
   ServiceListItem,
   VisibilityEnum,
@@ -20,7 +19,9 @@ import {
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 
+import { toGroupResponse } from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
 import { Institution } from "../../../../types/next-auth";
+import { DomainGroup } from "../institutions/business";
 
 export const MISSING_SERVICE_NAME =
   "Servizio non disponibile" as NonEmptyString;
@@ -48,7 +49,7 @@ export const reducePublicationServicesList = (
 export const toServiceListItem =
   (
     topicsMap: Record<string, ServiceTopic>,
-    groupsMap: Map<Group["id"], Group>,
+    groupsMap: Map<DomainGroup["id"], DomainGroup>,
   ) =>
   ({
     data,
@@ -160,16 +161,22 @@ export const reduceServiceTopicsList = (
       )
     : ({} as Record<string, ServiceTopic>);
 
-export const reduceGrops = (groups: Group[]): Map<Group["id"], Group> =>
+export const reduceGrops = (
+  groups: DomainGroup[],
+): Map<DomainGroup["id"], DomainGroup> =>
   groups.reduce(
     (map, group) => map.set(group.id, group),
-    new Map<Group["id"], Group>(),
+    new Map<DomainGroup["id"], DomainGroup>(),
   );
 
+// TODO: move mapping logic to route handler
 export const mapServiceGroup = (
   { group_id, ...othersMetadata }: ServiceMetadata,
-  groupIdToNameMap: Map<Group["id"], Group>,
+  groupIdToNameMap: Map<DomainGroup["id"], DomainGroup>,
 ) => ({
   ...othersMetadata,
-  group: group_id ? groupIdToNameMap.get(group_id) : undefined,
+  group: (() => {
+    const group = group_id ? groupIdToNameMap.get(group_id) : undefined;
+    return group ? toGroupResponse(group) : undefined;
+  })(),
 });

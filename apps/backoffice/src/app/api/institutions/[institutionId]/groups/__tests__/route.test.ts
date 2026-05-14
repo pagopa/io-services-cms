@@ -140,7 +140,7 @@ describe("getInstitutionGroups", () => {
         state: "ACTIVE",
       },
     ];
-    const response = NextResponse.json({ groupResponse: groups });
+    const response = NextResponse.json({ groups });
     mocks.institutionGroupBaseHandler.mockResolvedValueOnce(response);
 
     // when
@@ -151,7 +151,7 @@ describe("getInstitutionGroups", () => {
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(200);
-    expect(jsonBody).toEqual({ groupResponse: groups });
+    expect(jsonBody).toEqual({ groups });
     expect(mocks.institutionGroupBaseHandler).toHaveBeenCalledOnce();
     const callArgs = mocks.institutionGroupBaseHandler.mock.calls[0];
     expect(callArgs[0]).toBe(nextRequest);
