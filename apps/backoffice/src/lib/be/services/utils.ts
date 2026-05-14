@@ -173,10 +173,10 @@ export const reduceGrops = (
 export const mapServiceGroup = (
   { group_id, ...othersMetadata }: ServiceMetadata,
   groupIdToNameMap: Map<DomainGroup["id"], DomainGroup>,
-) => ({
-  ...othersMetadata,
-  group: (() => {
-    const group = group_id ? groupIdToNameMap.get(group_id) : undefined;
-    return group ? toGroupResponse(group) : undefined;
-  })(),
-});
+) => {
+  const group = group_id ? groupIdToNameMap.get(group_id) : undefined;
+  return {
+    ...othersMetadata,
+    group: group ? toGroupResponse(group) : undefined,
+  };
+};
