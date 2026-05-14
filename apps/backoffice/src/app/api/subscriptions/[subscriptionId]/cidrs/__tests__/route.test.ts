@@ -16,7 +16,7 @@ const anAuthrizedCIDRs = ["127.0.0.1" as Cidr];
 const mock: {
   isGroupAllowed: Mock;
   isAdminMock: Mock;
-  isAggregatorAdmin: Mock;
+  isAnAggregatorAdminAllowedOnGroup: Mock;
   userAuthz: Mock;
   parseBody: Mock;
   retrieveManageSubscriptionAuthorizedCIDRs: Mock;
@@ -26,11 +26,11 @@ const mock: {
   isGroupAllowed: vi.fn(),
   parseBody: vi.fn(),
   isAdminMock: vi.fn(() => true),
-  isAggregatorAdmin: vi.fn(() => false),
+  isAnAggregatorAdminAllowedOnGroup: vi.fn(() => false),
   userAuthz: vi.fn(() => ({
     isGroupAllowed: mock.isGroupAllowed,
     isAdmin: mock.isAdminMock,
-    isAggregatorAdmin: mock.isAggregatorAdmin
+    isAnAggregatorAdminAllowedOnGroup: mock.isAnAggregatorAdminAllowedOnGroup
   })),
   retrieveManageSubscriptionAuthorizedCIDRs: vi.fn(),
   upsertManageSubscriptionAuthorizedCIDRs: vi.fn(),
@@ -234,8 +234,7 @@ describe("Authorized CIDRs API", () => {
       expect(mock.isAdminMock).toHaveBeenCalledOnce();
       expect(mock.isAdminMock).toHaveBeenCalledWith();
       expect(mock.userAuthz).toHaveBeenCalledWith(aBackofficeUser);
-      expect(mock.isAggregatorAdmin).toHaveBeenCalledOnce();
-      expect(mock.isAggregatorAdmin).toHaveBeenCalledWith();
+      expect(mock.isAnAggregatorAdminAllowedOnGroup).toHaveBeenCalledExactlyOnceWith(groupId);
       expect(mock.parseBody).not.toHaveBeenCalled();
       expect(
         mock.upsertManageSubscriptionAuthorizedCIDRs

@@ -79,12 +79,11 @@ export const updateManageSubscriptionAuthorizedCidrsHandler = async (
 ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
   const allowed =
     userAuthz(backofficeUser).isAdmin() ||
-    (userAuthz(backofficeUser).isAggregatorAdmin() &&
-      backofficeUser.permissions.selcGroups?.some(
-        (group) =>
-          ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id ===
-          params.subscriptionId,
-      ));
+    userAuthz(backofficeUser).isAnAggregatorAdminAllowedOnGroup(
+      params.subscriptionId.substring(
+        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+      ),
+    );
   if (!allowed) {
     return handleForbiddenErrorResponse("Role not authorized");
   }
