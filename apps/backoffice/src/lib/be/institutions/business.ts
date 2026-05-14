@@ -29,7 +29,7 @@ type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to 
 type ReadonlyArrayElementType<T> = T extends readonly (infer U)[] ? U : never; // TODO: move to an Utils monorepo package
 
 export type DomainGroup = {
-  parentInstitutionId: string;
+  parentInstitutionId?: string;
 } & Group;
 
 /**
@@ -157,7 +157,7 @@ const toGroup = (
 ): DomainGroup => ({
   id: group.id,
   name: group.name,
-  parentInstitutionId: group.parentInstitutionId ?? "", // FIXME
+  parentInstitutionId: group.parentInstitutionId,
   state: parseState(group.status),
 });
 
