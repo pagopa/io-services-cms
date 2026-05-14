@@ -46,6 +46,7 @@ import {
   getSubscriptionAuthorizedCIDRs,
   upsertSubscriptionAuthorizedCIDRs,
 } from "./cosmos";
+import { SpecialGroup } from "../wrappers";
 
 // Register zip-encrypted format with archiver (once per process)
 try {
@@ -185,15 +186,24 @@ export async function upsertManageSubscription(
  * @param limit The maximum number of subscriptions to retrieve
  * @param offset The number of subscriptions to skip
  * @param selcGroups The groups to filter the subscriptions by (only for GROUP subscriptions)
+ * @param selcSpecialGroups The special groups to exclude from subscriptions listing
  * @returns The list of manage subscriptions for the user
  */
-export async function getManageSubscriptions(
-  subscriptionType: SubscriptionType,
-  apimUserId: string,
-  limit?: number,
-  offset?: number,
-  selcGroups?: Group[],
-): Promise<Subscription[]> {
+export async function getManageSubscriptions({
+  apimUserId,
+  limit,
+  offset,
+  selcGroups,
+  selcSpecialGroups,
+  subscriptionType,
+}: {
+  apimUserId: string;
+  limit?: number;
+  offset?: number;
+  selcGroups?: Group[];
+  selcSpecialGroups: SpecialGroup[];
+  subscriptionType: SubscriptionType;
+}): Promise<Subscription[]> {
   let filter;
   switch (subscriptionType) {
     case SubscriptionTypeEnum.MANAGE_ROOT:
@@ -206,6 +216,7 @@ export async function getManageSubscriptions(
     case SubscriptionTypeEnum.MANAGE_GROUP:
       filter = ApimUtils.apim_filters.manageGroupSubscriptionsFilter(
         selcGroups?.map((group) => group.id),
+        selcSpecialGroups.map((group) => group.parentInstitutionId),
       );
       break;
     default:

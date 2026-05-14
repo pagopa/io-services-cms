@@ -454,13 +454,14 @@ describe("Subscription API", () => {
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
       expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
-      expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
-        kind,
-        userMock.parameters.userId,
+      expect(mocks.getManageSubscriptions).toHaveBeenCalledWith({
+        subscriptionType: kind,
+        apimUserId: userMock.parameters.userId,
         limit,
         offset,
-        undefined,
-      );
+        selcGroups: undefined,
+        selcSpecialGroups: undefined,
+      });
     });
 
     it.each`
@@ -513,13 +514,14 @@ describe("Subscription API", () => {
         expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
         expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
         expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
-        expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
-          kind,
-          userMock.parameters.userId,
+        expect(mocks.getManageSubscriptions).toHaveBeenCalledWith({
+          subscriptionType: kind,
+          apimUserId: userMock.parameters.userId,
           limit,
           offset,
-          userRole === SelfcareRoles.admin ? undefined : selcGroups,
-        );
+          selcGroups,
+          selcSpecialGroups: undefined,
+        });
       },
     );
   });

@@ -67,7 +67,13 @@ describe("withJWTAuthHandler", () => {
     expect(aMockedHandler).toHaveBeenCalledWith(
       nextRequestMock,
       expect.objectContaining({
-        backofficeUser: mocks.jwtMock,
+        backofficeUser: {
+          ...mocks.jwtMock,
+          permissions: {
+            ...mocks.jwtMock.permissions,
+            selcSpecialGroups: [],
+          },
+        },
       }),
     );
     expect(result.status).toBe(200);
@@ -96,6 +102,7 @@ describe("withJWTAuthHandler", () => {
           permissions: {
             ...mocks.jwtMock.permissions,
             selcGroups: [],
+            selcSpecialGroups: [],
           },
         },
       }),
@@ -133,6 +140,7 @@ describe("withJWTAuthHandler", () => {
             permissions: {
               ...mocks.jwtMock.permissions,
               selcGroups: [],
+              selcSpecialGroups: [],
             },
           },
         }),
@@ -171,6 +179,7 @@ describe("withJWTAuthHandler", () => {
           permissions: {
             ...mocks.jwtMock.permissions,
             selcGroups: [selcGroups[0]],
+            selcSpecialGroups: [],
           },
         },
       }),
