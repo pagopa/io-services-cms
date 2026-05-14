@@ -271,7 +271,13 @@ describe("Subscriptions Business Logic", () => {
       );
 
       await expect(() =>
-        getManageSubscriptions(subscriptionType, ownerId, limit, offset),
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          selcSpecialGroups: [],
+        }),
       ).rejects.toThrowError("Error retrieving manage group subscriptions");
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -303,7 +309,13 @@ describe("Subscriptions Business Logic", () => {
       );
 
       await expect(
-        getManageSubscriptions(subscriptionType, ownerId, limit, offset),
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          selcSpecialGroups: [],
+        }),
       ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -323,9 +335,14 @@ describe("Subscriptions Business Logic", () => {
       mocks.getUserSubscriptions.mockReturnValueOnce(TE.right([]));
 
       await expect(
-        getManageSubscriptions(subscriptionType, ownerId, limit, offset, [
-          group,
-        ]),
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          selcGroups: [group],
+          selcSpecialGroups: [],
+        }),
       ).resolves.toStrictEqual([]);
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -353,13 +370,14 @@ describe("Subscriptions Business Logic", () => {
         );
 
         await expect(
-          getManageSubscriptions(
+          getManageSubscriptions({
             subscriptionType,
-            ownerId,
+            apimUserId: ownerId,
             limit,
             offset,
             selcGroups,
-          ),
+            selcSpecialGroups: [],
+          }),
         ).resolves.toStrictEqual([
           {
             id: mocks.aSubscriptionContract.name,
@@ -389,13 +407,14 @@ describe("Subscriptions Business Logic", () => {
       );
 
       await expect(
-        getManageSubscriptions(
+        getManageSubscriptions({
           subscriptionType,
-          ownerId,
+          apimUserId: ownerId,
           limit,
           offset,
           selcGroups,
-        ),
+          selcSpecialGroups: [],
+        }),
       ).resolves.toStrictEqual([]);
 
       expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();

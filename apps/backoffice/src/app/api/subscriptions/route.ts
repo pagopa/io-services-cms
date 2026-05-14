@@ -121,15 +121,14 @@ export const GET = withJWTAuthHandler(
     }
 
     try {
-      const response = await getManageSubscriptions(
-        maybeKind.right,
-        backofficeUser.parameters.userId,
-        maybeLimit.right,
-        maybeOffset.right,
-        userAuthzUtils.isAdmin()
-          ? undefined
-          : backofficeUser.permissions.selcGroups,
-      );
+      const response = await getManageSubscriptions({
+        apimUserId: backofficeUser.parameters.userId,
+        limit: maybeLimit.right,
+        offset: maybeOffset.right,
+        selcGroups: backofficeUser.permissions.selcGroups,
+        selcSpecialGroups: backofficeUser.permissions.selcSpecialGroups,
+        subscriptionType: maybeKind.right,
+      });
       return sanitizedNextResponseJson(
         buildPagination(response, maybeLimit.right, maybeOffset.right),
       );

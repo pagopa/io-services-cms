@@ -119,7 +119,46 @@ describe("withJWTAuthHandler", () => {
     expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
   });
 
-  it("valid token provided should end up in 200 response with selfcare groups detail when institution is aggregate", async () => {
+  it.each`
+    scenario                           | selcGroups
+    ${"selfcare groups are undefined"} | ${undefined}
+    ${"selfcare groups are empty"}     | ${[]}
+  `(
+    "valid token provided should end up in 200 response without selfcare groups detail when $scenario",
+    async ({ selcGroups }) => {
+      //given
+      mocks.jwtMock.permissions.selcGroups = selcGroups;
+      auth.mockResolvedValueOnce({ user: mocks.jwtMock });
+      const aMockedHandler = vi.fn(() =>
+        Promise.resolve(NextResponse.json({}, { status: 200 })),
+      );
+      const nextRequestMock = new NextRequest(new URL("http://localhost"));
+
+      //when
+      const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
+        params: Promise.resolve({}),
+      });
+
+      //then
+      expect(aMockedHandler).toHaveBeenCalledWith(
+        nextRequestMock,
+        expect.objectContaining({
+          backofficeUser: {
+            ...mocks.jwtMock,
+            permissions: {
+              ...mocks.jwtMock.permissions,
+              selcGroups: [],
+              selcSpecialGroups: [],
+            },
+          },
+        }),
+      );
+      expect(result.status).toBe(200);
+      expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
+    },
+  );
+
+  it("valid token provided should end up in 200 response with selfcare groups detail when is not an admin and has selcGroups", async () => {
     //given
     const jwtMock = structuredClone(mocks.jwtMock);
     jwtMock.institution.role = "admin";
@@ -143,12 +182,16 @@ describe("withJWTAuthHandler", () => {
     });
 
     //then
-    expect(aMockedHandler).toHaveBeenCalledWith(nextRequestMock, {
-      backofficeUser: {
-        ...jwtMock,
-        institution: {
-          ...jwtMock.institution,
-          selcSpecialGroups: [],
+    expect(aMockedHandler).toHaveBeenCalledWith(
+      nextRequestMock,
+      expect.objectContaining({
+        backofficeUser: {
+          ...mocks.jwtMock,
+          permissions: {
+            ...mocks.jwtMock.permissions,
+            selcGroups: [selcGroups[0]],
+            selcSpecialGroups: [],
+          },
         },
         permissions: {
           ...jwtMock.permissions,
