@@ -1,3 +1,4 @@
+import { toGroupResponse } from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
 import {
   ServiceListItem,
   VisibilityEnum,
@@ -19,7 +20,6 @@ import {
 import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 
-import { toGroupResponse } from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
 import { Institution } from "../../../../types/next-auth";
 import { DomainGroup } from "../institutions/business";
 
