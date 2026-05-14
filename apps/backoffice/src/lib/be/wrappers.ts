@@ -37,6 +37,7 @@ export const withJWTAuthHandler =
         permissions: {
           ...authenticationDetails.permissions,
           selcGroups: [],
+          selcSpecialGroups: [],
         },
       };
     } else {
@@ -53,6 +54,8 @@ export const withJWTAuthHandler =
               institutionGroup.id,
             ),
           ),
+          // TODO: populate with special groups
+          selcSpecialGroups: [],
         },
       };
     }
@@ -65,8 +68,11 @@ export const withJWTAuthHandler =
     });
   };
 
+export type SpecialGroup = { parentInstitutionId: string } & Group;
+
 export type BackOfficeUserEnriched = {
   permissions: {
     selcGroups?: Group[];
+    selcSpecialGroups: SpecialGroup[];
   } & Omit<BackOfficeUserPermissions, "selcGroups">;
 } & Omit<BackOfficeUser, "permissions">;
