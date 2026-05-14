@@ -40,13 +40,13 @@ import {
   getInstitutionDelegations,
   getInstitutionGroups,
 } from "../institutions/selfcare";
+import { SpecialGroup } from "../wrappers";
 import { FileState, FileStateEnum } from "./api-keys-exports-port";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
   upsertSubscriptionAuthorizedCIDRs,
 } from "./cosmos";
-import { SpecialGroup } from "../wrappers";
 
 // Register zip-encrypted format with archiver (once per process)
 try {
@@ -215,7 +215,7 @@ export async function getManageSubscriptions({
       break;
     case SubscriptionTypeEnum.MANAGE_GROUP:
       filter = ApimUtils.apim_filters.manageGroupSubscriptionsFilter(
-        selcGroups?.map((group) => group.id),
+        selcGroups?.map((group) => group.id) ?? [],
         selcSpecialGroups.map((group) => group.parentInstitutionId),
       );
       break;

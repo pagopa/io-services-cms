@@ -349,6 +349,88 @@ describe("Subscriptions Business Logic", () => {
       );
     });
 
+    it("should return a filtered group manage special Subscriptions", async () => {
+      const ownerId = mocks.anOwnerId;
+      const limit = 5;
+      const offset = 0;
+      const group = { id: "gid1", name: "groupName", state: "ACTIVE" };
+      const specialGroup = {
+        id: "p1",
+        name: "parentInstitutionId",
+        parentInstitutionId: "p1",
+      };
+      const name = "name";
+      const displayName = "displayName";
+      const state = "suspended";
+      const expectedResult = {
+        name,
+        displayName,
+        state,
+        foo: "foo",
+        bar: "bar",
+      };
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([expectedResult]),
+      );
+
+      await expect(
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          selcGroups: [group],
+          selcSpecialGroups: [specialGroup],
+        }),
+      ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
+
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+        ownerId,
+        offset,
+        limit,
+        `name eq 'MANAGE-GROUP-${group.id}' and not(name eq 'MANAGE-GROUP-${specialGroup.parentInstitutionId}')`,
+      );
+    });
+
+    it("should return a filtered group when no groups are provided", async () => {
+      const ownerId = mocks.anOwnerId;
+      const limit = 5;
+      const offset = 0;
+      const name = "name";
+      const displayName = "displayName";
+      const state = "suspended";
+      const expectedResult = {
+        name,
+        displayName,
+        state,
+        foo: "foo",
+        bar: "bar",
+      };
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([expectedResult]),
+      );
+
+      await expect(
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          selcGroups: [],
+          selcSpecialGroups: [],
+        }),
+      ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
+
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+        ownerId,
+        offset,
+        limit,
+        `startswith(name, 'MANAGE-GROUP-')`,
+      );
+    });
+
     it.each`
       scenario                       | selcGroups
       ${"selcGroups is not defined"} | ${undefined}

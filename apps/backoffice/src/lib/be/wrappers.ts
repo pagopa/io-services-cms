@@ -72,7 +72,7 @@ export type SpecialGroup = { parentInstitutionId: string } & Group;
 
 export type BackOfficeUserEnriched = {
   permissions: {
-    selcGroups?: Group[];
+    selcGroups: Group[];
     selcSpecialGroups: SpecialGroup[];
   } & Omit<BackOfficeUserPermissions, "selcGroups">;
 } & Omit<BackOfficeUser, "permissions">;
