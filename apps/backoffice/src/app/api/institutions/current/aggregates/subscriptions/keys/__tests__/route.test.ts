@@ -3,16 +3,19 @@ import { afterEach, describe, expect, it, Mock, vi } from "vitest";
 
 import { BackOfficeUser } from "../../../../../../../../../types/next-auth";
 import {
-  BadRequestError,
+  ExportFileNotFoundError,
+  ExportFileNotReadyError,
   PreconditionFailedError,
 } from "../../../../../../../../lib/be/errors";
-import { GET, POST } from "../route";
+import { FileStateEnum } from "../../../../../../../../lib/be/subscriptions/api-keys-exports-port";
+import { GET, POST, PUT } from "../route";
 
 const mocks: {
   backofficeUser: BackOfficeUser;
   generateApiKeysExports: Mock<any>;
   parseBody: Mock<any>;
-  retrieveApiKeysExports: Mock<any>;
+  retrieveApiKeysExportMetadata: Mock<any>;
+  generateApiKeysExportsDownloadLink: Mock<any>;
   sanitizedNextResponseJson: Mock<any>;
   sanitizedResponse: NextResponse;
   withJWTAuthHandler: Mock<any>;
@@ -24,7 +27,8 @@ const mocks: {
   } as unknown as BackOfficeUser,
   generateApiKeysExports: vi.fn(),
   parseBody: vi.fn(),
-  retrieveApiKeysExports: vi.fn(),
+  retrieveApiKeysExportMetadata: vi.fn(),
+  generateApiKeysExportsDownloadLink: vi.fn(),
   sanitizedNextResponseJson: vi.fn(),
   sanitizedResponse: "sanitizedResponse" as unknown as NextResponse,
   withJWTAuthHandler: vi.fn(
@@ -56,7 +60,8 @@ vi.mock("@/lib/be/sanitize", () => ({
 
 vi.mock("@/lib/be/subscriptions/business", () => ({
   generateApiKeysExports: mocks.generateApiKeysExports,
-  retrieveApiKeysExports: mocks.retrieveApiKeysExports,
+  retrieveApiKeysExportMetadata: mocks.retrieveApiKeysExportMetadata,
+  generateApiKeysExportsDownloadLink: mocks.generateApiKeysExportsDownloadLink,
 }));
 
 vi.mock("@/lib/be/errors", async () => {
@@ -203,7 +208,140 @@ describe("requestAggregatedInstitutionsManageKeys", () => {
   });
 });
 
-describe("getAggregatedInstitutionsManageKeysLink", () => {
+describe("generateDirectDownloadLinkForAggregatedInstitutionsManageKeys", () => {
+  it("should return 403 when user is not an aggregator", async () => {
+    // given
+    mocks.backofficeUser = {
+      ...mocks.backofficeUser,
+      institution: { ...mocks.backofficeUser.institution, isAggregator: false },
+    } as unknown as BackOfficeUser;
+    const request = new NextRequest("http://localhost", { method: "PUT" });
+
+    // when
+    const result = await PUT(request, {} as any);
+
+    // then
+    expect(result.status).toBe(403);
+    const body = await result.json();
+    expect(body.detail).toEqual(
+      "Only aggregators are authorized to request link about download procedure",
+    );
+    expect(mocks.generateApiKeysExportsDownloadLink).not.toHaveBeenCalled();
+  });
+
+  it("should return 400 when updateApiKeysExportsDownloadLink throws a ExportFileNotReadyError", async () => {
+    // given
+    mocks.backofficeUser = {
+      ...mocks.backofficeUser,
+      institution: { ...mocks.backofficeUser.institution, isAggregator: true },
+    } as unknown as BackOfficeUser;
+    const errorMessage = "Bad Request";
+    mocks.generateApiKeysExportsDownloadLink.mockRejectedValueOnce(
+      new ExportFileNotReadyError(errorMessage, "Bad Request"),
+    );
+    const request = new NextRequest("http://localhost", { method: "PUT" });
+
+    // when
+    const result = await PUT(request, {} as any);
+
+    // then
+    expect(result.status).toBe(400);
+    const body = await result.json();
+    expect(body.detail).toEqual(errorMessage);
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
+      mocks.backofficeUser.institution.id,
+      mocks.backofficeUser.parameters.userId,
+    );
+  });
+
+  it("should return 400 when updateApiKeysExportsDownloadLink throws a ExportFileNotFoundError", async () => {
+    // given
+    mocks.backofficeUser = {
+      ...mocks.backofficeUser,
+      institution: { ...mocks.backofficeUser.institution, isAggregator: true },
+    } as unknown as BackOfficeUser;
+    mocks.generateApiKeysExportsDownloadLink.mockRejectedValueOnce(
+      new ExportFileNotFoundError(),
+    );
+    const request = new NextRequest("http://localhost", { method: "PUT" });
+
+    // when
+    const result = await PUT(request, {} as any);
+
+    // then
+    expect(result.status).toBe(400);
+    const body = await result.json();
+    expect(body.detail).toEqual("Export File Not Found");
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
+      mocks.backofficeUser.institution.id,
+      mocks.backofficeUser.parameters.userId,
+    );
+  });
+
+  it("should return 500 when generateApiKeysExportsDownloadLink throws an unexpected error", async () => {
+    // given
+    mocks.backofficeUser = {
+      ...mocks.backofficeUser,
+      institution: { ...mocks.backofficeUser.institution, isAggregator: true },
+    } as unknown as BackOfficeUser;
+    mocks.generateApiKeysExportsDownloadLink.mockRejectedValueOnce(
+      new Error("unexpected error"),
+    );
+    const request = new NextRequest("http://localhost", { method: "PUT" });
+
+    // when
+    const result = await PUT(request, {} as any);
+
+    // then
+    expect(result.status).toBe(500);
+    const body = await result.json();
+    expect(body.title).toEqual(
+      "GenerateDirectDownloadLinkForAggregatedInstitutionsManageKeys",
+    );
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
+      mocks.backofficeUser.institution.id,
+      mocks.backofficeUser.parameters.userId,
+    );
+  });
+
+  it("should return 201 with download link when export is ready", async () => {
+    // given
+    mocks.backofficeUser = {
+      ...mocks.backofficeUser,
+      institution: { ...mocks.backofficeUser.institution, isAggregator: true },
+    } as unknown as BackOfficeUser;
+    const exportMetadata = {
+      downloadLink: "https://example.com/export.zip",
+    };
+    mocks.generateApiKeysExportsDownloadLink.mockResolvedValueOnce(
+      exportMetadata,
+    );
+    mocks.sanitizedNextResponseJson.mockReturnValueOnce(
+      mocks.sanitizedResponse,
+    );
+    const request = new NextRequest("http://localhost", { method: "PUT" });
+
+    // when
+    const result = await PUT(request, {} as any);
+
+    // then
+    expect(result).toEqual(mocks.sanitizedResponse);
+    expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledWith(
+      exportMetadata,
+      201,
+    );
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledOnce();
+    expect(mocks.generateApiKeysExportsDownloadLink).toHaveBeenCalledWith(
+      mocks.backofficeUser.institution.id,
+      mocks.backofficeUser.parameters.userId,
+    );
+  });
+});
+
+describe("getAggregatedInstitutionsManageKeysMetadata", () => {
   it("should return 403 when user is not an aggregator", async () => {
     // given
     mocks.backofficeUser = {
@@ -221,18 +359,17 @@ describe("getAggregatedInstitutionsManageKeysLink", () => {
     expect(body.detail).toEqual(
       "Only aggregators are authorized to request metadata about download procedure",
     );
-    expect(mocks.retrieveApiKeysExports).not.toHaveBeenCalled();
+    expect(mocks.retrieveApiKeysExportMetadata).not.toHaveBeenCalled();
   });
 
-  it("should return 400 when retrieveApiKeysExports throws a BadRequestError", async () => {
+  it("should return 404 when retrieveApiKeysExportMetadata throws a ExportFileNotFoundError", async () => {
     // given
     mocks.backofficeUser = {
       ...mocks.backofficeUser,
       institution: { ...mocks.backofficeUser.institution, isAggregator: true },
     } as unknown as BackOfficeUser;
-    const errorMessage = "Bad Request";
-    mocks.retrieveApiKeysExports.mockRejectedValueOnce(
-      new BadRequestError(errorMessage, "Found 0 exports"),
+    mocks.retrieveApiKeysExportMetadata.mockRejectedValueOnce(
+      new ExportFileNotFoundError(),
     );
     const request = new NextRequest("http://localhost", { method: "GET" });
 
@@ -240,23 +377,24 @@ describe("getAggregatedInstitutionsManageKeysLink", () => {
     const result = await GET(request, {} as any);
 
     // then
-    expect(result.status).toBe(400);
+    expect(result.status).toBe(404);
     const body = await result.json();
-    expect(body.detail).toEqual(errorMessage);
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledOnce();
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledWith(
+    expect(body.title).toEqual("Export not found");
+    expect(body.detail).toEqual("Export File Not Found");
+    expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledOnce();
+    expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,
       mocks.backofficeUser.parameters.userId,
     );
   });
 
-  it("should return 500 when retrieveApiKeysExports throws an unexpected error", async () => {
+  it("should return 500 when retrieveApiKeysExportMetadata throws an unexpected error", async () => {
     // given
     mocks.backofficeUser = {
       ...mocks.backofficeUser,
       institution: { ...mocks.backofficeUser.institution, isAggregator: true },
     } as unknown as BackOfficeUser;
-    mocks.retrieveApiKeysExports.mockRejectedValueOnce(
+    mocks.retrieveApiKeysExportMetadata.mockRejectedValueOnce(
       new Error("unexpected error"),
     );
     const request = new NextRequest("http://localhost", { method: "GET" });
@@ -267,82 +405,25 @@ describe("getAggregatedInstitutionsManageKeysLink", () => {
     // then
     expect(result.status).toBe(500);
     const body = await result.json();
-    expect(body.title).toEqual("GetAggregatedInstitutionsManageKeysLink");
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledOnce();
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledWith(
+    expect(body.title).toEqual("GetAggregatedInstitutionsManageKeysMetadata");
+    expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledOnce();
+    expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,
       mocks.backofficeUser.parameters.userId,
     );
   });
 
-  it("should return 200 with IN_PROGRESS state when export is in progress", async () => {
-    // given
-    mocks.backofficeUser = {
-      ...mocks.backofficeUser,
-      institution: { ...mocks.backofficeUser.institution, isAggregator: true },
-    } as unknown as BackOfficeUser;
-    const exportMetadata = { state: "IN_PROGRESS" };
-    mocks.retrieveApiKeysExports.mockResolvedValueOnce(exportMetadata);
-    mocks.sanitizedNextResponseJson.mockReturnValueOnce(
-      mocks.sanitizedResponse,
-    );
-    const request = new NextRequest("http://localhost", { method: "GET" });
-
-    // when
-    const result = await GET(request, {} as any);
-
-    // then
-    expect(result).toEqual(mocks.sanitizedResponse);
-    expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledWith(
-      exportMetadata,
-    );
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledOnce();
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledWith(
-      mocks.backofficeUser.institution.id,
-      mocks.backofficeUser.parameters.userId,
-    );
-  });
-
-  it("should return 200 with FAILED state when export has failed", async () => {
-    // given
-    mocks.backofficeUser = {
-      ...mocks.backofficeUser,
-      institution: { ...mocks.backofficeUser.institution, isAggregator: true },
-    } as unknown as BackOfficeUser;
-    const exportMetadata = { state: "FAILED" };
-    mocks.retrieveApiKeysExports.mockResolvedValueOnce(exportMetadata);
-    mocks.sanitizedNextResponseJson.mockReturnValueOnce(
-      mocks.sanitizedResponse,
-    );
-    const request = new NextRequest("http://localhost", { method: "GET" });
-
-    // when
-    const result = await GET(request, {} as any);
-
-    // then
-    expect(result).toEqual(mocks.sanitizedResponse);
-    expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledWith(
-      exportMetadata,
-    );
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledOnce();
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledWith(
-      mocks.backofficeUser.institution.id,
-      mocks.backofficeUser.parameters.userId,
-    );
-  });
-
-  it("should return 200 with DONE state and download link when export is ready", async () => {
+  it("should return the export metadata when retrieveApiKeysExportMetadata succeeds", async () => {
     // given
     mocks.backofficeUser = {
       ...mocks.backofficeUser,
       institution: { ...mocks.backofficeUser.institution, isAggregator: true },
     } as unknown as BackOfficeUser;
     const exportMetadata = {
-      state: "DONE",
-      downloadLink: "https://example.com/export.zip",
-      expirationDate: "2026-01-01T00:00:00.000Z",
+      status: FileStateEnum.DONE,
+      expirationDate: "2026-01-01T00:00:00Z",
     };
-    mocks.retrieveApiKeysExports.mockResolvedValueOnce(exportMetadata);
+    mocks.retrieveApiKeysExportMetadata.mockResolvedValueOnce(exportMetadata);
     mocks.sanitizedNextResponseJson.mockReturnValueOnce(
       mocks.sanitizedResponse,
     );
@@ -356,8 +437,8 @@ describe("getAggregatedInstitutionsManageKeysLink", () => {
     expect(mocks.sanitizedNextResponseJson).toHaveBeenCalledWith(
       exportMetadata,
     );
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledOnce();
-    expect(mocks.retrieveApiKeysExports).toHaveBeenCalledWith(
+    expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledOnce();
+    expect(mocks.retrieveApiKeysExportMetadata).toHaveBeenCalledWith(
       mocks.backofficeUser.institution.id,
       mocks.backofficeUser.parameters.userId,
     );

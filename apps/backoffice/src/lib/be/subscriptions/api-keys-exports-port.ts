@@ -24,8 +24,10 @@ export interface ApiKeysExportsPort {
     state?: FileState,
   ): Promise<
     {
+      creationDate: Date;
       fileName: string;
-      state?: FileState;
+      lastModifiedDate: Date;
+      state: FileState;
     }[]
   >;
 

@@ -1,3 +1,4 @@
+import { AggregatedInstitutionsManageKeysExportFileDownloadLink } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileDownloadLink";
 import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import {
   AggregatedInstitutionsManageKeysExportFileMetadataNotReady,
@@ -30,7 +31,8 @@ import * as TE from "fp-ts/lib/TaskEither";
 
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
-  BadRequestError,
+  ExportFileNotFoundError,
+  ExportFileNotReadyError,
   ManagedInternalError,
   PreconditionFailedError,
   SubscriptionOwnershipError,
@@ -40,7 +42,7 @@ import {
   getInstitutionDelegations,
   getInstitutionGroups,
 } from "../institutions/selfcare";
-import { FileState, FileStateEnum } from "./api-keys-exports-port";
+import { ApiKeysExportsPort, FileStateEnum } from "./api-keys-exports-port";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
@@ -708,18 +710,20 @@ async function retrieveAggregates(
   return { aggregatesCounter, enrichedAggregateData };
 }
 
-export async function retrieveApiKeysExports(
+/**
+ * Retrieves the most recent Api Keys Export
+ * @param aggregatorId the id of the aggregator used for tag searching
+ * @param userId the id of the user used for tag searching
+ * @throws `ManagedInternalError` if the search goes wrong
+ * @throws `ExportFileNotFoundError` if no export is found with tags
+ * @returns the most recent export by lastModifiedDate
+ */
+async function retrieveMostRecentApiKeysExport(
+  apiKeysExportsAdapter: ApiKeysExportsPort,
   aggregatorId: string,
   userId: string,
-): Promise<AggregatedInstitutionsManageKeysExportFileMetadata> {
-  const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
-  const exportsFiles: {
-    creationDate: Date;
-    fileName: string;
-    lastModifiedDate: Date;
-    state: FileState;
-  }[] = [];
-
+) {
+  const exportsFiles = [];
   try {
     exportsFiles.push(
       ...(await apiKeysExportsAdapter.findExportsFiles(aggregatorId, userId)),
@@ -729,11 +733,25 @@ export async function retrieveApiKeysExports(
   }
 
   if (exportsFiles.length === 0) {
-    throw new BadRequestError("Bad Request", "Found 0 exports");
+    throw new ExportFileNotFoundError("Found 0 exports");
   }
 
   const mostRecentExport = exportsFiles.reduce((a, b) =>
     a.lastModifiedDate.getTime() >= b.lastModifiedDate.getTime() ? a : b,
+  );
+
+  return mostRecentExport;
+}
+
+export async function generateApiKeysExportsDownloadLink(
+  aggregatorId: string,
+  userId: string,
+): Promise<AggregatedInstitutionsManageKeysExportFileDownloadLink> {
+  const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
+  const mostRecentExport = await retrieveMostRecentApiKeysExport(
+    apiKeysExportsAdapter,
+    aggregatorId,
+    userId,
   );
 
   let timeRemaining: number;
@@ -742,9 +760,9 @@ export async function retrieveApiKeysExports(
   switch (mostRecentExport.state) {
     case FileStateEnum.FAILED:
     case FileStateEnum.IN_PROGRESS:
-      return AggregatedInstitutionsManageKeysExportFileMetadataNotReady.encode({
-        state: mostRecentExport.state as unknown as StateEnumNotReady,
-      });
+      throw new ExportFileNotReadyError(
+        `Can not generate download link on ${mostRecentExport.state} export: ${mostRecentExport.fileName}`,
+      );
     case FileStateEnum.DONE:
       timeRemaining =
         mostRecentExport.lastModifiedDate.getTime() +
@@ -767,10 +785,48 @@ export async function retrieveApiKeysExports(
       } catch {
         throw new ManagedInternalError("Error while generating download URL");
       }
-      return AggregatedInstitutionsManageKeysExportFileMetadataReady.encode({
+      return AggregatedInstitutionsManageKeysExportFileDownloadLink.encode({
         downloadLink: url.href,
+      });
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = mostRecentExport.state;
+      throw new ManagedInternalError("Unrecognized export state");
+  }
+}
+
+export async function retrieveApiKeysExportMetadata(
+  aggregatorId: string,
+  userId: string,
+): Promise<AggregatedInstitutionsManageKeysExportFileMetadata> {
+  const apiKeysExportsAdapter = ApiKeysExportsAdapter.getInstance(process.env);
+
+  const mostRecentExport = await retrieveMostRecentApiKeysExport(
+    apiKeysExportsAdapter,
+    aggregatorId,
+    userId,
+  );
+
+  let expirationDate: Date;
+  switch (mostRecentExport.state) {
+    case FileStateEnum.FAILED:
+    case FileStateEnum.IN_PROGRESS:
+      return AggregatedInstitutionsManageKeysExportFileMetadataNotReady.encode({
+        state: mostRecentExport.state as unknown as StateEnumNotReady,
+      });
+    case FileStateEnum.DONE:
+      expirationDate = new Date(
+        mostRecentExport.lastModifiedDate.getTime() +
+          apiKeysExportsAdapter.EXPORTS_API_KEYS_DURATION_IN_HOURS *
+            60 *
+            60 *
+            1000,
+      );
+      return AggregatedInstitutionsManageKeysExportFileMetadataReady.encode({
+        // TODO: remove this after openapi refactor
+        downloadLink: "",
         expirationDate: expirationDate.toISOString(),
-        state: FileStateEnum.DONE as unknown as StateEnumReady,
+        state: mostRecentExport.state as unknown as StateEnumReady,
       });
     default:
       // eslint-disable-next-line no-case-declarations
