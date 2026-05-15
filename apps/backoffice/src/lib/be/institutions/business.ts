@@ -86,7 +86,11 @@ export const retrieveUnboundInstitutionGroups = async (
   institutionId: string,
 ): Promise<Group[]> => {
   const [subscriptions, groups] = await Promise.all([
-    getManageSubscriptions(SubscriptionTypeEnum.MANAGE_GROUP, apimUserId),
+    getManageSubscriptions({
+      apimUserId,
+      selcSpecialGroups: [],
+      subscriptionType: SubscriptionTypeEnum.MANAGE_GROUP,
+    }),
     retrieveInstitutionGroups(institutionId),
   ]);
   const subscriptionBoundGroupIds = subscriptions.reduce(

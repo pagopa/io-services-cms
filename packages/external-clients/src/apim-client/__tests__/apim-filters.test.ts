@@ -179,20 +179,14 @@ describe("subscriptionsExceptManageOneApimFilter", () => {
 
 describe("manageGroupSubscriptionsFilter", () => {
   it("should return a MANAGE-GROUP- filter when no groups are provided", () => {
-    const res = manageGroupSubscriptionsFilter();
+    const res = manageGroupSubscriptionsFilter([], []);
 
     expect(res).toEqual("startswith(name, 'MANAGE-GROUP-')");
   });
 
-  it("should return an empty filter when empty array is provided", () => {
-    const res = manageGroupSubscriptionsFilter([]);
-
-    expect(res).toEqual("");
-  });
-
   it("should return a single MANAGE-GROUP- filter when a single group id provided", () => {
     const groupId = "g1";
-    const res = manageGroupSubscriptionsFilter([groupId]);
+    const res = manageGroupSubscriptionsFilter([groupId], []);
 
     expect(res).toEqual(`name eq 'MANAGE-GROUP-${groupId}'`);
   });
@@ -202,12 +196,54 @@ describe("manageGroupSubscriptionsFilter", () => {
     for (let index = 0; index < groupids.length; index++) {
       groupids[index] = "id" + index;
     }
-    const res = manageGroupSubscriptionsFilter(groupids);
+    const res = manageGroupSubscriptionsFilter(groupids, []);
 
     const expectedRes = groupids
       .map((groupId) => `name eq 'MANAGE-GROUP-${groupId}'`)
       .join(" or ");
     expect(res).toEqual(expectedRes);
+  });
+
+  it("should return a MANAGE-GROUP special filter when a special group is provided", () => {
+    const groupId = "g1";
+    const parentInstitutionId = "p1";
+    const res = manageGroupSubscriptionsFilter(
+      [groupId],
+      [parentInstitutionId],
+    );
+
+    expect(res).toEqual(
+      `name eq 'MANAGE-GROUP-${groupId}' and not(name eq 'MANAGE-GROUP-${parentInstitutionId}')`,
+    );
+  });
+
+  it("should return a composed MANAGE-GROUP special filter when multiple special group are provided", () => {
+    const groupId = "g1";
+    const parentInstitutionId = "p1";
+    const parentInstitutionId2 = "p2";
+    const res = manageGroupSubscriptionsFilter(
+      [groupId],
+      [parentInstitutionId, parentInstitutionId2],
+    );
+
+    expect(res).toEqual(
+      `name eq 'MANAGE-GROUP-${groupId}' and not(name eq 'MANAGE-GROUP-${parentInstitutionId}') or not(name eq 'MANAGE-GROUP-${parentInstitutionId2}')`,
+    );
+  });
+
+  it("should manage a composed MANAGE-GROUP filter with both group ids and special groups", () => {
+    const groupId = "g1";
+    const groupId2 = "g2";
+    const parentInstitutionId = "p1";
+    const parentInstitutionId2 = "p2";
+    const res = manageGroupSubscriptionsFilter(
+      [groupId, groupId2],
+      [parentInstitutionId, parentInstitutionId2],
+    );
+
+    expect(res).toEqual(
+      `name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${groupId2}' and not(name eq 'MANAGE-GROUP-${parentInstitutionId}') or not(name eq 'MANAGE-GROUP-${parentInstitutionId2}')`,
+    );
   });
 });
 
