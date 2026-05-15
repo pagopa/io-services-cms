@@ -20,10 +20,6 @@ export const GET = withJWTAuthHandler(
       );
       return sanitizedNextResponseJson(institutionResponse);
     } catch (error) {
-      // logger.error(
-      //   `An Error has occurred while retrieving authorized institution for user having selfcareUserId: ${backofficeUser.id}, apimManageSubscriptionId: ${backofficeUser.parameters.subscriptionId}`,
-      //   { error },
-      // );
       return handleInternalErrorResponse(
         "InstitutionsRetrieveError",
         error,
