@@ -1,13 +1,15 @@
 import { UserContract } from "@azure/arm-apimanagement";
 import { ApimUtils, SelfcareUtils } from "@io-services-cms/external-clients";
-import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createSubscriptionForGroup } from "../create-manage-group-subscription";
-import { GroupChangeEvent } from "../types";
+import {
+  AGGREGATOR_MANAGE_GROUP_DISPLAY_NAME_PREFIX,
+  createSubscriptionForGroup,
+} from "../create-manage-group-subscription";
+import { GroupChangeEvent, GroupCreateEvent } from "../types";
 
 const getMockInstitution = (institutionId: string) => ({
   description: "An institution",
@@ -51,7 +53,7 @@ describe("createSubscriptionForGroup", () => {
   const baseEvent = {
     id: "group-id",
     institutionId: "institution-id",
-    name: "group name",
+    name: `${AGGREGATOR_MANAGE_GROUP_DISPLAY_NAME_PREFIX}group name`,
     productId: "prod-io",
     status: "ACTIVE",
   } as GroupChangeEvent;
@@ -62,7 +64,6 @@ describe("createSubscriptionForGroup", () => {
     mocks.ApimService.createOrUpdateUser.mockReset();
     mocks.ApimService.getUserByEmail.mockReset();
     mocks.ApimService.upsertSubscription.mockReset();
-    mocks.SelfcareClient.getInstitutionById.mockReset();
     mocks.SelfcareClient.getInstitutionById.mockReset();
   });
 
@@ -122,8 +123,8 @@ describe("createSubscriptionForGroup", () => {
       ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + group.id,
       group.name,
     );
+    expect(mocks.SelfcareClient.getInstitutionById).not.toHaveBeenCalled();
   });
-
 
   it("should return Left when upsertSubscription fails", async () => {
     //given
@@ -159,4 +160,131 @@ describe("createSubscriptionForGroup", () => {
       expect(result.left).toStrictEqual(error);
     }
   });
+
+  it("should fetch selfcare api on unknown group name prefix", async () => {
+    //given
+    const aName = "group name";
+    const expectedDisplayName = `${AGGREGATOR_MANAGE_GROUP_DISPLAY_NAME_PREFIX}${aName}`;
+    const group = {
+      ...baseEvent,
+      name: aName,
+      parentInstitutionId: "parent-institution-id",
+    } as GroupCreateEvent;
+    const user = {
+      id: "/users/user-id",
+    } as UserContract;
+
+    mocks.ApimService.getUserByEmail.mockReturnValueOnce(
+      TE.right(O.some(user)),
+    );
+    mocks.SelfcareClient.getInstitutionById.mockReturnValueOnce(
+      TE.right({
+        ...getMockInstitution(baseEvent.institutionId),
+        description: aName,
+      }),
+    );
+    mocks.ApimService.upsertSubscription.mockReturnValueOnce(TE.right({}));
+
+    //when
+    const result = await createSubscriptionForGroup(
+      deps.apimService,
+      deps.selfcareClient,
+      mockApimUserGroups,
+    )(group)();
+
+    //then
+    expect(E.isRight(result)).toBeTruthy();
+    expect(mocks.ApimService.getUserByEmail).toHaveBeenCalledTimes(1);
+    expect(mocks.SelfcareClient.getInstitutionById).toHaveBeenCalledTimes(1);
+    expect(
+      mocks.ApimService.upsertSubscription,
+    ).toHaveBeenCalledExactlyOnceWith(
+      "user-id",
+      `${ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX}${group.id}`,
+      expectedDisplayName,
+    );
+  });
+
+  it("should fail on selfcare api error when fetching for institution description", async () => {
+    //given
+    const aName = "group name";
+    const group = {
+      ...baseEvent,
+      name: aName,
+      parentInstitutionId: "parent-institution-id",
+    } as GroupCreateEvent;
+    const user = {
+      id: "/users/user-id",
+    } as UserContract;
+    const anError = Error("unknown error");
+
+    mocks.ApimService.getUserByEmail.mockReturnValueOnce(
+      TE.right(O.some(user)),
+    );
+    mocks.SelfcareClient.getInstitutionById.mockReturnValueOnce(
+      TE.left(anError),
+    );
+
+    //when
+    const result = await createSubscriptionForGroup(
+      deps.apimService,
+      deps.selfcareClient,
+      mockApimUserGroups,
+    )(group)();
+
+    //then
+    expect(result).toMatchObject(
+      E.left({
+        message: expect.stringContaining(`reason: ${anError.message}`),
+      }),
+    );
+    expect(mocks.ApimService.upsertSubscription).not.toHaveBeenCalled();
+  });
+
+  it.each`
+    value
+    ${null}
+    ${undefined}
+  `(
+    "should fail on selfcare $value description when fetching for institution description",
+    async ({ value }) => {
+      //given
+      const aName = "group name";
+      const group = {
+        ...baseEvent,
+        name: aName,
+        parentInstitutionId: "parent-institution-id",
+      } as GroupCreateEvent;
+      const user = {
+        id: "/users/user-id",
+      } as UserContract;
+
+      mocks.ApimService.getUserByEmail.mockReturnValueOnce(
+        TE.right(O.some(user)),
+      );
+      mocks.SelfcareClient.getInstitutionById.mockReturnValueOnce(
+        TE.right({
+          ...getMockInstitution(baseEvent.institutionId),
+          description: value,
+        }),
+      );
+
+      //when
+      const result = await createSubscriptionForGroup(
+        deps.apimService,
+        deps.selfcareClient,
+        mockApimUserGroups,
+      )(group)();
+
+      //then
+      expect(result).toMatchObject(
+        E.left({
+          message: expect.stringContaining(
+            "reason: Unexpected empty institution description while trying to format display name",
+          ),
+        }),
+      );
+      expect(mocks.ApimService.upsertSubscription).not.toHaveBeenCalled();
+    },
+  );
 });
