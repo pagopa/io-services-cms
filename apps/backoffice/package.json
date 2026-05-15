@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms-backoffice",
-  "version": "2.3.0",
+  "version": "2.4.2",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -42,7 +42,7 @@
     "@pagopa/mui-italia": "^1.0.1",
     "archiver": "^7.0.1",
     "archiver-zip-encrypted": "^2.0.0",
-    "axios": "^1.6.5",
+    "axios": "catalog:",
     "fp-ts": "^2.16.5",
     "front-matter": "^4.0.2",
     "i18next": "^23.5.1",

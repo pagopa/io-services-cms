@@ -64,5 +64,5 @@ jobs:
         with:
           id: 'Selfcare OpenAPI drift detected'
           title: ':x: The workflow *OpenAPI Drift Detection* has failed.'
-          text: 'Differences were found in Selfcare OpenAPI between <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.json|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json|remote> version.\n Check the workflow:\n *URL*: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
+          text: 'Differences were found in Selfcare OpenAPI between the local copies <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/apps/backoffice/openapi-selfcare.json|local>, <https://raw.githubusercontent.com/pagopa/io-services-cms/refs/heads/master/packages/external-clients/openapi-selfcare.json|local> and <https://selfcare.pagopa.it/developer/external/v2/ms-external-api.json|remote> version.\n Check the workflow:\n *URL*: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}'
           slack_webhook_url: ${{ env.SLACK_WEBHOOK_URL }}

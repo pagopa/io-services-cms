@@ -1,6 +1,13 @@
 import { AggregatedInstitutionsManageKeysExportFileDownloadLink } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileDownloadLink";
 import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import useFetch from "@/hooks/use-fetch";
+import {
+  trackEaFileGenerateCompletedEvent,
+  trackEaFileGenerateEndEvent,
+  trackEaFileGenerateErrorEvent,
+  trackEaFileGenerateProgressEvent,
+  trackEaFileGenerateRefreshEvent,
+} from "@/utils/mix-panel";
 import { Download, RefreshOutlined } from "@mui/icons-material";
 import { LoadingButton } from "@mui/lab";
 import {
@@ -10,7 +17,7 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import { useCallback, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface AggregatedInstitutionDownloadAlertProps {
@@ -47,6 +54,24 @@ export const AggregatedInstitutionDownloadAlert = ({
       document.body.removeChild(link);
     }
   }, [fetchDownloadLink, t]);
+
+  useEffect(() => {
+    switch (data?.state) {
+      case "DONE":
+        trackEaFileGenerateCompletedEvent();
+        trackEaFileGenerateEndEvent("success");
+        break;
+      case "IN_PROGRESS":
+        trackEaFileGenerateProgressEvent();
+        break;
+      case "FAILED":
+        trackEaFileGenerateErrorEvent();
+        trackEaFileGenerateEndEvent("error");
+        break;
+      default:
+        break;
+    }
+  }, [data?.state]);
 
   const alertProps = useMemo<AlertProps | undefined>(() => {
     switch (data?.state) {
@@ -92,7 +117,10 @@ export const AggregatedInstitutionDownloadAlert = ({
         return {
           action: (
             <Button
-              onClick={onRefresh}
+              onClick={() => {
+                trackEaFileGenerateRefreshEvent();
+                onRefresh();
+              }}
               startIcon={<RefreshOutlined />}
               variant="naked"
             >

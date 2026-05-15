@@ -20,6 +20,7 @@ import { AppLayout, PageLayout } from "@/layouts";
 import { isAdmin } from "@/utils/auth-util";
 import {
   trackAggregatedInstitutionsPageEvent,
+  trackEaFileGenerateStartEvent,
   trackEaManageKeyCopyEvent,
   trackEaManageKeyRegenerateEvent,
   trackEaManageKeyShowEvent,
@@ -466,6 +467,7 @@ export default function AggregatedInstitutions() {
             hideGenerate={Boolean(currentSearchByInstitutionName)}
             onEmptySearch={resetSearchByInstitutionName}
             onGenerateClick={() => {
+              trackEaFileGenerateStartEvent();
               setIsModalOpened(true);
             }}
             onSearchClick={handleSearchByInstitutionNameClick}
@@ -477,7 +479,7 @@ export default function AggregatedInstitutions() {
               setIsModalOpened(false);
             }}
             onConfirm={handleConfirmDialog}
-            sumbitting={fetchingRequestKeys}
+            submitting={fetchingRequestKeys}
           />
           <AggregatedInstitutionTableView
             columns={tableViewColumns}

@@ -88,3 +88,8 @@ data "azurerm_key_vault_secret" "pdv_tokenizer_api_key" {
   name         = var.pdv_tokenizer_api_key_name
   key_vault_id = var.key_vault_id
 }
+
+data "azurerm_key_vault_secret" "selfcare_api_key" {
+  name         = var.selfcare_api_key_name
+  key_vault_id = var.key_vault_id
+}
