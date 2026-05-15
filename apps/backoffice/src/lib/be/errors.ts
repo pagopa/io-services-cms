@@ -76,25 +76,16 @@ export class PreconditionFailedError extends Error {
 export class ExportFileNotReadyError extends ManagedInternalError {
   additionalDetails?: string;
   constructor(message: string, additionalDetails?: unknown) {
-    super("Export File not ready");
+    super(message, additionalDetails);
     this.name = "ExportFileNotReadyError";
-    this.message = message;
-    this.additionalDetails =
-      typeof additionalDetails === "string"
-        ? additionalDetails
-        : JSON.stringify(additionalDetails);
   }
 }
 
 export class ExportFileNotFoundError extends ManagedInternalError {
   additionalDetails?: string;
   constructor(additionalDetails?: unknown) {
-    super("Export File Not Found");
+    super("Export File Not Found", additionalDetails);
     this.name = "ExportFileNotFoundError";
-    this.additionalDetails =
-      typeof additionalDetails === "string"
-        ? additionalDetails
-        : JSON.stringify(additionalDetails);
   }
 }
 
