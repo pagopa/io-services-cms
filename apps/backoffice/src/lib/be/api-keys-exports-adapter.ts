@@ -106,23 +106,16 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
       lastModifiedDate: Date;
       state: FileState;
     }[] = [];
-    const tagQuery =
-      `"institutionId" = '${institutionId}' AND "userId" = '${userId}'` +
-      (state ? ` AND "state" = '${state}'` : "");
+    const prefix = `${institutionId}_${userId}`;
     try {
-      const result = this.blobContainerClient.findBlobsByTags(tagQuery);
+      const result = this.blobContainerClient.listBlobsFlat({
+        includeTags: true,
+        prefix,
+      });
 
       for await (const blob of result) {
-        const blobClient = this.blobContainerClient.getBlobClient(blob.name);
-        const { createdOn: creationDate, lastModified: lastModifiedDate } =
-          await blobClient.getProperties();
-
-        if (!state) {
-          // Azure SDK returns only searched tags. To get all tags we perform an additional getTags
-          // on the specific blob
-          const allTags = await blobClient.getTags();
-          blob.tags = allTags.tags;
-        }
+        const creationDate = blob.properties.createdOn;
+        const lastModifiedDate = blob.properties.lastModified;
 
         if (
           !(creationDate instanceof Date) ||
@@ -139,6 +132,11 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
             `Blob ${blob.name} has an invalid state tag: ${blob.tags?.state}`,
           );
         }
+
+        if (state && stateResult.right !== state) {
+          continue;
+        }
+
         blobs.push({
           creationDate,
           fileName: blob.name,
