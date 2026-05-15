@@ -823,8 +823,6 @@ export async function retrieveApiKeysExportMetadata(
             1000,
       );
       return AggregatedInstitutionsManageKeysExportFileMetadataReady.encode({
-        // TODO: remove this after openapi refactor
-        downloadLink: "",
         expirationDate: expirationDate.toISOString(),
         state: mostRecentExport.state as unknown as StateEnumReady,
       });

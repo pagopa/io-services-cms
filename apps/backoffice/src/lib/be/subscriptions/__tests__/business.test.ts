@@ -1441,7 +1441,6 @@ describe("Manage Keys", () => {
 
       // then
       expect(result).toEqual({
-        downloadLink: "",
         state: FileStateEnum.DONE,
         expirationDate: expirationDate.toISOString(),
       });
@@ -1499,7 +1498,6 @@ describe("Manage Keys", () => {
 
       // then
       expect(result).toEqual({
-        downloadLink: "",
         state: FileStateEnum.DONE,
         expirationDate: expirationDate.toISOString(),
       });

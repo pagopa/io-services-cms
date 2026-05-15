@@ -1,9 +1,34 @@
 /// <reference types="@testing-library/jest-dom" />
-import { fireEvent, render, screen } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AggregatedInstitutionDownloadAlert } from "../../components/aggregated-institutions/aggregated-institution-download-alert";
 import { StateEnum as NotReadyStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysExportFileMetadataNotReady";
 import { StateEnum as ReadyStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysExportFileMetadataReady";
+
+const { mockFetchDownloadLink, mockUseFetch, mockGenerateDirectDownloadLink } =
+  vi.hoisted(() => {
+    const mockFetchDownloadLink = vi.fn();
+    const mockGenerateDirectDownloadLink = vi.fn();
+    const mockUseFetch = vi.fn(() => ({
+      data: undefined,
+      error: undefined,
+      fetchData: mockFetchDownloadLink,
+      loading: false,
+    }));
+    return {
+      mockFetchDownloadLink,
+      mockUseFetch,
+      mockGenerateDirectDownloadLink,
+    };
+  });
+
+vi.mock("@/hooks/use-fetch", () => ({
+  default: mockUseFetch,
+  client: {
+    generateDirectDownloadLinkForAggregatedInstitutionsManageKeys:
+      mockGenerateDirectDownloadLink,
+  },
+}));
 
 vi.mock("react-i18next", () => ({
   useTranslation: () => ({
@@ -12,6 +37,10 @@ vi.mock("react-i18next", () => ({
       options?.expirationDate ? `${key}:${options.expirationDate}` : key,
   }),
 }));
+
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
 describe("[AggregatedInstitutionDownloadAlert] Component", () => {
   it("should not render anything when link metadata is undefined", () => {
@@ -25,11 +54,10 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it("should render the success state with download action", () => {
+  it("should render the success state with download button", () => {
     render(
       <AggregatedInstitutionDownloadAlert
         data={{
-          downloadLink: "https://example.com/manage-keys.json",
           expirationDate: "2026-04-15T10:00:00",
           state: ReadyStateEnum.DONE,
         }}
@@ -48,15 +76,82 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
       ),
     ).toBeInTheDocument();
 
-    const link = screen.getByRole("link", {
-      name: "routes.aggregated-institutions.downloadAlert.success.action",
+    expect(
+      screen.getByRole("button", {
+        name: "routes.aggregated-institutions.downloadAlert.success.action",
+      }),
+    ).toBeInTheDocument();
+  });
+
+  it("should call fetchDownloadLink and trigger anchor download on button click", async () => {
+    const anchorClickSpy = vi
+      .spyOn(HTMLElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    mockFetchDownloadLink.mockResolvedValueOnce({
+      data: { downloadLink: "https://example.com/fresh-link.json" },
+      success: true,
     });
 
-    expect(link).toHaveAttribute(
-      "href",
-      "https://example.com/manage-keys.json",
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{
+          expirationDate: "2026-04-15T10:00:00",
+          state: ReadyStateEnum.DONE,
+        }}
+        onRefresh={vi.fn()}
+      />,
     );
-    expect(link).toHaveAttribute("download", "I tuoi enti.json");
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "routes.aggregated-institutions.downloadAlert.success.action",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(mockFetchDownloadLink).toHaveBeenCalledWith(
+        "generateDirectDownloadLinkForAggregatedInstitutionsManageKeys",
+        {},
+        expect.anything(),
+        { notify: "errors" },
+      );
+      expect(anchorClickSpy).toHaveBeenCalledOnce();
+    });
+
+    anchorClickSpy.mockRestore();
+  });
+
+  it("should not trigger anchor download when fetchDownloadLink fails", async () => {
+    const anchorClickSpy = vi
+      .spyOn(HTMLElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    mockFetchDownloadLink.mockResolvedValueOnce({
+      error: { kind: "httpError", message: "serverError", status: 500 },
+      success: false,
+    });
+
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{
+          expirationDate: "2026-04-15T10:00:00",
+          state: ReadyStateEnum.DONE,
+        }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "routes.aggregated-institutions.downloadAlert.success.action",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(mockFetchDownloadLink).toHaveBeenCalledOnce();
+      expect(anchorClickSpy).not.toHaveBeenCalled();
+    });
+
+    anchorClickSpy.mockRestore();
   });
 
   it("should render the in-progress state and refresh on action click", () => {

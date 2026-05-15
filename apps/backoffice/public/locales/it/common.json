@@ -407,7 +407,8 @@
         "success": {
           "title": "Il file .json è pronto per il download",
           "description": "Sarà disponibile fino al {{expirationDate}}",
-          "action": "Scarica file .json"
+          "action": "Scarica file .json",
+          "downloadAttribute": "I tuoi enti.json"
         },
         "failure": {
           "title": "La generazione del file non è andata a buon fine",
