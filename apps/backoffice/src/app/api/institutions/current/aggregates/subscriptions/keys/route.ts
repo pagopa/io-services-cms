@@ -2,11 +2,13 @@ import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/
 import { RequestAggregatedInstitutionsManageKeysPayload } from "@/generated/api/RequestAggregatedInstitutionsManageKeysPayload";
 import { ResponseError } from "@/generated/api/ResponseError";
 import {
-  BadRequestError,
+  ExportFileNotFoundError,
+  ExportFileNotReadyError,
   PreconditionFailedError,
   handleBadRequestErrorResponse,
   handleForbiddenErrorResponse,
   handleInternalErrorResponse,
+  handleNotFoundErrorResponse,
   handlePreconditionFailedErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
@@ -14,10 +16,54 @@ import { parseBody } from "@/lib/be/req-res-utils";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import {
   generateApiKeysExports,
-  retrieveApiKeysExports,
+  generateApiKeysExportsDownloadLink,
+  retrieveApiKeysExportMetadata,
 } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
+
+/**
+ * @description Get Aggregated Institutions API Keys export Metadata
+ * @operationId getAggregatedInstitutionsManageKeysMetadata
+ */
+export const GET = withJWTAuthHandler(
+  async (
+    _request: NextRequest,
+    {
+      backofficeUser,
+    }: {
+      backofficeUser: BackOfficeUserEnriched;
+    },
+  ): Promise<
+    NextResponse<
+      AggregatedInstitutionsManageKeysExportFileMetadata | ResponseError
+    >
+  > => {
+    if (!backofficeUser.institution.isAggregator) {
+      return handleForbiddenErrorResponse(
+        "Only aggregators are authorized to request metadata about download procedure",
+      );
+    }
+
+    try {
+      const result = await retrieveApiKeysExportMetadata(
+        backofficeUser.institution.id,
+        backofficeUser.parameters.userId,
+      );
+      return sanitizedNextResponseJson(result);
+    } catch (error) {
+      if (error instanceof ExportFileNotFoundError) {
+        handlerErrorLog(error.message, error);
+        return handleNotFoundErrorResponse("Export not found", error);
+      }
+      return handleInternalErrorResponse(
+        "GetAggregatedInstitutionsManageKeysMetadata",
+        error,
+        `An Error has occurred while getting metadata for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
+      );
+    }
+  },
+);
 
 /**
  * @description Request to generate a manage keys exports file for aggregated institutions allowed to use by the current aggregator
@@ -74,10 +120,10 @@ export const POST = withJWTAuthHandler(
 );
 
 /**
- * @description Retrieve Metadata for Aggregated Institutions Download procedure
- * @operationId getAggregatedInstitutionsManageKeysLink
+ * @description Generate download link for Aggregated Institutions API Keys export
+ * @operationId generateDirectDownloadLinkForAggregatedInstitutionsManageKeys
  */
-export const GET = withJWTAuthHandler(
+export const PUT = withJWTAuthHandler(
   async (
     _request: NextRequest,
     {
@@ -92,25 +138,28 @@ export const GET = withJWTAuthHandler(
   > => {
     if (!backofficeUser.institution.isAggregator) {
       return handleForbiddenErrorResponse(
-        "Only aggregators are authorized to request metadata about download procedure",
+        "Only aggregators are authorized to request link about download procedure",
       );
     }
 
     try {
-      const result = await retrieveApiKeysExports(
+      const result = await generateApiKeysExportsDownloadLink(
         backofficeUser.institution.id,
         backofficeUser.parameters.userId,
       );
-      return sanitizedNextResponseJson(result);
+      return sanitizedNextResponseJson(result, 201);
     } catch (error) {
-      if (error instanceof BadRequestError) {
+      if (
+        error instanceof ExportFileNotFoundError ||
+        error instanceof ExportFileNotReadyError
+      ) {
         handlerErrorLog(error.message, error);
         return handleBadRequestErrorResponse(error.message);
       }
       return handleInternalErrorResponse(
-        "GetAggregatedInstitutionsManageKeysLink",
+        "GenerateDirectDownloadLinkForAggregatedInstitutionsManageKeys",
         error,
-        `An Error has occurred while getting manage keys exports for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
+        `An Error has occurred while generating download link for aggregated institutions for aggregatorId '${backofficeUser.institution.id}'`,
       );
     }
   },
