@@ -181,6 +181,31 @@ describe("userAuthz", () => {
     );
   });
 
+  describe("isUserAllowedOnGroup", () => {
+    it.each`
+      scenario                                                                                             | expectedResult | selcGroups                                                    | groupId                | checkActive
+      ${"selcGroups is not defined"}                                                                       | ${false}       | ${undefined}                                                  | ${"groupId"}           | ${undefined}
+      ${"selcGroups is empty"}                                                                             | ${false}       | ${[]}                                                         | ${"groupId"}           | ${undefined}
+      ${"groupId is included in selcGroups as string"}                                                     | ${true}        | ${["groupId"]}                                                | ${"groupId"}           | ${undefined}
+      ${"groupId is not included in selcGroups as string"}                                                 | ${false}       | ${["groupId"]}                                                | ${"different_groupId"} | ${undefined}
+      ${"groupId is included in enriched selcGroups and active check is not required"}                     | ${true}        | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${undefined}
+      ${"groupId is included in enriched selcGroups and active check is explicitly disabled"}              | ${true}        | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${false}
+      ${"groupId is included in enriched selcGroups but group is not active and active check is required"} | ${false}       | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${true}
+      ${"groupId is included in enriched selcGroups and group is active and active check is required"}     | ${true}        | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}    | ${"groupId"}           | ${true}
+      ${"groupId is not included in enriched selcGroups and active check is required"}                     | ${false}       | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}    | ${"different_groupId"} | ${true}
+    `(
+      "should return $expectedResult when $scenario",
+      ({ expectedResult, selcGroups, groupId, checkActive }) => {
+        expect(
+          userAuthz({
+            institution: { role: SelfcareRoles.operator },
+            permissions: { selcGroups },
+          } as BackOfficeUser).isUserAllowedOnGroup(groupId, checkActive),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
   describe("hasSelcGroups", () => {
     it.each`
       scenario                                 | expectedResult | selcGroups
