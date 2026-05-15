@@ -1,5 +1,16 @@
 # io-services-cms-backoffice
 
+## 2.5.0
+
+### Minor Changes
+
+- 40c5d8a3: Define the role of the Aggregator Admin and update the necessary routes
+
+### Patch Changes
+
+- 2afcb28c: add new domain Group type to handle parentInstitutionId property
+- 7b2ef18d: improve selfcare client error logging
+
 ## 2.4.2
 
 ### Patch Changes
