@@ -1,5 +1,4 @@
-import { institutionGroupBaseHandler } from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
-import { Group } from "@/generated/api/Group";
+import { institutionGroupBaseHandler } from "@/lib/be/groups/institution-groups-util";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -20,7 +19,7 @@ export const GET = withJWTAuthHandler(
   ) =>
     await institutionGroupBaseHandler(request, {
       backofficeUser,
-      groupHandler: (groups: Group[]) =>
+      groupHandler: (groups) =>
         new NextResponse(null, {
           status: groups.length > 0 ? 200 : 204,
         }),

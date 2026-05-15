@@ -1,4 +1,3 @@
-import { Group } from "@/generated/api/Group";
 import {
   ServiceListItem,
   VisibilityEnum,
@@ -8,6 +7,7 @@ import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycl
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
 import { ServiceMetadata } from "@/generated/services-cms/ServiceMetadata";
 import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
+import { toGroupResponse } from "@/lib/be/groups/institution-groups-util";
 import {
   DateUtils,
   ServiceLifecycle,
@@ -21,6 +21,7 @@ import * as RA from "fp-ts/lib/ReadonlyArray";
 import { pipe } from "fp-ts/lib/function";
 
 import { Institution } from "../../../../types/next-auth";
+import { DomainGroup } from "../institutions/business";
 
 export const MISSING_SERVICE_NAME =
   "Servizio non disponibile" as NonEmptyString;
@@ -48,7 +49,7 @@ export const reducePublicationServicesList = (
 export const toServiceListItem =
   (
     topicsMap: Record<string, ServiceTopic>,
-    groupsMap: Map<Group["id"], Group>,
+    groupsMap: Map<DomainGroup["id"], DomainGroup>,
   ) =>
   ({
     data,
@@ -160,16 +161,22 @@ export const reduceServiceTopicsList = (
       )
     : ({} as Record<string, ServiceTopic>);
 
-export const reduceGrops = (groups: Group[]): Map<Group["id"], Group> =>
+export const reduceGrops = (
+  groups: DomainGroup[],
+): Map<DomainGroup["id"], DomainGroup> =>
   groups.reduce(
     (map, group) => map.set(group.id, group),
-    new Map<Group["id"], Group>(),
+    new Map<DomainGroup["id"], DomainGroup>(),
   );
 
+// TODO: move mapping logic to route handler
 export const mapServiceGroup = (
   { group_id, ...othersMetadata }: ServiceMetadata,
-  groupIdToNameMap: Map<Group["id"], Group>,
-) => ({
-  ...othersMetadata,
-  group: group_id ? groupIdToNameMap.get(group_id) : undefined,
-});
+  groupIdToNameMap: Map<DomainGroup["id"], DomainGroup>,
+) => {
+  const group = group_id ? groupIdToNameMap.get(group_id) : undefined;
+  return {
+    ...othersMetadata,
+    group: group ? toGroupResponse(group) : undefined,
+  };
+};

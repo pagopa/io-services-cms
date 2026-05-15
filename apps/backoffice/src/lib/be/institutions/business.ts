@@ -28,6 +28,10 @@ type PromiseValue<T> = T extends Promise<infer U> ? U : never; // TODO: move to 
 // Type utility to extract the resolved type of a ReadonlyArray of Promises
 type ReadonlyArrayElementType<T> = T extends readonly (infer U)[] ? U : never; // TODO: move to an Utils monorepo package
 
+export type DomainGroup = {
+  parentInstitutionId?: string;
+} & Group;
+
 /**
  * Retrieve the institutions from which the user is authorized to operate
  * @param selfCareUserId the user id
@@ -58,8 +62,8 @@ export const retrieveInstitution = async (
 export const retrieveInstitutionGroups = async (
   institutionId: string,
   state?: GroupFilter,
-): Promise<Group[]> => {
-  const groups: Group[] = [];
+): Promise<DomainGroup[]> => {
+  const groups: DomainGroup[] = [];
   let page = 0;
   let hasMoreItems = false;
   do {
@@ -84,7 +88,7 @@ export const retrieveInstitutionGroups = async (
 export const retrieveUnboundInstitutionGroups = async (
   apimUserId: string,
   institutionId: string,
-): Promise<Group[]> => {
+): Promise<DomainGroup[]> => {
   const [subscriptions, groups] = await Promise.all([
     getManageSubscriptions(SubscriptionTypeEnum.MANAGE_GROUP, apimUserId),
     retrieveInstitutionGroups(institutionId),
@@ -94,7 +98,7 @@ export const retrieveUnboundInstitutionGroups = async (
       acc.add(
         item.id.substring(ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length),
       ),
-    new Set<Group["id"]>(),
+    new Set<DomainGroup["id"]>(),
   );
   return groups.filter((group) => !subscriptionBoundGroupIds.has(group.id));
 };
@@ -146,13 +150,14 @@ const toGroups = (
     PromiseValue<ReturnType<typeof getInstitutionGroups>>["content"],
     undefined
   >,
-): Group[] => userGroupResources.map(toGroup);
+): DomainGroup[] => userGroupResources.map(toGroup);
 
 const toGroup = (
   group: PromiseValue<ReturnType<typeof getSelfcareGroup>>,
-): Group => ({
+): DomainGroup => ({
   id: group.id,
   name: group.name,
+  parentInstitutionId: group.parentInstitutionId,
   state: parseState(group.status),
 });
 
@@ -189,7 +194,7 @@ export const groupExists = async (
 export const getGroup = async (
   groupId: NonEmptyString,
   institutionId: string,
-): Promise<Group> => {
+): Promise<DomainGroup> => {
   const selfcareGroup = await getSelfcareGroup(groupId, institutionId);
   return toGroup(selfcareGroup);
 };
