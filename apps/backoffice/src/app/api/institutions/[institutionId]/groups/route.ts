@@ -1,7 +1,7 @@
 import {
   institutionGroupBaseHandler,
   toGroupsResponse,
-} from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
+} from "@/lib/be/groups/institution-groups-util";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest } from "next/server";

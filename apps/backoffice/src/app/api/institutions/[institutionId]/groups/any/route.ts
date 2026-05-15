@@ -1,4 +1,4 @@
-import { institutionGroupBaseHandler } from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
+import { institutionGroupBaseHandler } from "@/lib/be/groups/institution-groups-util";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
 import { NextRequest, NextResponse } from "next/server";
 

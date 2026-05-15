@@ -46,7 +46,7 @@ vi.mock("@/lib/be/wrappers", async (importOriginal) => {
   };
 });
 
-vi.mock("../institution-groups-util", async (importOriginal) => {
+vi.mock("@/lib/be/groups/institution-groups-util", async (importOriginal) => {
   const original = (await importOriginal()) as any;
   return {
     ...original,

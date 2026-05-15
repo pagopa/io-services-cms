@@ -1,4 +1,3 @@
-import { toGroupResponse } from "@/app/api/institutions/[institutionId]/groups/institution-groups-util";
 import {
   ServiceListItem,
   VisibilityEnum,
@@ -8,6 +7,7 @@ import { ServiceLifecycleStatus } from "@/generated/services-cms/ServiceLifecycl
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/services-cms/ServiceLifecycleStatusType";
 import { ServiceMetadata } from "@/generated/services-cms/ServiceMetadata";
 import { ServiceTopic } from "@/generated/services-cms/ServiceTopic";
+import { toGroupResponse } from "@/lib/be/groups/institution-groups-util";
 import {
   DateUtils,
   ServiceLifecycle,

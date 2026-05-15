@@ -1,13 +1,13 @@
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { Group, StateEnum } from "../../../../../../generated/api/Group";
+import { StateEnum } from "../../../../generated/api/Group";
 import {
   GroupFilterType,
   GroupFilterTypeEnum,
-} from "../../../../../../generated/api/GroupFilterType";
-import { DomainGroup } from "../../../../../../lib/be/institutions/business";
-import { BackOfficeUserEnriched } from "../../../../../../lib/be/wrappers";
+} from "../../../../generated/api/GroupFilterType";
+import { DomainGroup } from "../../institutions/business";
+import { BackOfficeUserEnriched } from "../../wrappers";
 import {
   institutionGroupBaseHandler,
   toGroupResponse,
