@@ -518,7 +518,7 @@ export async function generateApiKeysExports(
     );
   }
 
-  const fileName = randomBytes(16).toString("hex") + ".zip"; // generate a random string to be used as file name for the export file to avoid conflicts in case of multiple export generation requests
+  const fileName = `${aggregatorId}_${userId}_${randomBytes(4).toString("hex")}`; // generate filename with institution/user prefix + random suffix to avoid conflicts
 
   await apiKeysExportsAdapter.initializeFile(fileName, aggregatorId, userId);
 

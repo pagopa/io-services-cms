@@ -1076,11 +1076,11 @@ describe("Manage Keys", () => {
     const aggregatorId = "aggregatorId";
     const userId = "userId";
     const password = "aSecurePassword";
-    const fakeFileName = "abcdef1234567890abcdef1234567890.zip";
+    const fakeFileName = "aggregatorId_userId_abcd1234";
 
     beforeEach(() => {
       mocks.randomBytes.mockReturnValue({
-        toString: () => "abcdef1234567890abcdef1234567890",
+        toString: () => "abcd1234",
       });
     });
 
