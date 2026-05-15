@@ -12,6 +12,7 @@ import {
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { regenerateManageSubscriptionApiKey } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched } from "@/lib/be/wrappers";
+import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
@@ -26,7 +27,15 @@ export const regenerateManageSubscriptionKeyHandler = async (
     params: { keyType: string; subscriptionId: string };
   },
 ): Promise<NextResponse<ResponseError | SubscriptionKeys>> => {
-  if (!userAuthz(backofficeUser).isAdmin()) {
+  const allowed =
+    userAuthz(backofficeUser).isAdmin() ||
+    userAuthz(backofficeUser).isAnAggregatorAdminAllowedOnGroup(
+      params.subscriptionId.substring(
+        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+      ),
+    );
+
+  if (!allowed) {
     return handleForbiddenErrorResponse("Role not authorized");
   }
   try {

@@ -5,6 +5,7 @@
 /** Selfcare roles */
 export enum SelfcareRoles {
   admin = "admin",
+  adminAggregator = "admin_aggregator",
   operator = "operator",
 }
 
