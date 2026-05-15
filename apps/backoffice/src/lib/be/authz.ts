@@ -20,8 +20,10 @@ export const isInstitutionIdSameAsCaller = (
 
 export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
   const isAdmin = (): boolean => user.institution.role === SelfcareRoles.admin;
+
   const isAggregatorAdmin = (): boolean =>
     user.institution.role === SelfcareRoles.adminAggregator;
+
   const isUserAllowedOnGroup = (
     groupId: string,
     checkActive?: boolean,
