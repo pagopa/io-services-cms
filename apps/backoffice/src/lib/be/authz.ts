@@ -77,6 +77,7 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
       return isUserAllowedOnGroup(groupId, checkActive);
     },
 
+    // TODO: refactor this method and its usage to simplify the logic of the permission check.
     /**
      * Checks if a group is allowed based on user permissions, optionally verifying its active state
      * @param groupId - The group identifier to check
