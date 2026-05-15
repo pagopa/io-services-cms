@@ -147,6 +147,7 @@ const buildSelfcareClient = (): SelfcareClient => {
                 states: "ACTIVE",
                 userId,
               },
+              timeout: 10000,
             }),
           identity,
         ),

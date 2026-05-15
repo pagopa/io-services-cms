@@ -27,8 +27,8 @@ export const getUserAuthorizedInstitutions = async (
   // errore validazione parametri chiamata
   if (E.isLeft(apiResult)) {
     throw new ManagedInternalError(
-      "Error calling selfcare getInstitutionsUsingGET API",
-      apiResult.left,
+      "Error calling selfcare getUserAuthorizedInstitutions API",
+      apiResult.left.message,
     );
   }
 
@@ -53,7 +53,7 @@ export const getInstitutionById = async (
 
     throw new ManagedInternalError(
       "Error calling selfcare getInstitution API",
-      apiResult.left,
+      apiResult.left.message,
     );
   }
 
@@ -78,7 +78,7 @@ export const getInstitutionGroups = async (params: {
   if (E.isLeft(apiResult)) {
     throw new ManagedInternalError(
       "Error calling selfcare getInstitutionGroups API",
-      apiResult.left,
+      apiResult.left.message,
     );
   }
 
@@ -110,7 +110,7 @@ export const getGroup = async (
 
     throw new ManagedInternalError(
       "Error calling selfcare getGroup API",
-      apiResult.left,
+      apiResult.left.message,
     );
   }
 
@@ -145,7 +145,7 @@ export const getInstitutionDelegations = async (
   if (E.isLeft(apiResult)) {
     throw new ManagedInternalError(
       "Error calling selfcare getDelegatedInstitutions API",
-      apiResult.left,
+      apiResult.left.message,
     );
   }
 
@@ -174,7 +174,7 @@ export const getInstitutionProducts = async (
   if (E.isLeft(apiResult)) {
     throw new ManagedInternalError(
       "Error calling selfcare getInstitutionProducts API",
-      apiResult.left,
+      apiResult.left.message,
     );
   }
 

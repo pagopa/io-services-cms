@@ -161,6 +161,7 @@ describe("Selfcare Client", () => {
           states: "ACTIVE",
           size: 10000,
         },
+        timeout: expect.any(Number),
       });
       expect(isAxiosError).not.toHaveBeenCalled();
     });
@@ -182,6 +183,7 @@ describe("Selfcare Client", () => {
           states: "ACTIVE",
           size: 10000,
         },
+        timeout: expect.any(Number),
       });
       expect(isAxiosError).toHaveBeenCalled();
       expect(E.isLeft(result)).toBeTruthy();
@@ -201,6 +203,7 @@ describe("Selfcare Client", () => {
           states: "ACTIVE",
           size: 10000,
         },
+        timeout: expect.any(Number),
       });
       expect(isAxiosError).not.toHaveBeenCalled();
       expect(E.isLeft(result)).toBeTruthy();
