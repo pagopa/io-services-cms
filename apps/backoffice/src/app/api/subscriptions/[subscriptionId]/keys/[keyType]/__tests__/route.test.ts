@@ -1,51 +1,55 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { NextRequest, NextResponse } from "next/server";
-import { BackOfficeUser } from "../../../../../../../../types/next-auth";
+import { BackOfficeUserEnriched } from "../../../../../../../lib/be/wrappers";
 import { SubscriptionOwnershipError } from "../../../../../../../lib/be/errors";
 import { PUT } from "../route";
 
 const backofficeUserMock = {
   parameters: { userId: "userId" },
-  permissions: {}
-} as BackOfficeUser;
+  permissions: {},
+} as BackOfficeUserEnriched;
 
 const {
   userAuthzMock,
   isGroupAllowedMock,
   isAdminMock,
+  isAnAggregatorAdminAllowedOnGroupMock,
   regenerateManageSubscritionApiKeyMock,
-  withJWTAuthHandlerMock
+  withJWTAuthHandlerMock,
 } = vi.hoisted(() => ({
   isGroupAllowedMock: vi.fn(() => true),
   isAdminMock: vi.fn(() => true),
+  isAnAggregatorAdminAllowedOnGroupMock: vi.fn(() => false),
   userAuthzMock: vi.fn(() => ({
     isGroupAllowed: isGroupAllowedMock,
-    isAdmin: isAdminMock
+    isAdmin: isAdminMock,
+    isAnAggregatorAdminAllowedOnGroup: isAnAggregatorAdminAllowedOnGroupMock,
   })),
   regenerateManageSubscritionApiKeyMock: vi.fn(),
   withJWTAuthHandlerMock: vi.fn(
     (
       handler: (
         nextRequest: NextRequest,
-        context: { backofficeUser: BackOfficeUser; params: any }
-      ) => Promise<NextResponse> | Promise<Response>
-    ) => async (nextRequest: NextRequest, { params }: { params: {} }) =>
-      handler(nextRequest, {
-        backofficeUser: backofficeUserMock,
-        params
-      })
-  )
+        context: { backofficeUser: BackOfficeUserEnriched; params: any },
+      ) => Promise<NextResponse> | Promise<Response>,
+    ) =>
+      async (nextRequest: NextRequest, { params }: { params: {} }) =>
+        handler(nextRequest, {
+          backofficeUser: backofficeUserMock,
+          params,
+        }),
+  ),
 }));
 
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock
+  withJWTAuthHandler: withJWTAuthHandlerMock,
 }));
 vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock
+  userAuthz: userAuthzMock,
 }));
 vi.mock("@/lib/be/subscriptions/business", () => ({
-  regenerateManageSubscriptionApiKey: regenerateManageSubscritionApiKeyMock
+  regenerateManageSubscriptionApiKey: regenerateManageSubscritionApiKeyMock,
 }));
 
 afterEach(() => {
@@ -64,17 +68,46 @@ describe("regenerateManageSubscriptionKey", () => {
 
     // when
     const result = await PUT(nextRequest, {
-      params: { subscriptionId }
+      params: { subscriptionId },
     });
 
     // then
     const jsonBody = await result.json();
     expect(result.status).toBe(403);
     expect(jsonBody.detail).toEqual("Role not authorized");
-    expect(userAuthzMock).toHaveBeenCalledOnce();
+    expect(userAuthzMock).toHaveBeenCalledTimes(2);
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledOnce();
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledWith();
+    expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
+  });
+
+  it("should return an unauthorized response when provided aggregator admin is not allowed on the subscription", async () => {
+    // given
+    const nextRequest = new NextRequest("http://localhost");
+    const groupId = "groupId";
+    const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
+    isAdminMock.mockReturnValueOnce(false);
+    isAnAggregatorAdminAllowedOnGroupMock.mockReturnValueOnce(false);
+
+    // when
+    const result = await PUT(nextRequest, {
+      params: { subscriptionId },
+    });
+
+    // then
+    const jsonBody = await result.json();
+    expect(result.status).toBe(403);
+    expect(jsonBody.detail).toEqual("Role not authorized");
+    expect(userAuthzMock).toHaveBeenCalledTimes(2);
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+    expect(isAdminMock).toHaveBeenCalledOnce();
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+    expect(isAnAggregatorAdminAllowedOnGroupMock).toHaveBeenCalledExactlyOnceWith(
+      groupId
+    );
     expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
   });
 
@@ -88,7 +121,7 @@ describe("regenerateManageSubscriptionKey", () => {
 
     // when
     const result = await PUT(nextRequest, {
-      params: { subscriptionId, keyType }
+      params: { subscriptionId, keyType },
     });
 
     // then
@@ -99,7 +132,48 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
     expect(isAdminMock).toHaveBeenCalledOnce();
     expect(isAdminMock).toHaveBeenCalledWith();
+    expect(isAnAggregatorAdminAllowedOnGroupMock).not.toHaveBeenCalled(); // short-circuit admin check
     expect(regenerateManageSubscritionApiKeyMock).not.toHaveBeenCalled();
+  });
+
+  it("should return OK when aggregator admin is allowed on the subscription", async () => {
+    // given
+    const nextRequest = new NextRequest("http://localhost");
+    const keyType = "primary";
+    const groupId = "groupId";
+    const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
+    isAdminMock.mockReturnValueOnce(false);
+    isAnAggregatorAdminAllowedOnGroupMock.mockReturnValueOnce(true);
+    backofficeUserMock.permissions.selcGroups = [{ id: groupId }];
+
+    const expectedResponse = { foo: "bar" };
+    regenerateManageSubscritionApiKeyMock.mockResolvedValueOnce(
+      expectedResponse,
+    );
+
+    // when
+    const result = await PUT(nextRequest, {
+      params: { subscriptionId, keyType },
+    });
+
+    // then
+    const jsonBody = await result.json();
+    expect(result.status).toBe(200);
+    expect(jsonBody).toStrictEqual(expectedResponse);
+    expect(userAuthzMock).toHaveBeenCalledTimes(2);
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+    expect(isAdminMock).toHaveBeenCalledOnce();
+    expect(isAdminMock).toHaveBeenCalledWith();
+    expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+    expect(isAnAggregatorAdminAllowedOnGroupMock).toHaveBeenCalledExactlyOnceWith(
+      groupId
+    );
+    expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledOnce();
+    expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
+      backofficeUserMock.parameters.userId,
+      subscriptionId,
+      keyType,
+    );
   });
 
   it("should return OK when provided group id is allowed", async () => {
@@ -111,12 +185,12 @@ describe("regenerateManageSubscriptionKey", () => {
     isGroupAllowedMock.mockReturnValueOnce(true);
     const expectedResponse = { foo: "bar" };
     regenerateManageSubscritionApiKeyMock.mockResolvedValueOnce(
-      expectedResponse
+      expectedResponse,
     );
 
     // when
     const result = await PUT(nextRequest, {
-      params: { subscriptionId, keyType }
+      params: { subscriptionId, keyType },
     });
 
     // then
@@ -131,7 +205,7 @@ describe("regenerateManageSubscriptionKey", () => {
     expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
       backofficeUserMock.parameters.userId,
       subscriptionId,
-      keyType
+      keyType,
     );
   });
 
@@ -152,7 +226,7 @@ describe("regenerateManageSubscriptionKey", () => {
 
       // when
       const result = await PUT(nextRequest, {
-        params: { subscriptionId, keyType }
+        params: { subscriptionId, keyType },
       });
 
       // then
@@ -168,8 +242,8 @@ describe("regenerateManageSubscriptionKey", () => {
       expect(regenerateManageSubscritionApiKeyMock).toHaveBeenCalledWith(
         backofficeUserMock.parameters.userId,
         subscriptionId,
-        keyType
+        keyType,
       );
-    }
+    },
   );
 });

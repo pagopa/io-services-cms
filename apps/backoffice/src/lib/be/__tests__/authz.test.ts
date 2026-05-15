@@ -93,6 +93,50 @@ describe("userAuthz", () => {
     );
   });
 
+  describe("isAggregatorAdmin", () => {
+    it.each`
+      expectedResult | role
+      ${true}        | ${SelfcareRoles.adminAggregator}
+      ${false}       | ${SelfcareRoles.admin}
+      ${false}       | ${SelfcareRoles.operator}
+    `(
+      'should return $expectedResult for "$role" user',
+      ({ expectedResult, role }) => {
+        expect(
+          userAuthz({
+            institution: { role },
+          } as BackOfficeUser).isAggregatorAdmin(),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
+  describe("isAnAggregatorAdminAllowedOnGroup", () => {
+    it.each`
+      scenario                                                                          | expectedResult | role                             | selcGroups                                                  | groupId                | checkActive
+      ${"It is an Aggregator Admin and the group is allowed"}                           | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
+      ${"It is an Aggregator Admin and the group is both allowed and active (checked)"} | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${true}
+      ${"It is an Aggregator Admin and the group is allowed (explicitly unchecked)"}    | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${false}
+      ${"It is an Aggregator Admin and the group is allowed but not active"}            | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "DELETED" }]} | ${"groupId"}           | ${true}
+      ${"It is an Aggregator Admin and the group is allowed (groupId as string)"}       | ${true}        | ${SelfcareRoles.adminAggregator} | ${["groupId"]}                                              | ${"groupId"}           | ${undefined}
+      ${"It is an Aggregator Admin but the group does not match"}                       | ${false}       | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"different_groupId"} | ${undefined}
+      ${"It is an Aggregator Admin and there are no groups"}                            | ${false}       | ${SelfcareRoles.adminAggregator} | ${undefined}                                                | ${"groupId"}           | ${undefined}
+      ${"It is an Aggregator Admin and the group list is empty"}                        | ${false}       | ${SelfcareRoles.adminAggregator} | ${[]}                                                       | ${"groupId"}           | ${undefined}
+      ${"It is an Operator and the group is active"}                                    | ${false}       | ${SelfcareRoles.operator}        | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
+      ${"It is an Admin and the group is active"}                                       | ${false}       | ${SelfcareRoles.admin}           | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
+    `(
+      'should return $expectedResult for "$role" user with selcGroups: $selcGroups and groupId: $groupId',
+      ({ expectedResult, role, selcGroups, groupId }) => {
+        expect(
+          userAuthz({
+            institution: { role },
+            permissions: { selcGroups },
+          } as BackOfficeUser).isAnAggregatorAdminAllowedOnGroup(groupId),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
   describe("isInstitutionAllowed", () => {
     it.each`
       scenario                                 | expectedResult | allowedInstitutionId | providedInstitutionId
@@ -132,6 +176,31 @@ describe("userAuthz", () => {
             institution: { role },
             permissions: { selcGroups },
           } as BackOfficeUser).isGroupAllowed(groupId, active),
+        ).toBe(expectedResult);
+      },
+    );
+  });
+
+  describe("isUserAllowedOnGroup", () => {
+    it.each`
+      scenario                                                                                             | expectedResult | selcGroups                                                    | groupId                | checkActive
+      ${"selcGroups is not defined"}                                                                       | ${false}       | ${undefined}                                                  | ${"groupId"}           | ${undefined}
+      ${"selcGroups is empty"}                                                                             | ${false}       | ${[]}                                                         | ${"groupId"}           | ${undefined}
+      ${"groupId is included in selcGroups as string"}                                                     | ${true}        | ${["groupId"]}                                                | ${"groupId"}           | ${undefined}
+      ${"groupId is not included in selcGroups as string"}                                                 | ${false}       | ${["groupId"]}                                                | ${"different_groupId"} | ${undefined}
+      ${"groupId is included in enriched selcGroups and active check is not required"}                     | ${true}        | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${undefined}
+      ${"groupId is included in enriched selcGroups and active check is explicitly disabled"}              | ${true}        | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${false}
+      ${"groupId is included in enriched selcGroups but group is not active and active check is required"} | ${false}       | ${[{ id: "groupId", name: "groupName", state: "SUSPENDED" }]} | ${"groupId"}           | ${true}
+      ${"groupId is included in enriched selcGroups and group is active and active check is required"}     | ${true}        | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}    | ${"groupId"}           | ${true}
+      ${"groupId is not included in enriched selcGroups and active check is required"}                     | ${false}       | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}    | ${"different_groupId"} | ${true}
+    `(
+      "should return $expectedResult when $scenario",
+      ({ expectedResult, selcGroups, groupId, checkActive }) => {
+        expect(
+          userAuthz({
+            institution: { role: SelfcareRoles.operator },
+            permissions: { selcGroups },
+          } as BackOfficeUser).isUserAllowedOnGroup(groupId, checkActive),
         ).toBe(expectedResult);
       },
     );

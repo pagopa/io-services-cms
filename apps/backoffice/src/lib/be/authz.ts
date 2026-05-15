@@ -20,6 +20,29 @@ export const isInstitutionIdSameAsCaller = (
 
 export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
   const isAdmin = (): boolean => user.institution.role === SelfcareRoles.admin;
+
+  const isAggregatorAdmin = (): boolean =>
+    user.institution.role === SelfcareRoles.adminAggregator;
+
+  const isUserAllowedOnGroup = (
+    groupId: string,
+    checkActive?: boolean,
+  ): boolean => {
+    const { selcGroups } = user.permissions;
+    if (!selcGroups || selcGroups.length === 0) {
+      return false;
+    }
+    return selcGroups.some((group) => {
+      if (typeof group === "string") {
+        return group === groupId;
+      } else {
+        return checkActive
+          ? group.id === groupId && group.state === StateEnum.ACTIVE
+          : group.id === groupId;
+      }
+    });
+  };
+
   return {
     /**
      * Check if the user has at least one group
@@ -35,6 +58,29 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
      */
     isAdmin,
     /**
+     * Check if the user role is `admin_aggregator`
+     * @returns a boolean indicating whether the user is an aggregator admin or not
+     */
+    isAggregatorAdmin,
+
+    /**
+     * Check if the user role is `admin_aggregator` and allowed on a specific group
+     * @param groupId - The group identifier to check
+     * @param checkActive - Optional flag to enforce active state check on group
+     * @returns a boolean indicating whether the user is an aggregator admin allowed on the group or not
+     */
+    isAnAggregatorAdminAllowedOnGroup: (
+      groupId: string,
+      checkActive?: boolean,
+    ): boolean => {
+      if (!isAggregatorAdmin()) {
+        return false;
+      }
+      return isUserAllowedOnGroup(groupId, checkActive);
+    },
+
+    // TODO: refactor this method and its usage to simplify the logic of the permission check.
+    /**
      * Checks if a group is allowed based on user permissions, optionally verifying its active state
      * @param groupId - The group identifier to check
      * @param checkActive - Optional flag to enforce active state check on group
@@ -46,15 +92,7 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
         return true;
       }
 
-      return selcGroups.some((group) => {
-        if (typeof group === "string") {
-          return group === groupId;
-        } else {
-          return checkActive
-            ? group.id === groupId && group.state === StateEnum.ACTIVE
-            : group.id === groupId;
-        }
-      });
+      return isUserAllowedOnGroup(groupId, checkActive);
     },
 
     /**
@@ -64,5 +102,14 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
      */
     isInstitutionAllowed: (institutionId: string): boolean =>
       user.institution.id === institutionId,
+
+    /**
+     * Checks if the user is explicitly allowed on a specific group based on their permissions, optionally verifying its active state
+     * @param groupId - The group identifier to check
+     * @param checkActive - Optional flag to enforce active state check on group
+     * @returns Whether the user is permitted for the specified group
+     * @note This method does not consider the case of users without groups, which are allowed to access all groups. It strictly checks if the user has explicit permission for the given group.
+     */
+    isUserAllowedOnGroup: isUserAllowedOnGroup,
   };
 };
