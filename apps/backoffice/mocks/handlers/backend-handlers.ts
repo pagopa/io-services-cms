@@ -839,8 +839,6 @@ export const buildHandlers = () => {
         const resultArray = [
           new HttpResponse(
             JSON.stringify({
-              downloadLink:
-                getMockAggregatedInstitutionManageKeysJsonDownloadLink(),
               expirationDate: new Date().toISOString(),
               state: "DONE",
             }),
@@ -876,11 +874,33 @@ export const buildHandlers = () => {
     ),
     http.post(
       `${baseURL}/institutions/current/aggregates/subscriptions/keys`,
-      ({ request }) => {
-        const { body: _ } = request;
-
+      () => {
         const resultArray = [
           new HttpResponse(null, { status: 202 }),
+          new HttpResponse(null, { status: 400 }),
+          new HttpResponse(null, { status: 401 }),
+          new HttpResponse(null, { status: 403 }),
+          new HttpResponse(null, { status: 429 }),
+          new HttpResponse(null, { status: 500 }),
+        ];
+
+        return resultArray[0];
+      },
+    ),
+    http.put(
+      `${baseURL}/institutions/current/aggregates/subscriptions/keys`,
+      () => {
+        const resultArray = [
+          new HttpResponse(
+            JSON.stringify({
+              downloadLink:
+                getMockAggregatedInstitutionManageKeysJsonDownloadLink(),
+            }),
+            {
+              status: 201,
+            },
+          ),
+          new HttpResponse(null, { status: 400 }),
           new HttpResponse(null, { status: 401 }),
           new HttpResponse(null, { status: 403 }),
           new HttpResponse(null, { status: 429 }),

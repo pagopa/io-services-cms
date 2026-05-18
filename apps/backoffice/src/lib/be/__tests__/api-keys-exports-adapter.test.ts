@@ -13,7 +13,7 @@ const mocks = vi.hoisted(() => {
     uploadStream,
     setTags,
   }));
-  const findBlobsByTags = vi.fn();
+  const listBlobsFlat = vi.fn();
   const getProperties = vi.fn();
   const getTags = vi.fn();
   const getBlobClient = vi.fn(() => ({
@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => {
     url: "https://localhost",
   }));
   const getContainerClient = vi.fn(() => ({
-    findBlobsByTags,
+    listBlobsFlat,
     getBlockBlobClient,
     getBlobClient,
   }));
@@ -43,7 +43,7 @@ const mocks = vi.hoisted(() => {
     getBlockBlobClient,
     getBlobClient,
     getProperties,
-    findBlobsByTags,
+    listBlobsFlat,
     getContainerClient,
     blobServiceClientConstructor,
     defaultAzureCredentialConstructor,
@@ -127,10 +127,10 @@ describe("findExportsFiles", () => {
     EXPORTS_API_KEYS_DURATION_IN_HOURS: "24",
   };
 
-  it("should throw ManagedInternalError when blob tags query fails", async () => {
+  it("should throw ManagedInternalError when blob listing fails", async () => {
     // given
     const adapter = ApiKeysExportsAdapter.getInstance(environment);
-    mocks.findBlobsByTags.mockImplementationOnce(() => {
+    mocks.listBlobsFlat.mockImplementationOnce(() => {
       throw new Error("query failed");
     });
 
@@ -138,54 +138,49 @@ describe("findExportsFiles", () => {
     await expect(
       adapter.findExportsFiles("institutionId", "userId"),
     ).rejects.toThrowError(ManagedInternalError);
-    expect(mocks.findBlobsByTags).toHaveBeenCalledOnce();
-    expect(mocks.findBlobsByTags).toHaveBeenCalledWith(
-      "\"institutionId\" = 'institutionId' AND \"userId\" = 'userId'",
-    );
+    expect(mocks.listBlobsFlat).toHaveBeenCalledOnce();
+    expect(mocks.listBlobsFlat).toHaveBeenCalledWith({
+      includeTags: true,
+      prefix: "institutionId_userId",
+    });
   });
 
   it("should throw ManagedInternalError when a blob has an invalid state tag", async () => {
     // given
     const adapter = ApiKeysExportsAdapter.getInstance(environment);
-    mocks.findBlobsByTags.mockReturnValueOnce(
+    mocks.listBlobsFlat.mockReturnValueOnce(
       createAsyncIterable([
         {
           name: "invalid.zip",
+          properties: { createdOn: mockDate, lastModified: mockDate },
+          tags: { state: "UNKNOWN" },
         },
       ]),
     );
-    mocks.getProperties.mockReturnValueOnce({
-      lastModified: mockDate,
-      createdOn: mockDate,
-    });
-    mocks.getTags.mockResolvedValueOnce({
-      tags: {
-        state: "UNKNOWN",
-      },
-    });
 
     // when and then
     await expect(
       adapter.findExportsFiles("institutionId", "userId"),
     ).rejects.toThrowError(ManagedInternalError);
-    expect(mocks.findBlobsByTags).toHaveBeenCalledOnce();
-    expect(mocks.findBlobsByTags).toHaveBeenCalledWith(
-      "\"institutionId\" = 'institutionId' AND \"userId\" = 'userId'",
-    );
+    expect(mocks.listBlobsFlat).toHaveBeenCalledOnce();
+    expect(mocks.listBlobsFlat).toHaveBeenCalledWith({
+      includeTags: true,
+      prefix: "institutionId_userId",
+    });
   });
 
   it("should throw ManagedInternalError when a blob has invalid date properties", async () => {
     // given
     const adapter = ApiKeysExportsAdapter.getInstance(environment);
-    mocks.findBlobsByTags.mockReturnValueOnce(
+    mocks.listBlobsFlat.mockReturnValueOnce(
       createAsyncIterable([
-        { name: "file.zip", tags: { state: FileStateEnum.IN_PROGRESS } },
+        {
+          name: "file.zip",
+          properties: { createdOn: "not-a-date", lastModified: "not-a-date" },
+          tags: { state: FileStateEnum.IN_PROGRESS },
+        },
       ]),
     );
-    mocks.getProperties.mockResolvedValueOnce({
-      createdOn: "not-a-date",
-      lastModified: "not-a-date",
-    });
 
     // when and then
     await expect(
@@ -195,22 +190,21 @@ describe("findExportsFiles", () => {
         FileStateEnum.IN_PROGRESS,
       ),
     ).rejects.toThrowError(ManagedInternalError);
-    expect(mocks.findBlobsByTags).toHaveBeenCalledOnce();
-    expect(mocks.getProperties).toHaveBeenCalledOnce();
+    expect(mocks.listBlobsFlat).toHaveBeenCalledOnce();
   });
 
   it.each([
     {
       state: undefined,
-      expectedQuery:
-        "\"institutionId\" = 'institutionId' AND \"userId\" = 'userId'",
       blobs: [
         {
           name: "file-1.zip",
+          properties: { createdOn: mockDate, lastModified: mockDate },
           tags: { state: FileStateEnum.IN_PROGRESS },
         },
         {
           name: "file-2.zip",
+          properties: { createdOn: mockDate, lastModified: mockDate },
           tags: { state: FileStateEnum.DONE },
         },
       ],
@@ -231,12 +225,16 @@ describe("findExportsFiles", () => {
     },
     {
       state: FileStateEnum.IN_PROGRESS,
-      expectedQuery:
-        "\"institutionId\" = 'institutionId' AND \"userId\" = 'userId' AND \"state\" = 'IN_PROGRESS'",
       blobs: [
         {
           name: "file-1.zip",
+          properties: { createdOn: mockDate, lastModified: mockDate },
           tags: { state: FileStateEnum.IN_PROGRESS },
+        },
+        {
+          name: "file-2.zip",
+          properties: { createdOn: mockDate, lastModified: mockDate },
+          tags: { state: FileStateEnum.DONE },
         },
       ],
       expectedResult: [
@@ -250,25 +248,10 @@ describe("findExportsFiles", () => {
     },
   ])(
     "should return matching blobs when $state is queried",
-    async ({ state, expectedQuery, blobs, expectedResult }) => {
+    async ({ state, blobs, expectedResult }) => {
       // given
       const adapter = ApiKeysExportsAdapter.getInstance(environment);
-      mocks.findBlobsByTags.mockReturnValueOnce(createAsyncIterable(blobs));
-      blobs.forEach((blob) => {
-        mocks.getProperties.mockResolvedValueOnce({
-          createdOn: mockDate,
-          lastModified: mockDate,
-        });
-        if (!state) {
-          // if state is undefined blob is filterer by userId and institutionId
-          // and state is received with getTags call
-          mocks.getTags.mockResolvedValueOnce({
-            tags: {
-              state: blob.tags.state,
-            },
-          });
-        }
-      });
+      mocks.listBlobsFlat.mockReturnValueOnce(createAsyncIterable(blobs));
 
       // when
       const result = await adapter.findExportsFiles(
@@ -278,9 +261,11 @@ describe("findExportsFiles", () => {
       );
 
       // then
-      expect(mocks.findBlobsByTags).toHaveBeenCalledOnce();
-      expect(mocks.findBlobsByTags).toHaveBeenCalledWith(expectedQuery);
-      expect(mocks.getProperties).toHaveBeenCalledTimes(blobs.length);
+      expect(mocks.listBlobsFlat).toHaveBeenCalledOnce();
+      expect(mocks.listBlobsFlat).toHaveBeenCalledWith({
+        includeTags: true,
+        prefix: "institutionId_userId",
+      });
       expect(result).toStrictEqual(expectedResult);
     },
   );
@@ -292,6 +277,7 @@ describe("initializeFile", () => {
     EXPORTS_API_KEYS_CONTAINER_NAME: "api-keys-exports",
     EXPORTS_API_KEYS_DURATION_IN_HOURS: "24",
   };
+  const fileName = "institutionId_userId_abcd1234";
 
   it("should throw ManagedInternalError when upload fails", async () => {
     // given
@@ -300,10 +286,10 @@ describe("initializeFile", () => {
 
     // when and then
     await expect(
-      adapter.initializeFile("file.zip", "institutionId", "userId"),
+      adapter.initializeFile(fileName, "institutionId", "userId"),
     ).rejects.toThrowError("Errore durante l'inizializzazione del file");
     expect(mocks.getBlockBlobClient).toHaveBeenCalledOnce();
-    expect(mocks.getBlockBlobClient).toHaveBeenCalledWith("file.zip");
+    expect(mocks.getBlockBlobClient).toHaveBeenCalledWith(fileName);
     expect(mocks.upload).toHaveBeenCalledOnce();
     expect(mocks.upload).toHaveBeenCalledWith("", 0, {
       tags: {
@@ -321,12 +307,12 @@ describe("initializeFile", () => {
 
     // when
     await expect(
-      adapter.initializeFile("file.zip", "institutionId", "userId"),
+      adapter.initializeFile(fileName, "institutionId", "userId"),
     ).resolves.toBeUndefined();
 
     // then
     expect(mocks.getBlockBlobClient).toHaveBeenCalledOnce();
-    expect(mocks.getBlockBlobClient).toHaveBeenCalledWith("file.zip");
+    expect(mocks.getBlockBlobClient).toHaveBeenCalledWith(fileName);
     expect(mocks.upload).toHaveBeenCalledOnce();
     expect(mocks.upload).toHaveBeenCalledWith("", 0, {
       tags: {

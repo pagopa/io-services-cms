@@ -310,7 +310,7 @@ describe("[AggregatedInstitutions] Page", () => {
       );
 
       expect(mockFetchData).toHaveBeenCalledWith(
-        "getAggregatedInstitutionsManageKeysLink",
+        "getAggregatedInstitutionsManageKeysMetadata",
         {},
         expect.anything(),
       );

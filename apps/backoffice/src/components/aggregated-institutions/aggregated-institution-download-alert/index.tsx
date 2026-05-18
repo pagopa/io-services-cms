@@ -1,13 +1,15 @@
-import { AggregatedInstitutionsManageKeysLinkMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysLinkMetadata";
+import { AggregatedInstitutionsManageKeysExportFileDownloadLink } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileDownloadLink";
+import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
+import useFetch from "@/hooks/use-fetch";
 import {
   trackEaFileGenerateCompletedEvent,
-  trackEaFileGenerateDownloadEvent,
   trackEaFileGenerateEndEvent,
   trackEaFileGenerateErrorEvent,
   trackEaFileGenerateProgressEvent,
   trackEaFileGenerateRefreshEvent,
 } from "@/utils/mix-panel";
 import { Download, RefreshOutlined } from "@mui/icons-material";
+import { LoadingButton } from "@mui/lab";
 import {
   Alert,
   AlertProps,
@@ -15,11 +17,11 @@ import {
   Button,
   Typography,
 } from "@mui/material";
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 export interface AggregatedInstitutionDownloadAlertProps {
-  data?: AggregatedInstitutionsManageKeysLinkMetadata;
+  data?: AggregatedInstitutionsManageKeysExportFileMetadata;
   onRefresh: () => void;
 }
 
@@ -28,6 +30,30 @@ export const AggregatedInstitutionDownloadAlert = ({
   onRefresh,
 }: AggregatedInstitutionDownloadAlertProps) => {
   const { i18n, t } = useTranslation();
+  const { fetchData: fetchDownloadLink, loading: downloadLinkLoading } =
+    useFetch<AggregatedInstitutionsManageKeysExportFileDownloadLink>();
+
+  const handleDownloadClick = useCallback(async () => {
+    const result = await fetchDownloadLink(
+      "generateDirectDownloadLinkForAggregatedInstitutionsManageKeys",
+      {},
+      AggregatedInstitutionsManageKeysExportFileDownloadLink,
+      { notify: "errors" },
+    );
+    if (result.success && result.data?.downloadLink) {
+      const link = document.createElement("a");
+      link.href = result.data.downloadLink;
+      link.setAttribute(
+        "download",
+        t(
+          "routes.aggregated-institutions.downloadAlert.success.downloadAttribute",
+        ),
+      );
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [fetchDownloadLink, t]);
 
   useEffect(() => {
     switch (data?.state) {
@@ -52,16 +78,14 @@ export const AggregatedInstitutionDownloadAlert = ({
       case "DONE":
         return {
           action: (
-            <Button
-              component="a"
-              download="I tuoi enti.json"
-              href={data.downloadLink}
-              onClick={trackEaFileGenerateDownloadEvent}
+            <LoadingButton
+              loading={downloadLinkLoading}
+              onClick={handleDownloadClick}
               startIcon={<Download />}
               variant="naked"
             >
               {t("routes.aggregated-institutions.downloadAlert.success.action")}
-            </Button>
+            </LoadingButton>
           ),
           children: (
             <>
@@ -144,7 +168,14 @@ export const AggregatedInstitutionDownloadAlert = ({
       default:
         break;
     }
-  }, [data, i18n.language, t, onRefresh]);
+  }, [
+    data,
+    i18n.language,
+    t,
+    onRefresh,
+    downloadLinkLoading,
+    handleDownloadClick,
+  ]);
 
   return (
     alertProps && <Alert elevation={4} variant="outlined" {...alertProps} />
