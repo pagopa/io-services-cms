@@ -1,5 +1,18 @@
 # io-services-cms-backoffice
 
+## 2.5.0
+
+### Minor Changes
+
+- 29add371: fetch export download link on click via dedicated API call
+- 40c5d8a3: Define the role of the Aggregator Admin and update the necessary routes
+- 29add371: Refactor to aggregates manage keys export endpoints
+
+### Patch Changes
+
+- 2afcb28c: add new domain Group type to handle parentInstitutionId property
+- 7b2ef18d: improve selfcare client error logging
+
 ## 2.4.2
 
 ### Patch Changes
