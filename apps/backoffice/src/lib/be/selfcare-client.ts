@@ -1,4 +1,8 @@
 import { StateEnum } from "@/generated/api/Group";
+import {
+  DelegationInstitutionResponse,
+  DelegationTypeEnum,
+} from "@/generated/selfcare/DelegationInstitutionResponse";
 import { DelegationResponse } from "@/generated/selfcare/DelegationResponse";
 import { DelegationWithPaginationResponse } from "@/generated/selfcare/DelegationWithPaginationResponse";
 import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
@@ -54,6 +58,19 @@ export type DelegationWithPaginationResponseStrict = t.TypeOf<
 >;
 
 export interface SelfcareClient {
+  /**
+   * Returns the list of institutions of all delegations created by the institution specified in the request path parameter.<br><br> Example: /delegations/delegates/A --> Returns institution details of B,C,D<br><br> <img src=\"https://img.plantuml.biz/plantuml/svg/SoWkIImgoStCIybDBE0goIzGACbNICelASdFLKZ9B4fDBidCp-FIKaWhoi-rKl3CAox9B2a5YIauScbf0HMZ2ZfX4tJ69kZ2vP0Aj1HgCG00\">
+   * @param params the parameters to filter the delegations
+   * - institutionId: the institution id for which retrieve the delegations
+   * - type: the delegation type to filter the delegations (PT, AOO, EA)
+   * - size: the maximum number of delegations to return
+   * @returns a task either containing an error or an array of delegation institution responses
+   */
+  getDelegateInstitutions: (params: {
+    institutionId: string;
+    size?: number;
+    type?: DelegationTypeEnum;
+  }) => TE.TaskEither<Error, DelegationInstitutionResponse[]>;
   getGroup: (
     id: NonEmptyString,
   ) => TE.TaskEither<AxiosError | Error, UserGroupResource>;
@@ -322,10 +339,45 @@ const getInstitutionProducts: (
       ),
     );
 
+const getDelegateInstitutions: (
+  axiosInstance: AxiosInstance,
+) => SelfcareClient["getDelegateInstitutions"] =
+  (axiosInstance) =>
+  ({ institutionId, size, type }) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.get(`${delegationsApi}/delegates/${institutionId}`, {
+            params: {
+              size,
+              type,
+            },
+          }),
+        flow(
+          E.fromPredicate(
+            axios.isAxiosError,
+            (e) =>
+              new Error(
+                `Error calling selfcare getDelegateInstitutionsUsingGET API: ${e}`,
+              ),
+          ),
+          E.toUnion,
+        ),
+      ),
+      TE.chainEitherK((response) =>
+        pipe(
+          response.data,
+          t.array(DelegationInstitutionResponse).decode,
+          E.mapLeft((e) => pipe(e, readableReport, E.toError)),
+        ),
+      ),
+    );
+
 const buildSelfcareClient = (): SelfcareClient => {
   const axiosInstance = getAxiosInstance();
 
   return {
+    getDelegateInstitutions: getDelegateInstitutions(axiosInstance),
     getGroup: getGroup(axiosInstance),
     getInstitutionById: getInstitutionById(axiosInstance),
     getInstitutionDelegations: getInstitutionDelegations(axiosInstance),
