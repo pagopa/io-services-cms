@@ -29,46 +29,58 @@ export const withJWTAuthHandler =
     if (!session?.user) {
       return handleUnauthorizedErrorResponse("No Authentication provided");
     }
-    const authenticationDetails = session.user;
 
-    let backofficeUser: BackOfficeUserEnriched;
-    const userAuth = userAuthz(authenticationDetails);
-    if (userAuth.isAdmin() || !userAuth.hasSelcGroups()) {
-      backofficeUser = {
-        ...authenticationDetails,
-        permissions: {
-          ...authenticationDetails.permissions,
-          selcGroups: [],
-        },
-      };
-    } else {
+    const userAuth = userAuthz(session.user);
+    let selcGroups: DomainGroup[] = [];
+    let selcSpecialGroups: SpecialGroup[] = [];
+
+    if (
+      session.user.institution.isAggregate ||
+      (!userAuth.isAdmin() && userAuth.hasSelcGroups())
+    ) {
       const institutionGroups = await retrieveInstitutionGroups(
-        authenticationDetails.institution.id,
+        session.user.institution.id,
         "*",
       );
-      backofficeUser = {
-        ...authenticationDetails,
-        permissions: {
-          ...authenticationDetails.permissions,
-          selcGroups: institutionGroups.filter((institutionGroup) =>
-            authenticationDetails.permissions.selcGroups?.includes(
-              institutionGroup.id,
-            ),
-          ),
-        },
-      };
+      selcSpecialGroups = institutionGroups.filter(
+        (institutionGroup): institutionGroup is SpecialGroup =>
+          !!institutionGroup.parentInstitutionId,
+      );
+      selcGroups = institutionGroups.filter((institutionGroup) =>
+        session.user.permissions.selcGroups?.includes(institutionGroup.id),
+      );
     }
 
-    const resolvedParams = await params;
-    // chiamo l'handler finale "iniettando" il payload contenuto nel token
+    // call the final handler "injecting" the payload contained in the token
     return handler(nextRequest, {
-      backofficeUser,
-      params: resolvedParams,
+      backofficeUser: {
+        ...session.user,
+        institution: {
+          ...session.user.institution,
+          selcSpecialGroups,
+        },
+        permissions: {
+          ...session.user.permissions,
+          selcGroups,
+        },
+      },
+      params: await params,
     });
   };
 
+export type SpecialGroup = { parentInstitutionId: string } & DomainGroup;
+
 export type BackOfficeUserEnriched = {
+  institution: {
+    /**
+     * if selcSpecialGroups is empty, it means that there are no visibility restrictions for the user over "special" groups
+     */
+    selcSpecialGroups: SpecialGroup[];
+  } & BackOfficeUser["institution"];
   permissions: {
+    /**
+     * if selcGroups is undefined or empty, it means that there are no visibility restrictions for the user over "regular" groups
+     */
     selcGroups?: DomainGroup[];
   } & Omit<BackOfficeUserPermissions, "selcGroups">;
 } & Omit<BackOfficeUser, "permissions">;
