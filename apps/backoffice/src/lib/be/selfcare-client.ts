@@ -133,67 +133,72 @@ const getAxiosInstance = (): AxiosInstance => {
   });
 };
 
-const buildSelfcareClient = (): SelfcareClient => {
-  const axiosInstance = getAxiosInstance();
-
-  const getUserAuthorizedInstitutions: SelfcareClient["getUserAuthorizedInstitutions"] =
-    (userId) =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            axiosInstance.get(usersApi, {
-              params: {
-                size: 10000,
-                states: "ACTIVE",
-                userId,
-              },
-              timeout: 10000,
-            }),
-          identity,
-        ),
-        TE.mapLeft((e) => {
-          if (axios.isAxiosError(e)) {
-            return new Error(`Axios error catched ${e.message}`);
-          } else {
-            return new Error(
-              `Error calling selfcare getUserAuthorizedInstitutions API: ${e}`,
-            );
-          }
-        }),
-        TE.chainW((response) =>
-          pipe(
-            response.data,
-            UserInstitutions.decode,
-            E.mapLeft(flow(readableReport, E.toError)),
-            TE.fromEither,
-          ),
-        ),
-      );
-
-  const getInstitutionById: SelfcareClient["getInstitutionById"] = (id) =>
+const getUserAuthorizedInstitutions: (
+  axiosInstance: AxiosInstance,
+) => SelfcareClient["getUserAuthorizedInstitutions"] =
+  (axiosInstance) => (userId) =>
     pipe(
       TE.tryCatch(
-        () => axiosInstance.get(`${institutionsApi}/${id}`),
-        flow(
-          E.fromPredicate(
-            axios.isAxiosError,
-            (e) =>
-              new Error(`Error calling selfcare getInstitutionById API: ${e}`),
-          ),
-          E.toUnion,
-        ),
+        () =>
+          axiosInstance.get(usersApi, {
+            params: {
+              size: 10000,
+              states: "ACTIVE",
+              userId,
+            },
+            timeout: 10000,
+          }),
+        identity,
       ),
+      TE.mapLeft((e) => {
+        if (axios.isAxiosError(e)) {
+          return new Error(`Axios error catched ${e.message}`);
+        } else {
+          return new Error(
+            `Error calling selfcare getUserAuthorizedInstitutions API: ${e}`,
+          );
+        }
+      }),
       TE.chainW((response) =>
         pipe(
           response.data,
-          InstitutionResponse.decode,
+          UserInstitutions.decode,
           E.mapLeft(flow(readableReport, E.toError)),
           TE.fromEither,
         ),
       ),
     );
 
-  const getInstitutionGroups: SelfcareClient["getInstitutionGroups"] = ({
+const getInstitutionById: (
+  axiosInstance: AxiosInstance,
+) => SelfcareClient["getInstitutionById"] = (axiosInstance) => (id) =>
+  pipe(
+    TE.tryCatch(
+      () => axiosInstance.get(`${institutionsApi}/${id}`),
+      flow(
+        E.fromPredicate(
+          axios.isAxiosError,
+          (e) =>
+            new Error(`Error calling selfcare getInstitutionById API: ${e}`),
+        ),
+        E.toUnion,
+      ),
+    ),
+    TE.chainW((response) =>
+      pipe(
+        response.data,
+        InstitutionResponse.decode,
+        E.mapLeft(flow(readableReport, E.toError)),
+        TE.fromEither,
+      ),
+    ),
+  );
+
+const getInstitutionGroups: (
+  axiosInstance: AxiosInstance,
+) => SelfcareClient["getInstitutionGroups"] =
+  (axiosInstance) =>
+  ({
     institutionId,
     page,
     parentInstitutionId,
@@ -230,7 +235,8 @@ const buildSelfcareClient = (): SelfcareClient => {
       ),
     );
 
-  const getGroup: SelfcareClient["getGroup"] = (id) =>
+const getGroup: (axiosInstance: AxiosInstance) => SelfcareClient["getGroup"] =
+  (axiosInstance) => (id) =>
     pipe(
       TE.tryCatch(
         () => axiosInstance.get(`${groupsApi}/${id}`),
@@ -251,42 +257,43 @@ const buildSelfcareClient = (): SelfcareClient => {
       ),
     );
 
-  const getInstitutionDelegations: SelfcareClient["getInstitutionDelegations"] =
-    (institutionId, size, page, search) =>
-      pipe(
-        TE.tryCatch(
-          () =>
-            axiosInstance.get(`${delegationsApi}/delegations-with-pagination`, {
-              params: {
-                brokerId: institutionId,
-                order: "ASC",
-                page,
-                search,
-                size,
-              },
-            }),
-          flow(
-            E.fromPredicate(
-              axios.isAxiosError,
-              (e) =>
-                new Error(`Error calling selfcare getDelegations API: ${e}`),
-            ),
-            E.toUnion,
+const getInstitutionDelegations: (
+  axiosInstance: AxiosInstance,
+) => SelfcareClient["getInstitutionDelegations"] =
+  (axiosInstance) => (institutionId, size, page, search) =>
+    pipe(
+      TE.tryCatch(
+        () =>
+          axiosInstance.get(`${delegationsApi}/delegations-with-pagination`, {
+            params: {
+              brokerId: institutionId,
+              order: "ASC",
+              page,
+              search,
+              size,
+            },
+          }),
+        flow(
+          E.fromPredicate(
+            axios.isAxiosError,
+            (e) => new Error(`Error calling selfcare getDelegations API: ${e}`),
           ),
+          E.toUnion,
         ),
-        TE.chainEitherK((response) =>
-          pipe(
-            response.data,
-            DelegationWithPaginationResponseStrict.decode,
-            E.mapLeft((e) => pipe(e, readableReport, E.toError)),
-          ),
+      ),
+      TE.chainEitherK((response) =>
+        pipe(
+          response.data,
+          DelegationWithPaginationResponseStrict.decode,
+          E.mapLeft((e) => pipe(e, readableReport, E.toError)),
         ),
-      );
+      ),
+    );
 
-  const getInstitutionProducts: SelfcareClient["getInstitutionProducts"] = (
-    institutionId,
-    userId,
-  ) =>
+const getInstitutionProducts: (
+  axiosInstance: AxiosInstance,
+) => SelfcareClient["getInstitutionProducts"] =
+  (axiosInstance) => (institutionId, userId) =>
     pipe(
       TE.tryCatch(
         () =>
@@ -315,13 +322,16 @@ const buildSelfcareClient = (): SelfcareClient => {
       ),
     );
 
+const buildSelfcareClient = (): SelfcareClient => {
+  const axiosInstance = getAxiosInstance();
+
   return {
-    getGroup,
-    getInstitutionById,
-    getInstitutionDelegations,
-    getInstitutionGroups,
-    getInstitutionProducts,
-    getUserAuthorizedInstitutions,
+    getGroup: getGroup(axiosInstance),
+    getInstitutionById: getInstitutionById(axiosInstance),
+    getInstitutionDelegations: getInstitutionDelegations(axiosInstance),
+    getInstitutionGroups: getInstitutionGroups(axiosInstance),
+    getInstitutionProducts: getInstitutionProducts(axiosInstance),
+    getUserAuthorizedInstitutions: getUserAuthorizedInstitutions(axiosInstance),
   };
 };
 
