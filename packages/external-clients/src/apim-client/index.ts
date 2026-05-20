@@ -115,6 +115,15 @@ export interface ApimService {
     subscriptionId: string,
     ifMatch?: string,
   ) => TE.TaskEither<ApimRestError | Error, void>;
+  /**
+   * Deletes a user specified by its identifier.
+   * @param userId User entity Identifier
+   * @param ifMatch ETag of the Entity. Use * for unconditional delete.
+   */
+  readonly deleteUser: (
+    userId: string,
+    ifMatch?: string,
+  ) => TE.TaskEither<ApimRestError | Error, void>;
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString,
   ) => TE.TaskEither<ApimRestError, Delegate>;
@@ -197,6 +206,8 @@ export const getApimService = (
       subscriptionId,
       ifMatch,
     ),
+  deleteUser: (userId, ifMatch = "*") =>
+    deleteUser(apimClient, apimResourceGroup, apimServiceName, userId, ifMatch),
   getDelegateFromServiceId: (serviceId) =>
     getDelegateFromServiceId(
       apimClient,
@@ -553,6 +564,39 @@ const deleteSubscription = (
           subscriptionId,
           ifMatch,
         ),
+      identity,
+    ),
+    chainApimMappedError,
+  );
+
+/**
+ * Delete an existing APIM user
+ *
+ * @param apimClient
+ * @param apimResourceGroup
+ * @param apimServiceName
+ * @param userId
+ * @param ifMatch
+ * @returns
+ */
+const deleteUser = (
+  apimClient: ApiManagementClient,
+  apimResourceGroup: string,
+  apimServiceName: string,
+  userId: string,
+  ifMatch: string,
+): TE.TaskEither<ApimRestError, void> =>
+  pipe(
+    TE.tryCatch(
+      () =>
+        apimClient.user
+          .beginDeleteAndWait(
+            apimResourceGroup,
+            apimServiceName,
+            userId,
+            ifMatch,
+          )
+          .then(() => undefined),
       identity,
     ),
     chainApimMappedError,
