@@ -1,0 +1,23 @@
+name: Deploy Backoffice
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  deploy_to_azure:
+    name: Deploy io-services-cms-backoffice
+    uses: pagopa/dx/.github/workflows/release-azure-appsvc-v1.yaml@76fa9d0cf942bdc2fb5f74853e271511a48269c4
+    with:
+      environment: app-prod
+      resource_group_name: "io-p-itn-svc-rg-01"
+      workspace_name: "io-services-cms-backoffice"
+      web_app_name: "io-p-itn-svc-bo-app-01"
+      disable_auto_staging_deploy: true
+      use_private_agent: true
+    secrets: inherit
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
