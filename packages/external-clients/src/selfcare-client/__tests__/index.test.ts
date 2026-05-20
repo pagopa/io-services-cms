@@ -2,18 +2,23 @@ import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import * as E from "fp-ts/lib/Either";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TypeEnum } from "../../generated/selfcare/DelegationResponse";
-import { DelegationWithPaginationResponse } from "../../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../../generated/selfcare/InstitutionResponse";
 import { PageOfUserGroupResource } from "../../generated/selfcare/PageOfUserGroupResource";
 import { StatusEnum } from "../../generated/selfcare/UserGroupResource";
-import { getSelfcareClient, resetInstance, UserInstitutions } from "../index";
+import {
+  DelegationWithPaginationResponseStrict,
+  getSelfcareClient,
+  resetInstance,
+  UserInstitutions,
+} from "../index";
+import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 
 const mocks: {
   institution: InstitutionResponse;
   userInstitutions: UserInstitutions;
   aSelfcareUserId: string;
   institutionGroups: PageOfUserGroupResource;
-  delegations: DelegationWithPaginationResponse;
+  delegations: DelegationWithPaginationResponseStrict;
 } = {
   institution: {
     id: "institutionId",
@@ -218,5 +223,111 @@ describe("Selfcare Client", () => {
       expect(E.isLeft(result)).toBeTruthy();
       commonExpectation();
     });
+  });
+
+  describe("getDelegations", () => {
+    const institutionId = "instId";
+    const endpoint = `/delegations/delegations-with-pagination`;
+
+    it("should return the delegated institutions for the given institution", async () => {
+      // given
+      const size = 5;
+      const page = 0;
+      const search = "search";
+
+      getMock.mockResolvedValueOnce({
+        status: 200,
+        data: mocks.delegations,
+      });
+
+      // when
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionDelegations(institutionId, size, page, search)();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          brokerId: institutionId,
+          size,
+          page,
+          search,
+          order: "ASC",
+        },
+      });
+      expect(isAxiosError).not.toHaveBeenCalled();
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual(mocks.delegations);
+      }
+      commonExpectation();
+    });
+
+    it("should return an error when received an error from selfcare", async () => {
+      // given
+      getMock.mockRejectedValueOnce({
+        message: "Received 400 response",
+        response: { status: 400 },
+      });
+      isAxiosError.mockReturnValueOnce(true);
+
+      // when
+      const result = await getSelfcareClient(
+        selfcareExternalApiBaseUrl,
+        selfcareApiKey,
+        httpAgentConfig,
+      ).getInstitutionDelegations(institutionId)();
+
+      // then
+      expect(getMock).toHaveBeenCalledWith(endpoint, {
+        params: {
+          brokerId: institutionId,
+          size: undefined,
+          page: undefined,
+          search: undefined,
+          order: "ASC",
+        },
+      });
+      expect(isAxiosError).toHaveBeenCalled();
+      expect(E.isLeft(result)).toBeTruthy();
+      commonExpectation();
+    });
+
+    it.each`
+      scenario                 | data
+      ${"empty response"}      | ${""}
+      ${"empty object"}        | ${{}}
+      ${"missing delegations"} | ${{ ...mocks.delegations, delegations: undefined }}
+      ${"missing pageInfo"}    | ${{ ...mocks.delegations, pageInfo: undefined }}
+    `(
+      "should return an error when received a bad response from selfcare: $scenario",
+      async ({ data }) => {
+        // given
+        getMock.mockResolvedValueOnce({ status: 200, data });
+
+        // when
+        const result = await getSelfcareClient(
+          selfcareExternalApiBaseUrl,
+          selfcareApiKey,
+          httpAgentConfig,
+        ).getInstitutionDelegations(institutionId)();
+
+        // then
+        expect(getMock).toHaveBeenCalledWith(endpoint, {
+          params: {
+            brokerId: institutionId,
+            size: undefined,
+            page: undefined,
+            search: undefined,
+            order: "ASC",
+          },
+        });
+        expect(isAxiosError).not.toHaveBeenCalled();
+        expect(E.isLeft(result)).toBeTruthy();
+        commonExpectation();
+      },
+    );
   });
 });

@@ -7,6 +7,8 @@ import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 
 import { StateEnum } from "../generated/api/Group";
+import { DelegationResponse } from "../generated/selfcare/DelegationResponse";
+import { DelegationWithPaginationResponse } from "../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../generated/selfcare/InstitutionResponse";
 import { ProductResource } from "../generated/selfcare/ProductResource";
 import { UserInstitutionResource } from "../generated/selfcare/UserInstitutionResource";
@@ -25,13 +27,45 @@ export const InstitutionProducts = t.readonlyArray(
 );
 export type InstitutionProducts = t.TypeOf<typeof InstitutionProducts>;
 
+const PageInfoStrict = t.type({
+  pageNo: t.number,
+  pageSize: t.number,
+  totalElements: t.number,
+  totalPages: t.number,
+});
+
+export const DelegationWithPaginationResponseStrict = t.intersection([
+  DelegationWithPaginationResponse,
+  t.type({
+    delegations: t.readonlyArray(DelegationResponse),
+    pageInfo: PageInfoStrict,
+  }),
+]);
+export type DelegationWithPaginationResponseStrict = t.TypeOf<
+  typeof DelegationWithPaginationResponseStrict
+>;
+
 export interface SelfcareClient {
   getInstitutionById: (
     id: string,
   ) => TE.TaskEither<AxiosError | Error, InstitutionResponse>;
+  /**
+   * Returns paginated delegations for a broker institution (aggregator).
+   * @param institutionId the broker/aggregator institution id
+   * @param size max number of delegations per page
+   * @param page page number (0-based)
+   * @param search optional search term
+   */
+  getInstitutionDelegations: (
+    institutionId: string,
+    size?: number,
+    page?: number,
+    search?: string,
+  ) => TE.TaskEither<Error, DelegationWithPaginationResponseStrict>;
 }
 
 const institutionsApi = "/institutions";
+const delegationsApi = "/delegations";
 let selfcareClient: SelfcareClient;
 
 const getAxiosInstance = (
@@ -80,8 +114,43 @@ const buildSelfcareClient = (
       ),
     );
 
+  const getInstitutionDelegations: SelfcareClient["getInstitutionDelegations"] =
+    (institutionId, size, page, search) =>
+      pipe(
+        TE.tryCatch(
+          () =>
+            axiosInstance.get(`${delegationsApi}/delegations-with-pagination`, {
+              params: {
+                brokerId: institutionId,
+                order: "ASC",
+                page,
+                search,
+                size,
+              },
+            }),
+          flow(
+            E.fromPredicate(
+              axios.isAxiosError,
+              (e) =>
+                new Error(
+                  `Error calling selfcare getInstitutionDelegations API: ${e}`,
+                ),
+            ),
+            E.toUnion,
+          ),
+        ),
+        TE.chainEitherK((response) =>
+          pipe(
+            response.data,
+            DelegationWithPaginationResponseStrict.decode,
+            E.mapLeft((e) => pipe(e, readableReport, E.toError)),
+          ),
+        ),
+      );
+
   return {
     getInstitutionById,
+    getInstitutionDelegations,
   };
 };
 
