@@ -7,6 +7,12 @@ on:
 
 jobs:
   deploy_to_azure:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'release' &&
+        startsWith(github.event.release.tag_name, 'io-services-app-backend@')
+      )
     name: Deploy io-services-app-backend
     uses: pagopa/dx/.github/workflows/release-azure-appsvc-v1.yaml@76fa9d0cf942bdc2fb5f74853e271511a48269c4
     with:
