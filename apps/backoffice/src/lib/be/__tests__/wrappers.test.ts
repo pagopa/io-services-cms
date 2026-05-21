@@ -7,7 +7,7 @@ const mocks: {
   jwtMock: BackOfficeUser;
 } = vi.hoisted(() => ({
   jwtMock: {
-    institution: { role: "admin", id: "institutionId", isAggregate: false },
+    institution: { role: "admin", id: "institutionId", isAggregate: false, selcSpecialGroups: [] },
     permissions: { selcGroups: [] },
     parameters: {
       userEmail: "anEmail@email.it",
@@ -75,7 +75,6 @@ describe("withJWTAuthHandler", () => {
         ...jwtMock,
         institution: {
           ...jwtMock.institution,
-          selcSpecialGroups: [],
         },
       },
       params: {},
@@ -106,7 +105,6 @@ describe("withJWTAuthHandler", () => {
         ...jwtMock,
         institution: {
           ...jwtMock.institution,
-          selcSpecialGroups: [],
         },
         permissions: {
           ...jwtMock.permissions,
@@ -148,7 +146,6 @@ describe("withJWTAuthHandler", () => {
             permissions: {
               ...mocks.jwtMock.permissions,
               selcGroups: [],
-              selcSpecialGroups: [],
             },
           },
         }),
@@ -190,7 +187,6 @@ describe("withJWTAuthHandler", () => {
           permissions: {
             ...mocks.jwtMock.permissions,
             selcGroups: [selcGroups[0]],
-            selcSpecialGroups: [],
           },
         },
         permissions: {

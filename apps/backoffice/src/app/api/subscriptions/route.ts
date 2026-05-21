@@ -126,7 +126,7 @@ export const GET = withJWTAuthHandler(
         limit: maybeLimit.right,
         offset: maybeOffset.right,
         selcGroups: backofficeUser.permissions.selcGroups,
-        selcSpecialGroups: backofficeUser.permissions.selcSpecialGroups,
+        selcSpecialGroups: backofficeUser.institution.selcSpecialGroups,
         subscriptionType: maybeKind.right,
       });
       return sanitizedNextResponseJson(
