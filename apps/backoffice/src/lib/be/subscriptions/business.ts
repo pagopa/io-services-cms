@@ -42,9 +42,8 @@ import {
   getInstitutionDelegations,
   getInstitutionGroups,
 } from "../institutions/selfcare";
-import { ApiKeysExportsPort, FileStateEnum } from "./api-keys-exports-port";
 import { SpecialGroup } from "../wrappers";
-import { FileState, FileStateEnum } from "./api-keys-exports-port";
+import { ApiKeysExportsPort, FileStateEnum } from "./api-keys-exports-port";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,
@@ -219,7 +218,7 @@ export async function getManageSubscriptions({
     case SubscriptionTypeEnum.MANAGE_GROUP:
       filter = ApimUtils.apim_filters.manageGroupSubscriptionsFilter(
         selcGroups?.map((group) => group.id) ?? [],
-        selcSpecialGroups.map((group) => group.parentInstitutionId),
+        selcSpecialGroups.map((group) => group.id),
       );
       break;
     default:
