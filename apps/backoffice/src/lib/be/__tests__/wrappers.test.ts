@@ -7,7 +7,12 @@ const mocks: {
   jwtMock: BackOfficeUser;
 } = vi.hoisted(() => ({
   jwtMock: {
-    institution: { role: "admin", id: "institutionId", isAggregate: false, selcSpecialGroups: [] },
+    institution: {
+      role: "admin",
+      id: "institutionId",
+      isAggregate: false,
+      selcSpecialGroups: [],
+    },
     permissions: { selcGroups: [] },
     parameters: {
       userEmail: "anEmail@email.it",
@@ -183,19 +188,15 @@ describe("withJWTAuthHandler", () => {
       nextRequestMock,
       expect.objectContaining({
         backofficeUser: {
-          ...mocks.jwtMock,
+          ...jwtMock,
           permissions: {
-            ...mocks.jwtMock.permissions,
+            ...jwtMock.permissions,
             selcGroups: [selcGroups[0]],
           },
         },
-        permissions: {
-          ...jwtMock.permissions,
-          selcGroups: [selcGroups[0]],
-        },
-      },
-      params: {},
-    });
+        params: {},
+      }),
+    );
     expect(result.status).toBe(200);
     expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
     expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
