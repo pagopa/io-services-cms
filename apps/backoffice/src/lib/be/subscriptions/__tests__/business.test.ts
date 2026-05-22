@@ -360,7 +360,7 @@ describe("Subscriptions Business Logic", () => {
       const offset = 0;
       const group = { id: "gid1", name: "groupName", state: "ACTIVE" };
       const specialGroup = {
-        id: "p1",
+        id: "sg1",
         name: "parentInstitutionId",
         parentInstitutionId: "p1",
       };
@@ -394,7 +394,7 @@ describe("Subscriptions Business Logic", () => {
         ownerId,
         offset,
         limit,
-        `name eq 'MANAGE-GROUP-${group.id}' and not(name eq 'MANAGE-GROUP-${specialGroup.parentInstitutionId}')`,
+        `(name eq 'MANAGE-GROUP-${group.id}') and not(name eq 'MANAGE-GROUP-${specialGroup.id}')`,
       );
     });
 

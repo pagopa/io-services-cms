@@ -125,6 +125,7 @@ export const GET = withJWTAuthHandler(
         apimUserId: backofficeUser.parameters.userId,
         limit: maybeLimit.right,
         offset: maybeOffset.right,
+        // selcGroups is [] for admins (set by withJWTAuthHandler wrapper)
         selcGroups: backofficeUser.permissions.selcGroups,
         selcSpecialGroups: backofficeUser.institution.selcSpecialGroups,
         subscriptionType: maybeKind.right,

@@ -4,6 +4,7 @@ import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../../types/next-auth";
+import { BackOfficeUserEnriched } from "../../../../lib/be/wrappers";
 import { CreateManageGroupSubscription } from "../../../../generated/api/CreateManageGroupSubscription";
 import {
   StateEnum,
@@ -36,6 +37,8 @@ const userMock = {
     name: faker.company.name(),
     role: SelfcareRoles.admin,
     isAggregator: faker.datatype.boolean(),
+    isAggregate: faker.datatype.boolean(),
+    selcSpecialGroups: [],
   },
   name: faker.person.fullName(),
   parameters: {
@@ -46,7 +49,7 @@ const userMock = {
   permissions: {
     apimGroups: faker.helpers.multiple(faker.string.alpha),
   },
-} as BackOfficeUser;
+} as BackOfficeUserEnriched;
 
 const stubs = { aGroup: { id: "aGroupId", name: "aGroupName" } };
 
@@ -460,7 +463,7 @@ describe("Subscription API", () => {
         limit,
         offset,
         selcGroups: undefined,
-        selcSpecialGroups: undefined,
+        selcSpecialGroups: userMock.institution.selcSpecialGroups,
       });
     });
 
@@ -520,7 +523,7 @@ describe("Subscription API", () => {
           limit,
           offset,
           selcGroups,
-          selcSpecialGroups: undefined,
+          selcSpecialGroups: userMock.institution.selcSpecialGroups,
         });
       },
     );

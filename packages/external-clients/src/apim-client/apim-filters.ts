@@ -277,7 +277,7 @@ export const manageGroupSubscriptionsFilter = (
                   composeFilter:
                     i === 0
                       ? FilterCompositionEnum.none
-                      : FilterCompositionEnum.or,
+                      : FilterCompositionEnum.and,
                   field: FilterFieldEnum.name,
                   filterType: FilterSupportedOperatorsEnum.eq,
                   inverse: true,
@@ -295,7 +295,10 @@ export const manageGroupSubscriptionsFilter = (
     O.map(({ excludeManageGroupSpecialFilter, groupIdsFilter }) =>
       excludeManageGroupSpecialFilter.length > 0
         ? // if evaluated insert excludeManageGroupSpecialFilter
-          `${groupIdsFilter} ${FilterCompositionEnum.and}${excludeManageGroupSpecialFilter}`
+          // groupIdsFilter is encapsulated in parenthesis so that
+          // OR operator doesnt break precedence
+          // (https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html#_Toc372793858)
+          `(${groupIdsFilter}) ${FilterCompositionEnum.and}${excludeManageGroupSpecialFilter}`
         : groupIdsFilter,
     ),
     O.getOrElse(() => ""),

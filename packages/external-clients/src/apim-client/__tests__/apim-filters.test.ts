@@ -213,7 +213,7 @@ describe("manageGroupSubscriptionsFilter", () => {
     );
 
     expect(res).toEqual(
-      `name eq 'MANAGE-GROUP-${groupId}' and not(name eq 'MANAGE-GROUP-${parentInstitutionId}')`,
+      `(name eq 'MANAGE-GROUP-${groupId}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId}')`,
     );
   });
 
@@ -227,7 +227,7 @@ describe("manageGroupSubscriptionsFilter", () => {
     );
 
     expect(res).toEqual(
-      `name eq 'MANAGE-GROUP-${groupId}' and not(name eq 'MANAGE-GROUP-${parentInstitutionId}') or not(name eq 'MANAGE-GROUP-${parentInstitutionId2}')`,
+      `(name eq 'MANAGE-GROUP-${groupId}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId2}')`,
     );
   });
 
@@ -242,7 +242,7 @@ describe("manageGroupSubscriptionsFilter", () => {
     );
 
     expect(res).toEqual(
-      `name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${groupId2}' and not(name eq 'MANAGE-GROUP-${parentInstitutionId}') or not(name eq 'MANAGE-GROUP-${parentInstitutionId2}')`,
+      `(name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${groupId2}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId2}')`,
     );
   });
 });
