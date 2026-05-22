@@ -88,6 +88,7 @@ const getExpectedUser = (
   apimUser: typeof aValidApimUser,
   manageSubscription: typeof aValidSubscription,
   institution: InstitutionResponse,
+  isAggregate = false,
   isAggregator = false,
 ) => ({
   id: jwtPayload.uid,
@@ -97,6 +98,7 @@ const getExpectedUser = (
     id: jwtPayload.organization.id,
     name: jwtPayload.organization.name,
     fiscalCode: jwtPayload.organization.fiscal_code,
+    isAggregate,
     isAggregator,
     role: jwtPayload.organization.roles[0].role,
     logo_url: institution.logo,
@@ -178,8 +180,13 @@ const { getInstitutionById } = vi.hoisted(() => ({
   getInstitutionById: vi.fn(),
 }));
 
+const { hasAggregators } = vi.hoisted(() => ({
+  hasAggregators: vi.fn(() => Promise.resolve(false)),
+}));
+
 vi.mock("@/lib/be/institutions/selfcare", () => ({
   getInstitutionById,
+  hasAggregators,
 }));
 
 afterEach(() => {
@@ -693,6 +700,45 @@ describe("Authorize", () => {
     expect(upsertSubscription).not.toHaveBeenCalled();
   });
 
+  it("should fail when retrieving institution has aggregators", async () => {
+    const errorMessage = "Rejected hasAggregators";
+    jwtVerify.mockResolvedValueOnce({
+      payload: aValidJwtPayload,
+    });
+    formatEmailForOrganization.mockReturnValueOnce(
+      `org.${aValidJwtPayload.organization.id}@selfcare.io.pagopa.it`,
+    );
+    getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
+    getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
+    getInstitutionById.mockResolvedValueOnce(aValidInstitution);
+    hasAggregators.mockRejectedValueOnce(new Error(errorMessage));
+
+    await expect(() =>
+      authorize(mockConfig)({ identity_token: "identity_token" }, {}),
+    ).rejects.toThrowError(errorMessage);
+
+    expect(jwtVerify).toHaveBeenCalledOnce();
+    expect(getApimService).toHaveBeenCalledTimes(2);
+    expect(getUserByEmail).toHaveBeenCalledOnce();
+    expect(getUserByEmail).toHaveBeenCalledWith(
+      getExpectedUserEmailReqParam(aValidJwtPayload.organization),
+      true,
+    );
+    expect(getSubscription).toHaveBeenCalledOnce();
+    expect(getSubscription).toHaveBeenCalledWith(
+      `MANAGE-${aValidApimUser.name}`,
+    );
+    expect(getInstitutionById).toHaveBeenCalledOnce();
+    expect(getInstitutionById).toHaveBeenCalledWith(
+      aValidJwtPayload.organization.id,
+    );
+    expect(hasAggregators).toHaveBeenCalledOnce();
+    expect(hasAggregators).toHaveBeenCalledWith(aValidInstitution.id);
+    expect(createOrUpdateUser).not.toHaveBeenCalled();
+    expect(createGroupUser).not.toHaveBeenCalled();
+    expect(upsertSubscription).not.toHaveBeenCalled();
+  });
+
   it("should return a valid backoffice User when both APIM users and its manage subscription exists", async () => {
     jwtVerify.mockResolvedValueOnce({
       payload: aValidJwtPayload,
@@ -703,6 +749,7 @@ describe("Authorize", () => {
     getUserByEmail.mockImplementation(() => TE.right(O.some(aValidApimUser)));
     getSubscription.mockReturnValueOnce(TE.right(aValidSubscription));
     getInstitutionById.mockResolvedValueOnce(aValidInstitution);
+    hasAggregators.mockResolvedValueOnce(false);
 
     const user = await authorize(mockConfig)(
       { identity_token: "identity_token" },
@@ -715,6 +762,7 @@ describe("Authorize", () => {
         aValidApimUser,
         aValidSubscription,
         aValidInstitution,
+        false,
       ),
     );
     expect(jwtVerify).toHaveBeenCalledOnce();
@@ -729,6 +777,8 @@ describe("Authorize", () => {
     expect(getInstitutionById).toHaveBeenCalledWith(
       aValidJwtPayload.organization.id,
     );
+    expect(hasAggregators).toHaveBeenCalledOnce();
+    expect(hasAggregators).toHaveBeenCalledWith(aValidInstitution.id);
     expect(createOrUpdateUser).not.toHaveBeenCalled();
     expect(createGroupUser).not.toHaveBeenCalled();
     expect(upsertSubscription).not.toHaveBeenCalled();
