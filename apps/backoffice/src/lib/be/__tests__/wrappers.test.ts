@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
 import { withJWTAuthHandler } from "../wrappers";
 
@@ -7,7 +7,7 @@ const mocks: {
   jwtMock: BackOfficeUser;
 } = vi.hoisted(() => ({
   jwtMock: {
-    institution: { role: "admin", id: "institutionId" },
+    institution: { role: "admin", id: "institutionId", isAggregate: false },
     permissions: { selcGroups: [] },
     parameters: {
       userEmail: "anEmail@email.it",
@@ -33,6 +33,10 @@ vi.mock("../institutions/business", () => ({
   retrieveInstitutionGroups,
 }));
 
+afterEach(() => {
+  vi.clearAllMocks();
+});
+
 describe("withJWTAuthHandler", () => {
   it("no token or invalid one provided should end up in 401 response", async () => {
     auth.mockResolvedValueOnce(null);
@@ -52,7 +56,9 @@ describe("withJWTAuthHandler", () => {
   });
 
   it("valid token provided should end up in 200 response", async () => {
-    auth.mockResolvedValueOnce({ user: mocks.jwtMock });
+    const jwtMock = structuredClone(mocks.jwtMock);
+
+    auth.mockResolvedValueOnce({ user: jwtMock });
 
     const nextRequestMock = new NextRequest(new URL("http://localhost"));
 
@@ -64,19 +70,26 @@ describe("withJWTAuthHandler", () => {
       params: Promise.resolve({}),
     });
 
-    expect(aMockedHandler).toHaveBeenCalledWith(
-      nextRequestMock,
-      expect.objectContaining({
-        backofficeUser: mocks.jwtMock,
-      }),
-    );
+    expect(aMockedHandler).toHaveBeenCalledWith(nextRequestMock, {
+      backofficeUser: {
+        ...jwtMock,
+        institution: {
+          ...jwtMock.institution,
+          selcSpecialGroups: [],
+        },
+      },
+      params: {},
+    });
     expect(result.status).toBe(200);
   });
 
   it("valid token provided should end up in 200 response without selfcare groups detail when user is an admin", async () => {
     //given
-    mocks.jwtMock.institution.role = "admin";
-    auth.mockResolvedValueOnce({ user: mocks.jwtMock });
+    const jwtMock = structuredClone(mocks.jwtMock);
+    jwtMock.institution.role = "admin";
+    jwtMock.institution.isAggregate = false;
+
+    auth.mockResolvedValueOnce({ user: jwtMock });
     const aMockedHandler = vi.fn(() =>
       Promise.resolve(NextResponse.json({}, { status: 200 })),
     );
@@ -88,65 +101,32 @@ describe("withJWTAuthHandler", () => {
     });
 
     //then
-    expect(aMockedHandler).toHaveBeenCalledWith(
-      nextRequestMock,
-      expect.objectContaining({
-        backofficeUser: {
-          ...mocks.jwtMock,
-          permissions: {
-            ...mocks.jwtMock.permissions,
-            selcGroups: [],
-          },
+    expect(aMockedHandler).toHaveBeenCalledWith(nextRequestMock, {
+      backofficeUser: {
+        ...jwtMock,
+        institution: {
+          ...jwtMock.institution,
+          selcSpecialGroups: [],
         },
-      }),
-    );
+        permissions: {
+          ...jwtMock.permissions,
+          selcGroups: [],
+        },
+      },
+      params: {},
+    });
     expect(result.status).toBe(200);
     expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
   });
 
-  it.each`
-    scenario                           | selcGroups
-    ${"selfcare groups are undefined"} | ${undefined}
-    ${"selfcare groups are empty"}     | ${[]}
-  `(
-    "valid token provided should end up in 200 response without selfcare groups detail when $scenario",
-    async ({ selcGroups }) => {
-      //given
-      mocks.jwtMock.permissions.selcGroups = selcGroups;
-      auth.mockResolvedValueOnce({ user: mocks.jwtMock });
-      const aMockedHandler = vi.fn(() =>
-        Promise.resolve(NextResponse.json({}, { status: 200 })),
-      );
-      const nextRequestMock = new NextRequest(new URL("http://localhost"));
-
-      //when
-      const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
-        params: Promise.resolve({}),
-      });
-
-      //then
-      expect(aMockedHandler).toHaveBeenCalledWith(
-        nextRequestMock,
-        expect.objectContaining({
-          backofficeUser: {
-            ...mocks.jwtMock,
-            permissions: {
-              ...mocks.jwtMock.permissions,
-              selcGroups: [],
-            },
-          },
-        }),
-      );
-      expect(result.status).toBe(200);
-      expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
-    },
-  );
-
-  it("valid token provided should end up in 200 response with selfcare groups detail when is not an admin and has selcGroups", async () => {
+  it("valid token provided should end up in 200 response with selfcare groups detail when institution is aggregate", async () => {
     //given
-    mocks.jwtMock.institution.role = "operator";
-    mocks.jwtMock.permissions.selcGroups = ["id1"];
-    auth.mockResolvedValueOnce({ user: mocks.jwtMock });
+    const jwtMock = structuredClone(mocks.jwtMock);
+    jwtMock.institution.role = "admin";
+    jwtMock.institution.isAggregate = true;
+    jwtMock.permissions.selcGroups = ["id1"];
+
+    auth.mockResolvedValueOnce({ user: jwtMock });
     const aMockedHandler = vi.fn(() =>
       Promise.resolve(NextResponse.json({}, { status: 200 })),
     );
@@ -163,22 +143,114 @@ describe("withJWTAuthHandler", () => {
     });
 
     //then
-    expect(aMockedHandler).toHaveBeenCalledWith(
-      nextRequestMock,
-      expect.objectContaining({
-        backofficeUser: {
-          ...mocks.jwtMock,
-          permissions: {
-            ...mocks.jwtMock.permissions,
-            selcGroups: [selcGroups[0]],
-          },
+    expect(aMockedHandler).toHaveBeenCalledWith(nextRequestMock, {
+      backofficeUser: {
+        ...jwtMock,
+        institution: {
+          ...jwtMock.institution,
+          selcSpecialGroups: [],
         },
-      }),
-    );
+        permissions: {
+          ...jwtMock.permissions,
+          selcGroups: [selcGroups[0]],
+        },
+      },
+      params: {},
+    });
     expect(result.status).toBe(200);
     expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
     expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
-      mocks.jwtMock.institution.id,
+      jwtMock.institution.id,
+      "*",
+    );
+  });
+
+  it.each`
+    scenario                           | selcGroups
+    ${"selfcare groups are undefined"} | ${undefined}
+    ${"selfcare groups are empty"}     | ${[]}
+  `(
+    "valid token provided should end up in 200 response without selfcare groups detail when $scenario",
+    async ({ selcGroups }) => {
+      //given
+      const jwtMock = structuredClone(mocks.jwtMock);
+      jwtMock.institution.role = "admin";
+      jwtMock.institution.isAggregate = false;
+      jwtMock.permissions.selcGroups = selcGroups;
+
+      auth.mockResolvedValueOnce({ user: jwtMock });
+      const aMockedHandler = vi.fn(() =>
+        Promise.resolve(NextResponse.json({}, { status: 200 })),
+      );
+      const nextRequestMock = new NextRequest(new URL("http://localhost"));
+
+      //when
+      const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
+        params: Promise.resolve({}),
+      });
+
+      //then
+      expect(aMockedHandler).toHaveBeenCalledWith(nextRequestMock, {
+        backofficeUser: {
+          ...jwtMock,
+          institution: {
+            ...jwtMock.institution,
+            selcSpecialGroups: [],
+          },
+          permissions: {
+            ...jwtMock.permissions,
+            selcGroups: [],
+          },
+        },
+        params: {},
+      });
+      expect(result.status).toBe(200);
+      expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
+    },
+  );
+
+  it("valid token provided should end up in 200 response with selfcare groups detail when is not an admin and has selcGroups", async () => {
+    //given
+    const jwtMock = structuredClone(mocks.jwtMock);
+    jwtMock.institution.role = "operator";
+    jwtMock.institution.isAggregate = false;
+    jwtMock.permissions.selcGroups = ["id1"];
+
+    auth.mockResolvedValueOnce({ user: jwtMock });
+    const aMockedHandler = vi.fn(() =>
+      Promise.resolve(NextResponse.json({}, { status: 200 })),
+    );
+    const selcGroups = [
+      { id: "id1", name: "group1", state: "ACTIVE" },
+      { id: "id2", name: "group2", state: "ACTIVE" },
+    ];
+    retrieveInstitutionGroups.mockResolvedValueOnce(selcGroups);
+    const nextRequestMock = new NextRequest(new URL("http://localhost"));
+
+    //when
+    const result = await withJWTAuthHandler(aMockedHandler)(nextRequestMock, {
+      params: Promise.resolve({}),
+    });
+
+    //then
+    expect(aMockedHandler).toHaveBeenCalledWith(nextRequestMock, {
+      backofficeUser: {
+        ...jwtMock,
+        institution: {
+          ...jwtMock.institution,
+          selcSpecialGroups: [],
+        },
+        permissions: {
+          ...jwtMock.permissions,
+          selcGroups: [selcGroups[0]],
+        },
+      },
+      params: {},
+    });
+    expect(result.status).toBe(200);
+    expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+    expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+      jwtMock.institution.id,
       "*",
     );
   });
