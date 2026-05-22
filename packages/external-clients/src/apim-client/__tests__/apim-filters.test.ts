@@ -206,43 +206,40 @@ describe("manageGroupSubscriptionsFilter", () => {
 
   it("should return a MANAGE-GROUP special filter when a special group is provided", () => {
     const groupId = "g1";
-    const parentInstitutionId = "p1";
-    const res = manageGroupSubscriptionsFilter(
-      [groupId],
-      [parentInstitutionId],
-    );
+    const specialGroupId = "sg1";
+    const res = manageGroupSubscriptionsFilter([groupId], [specialGroupId]);
 
     expect(res).toEqual(
-      `(name eq 'MANAGE-GROUP-${groupId}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId}')`,
+      `(name eq 'MANAGE-GROUP-${groupId}') and not(name eq 'MANAGE-GROUP-${specialGroupId}')`,
     );
   });
 
   it("should return a composed MANAGE-GROUP special filter when multiple special group are provided", () => {
     const groupId = "g1";
-    const parentInstitutionId = "p1";
-    const parentInstitutionId2 = "p2";
+    const specialGroupId = "sg1";
+    const specialGroupId2 = "sg2";
     const res = manageGroupSubscriptionsFilter(
       [groupId],
-      [parentInstitutionId, parentInstitutionId2],
+      [specialGroupId, specialGroupId2],
     );
 
     expect(res).toEqual(
-      `(name eq 'MANAGE-GROUP-${groupId}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId2}')`,
+      `(name eq 'MANAGE-GROUP-${groupId}') and not(name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}')`,
     );
   });
 
   it("should manage a composed MANAGE-GROUP filter with both group ids and special groups", () => {
     const groupId = "g1";
     const groupId2 = "g2";
-    const parentInstitutionId = "p1";
-    const parentInstitutionId2 = "p2";
+    const specialGroupId = "sg1";
+    const specialGroupId2 = "sg2";
     const res = manageGroupSubscriptionsFilter(
       [groupId, groupId2],
-      [parentInstitutionId, parentInstitutionId2],
+      [specialGroupId, specialGroupId2],
     );
 
     expect(res).toEqual(
-      `(name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${groupId2}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId}') and not(name eq 'MANAGE-GROUP-${parentInstitutionId2}')`,
+      `(name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${groupId2}') and not(name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}')`,
     );
   });
 });

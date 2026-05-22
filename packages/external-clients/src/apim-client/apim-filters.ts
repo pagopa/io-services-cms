@@ -273,14 +273,18 @@ export const manageGroupSubscriptionsFilter = (
           flow(
             RA.mapWithIndex((i, specialGroupId) =>
               pipe(
+                // to shorten the overall filter length
+                // instead of using multiple not eq operators
+                // we construct an unique predicate with OR
+                // and preprend NOT after in the chain
                 buildApimFilter({
                   composeFilter:
                     i === 0
                       ? FilterCompositionEnum.none
-                      : FilterCompositionEnum.and,
+                      : FilterCompositionEnum.or,
                   field: FilterFieldEnum.name,
                   filterType: FilterSupportedOperatorsEnum.eq,
-                  inverse: true,
+                  inverse: false,
                   value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + specialGroupId,
                 }),
                 O.getOrElse(() => ""),
@@ -298,7 +302,7 @@ export const manageGroupSubscriptionsFilter = (
           // groupIdsFilter is encapsulated in parenthesis so that
           // OR operator doesnt break precedence
           // (https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html#_Toc372793858)
-          `(${groupIdsFilter}) ${FilterCompositionEnum.and}${excludeManageGroupSpecialFilter}`
+          `(${groupIdsFilter}) ${FilterCompositionEnum.and}not(${excludeManageGroupSpecialFilter})`
         : groupIdsFilter,
     ),
     O.getOrElse(() => ""),
