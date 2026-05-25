@@ -237,89 +237,69 @@ export const manageGroupSubscriptionsFilter = (
   specialGroupsIds: string[],
 ): string =>
   pipe(
-    O.Do,
-    O.bind("groupIdsFilter", () =>
-      pipe(
-        groupIds,
-        O.fromPredicate(RA.isNonEmpty),
-        O.map(
-          flow(
-            RA.mapWithIndex((i, groupId) =>
-              pipe(
-                buildApimFilter({
-                  composeFilter:
-                    i === 0
-                      ? FilterCompositionEnum.none
-                      : FilterCompositionEnum.or,
-                  field: FilterFieldEnum.name,
-                  filterType: FilterSupportedOperatorsEnum.eq,
-                  inverse: false,
-                  value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId,
-                }),
-                O.getOrElse(() => ""),
-              ),
-            ),
-            (groupIdFilters) => groupIdFilters.join(" "),
+    groupIds,
+    O.fromPredicate(RA.isNonEmpty),
+    O.map(
+      flow(
+        RA.mapWithIndex((i, groupId) =>
+          pipe(
+            buildApimFilter({
+              composeFilter:
+                i === 0 ? FilterCompositionEnum.none : FilterCompositionEnum.or,
+              field: FilterFieldEnum.name,
+              filterType: FilterSupportedOperatorsEnum.eq,
+              inverse: false,
+              value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId,
+            }),
+            O.getOrElse(() => ""),
           ),
         ),
-        // if groupIds is empty we default to all MANAGE-GROUP subscriptions filter
-        O.orElse(() =>
-          buildApimFilter({
-            composeFilter: FilterCompositionEnum.none,
-            field: FilterFieldEnum.name,
-            filterType: FilterSupportedFunctionsEnum.startswith,
-            inverse: false,
-            value: SUBSCRIPTION_MANAGE_GROUP_PREFIX,
-          }),
-        ),
+        (groupIdFilters) => groupIdFilters.join(" "),
       ),
     ),
-    O.bind("excludeManageGroupSpecialFilter", () =>
+    O.orElse(() =>
       pipe(
-        specialGroupsIds,
-        O.fromPredicate(RA.isNonEmpty),
-        O.map(
-          flow(
-            RA.mapWithIndex((i, specialGroupId) =>
-              pipe(
-                // to shorten the overall filter length
-                // instead of using multiple not eq operators
-                // we construct an unique predicate with OR
-                // and preprend NOT after in the chain
-                buildApimFilter({
-                  composeFilter:
-                    i === 0
-                      ? FilterCompositionEnum.none
-                      : FilterCompositionEnum.or,
-                  field: FilterFieldEnum.name,
-                  filterType: FilterSupportedOperatorsEnum.eq,
-                  inverse: false,
-                  value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + specialGroupId,
-                }),
-                O.getOrElse(() => ""),
+        buildApimFilter({
+          composeFilter: FilterCompositionEnum.none,
+          field: FilterFieldEnum.name,
+          filterType: FilterSupportedFunctionsEnum.startswith,
+          inverse: false,
+          value: SUBSCRIPTION_MANAGE_GROUP_PREFIX,
+        }),
+        O.chain((startWithFilter) =>
+          pipe(
+            specialGroupsIds,
+            O.fromPredicate(RA.isNonEmpty),
+            O.map(
+              flow(
+                RA.mapWithIndex((i, specialGroupId) =>
+                  pipe(
+                    // to shorten the overall filter length
+                    // instead of using multiple not eq operators
+                    // we construct an unique predicate with OR
+                    // and prepend NOT after in the chain
+                    buildApimFilter({
+                      composeFilter:
+                        i === 0
+                          ? FilterCompositionEnum.none
+                          : FilterCompositionEnum.or,
+                      field: FilterFieldEnum.name,
+                      filterType: FilterSupportedOperatorsEnum.eq,
+                      inverse: false,
+                      value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + specialGroupId,
+                    }),
+                    O.getOrElse(() => ""),
+                  ),
+                ),
+                (exclusionFilters) => exclusionFilters.join(" "),
+                (exclusionFilter) =>
+                  `${startWithFilter} ${FilterCompositionEnum.and}not(${exclusionFilter})`,
               ),
             ),
-            (groupIdFilters) => groupIdFilters.join(" "),
+            O.orElse(() => O.some(startWithFilter)),
           ),
         ),
-        O.orElse(() => O.some("")),
       ),
-    ),
-    O.map(({ excludeManageGroupSpecialFilter, groupIdsFilter }) =>
-      // NOTE:
-      // 1. selcGroup also contains special groups except for ADMIN that always has selcGroup forced to empty array
-      // 2. excludeManageGroupSpecialFilter is applied only when groupIds array is empty
-      //    (APIM filter with startsWith clause)
-      // the following table show samples with only one special group
-      // | selcGroup | selcSpecialGroup | role     | APIM filter                    |
-      // | --------- | ---------------- | -------- | ------------------------------ |
-      // | []        | [gs1]            | ADMIN    | startsWith() + exclusionFilter |
-      // | [gs1]     | [gs1]            | ADMIN_EA | name eq gs1                    |
-      // | []        | [gs1]            | OPERATOR | startsWith() + exclusionFilter |
-      // | [gs1]     | [gs1]            | OPERATOR | name eq gs1                    |
-      groupIds.length === 0 && excludeManageGroupSpecialFilter.length > 0
-        ? `${groupIdsFilter} ${FilterCompositionEnum.and}not(${excludeManageGroupSpecialFilter})`
-        : groupIdsFilter,
     ),
     O.getOrElse(() => ""),
   );
