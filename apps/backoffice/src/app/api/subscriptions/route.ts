@@ -123,12 +123,13 @@ export const GET = withJWTAuthHandler(
     try {
       const response = await getManageSubscriptions({
         apimUserId: backofficeUser.parameters.userId,
+        institutionSelcSpecialGroups:
+          backofficeUser.institution.selcSpecialGroups,
         limit: maybeLimit.right,
         offset: maybeOffset.right,
-        // selcGroups is [] for admins (set by withJWTAuthHandler wrapper)
-        selcGroups: backofficeUser.permissions.selcGroups,
-        selcSpecialGroups: backofficeUser.institution.selcSpecialGroups,
         subscriptionType: maybeKind.right,
+        // selcGroups is [] for admins (set by withJWTAuthHandler wrapper)
+        userSelcGroups: backofficeUser.permissions.selcGroups,
       });
       return sanitizedNextResponseJson(
         buildPagination(response, maybeLimit.right, maybeOffset.right),

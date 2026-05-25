@@ -343,7 +343,7 @@ describe("Institutions", () => {
       expect(getManageSubscriptionsMock).toHaveBeenCalledWith({
         subscriptionType: "MANAGE_GROUP",
         apimUserId,
-        selcSpecialGroups: [],
+        institutionSelcSpecialGroups: [],
       });
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
       expect(getInstitutionGroupsMock).toHaveBeenCalledWith({
@@ -387,7 +387,7 @@ describe("Institutions", () => {
       expect(getManageSubscriptionsMock).toHaveBeenCalledWith({
         subscriptionType: "MANAGE_GROUP",
         apimUserId,
-        selcSpecialGroups: [],
+        institutionSelcSpecialGroups: [],
       });
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
       expect(getInstitutionGroupsMock).toHaveBeenCalledWith({

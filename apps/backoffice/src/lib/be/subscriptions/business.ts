@@ -193,23 +193,23 @@ export async function upsertManageSubscription(
  */
 export async function getManageSubscriptions({
   apimUserId,
+  institutionSelcSpecialGroups,
   limit,
   offset,
-  selcGroups,
-  selcSpecialGroups,
   subscriptionType,
+  userSelcGroups,
 }: {
   apimUserId: string;
+  institutionSelcSpecialGroups: SpecialGroup[];
   limit?: number;
   offset?: number;
-  selcGroups?: Group[];
-  selcSpecialGroups: SpecialGroup[];
   subscriptionType: SubscriptionType;
+  userSelcGroups?: Group[];
 }): Promise<Subscription[]> {
   let filter;
   switch (subscriptionType) {
     case SubscriptionTypeEnum.MANAGE_ROOT:
-      if (selcGroups && selcGroups.length > 0) {
+      if (userSelcGroups && userSelcGroups.length > 0) {
         // Non-admin users who have at least one group are not allowed to retrieve "ROOT MANAGE" subscription
         return Promise.resolve([]);
       }
@@ -217,8 +217,8 @@ export async function getManageSubscriptions({
       break;
     case SubscriptionTypeEnum.MANAGE_GROUP:
       filter = ApimUtils.apim_filters.manageGroupSubscriptionsFilter(
-        selcGroups?.map((group) => group.id) ?? [],
-        selcSpecialGroups.map((group) => group.id),
+        userSelcGroups?.map((group) => group.id) ?? [],
+        institutionSelcSpecialGroups.map((group) => group.id),
       );
       break;
     default:

@@ -92,7 +92,7 @@ export const retrieveUnboundInstitutionGroups = async (
   const [subscriptions, groups] = await Promise.all([
     getManageSubscriptions({
       apimUserId,
-      selcSpecialGroups: [],
+      institutionSelcSpecialGroups: [],
       subscriptionType: SubscriptionTypeEnum.MANAGE_GROUP,
     }),
     retrieveInstitutionGroups(institutionId),

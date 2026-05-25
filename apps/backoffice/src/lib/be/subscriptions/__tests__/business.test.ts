@@ -276,7 +276,7 @@ describe("Subscriptions Business Logic", () => {
           apimUserId: ownerId,
           limit,
           offset,
-          selcSpecialGroups: [],
+          institutionSelcSpecialGroups: [],
         }),
       ).rejects.toThrowError("Error retrieving manage group subscriptions");
 
@@ -314,7 +314,7 @@ describe("Subscriptions Business Logic", () => {
           apimUserId: ownerId,
           limit,
           offset,
-          selcSpecialGroups: [],
+          institutionSelcSpecialGroups: [],
         }),
       ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
 
@@ -340,8 +340,8 @@ describe("Subscriptions Business Logic", () => {
           apimUserId: ownerId,
           limit,
           offset,
-          selcGroups: [group],
-          selcSpecialGroups: [],
+          userSelcGroups: [group],
+          institutionSelcSpecialGroups: [],
         }),
       ).resolves.toStrictEqual([]);
 
@@ -384,8 +384,8 @@ describe("Subscriptions Business Logic", () => {
           apimUserId: ownerId,
           limit,
           offset,
-          selcGroups: [group],
-          selcSpecialGroups: [specialGroup],
+          userSelcGroups: [group],
+          institutionSelcSpecialGroups: [specialGroup],
         }),
       ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
 
@@ -394,7 +394,7 @@ describe("Subscriptions Business Logic", () => {
         ownerId,
         offset,
         limit,
-        `(name eq 'MANAGE-GROUP-${group.id}') and not(name eq 'MANAGE-GROUP-${specialGroup.id}')`,
+        `name eq 'MANAGE-GROUP-${group.id}'`,
       );
     });
 
@@ -422,8 +422,8 @@ describe("Subscriptions Business Logic", () => {
           apimUserId: ownerId,
           limit,
           offset,
-          selcGroups: [],
-          selcSpecialGroups: [],
+          userSelcGroups: [],
+          institutionSelcSpecialGroups: [],
         }),
       ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
 
@@ -437,12 +437,12 @@ describe("Subscriptions Business Logic", () => {
     });
 
     it.each`
-      scenario                       | selcGroups
-      ${"selcGroups is not defined"} | ${undefined}
-      ${"selcGroups is empty"}       | ${[]}
+      scenario                           | userSelcGroups
+      ${"userSelcGroups is not defined"} | ${undefined}
+      ${"userSelcGroups is empty"}       | ${[]}
     `(
       "should return a single subscription when the root manage is requested and $scenario",
-      async ({ selcGroups }) => {
+      async ({ userSelcGroups }) => {
         const subscriptionType = "MANAGE_ROOT";
         const ownerId = mocks.anOwnerId;
         const limit = 5;
@@ -457,8 +457,8 @@ describe("Subscriptions Business Logic", () => {
             apimUserId: ownerId,
             limit,
             offset,
-            selcGroups,
-            selcSpecialGroups: [],
+            userSelcGroups,
+            institutionSelcSpecialGroups: [],
           }),
         ).resolves.toStrictEqual([
           {
@@ -478,12 +478,12 @@ describe("Subscriptions Business Logic", () => {
       },
     );
 
-    it("should return an empty array when the root manage is requested and selcGroups contains at least one item", async () => {
+    it("should return an empty array when the root manage is requested and userSelcGroups contains at least one item", async () => {
       const subscriptionType = "MANAGE_ROOT";
       const ownerId = mocks.anOwnerId;
       const limit = 5;
       const offset = 0;
-      const selcGroups = ["item"];
+      const userSelcGroups = ["item"];
       mocks.getUserSubscriptions.mockReturnValueOnce(
         TE.right([mocks.aSubscriptionContract]),
       );
@@ -494,8 +494,8 @@ describe("Subscriptions Business Logic", () => {
           apimUserId: ownerId,
           limit,
           offset,
-          selcGroups,
-          selcSpecialGroups: [],
+          userSelcGroups,
+          institutionSelcSpecialGroups: [],
         }),
       ).resolves.toStrictEqual([]);
 

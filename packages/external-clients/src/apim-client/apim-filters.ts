@@ -217,15 +217,24 @@ export const subscriptionsExceptManageOneApimFilter = () =>
   );
 
 /**
- * User Subscription list filtered by name startswith 'MANAGE-GROUP-'
- * if specialGroupsInstitutionIds argument is provided,
- * 'MANAGE-GROUP-' of type special are excluded
+ * User Subscription list filtered by 'MANAGE-GROUP-'
+ *  NOTE:
+ * 1. selcGroup also contains special groups except for ADMIN that always has selcGroup forced to empty array
+ * 2. excludeManageGroupSpecialFilter is applied only when groupIds array is empty
+ *    (APIM filter with startsWith clause)
+ * the following table show samples with only one special group
+ * | selcGroup | selcSpecialGroup | role     | APIM filter                    |
+ * | --------- | ---------------- | -------- | ------------------------------ |
+ * | []        | [gs1]            | ADMIN    | startsWith() + exclusionFilter |
+ * | [gs1]     | [gs1]            | ADMIN_EA | name eq gs1                    |
+ * | []        | [gs1]            | OPERATOR | startsWith() + exclusionFilter |
+ * | [gs1]     | [gs1]            | OPERATOR | name eq gs1                    |
  *
  * @returns API Management `$filter` property
  */
 export const manageGroupSubscriptionsFilter = (
   groupIds: string[],
-  specialGroupsInstitutionIds: string[],
+  specialGroupsIds: string[],
 ): string =>
   pipe(
     O.Do,
@@ -267,7 +276,7 @@ export const manageGroupSubscriptionsFilter = (
     ),
     O.bind("excludeManageGroupSpecialFilter", () =>
       pipe(
-        specialGroupsInstitutionIds,
+        specialGroupsIds,
         O.fromPredicate(RA.isNonEmpty),
         O.map(
           flow(
@@ -297,12 +306,19 @@ export const manageGroupSubscriptionsFilter = (
       ),
     ),
     O.map(({ excludeManageGroupSpecialFilter, groupIdsFilter }) =>
-      excludeManageGroupSpecialFilter.length > 0
-        ? // if evaluated insert excludeManageGroupSpecialFilter
-          // groupIdsFilter is encapsulated in parenthesis so that
-          // OR operator doesnt break precedence
-          // (https://docs.oasis-open.org/odata/odata/v4.0/os/part2-url-conventions/odata-v4.0-os-part2-url-conventions.html#_Toc372793858)
-          `(${groupIdsFilter}) ${FilterCompositionEnum.and}not(${excludeManageGroupSpecialFilter})`
+      // NOTE:
+      // 1. selcGroup also contains special groups except for ADMIN that always has selcGroup forced to empty array
+      // 2. excludeManageGroupSpecialFilter is applied only when groupIds array is empty
+      //    (APIM filter with startsWith clause)
+      // the following table show samples with only one special group
+      // | selcGroup | selcSpecialGroup | role     | APIM filter                    |
+      // | --------- | ---------------- | -------- | ------------------------------ |
+      // | []        | [gs1]            | ADMIN    | startsWith() + exclusionFilter |
+      // | [gs1]     | [gs1]            | ADMIN_EA | name eq gs1                    |
+      // | []        | [gs1]            | OPERATOR | startsWith() + exclusionFilter |
+      // | [gs1]     | [gs1]            | OPERATOR | name eq gs1                    |
+      groupIds.length === 0 && excludeManageGroupSpecialFilter.length > 0
+        ? `${groupIdsFilter} ${FilterCompositionEnum.and}not(${excludeManageGroupSpecialFilter})`
         : groupIdsFilter,
     ),
     O.getOrElse(() => ""),

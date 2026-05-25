@@ -462,19 +462,19 @@ describe("Subscription API", () => {
         apimUserId: userMock.parameters.userId,
         limit,
         offset,
-        selcGroups: undefined,
-        selcSpecialGroups: userMock.institution.selcSpecialGroups,
+        userSelcGroups: undefined,
+        institutionSelcSpecialGroups: userMock.institution.selcSpecialGroups,
       });
     });
 
     it.each`
-      scenario                                 | userRole                  | selcGroups
+      scenario                                 | userRole                  | userSelcGroups
       ${"user is admin"}                       | ${SelfcareRoles.admin}    | ${undefined}
       ${"user is not admin and has no groups"} | ${SelfcareRoles.operator} | ${undefined}
       ${"user is not admin and has groups"}    | ${SelfcareRoles.operator} | ${["g1"]}
     `(
       "should return the subscriptions when getManageSubscriptions do not fails and $scenario",
-      async ({ userRole, selcGroups }) => {
+      async ({ userRole, userSelcGroups }) => {
         // given
         const kind = "MANAGE_ROOT";
         const limit = 10;
@@ -495,7 +495,7 @@ describe("Subscription API", () => {
           },
           permissions: {
             ...userMock.permissions,
-            selcGroups: selcGroups,
+            selcGroups: userSelcGroups,
           },
         }));
 
@@ -522,8 +522,8 @@ describe("Subscription API", () => {
           apimUserId: userMock.parameters.userId,
           limit,
           offset,
-          selcGroups,
-          selcSpecialGroups: userMock.institution.selcSpecialGroups,
+          userSelcGroups,
+          institutionSelcSpecialGroups: userMock.institution.selcSpecialGroups,
         });
       },
     );

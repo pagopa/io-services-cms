@@ -204,42 +204,64 @@ describe("manageGroupSubscriptionsFilter", () => {
     expect(res).toEqual(expectedRes);
   });
 
-  it("should return a MANAGE-GROUP special filter when a special group is provided", () => {
-    const groupId = "g1";
+  it("should return a MANAGE-GROUP- startsWith filter with special group exclusion when no group ids are provided", () => {
     const specialGroupId = "sg1";
-    const res = manageGroupSubscriptionsFilter([groupId], [specialGroupId]);
+    const res = manageGroupSubscriptionsFilter([], [specialGroupId]);
 
     expect(res).toEqual(
-      `(name eq 'MANAGE-GROUP-${groupId}') and not(name eq 'MANAGE-GROUP-${specialGroupId}')`,
+      `startswith(name, 'MANAGE-GROUP-') and not(name eq 'MANAGE-GROUP-${specialGroupId}')`,
     );
   });
 
-  it("should return a composed MANAGE-GROUP special filter when multiple special group are provided", () => {
-    const groupId = "g1";
+  it("should return a MANAGE-GROUP- startsWith filter with multiple special group exclusions when no group ids are provided", () => {
     const specialGroupId = "sg1";
     const specialGroupId2 = "sg2";
     const res = manageGroupSubscriptionsFilter(
-      [groupId],
+      [],
       [specialGroupId, specialGroupId2],
     );
 
     expect(res).toEqual(
-      `(name eq 'MANAGE-GROUP-${groupId}') and not(name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}')`,
+      `startswith(name, 'MANAGE-GROUP-') and not(name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}')`,
     );
   });
 
-  it("should manage a composed MANAGE-GROUP filter with both group ids and special groups", () => {
+  it("should return a single MANAGE-GROUP- name eq filter when the only group id is itself a special group", () => {
+    const specialGroupId = "sg1";
+    const res = manageGroupSubscriptionsFilter(
+      [specialGroupId],
+      [specialGroupId],
+    );
+
+    expect(res).toEqual(`name eq 'MANAGE-GROUP-${specialGroupId}'`);
+  });
+
+  it("should return concat MANAGE-GROUP- name eq filters when group ids include multiple special groups", () => {
+    const groupId = "g1";
+    const specialGroupId = "sg1";
+    const specialGroupId2 = "sg2";
+    const res = manageGroupSubscriptionsFilter(
+      [groupId, specialGroupId, specialGroupId2],
+      [specialGroupId, specialGroupId2],
+    );
+
+    expect(res).toEqual(
+      `name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}'`,
+    );
+  });
+
+  it("should return concat MANAGE-GROUP- name eq filters ignoring special groups exclusion when multiple group ids include special groups", () => {
     const groupId = "g1";
     const groupId2 = "g2";
     const specialGroupId = "sg1";
     const specialGroupId2 = "sg2";
     const res = manageGroupSubscriptionsFilter(
-      [groupId, groupId2],
+      [groupId, groupId2, specialGroupId, specialGroupId2],
       [specialGroupId, specialGroupId2],
     );
 
     expect(res).toEqual(
-      `(name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${groupId2}') and not(name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}')`,
+      `name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${groupId2}' or name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}'`,
     );
   });
 });
