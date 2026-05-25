@@ -187,8 +187,8 @@ export async function upsertManageSubscription(
  * @param apimUserId The id of the user to check the subscription ownership for
  * @param limit The maximum number of subscriptions to retrieve
  * @param offset The number of subscriptions to skip
- * @param selcGroups The groups to filter the subscriptions by (only for GROUP subscriptions)
- * @param selcSpecialGroups The special groups to exclude from subscriptions listing
+ * @param userSelcGroups The groups to filter the subscriptions by (only for GROUP subscriptions)
+ * @param institutionSelcSpecialGroups The special groups to exclude from subscriptions listing
  * @returns The list of manage subscriptions for the user
  */
 export async function getManageSubscriptions({

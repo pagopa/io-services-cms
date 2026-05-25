@@ -223,7 +223,7 @@ export const subscriptionsExceptManageOneApimFilter = () =>
  * 2. excludeManageGroupSpecialFilter is applied only when groupIds array is empty
  *    (APIM filter with startsWith clause)
  * the following table show samples with only one special group
- * | selcGroup | selcSpecialGroup | role     | APIM filter                    |
+ * | groupIds  | specialGroupsIds | role     | APIM filter                    |
  * | --------- | ---------------- | -------- | ------------------------------ |
  * | []        | [gs1]            | ADMIN    | startsWith() + exclusionFilter |
  * | [gs1]     | [gs1]            | ADMIN_EA | name eq gs1                    |

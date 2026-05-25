@@ -128,7 +128,7 @@ export const GET = withJWTAuthHandler(
         limit: maybeLimit.right,
         offset: maybeOffset.right,
         subscriptionType: maybeKind.right,
-        // selcGroups is [] for admins (set by withJWTAuthHandler wrapper)
+        // userSelcGroups is [] for admins (set by withJWTAuthHandler wrapper)
         userSelcGroups: backofficeUser.permissions.selcGroups,
       });
       return sanitizedNextResponseJson(
