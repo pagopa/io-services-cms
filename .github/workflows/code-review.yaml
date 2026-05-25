@@ -11,7 +11,7 @@ on:
       - apps/**
       - packages/**
       - package.json
-      - .github/workflows/code_review.yaml
+      - .github/workflows/code-review.yaml
   workflow_dispatch:
 
 jobs:
