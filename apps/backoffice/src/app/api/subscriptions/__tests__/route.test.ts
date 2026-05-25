@@ -4,6 +4,7 @@ import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../../types/next-auth";
+import { BackOfficeUserEnriched } from "../../../../lib/be/wrappers";
 import { CreateManageGroupSubscription } from "../../../../generated/api/CreateManageGroupSubscription";
 import {
   StateEnum,
@@ -36,6 +37,8 @@ const userMock = {
     name: faker.company.name(),
     role: SelfcareRoles.admin,
     isAggregator: faker.datatype.boolean(),
+    isAggregate: faker.datatype.boolean(),
+    selcSpecialGroups: [],
   },
   name: faker.person.fullName(),
   parameters: {
@@ -46,7 +49,7 @@ const userMock = {
   permissions: {
     apimGroups: faker.helpers.multiple(faker.string.alpha),
   },
-} as BackOfficeUser;
+} as BackOfficeUserEnriched;
 
 const stubs = { aGroup: { id: "aGroupId", name: "aGroupName" } };
 
@@ -454,23 +457,24 @@ describe("Subscription API", () => {
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
       expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
-      expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
-        kind,
-        userMock.parameters.userId,
+      expect(mocks.getManageSubscriptions).toHaveBeenCalledWith({
+        subscriptionType: kind,
+        apimUserId: userMock.parameters.userId,
         limit,
         offset,
-        undefined,
-      );
+        userSelcGroups: undefined,
+        institutionSelcSpecialGroups: userMock.institution.selcSpecialGroups,
+      });
     });
 
     it.each`
-      scenario                                 | userRole                  | selcGroups
+      scenario                                 | userRole                  | userSelcGroups
       ${"user is admin"}                       | ${SelfcareRoles.admin}    | ${undefined}
       ${"user is not admin and has no groups"} | ${SelfcareRoles.operator} | ${undefined}
       ${"user is not admin and has groups"}    | ${SelfcareRoles.operator} | ${["g1"]}
     `(
       "should return the subscriptions when getManageSubscriptions do not fails and $scenario",
-      async ({ userRole, selcGroups }) => {
+      async ({ userRole, userSelcGroups }) => {
         // given
         const kind = "MANAGE_ROOT";
         const limit = 10;
@@ -491,7 +495,7 @@ describe("Subscription API", () => {
           },
           permissions: {
             ...userMock.permissions,
-            selcGroups: selcGroups,
+            selcGroups: userSelcGroups,
           },
         }));
 
@@ -513,13 +517,14 @@ describe("Subscription API", () => {
         expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
         expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
         expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
-        expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
-          kind,
-          userMock.parameters.userId,
+        expect(mocks.getManageSubscriptions).toHaveBeenCalledWith({
+          subscriptionType: kind,
+          apimUserId: userMock.parameters.userId,
           limit,
           offset,
-          userRole === SelfcareRoles.admin ? undefined : selcGroups,
-        );
+          userSelcGroups,
+          institutionSelcSpecialGroups: userMock.institution.selcSpecialGroups,
+        });
       },
     );
   });

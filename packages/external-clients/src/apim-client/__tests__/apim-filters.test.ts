@@ -179,20 +179,14 @@ describe("subscriptionsExceptManageOneApimFilter", () => {
 
 describe("manageGroupSubscriptionsFilter", () => {
   it("should return a MANAGE-GROUP- filter when no groups are provided", () => {
-    const res = manageGroupSubscriptionsFilter();
+    const res = manageGroupSubscriptionsFilter([], []);
 
     expect(res).toEqual("startswith(name, 'MANAGE-GROUP-')");
   });
 
-  it("should return an empty filter when empty array is provided", () => {
-    const res = manageGroupSubscriptionsFilter([]);
-
-    expect(res).toEqual("");
-  });
-
   it("should return a single MANAGE-GROUP- filter when a single group id provided", () => {
     const groupId = "g1";
-    const res = manageGroupSubscriptionsFilter([groupId]);
+    const res = manageGroupSubscriptionsFilter([groupId], []);
 
     expect(res).toEqual(`name eq 'MANAGE-GROUP-${groupId}'`);
   });
@@ -202,12 +196,73 @@ describe("manageGroupSubscriptionsFilter", () => {
     for (let index = 0; index < groupids.length; index++) {
       groupids[index] = "id" + index;
     }
-    const res = manageGroupSubscriptionsFilter(groupids);
+    const res = manageGroupSubscriptionsFilter(groupids, []);
 
     const expectedRes = groupids
       .map((groupId) => `name eq 'MANAGE-GROUP-${groupId}'`)
       .join(" or ");
     expect(res).toEqual(expectedRes);
+  });
+
+  it("should return a MANAGE-GROUP- startsWith filter with special group exclusion when no group ids are provided", () => {
+    const specialGroupId = "sg1";
+    const res = manageGroupSubscriptionsFilter([], [specialGroupId]);
+
+    expect(res).toEqual(
+      `startswith(name, 'MANAGE-GROUP-') and not(name eq 'MANAGE-GROUP-${specialGroupId}')`,
+    );
+  });
+
+  it("should return a MANAGE-GROUP- startsWith filter with multiple special group exclusions when no group ids are provided", () => {
+    const specialGroupId = "sg1";
+    const specialGroupId2 = "sg2";
+    const res = manageGroupSubscriptionsFilter(
+      [],
+      [specialGroupId, specialGroupId2],
+    );
+
+    expect(res).toEqual(
+      `startswith(name, 'MANAGE-GROUP-') and not(name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}')`,
+    );
+  });
+
+  it("should return a single MANAGE-GROUP- name eq filter when the only group id is itself a special group", () => {
+    const specialGroupId = "sg1";
+    const res = manageGroupSubscriptionsFilter(
+      [specialGroupId],
+      [specialGroupId],
+    );
+
+    expect(res).toEqual(`name eq 'MANAGE-GROUP-${specialGroupId}'`);
+  });
+
+  it("should return concat MANAGE-GROUP- name eq filters when group ids include multiple special groups", () => {
+    const groupId = "g1";
+    const specialGroupId = "sg1";
+    const specialGroupId2 = "sg2";
+    const res = manageGroupSubscriptionsFilter(
+      [groupId, specialGroupId, specialGroupId2],
+      [specialGroupId, specialGroupId2],
+    );
+
+    expect(res).toEqual(
+      `name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}'`,
+    );
+  });
+
+  it("should return concat MANAGE-GROUP- name eq filters ignoring special groups exclusion when multiple group ids include special groups", () => {
+    const groupId = "g1";
+    const groupId2 = "g2";
+    const specialGroupId = "sg1";
+    const specialGroupId2 = "sg2";
+    const res = manageGroupSubscriptionsFilter(
+      [groupId, groupId2, specialGroupId, specialGroupId2],
+      [specialGroupId, specialGroupId2],
+    );
+
+    expect(res).toEqual(
+      `name eq 'MANAGE-GROUP-${groupId}' or name eq 'MANAGE-GROUP-${groupId2}' or name eq 'MANAGE-GROUP-${specialGroupId}' or name eq 'MANAGE-GROUP-${specialGroupId2}'`,
+    );
   });
 });
 
