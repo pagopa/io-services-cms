@@ -123,15 +123,17 @@ describe("withJWTAuthHandler", () => {
   });
 
   it.each`
-    scenario                           | selcGroups
-    ${"selfcare groups are undefined"} | ${undefined}
-    ${"selfcare groups are empty"}     | ${[]}
+    scenario                       | selcGroups
+    ${"selfcare groups are empty"} | ${[]}
   `(
-    "valid token provided should end up in 200 response without selfcare groups detail when $scenario",
+    "valid token provided should end up in 200 response without selfcare groups detail when user is not admin and $scenario",
     async ({ selcGroups }) => {
       //given
-      mocks.jwtMock.permissions.selcGroups = selcGroups;
-      auth.mockResolvedValueOnce({ user: mocks.jwtMock });
+      const jwtMock = structuredClone(mocks.jwtMock);
+      jwtMock.institution.role = "operator";
+      jwtMock.permissions.selcGroups = selcGroups;
+      auth.mockResolvedValueOnce({ user: jwtMock });
+      retrieveInstitutionGroups.mockResolvedValueOnce(selcGroups);
       const aMockedHandler = vi.fn(() =>
         Promise.resolve(NextResponse.json({}, { status: 200 })),
       );
@@ -147,23 +149,27 @@ describe("withJWTAuthHandler", () => {
         nextRequestMock,
         expect.objectContaining({
           backofficeUser: {
-            ...mocks.jwtMock,
+            ...jwtMock,
             permissions: {
-              ...mocks.jwtMock.permissions,
+              ...jwtMock.permissions,
               selcGroups: [],
             },
           },
         }),
       );
       expect(result.status).toBe(200);
-      expect(retrieveInstitutionGroups).not.toHaveBeenCalled();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledOnce();
+      expect(retrieveInstitutionGroups).toHaveBeenCalledWith(
+        jwtMock.institution.id,
+        "*",
+      );
     },
   );
 
   it("valid token provided should end up in 200 response with selfcare groups detail when is not an admin and has selcGroups", async () => {
     //given
     const jwtMock = structuredClone(mocks.jwtMock);
-    jwtMock.institution.role = "admin";
+    jwtMock.institution.role = "operator";
     jwtMock.institution.isAggregate = true;
     jwtMock.permissions.selcGroups = ["id1"];
 
@@ -207,10 +213,10 @@ describe("withJWTAuthHandler", () => {
 
   it.each`
     scenario                           | selcGroups
-    ${"selfcare groups are undefined"} | ${undefined}
+    ${"selfcare groups are not empty"} | ${[{ id: "id1", name: "group1", state: "ACTIVE" }]}
     ${"selfcare groups are empty"}     | ${[]}
   `(
-    "valid token provided should end up in 200 response without selfcare groups detail when $scenario",
+    "valid token provided should end up in 200 response without selfcare groups detail when user is admin and $scenario",
     async ({ selcGroups }) => {
       //given
       const jwtMock = structuredClone(mocks.jwtMock);
