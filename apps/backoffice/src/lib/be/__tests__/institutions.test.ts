@@ -340,10 +340,11 @@ describe("Institutions", () => {
         retrieveUnboundInstitutionGroups(apimUserId, institutionId),
       ).rejects.toThrowError(error);
       expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
-      expect(getManageSubscriptionsMock).toHaveBeenCalledWith(
-        "MANAGE_GROUP",
+      expect(getManageSubscriptionsMock).toHaveBeenCalledWith({
+        subscriptionType: "MANAGE_GROUP",
         apimUserId,
-      );
+        institutionSelcSpecialGroups: [],
+      });
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
       expect(getInstitutionGroupsMock).toHaveBeenCalledWith({
         institutionId,
@@ -383,10 +384,11 @@ describe("Institutions", () => {
         },
       ]);
       expect(getManageSubscriptionsMock).toHaveBeenCalledOnce();
-      expect(getManageSubscriptionsMock).toHaveBeenCalledWith(
-        "MANAGE_GROUP",
+      expect(getManageSubscriptionsMock).toHaveBeenCalledWith({
+        subscriptionType: "MANAGE_GROUP",
         apimUserId,
-      );
+        institutionSelcSpecialGroups: [],
+      });
       expect(getInstitutionGroupsMock).toHaveBeenCalledOnce();
       expect(getInstitutionGroupsMock).toHaveBeenCalledWith({
         institutionId,

@@ -61,10 +61,9 @@ export const institutionGroupBaseHandler = async (
       switch (maybeFilter.right) {
         case GroupFilterTypeEnum.ALL:
           if (userAuthz.hasSelcGroups()) {
-            groups =
-              backofficeUser.permissions.selcGroups?.filter(
-                (group) => group.state === StateEnum.ACTIVE,
-              ) ?? [];
+            groups = backofficeUser.permissions.selcGroups.filter(
+              (group) => group.state === StateEnum.ACTIVE,
+            );
           } else {
             groups = await retrieveInstitutionGroups(params.institutionId);
           }

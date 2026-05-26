@@ -9,15 +9,14 @@ import { GET } from "../route";
 
 const backofficeUserMock: BackOfficeUser = {
   id: faker.string.uuid(),
-  name: faker.person.fullName(),
-  email: faker.internet.email(),
   institution: {
     id: faker.string.uuid(),
     name: faker.company.name(),
     fiscalCode: faker.string.numeric(),
     role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
     logo_url: faker.image.url(),
-    isAggregator: false
+    isAggregator: false,
+    isAggregate: false,
   },
   permissions: { apimGroups: faker.helpers.multiple(faker.string.alpha) },
   parameters: {

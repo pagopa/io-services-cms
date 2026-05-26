@@ -24,12 +24,13 @@ const { AzureUserAttributesManageMiddleware } = vi.hoisted(() => ({
 
 vi.mock(
   "../../lib/middlewares/azure_user_attributes_manage-middleware",
-  async () => {
-    const actual = await vi.importActual(
-      "../../lib/middlewares/azure_user_attributes_manage-middleware",
-    );
+  async (importOriginal) => {
+    const original =
+      await importOriginal<
+        typeof import("../../lib/middlewares/azure_user_attributes_manage-middleware")
+      >();
     return {
-      ...(actual as any),
+      ...original,
       AzureUserAttributesManageMiddleware,
     };
   },
