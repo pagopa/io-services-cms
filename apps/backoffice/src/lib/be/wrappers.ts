@@ -1,11 +1,11 @@
 import { auth } from "@/auth";
 import { NextRequest, NextResponse } from "next/server";
 
+import { SelfcareRoles } from "@/types/auth";
 import {
   BackOfficeUser,
   BackOfficeUserPermissions,
 } from "../../../types/next-auth";
-import { userAuthz } from "./authz";
 import { handleUnauthorizedErrorResponse } from "./errors";
 import {
   DomainGroup,
@@ -30,25 +30,28 @@ export const withJWTAuthHandler =
       return handleUnauthorizedErrorResponse("No Authentication provided");
     }
 
-    const userAuth = userAuthz(session.user);
-    let selcGroups: DomainGroup[] = [];
-    let selcSpecialGroups: SpecialGroup[] = [];
+    let selcGroups: DomainGroup[];
+    let institutionSpecialGroups: SpecialGroup[] = [];
+    let institutionGroups: DomainGroup[] | undefined;
 
-    if (
-      session.user.institution.isAggregate ||
-      (!userAuth.isAdmin() && userAuth.hasSelcGroups())
-    ) {
-      const institutionGroups = await retrieveInstitutionGroups(
-        session.user.institution.id,
-        "*",
+    if (session.user.institution.role === SelfcareRoles.admin) {
+      selcGroups = [];
+    } else {
+      institutionGroups =
+        institutionGroups ??
+        (await retrieveInstitutionGroups(session.user.institution.id, "*"));
+      selcGroups = institutionGroups.filter(
+        (institutionGroup) =>
+          session.user.permissions.selcGroups?.includes(institutionGroup.id) ??
+          false,
       );
-      selcSpecialGroups = institutionGroups.filter(
-        (institutionGroup): institutionGroup is SpecialGroup =>
-          !!institutionGroup.parentInstitutionId,
-      );
-      selcGroups = institutionGroups.filter((institutionGroup) =>
-        session.user.permissions.selcGroups?.includes(institutionGroup.id),
-      );
+    }
+
+    if (session.user.institution.isAggregate) {
+      institutionGroups =
+        institutionGroups ??
+        (await retrieveInstitutionGroups(session.user.institution.id, "*"));
+      institutionSpecialGroups = institutionGroups.filter(isSpecialGroup);
     }
 
     // call the final handler "injecting" the payload contained in the token
@@ -57,7 +60,7 @@ export const withJWTAuthHandler =
         ...session.user,
         institution: {
           ...session.user.institution,
-          selcSpecialGroups,
+          selcSpecialGroups: institutionSpecialGroups,
         },
         permissions: {
           ...session.user.permissions,
@@ -73,14 +76,17 @@ export type SpecialGroup = { parentInstitutionId: string } & DomainGroup;
 export type BackOfficeUserEnriched = {
   institution: {
     /**
-     * if selcSpecialGroups is empty, it means that there are no visibility restrictions for the user over "special" groups
+     * if selcSpecialGroups is empty, it means that institution has no "special" groups
      */
     selcSpecialGroups: SpecialGroup[];
   } & BackOfficeUser["institution"];
   permissions: {
     /**
-     * if selcGroups is undefined or empty, it means that there are no visibility restrictions for the user over "regular" groups
+     * if selcGroups is empty, it means that the user is not a member of any group (or is an admin) and there are no visibility restrictions for the user over groups
      */
-    selcGroups?: DomainGroup[];
+    selcGroups: DomainGroup[];
   } & Omit<BackOfficeUserPermissions, "selcGroups">;
 } & Omit<BackOfficeUser, "permissions">;
+
+const isSpecialGroup = (group: DomainGroup): group is SpecialGroup =>
+  group.parentInstitutionId !== undefined;
