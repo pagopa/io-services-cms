@@ -7,6 +7,7 @@ import {
 } from "@/lib/be/errors";
 import { deleteManageSubscription } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import { SelfcareRoles } from "@/types/auth";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -26,7 +27,20 @@ export const DELETE = withJWTAuthHandler(
       params: { subscriptionId: string };
     },
   ) => {
-    if (!userAuthz(backofficeUser).isAdmin()) {
+    const userAuthzUtils = userAuthz(backofficeUser);
+    const userRole: SelfcareRoles = backofficeUser.institution.role;
+    switch (userRole) {
+      case SelfcareRoles.admin:
+        break;
+      case SelfcareRoles.adminAggregator:
+      case SelfcareRoles.operator:
+        return handleForbiddenErrorResponse("Role not authorized");
+      default:
+        // eslint-disable-next-line no-case-declarations
+        const _: never = userRole; // This will make sure that all cases are handled in the switch
+        throw new Error("Invalid user role");
+    }
+    if (!userAuthzUtils.isAdmin()) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
     if (
@@ -36,6 +50,14 @@ export const DELETE = withJWTAuthHandler(
     ) {
       return handleForbiddenErrorResponse(
         "Only MANAGE_GROUP Subscriptions can be deleted",
+      );
+    }
+    const groupId = params.subscriptionId.substring(
+      ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+    );
+    if (userAuthzUtils.isAnInstitutionSpecialGroup(groupId)) {
+      return handleForbiddenErrorResponse(
+        "Cannot delete subscription related to 'special' groups",
       );
     }
 

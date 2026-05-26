@@ -7,7 +7,7 @@ export interface Institution {
   isAggregate: boolean;
   logo_url?: string;
   name: string;
-  role: string;
+  role: SelfcareRoles;
 }
 
 export interface BackOfficeUserPermissions {

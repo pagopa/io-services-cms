@@ -18,7 +18,7 @@ export const isInstitutionIdSameAsCaller = (
   institutionId: string,
 ): boolean => user.institution.id === institutionId;
 
-export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
+export const userAuthz = (user: BackOfficeUserEnriched) => {
   const isAdmin = (): boolean => user.institution.role === SelfcareRoles.admin;
 
   const isAggregatorAdmin = (): boolean =>
@@ -29,16 +29,17 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
     checkActive?: boolean,
   ): boolean => {
     const { selcGroups } = user.permissions;
-    if (!selcGroups || selcGroups.length === 0) {
+    if (!selcGroups) {
       return false;
     }
     return selcGroups.some((group) => {
       if (typeof group === "string") {
         return group === groupId;
       } else {
-        return checkActive
-          ? group.id === groupId && group.state === StateEnum.ACTIVE
-          : group.id === groupId;
+        return (
+          group.id === groupId &&
+          (checkActive ? group.state === StateEnum.ACTIVE : true)
+        );
       }
     });
   };
@@ -63,23 +64,15 @@ export const userAuthz = (user: BackOfficeUser | BackOfficeUserEnriched) => {
      */
     isAggregatorAdmin,
 
-    /**
-     * Check if the user role is `admin_aggregator` and allowed on a specific group
-     * @param groupId - The group identifier to check
-     * @param checkActive - Optional flag to enforce active state check on group
-     * @returns a boolean indicating whether the user is an aggregator admin allowed on the group or not
-     */
-    isAnAggregatorAdminAllowedOnGroup: (
-      groupId: string,
-      checkActive?: boolean,
-    ): boolean => {
-      if (!isAggregatorAdmin()) {
-        return false;
-      }
-      return isUserAllowedOnGroup(groupId, checkActive);
-    },
-
     // TODO: refactor this method and its usage to simplify the logic of the permission check.
+    /**
+     * Checks if the provided group is part of a special group within their institution
+     * @param groupId - The group identifier to check
+     * @returns Whether the group is a special group for the user's institution
+     */
+    isAnInstitutionSpecialGroup: (groupId: string): boolean =>
+      user.institution.selcSpecialGroups.some((group) => group.id === groupId),
+
     /**
      * Checks if a group is allowed based on user permissions, optionally verifying its active state
      * @param groupId - The group identifier to check

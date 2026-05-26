@@ -15,6 +15,7 @@ import {
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched } from "@/lib/be/wrappers";
+import { SelfcareRoles } from "@/types/auth";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -28,17 +29,33 @@ export const getManageSubscriptionAuthorizedCidrsHandler = async (
     params: { subscriptionId: string };
   },
 ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
-  if (
-    !userAuthz(backofficeUser).isGroupAllowed(
-      params.subscriptionId.substring(
-        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
-      ),
-    )
-  ) {
-    return handleForbiddenErrorResponse(
-      "Requested subscription is out of your scope",
-    );
+  const groupId = params.subscriptionId.substring(
+    ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+  );
+  const userAuthzUtils = userAuthz(backofficeUser);
+  const userRole: SelfcareRoles = backofficeUser.institution.role;
+  switch (userRole) {
+    case SelfcareRoles.admin:
+      if (userAuthzUtils.isAnInstitutionSpecialGroup(groupId)) {
+        return handleForbiddenErrorResponse(
+          "You are not allowed to retrieve CIDRs for 'special' subscriptions",
+        );
+      }
+      break;
+    case SelfcareRoles.adminAggregator:
+    case SelfcareRoles.operator:
+      if (!userAuthzUtils.isUserAllowedOnGroup(groupId)) {
+        return handleForbiddenErrorResponse(
+          "Requested subscription is out of your scope",
+        );
+      }
+      break;
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = userRole; // This will make sure that all cases are handled in the switch
+      throw new Error("Invalid user role");
   }
+
   try {
     const authorizedCIDRsResponse =
       await retrieveManageSubscriptionAuthorizedCIDRs(
@@ -77,16 +94,34 @@ export const updateManageSubscriptionAuthorizedCidrsHandler = async (
     params: { subscriptionId: string };
   },
 ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
-  const allowed =
-    userAuthz(backofficeUser).isAdmin() ||
-    userAuthz(backofficeUser).isAnAggregatorAdminAllowedOnGroup(
-      params.subscriptionId.substring(
-        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
-      ),
-    );
-  if (!allowed) {
-    return handleForbiddenErrorResponse("Role not authorized");
+  const groupId = params.subscriptionId.substring(
+    ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+  );
+  const userAuthzUtils = userAuthz(backofficeUser);
+  const userRole: SelfcareRoles = backofficeUser.institution.role;
+  switch (userRole) {
+    case SelfcareRoles.admin:
+      if (userAuthzUtils.isAnInstitutionSpecialGroup(groupId)) {
+        return handleForbiddenErrorResponse(
+          "You are not allowed to update CIDRs for 'special' subscriptions",
+        );
+      }
+      break;
+    case SelfcareRoles.adminAggregator:
+      if (!userAuthzUtils.isUserAllowedOnGroup(groupId)) {
+        return handleForbiddenErrorResponse(
+          "Requested subscription is out of your scope",
+        );
+      }
+      break;
+    case SelfcareRoles.operator:
+      return handleForbiddenErrorResponse("Role not authorized");
+    default:
+      // eslint-disable-next-line no-case-declarations
+      const _: never = userRole; // This will make sure that all cases are handled in the switch
+      throw new Error("Invalid user role");
   }
+
   let requestPayload;
   try {
     requestPayload = await parseBody(request, SubscriptionCIDRs);
