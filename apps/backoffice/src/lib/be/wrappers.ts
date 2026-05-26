@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
+import { SelfcareRoles } from "@/types/auth";
 import { NextRequest, NextResponse } from "next/server";
 
-import { SelfcareRoles } from "@/types/auth";
 import {
   BackOfficeUser,
   BackOfficeUserPermissions,
