@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { SubscriptionContract } from "@azure/arm-apimanagement";
 import { ApimUtils, SelfcareUtils } from "@io-services-cms/external-clients";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
@@ -9,8 +8,16 @@ import * as ROA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
 import { flow, pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
+import * as pino from "pino";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+
+const logger = pino({
+  transport: {
+    options: { colorize: true },
+    target: "pino-pretty",
+  },
+});
 
 const Config = t.type({
   AZURE_APIM: NonEmptyString,
@@ -46,7 +53,7 @@ const deleteAllSubscriptionsForUser = (
     apimService.getUserSubscriptions(userId),
     TE.orElse((err) => {
       if ("statusCode" in err && err.statusCode === NOT_FOUND_STATUS) {
-        console.log(
+        logger.info(
           `Subscriptions for user ${userId} not found (404), skipping`,
         );
         return TE.right([] as readonly SubscriptionContract[]);
@@ -60,12 +67,12 @@ const deleteAllSubscriptionsForUser = (
           if (!subcriptionId) {
             return TE.right(undefined);
           }
-          console.log(`Deleting subscription: ${subcriptionId}`);
+          logger.info(`Deleting subscription: ${subcriptionId}`);
           return pipe(
             apimService.deleteSubscription(subcriptionId),
             TE.orElse((err) => {
               if ("statusCode" in err && err.statusCode === NOT_FOUND_STATUS) {
-                console.log(
+                logger.info(
                   `Subscription ${subcriptionId} already gone (404), continuing`,
                 );
                 return TE.right(undefined);
@@ -105,7 +112,7 @@ const purgeAggregate = (
         apimService.getUserByEmail(email),
         TE.orElse((err) => {
           if ("statusCode" in err && err.statusCode === NOT_FOUND_STATUS) {
-            console.log(
+            logger.info(
               `APIM user for ${institutionId} not found (404), skipping`,
             );
             return TE.right(O.none);
@@ -116,7 +123,7 @@ const purgeAggregate = (
     ),
     TE.chain(({ maybeUser }) => {
       if (O.isNone(maybeUser)) {
-        console.log(
+        logger.info(
           `No APIM user found for institution ${institutionId}, skipping`,
         );
         return TE.right(undefined);
@@ -124,12 +131,12 @@ const purgeAggregate = (
       const user = maybeUser.value;
       const userId = user.name;
       if (!userId) {
-        console.warn(
+        logger.info(
           `APIM user for institution ${institutionId} has no name/id, skipping`,
         );
         return TE.right(undefined);
       }
-      console.log(`APIM user: ${userId}`);
+      logger.info(`APIM user: ${userId}`);
       return pipe(
         deleteAllSubscriptionsForUser(apimService, userId),
         TE.orElse((err) =>
@@ -140,12 +147,12 @@ const purgeAggregate = (
           ),
         ),
         TE.chainW(() => {
-          console.log(`Deleting APIM user: ${userId}`);
+          logger.info(`Deleting APIM user: ${userId}`);
           return pipe(
             apimService.deleteUser(userId),
             TE.orElse((err) => {
               if ("statusCode" in err && err.statusCode === NOT_FOUND_STATUS) {
-                console.log(
+                logger.info(
                   `APIM user ${userId} already gone (404), continuing`,
                 );
                 return TE.right(undefined);
@@ -178,11 +185,11 @@ const fetchAllDelegations = async (
   let page = 0;
 
   while (true) {
-    console.log(`Fetching delegations page ${page}...`);
+    logger.info(`Fetching delegations page ${page}...`);
     const result = await selfcareClient.getInstitutionDelegations(
       aggregatorInstitutionId,
       PAGE_SIZE,
-      page,
+      page++,
     )();
 
     if (E.isLeft(result)) {
@@ -194,14 +201,13 @@ const fetchAllDelegations = async (
     const { delegations, pageInfo } = result.right;
     allDelegations.push(...delegations);
 
-    console.log(
+    logger.info(
       `Fetched ${delegations.length} delegations (page ${page}/${pageInfo.totalPages})`,
     );
 
     if (page >= pageInfo.totalPages) {
       break;
     }
-    page++;
   }
 
   return allDelegations;
@@ -221,9 +227,10 @@ const run = async (): Promise<void> => {
 
   const { aggregatorInstitutionId } = argv;
 
-  console.log(
+  logger.info(
     `Starting purge-all-aggregates for aggregator: ${aggregatorInstitutionId}`,
   );
+  const startTime = Date.now();
 
   const config = parseConfig();
 
@@ -246,39 +253,39 @@ const run = async (): Promise<void> => {
     aggregatorInstitutionId,
   );
 
-  console.log(`\nTotal aggregates to purge: ${delegations.length}\n`);
+  logger.info(`Total aggregates to purge: ${delegations.length}`);
 
   let successCount = 0;
   let errorCount = 0;
 
   for (const delegation of delegations) {
     const { institutionId, institutionName } = delegation;
-    console.log(`Processing aggregate: ${institutionName} (${institutionId})`);
+    logger.info(`Processing aggregate: ${institutionName} (${institutionId})`);
 
     const result = await purgeAggregate(apimService, institutionId)();
 
     if (E.isLeft(result)) {
-      console.error(`ERROR purging ${institutionId}: ${result.left.message}`);
+      logger.error(`ERROR purging ${institutionId}: ${result.left.message}`);
       errorCount++;
     } else {
-      console.log(`Done: ${institutionId}`);
+      logger.info(`Done: ${institutionId}`);
       successCount++;
     }
   }
 
-  console.log(
-    `\nPurge complete. Success: ${successCount}, Errors: ${errorCount}`,
+  logger.info(
+    `Purge complete. Success: ${successCount}, Errors: ${errorCount} (${Date.now() - startTime}ms)`,
   );
 
   if (errorCount > 0) {
-    console.error(
-      `\n${errorCount} aggregate(s) failed to purge. Re-run the script to retry (it is idempotent).`,
+    logger.error(
+      `${errorCount} aggregate(s) failed to purge. Re-run the script to retry (it is idempotent).`,
     );
     process.exit(1);
   }
 };
 
 run().catch((err) => {
-  console.error("Unexpected error:", err);
+  logger.error({ err }, "Unexpected error");
   process.exit(1);
 });
