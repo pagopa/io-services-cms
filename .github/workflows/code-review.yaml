@@ -5,15 +5,6 @@
 name: Code Review
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - apps/**
-      - packages/**
-      - package.json
-      - turbo.json
-      - .github/workflows/code_review.yaml
   pull_request:
     types: [opened, edited, synchronize, reopened, ready_for_review]
     paths:
