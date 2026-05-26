@@ -119,10 +119,12 @@ export interface ApimService {
    * Deletes a user specified by its identifier.
    * @param userId User entity Identifier
    * @param ifMatch ETag of the Entity. Use * for unconditional delete.
+   * @param deleteSubscriptions Default: true. Internally deletes all user subscriptions.
    */
   readonly deleteUser: (
     userId: string,
     ifMatch?: string,
+    deleteSubscription?: boolean,
   ) => TE.TaskEither<ApimRestError | Error, void>;
   readonly getDelegateFromServiceId: (
     serviceId: NonEmptyString,
@@ -206,8 +208,15 @@ export const getApimService = (
       subscriptionId,
       ifMatch,
     ),
-  deleteUser: (userId, ifMatch = "*") =>
-    deleteUser(apimClient, apimResourceGroup, apimServiceName, userId, ifMatch),
+  deleteUser: (userId, ifMatch = "*", deleteSubscriptions = true) =>
+    deleteUser(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      userId,
+      ifMatch,
+      deleteSubscriptions,
+    ),
   getDelegateFromServiceId: (serviceId) =>
     getDelegateFromServiceId(
       apimClient,
@@ -585,6 +594,7 @@ const deleteUser = (
   apimServiceName: string,
   userId: string,
   ifMatch: string,
+  deleteSubscriptions: boolean,
 ): TE.TaskEither<ApimRestError, void> =>
   pipe(
     TE.tryCatch(
@@ -595,6 +605,9 @@ const deleteUser = (
             apimServiceName,
             userId,
             ifMatch,
+            {
+              deleteSubscriptions,
+            },
           )
           .then(() => undefined),
       identity,

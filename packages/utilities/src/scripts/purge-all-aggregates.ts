@@ -1,12 +1,10 @@
-import { SubscriptionContract } from "@azure/arm-apimanagement";
 import { ApimUtils, SelfcareUtils } from "@io-services-cms/external-clients";
 import { readableReportSimplified } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
-import * as ROA from "fp-ts/lib/ReadonlyArray";
 import * as TE from "fp-ts/lib/TaskEither";
-import { flow, pipe } from "fp-ts/lib/function";
+import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import * as pino from "pino";
 import yargs from "yargs";
@@ -42,60 +40,9 @@ const parseConfig = (): Config => {
 const NOT_FOUND_STATUS = 404;
 
 /**
- * Delete all subscriptions for a given APIM user.
- * 404 on any individual subscription is treated as "already deleted" and ignored.
- */
-const deleteAllSubscriptionsForUser = (
-  apimService: ApimUtils.ApimService,
-  userId: string,
-): TE.TaskEither<Error, void> =>
-  pipe(
-    apimService.getUserSubscriptions(userId),
-    TE.orElse((err) => {
-      if ("statusCode" in err && err.statusCode === NOT_FOUND_STATUS) {
-        logger.info(
-          `Subscriptions for user ${userId} not found (404), skipping`,
-        );
-        return TE.right([] as readonly SubscriptionContract[]);
-      }
-      return TE.left(new Error(err.name || "APIM RestError"));
-    }),
-    TE.chain(
-      flow(
-        ROA.map((subscription) => {
-          const subcriptionId = subscription.name;
-          if (!subcriptionId) {
-            return TE.right(undefined);
-          }
-          logger.info(`Deleting subscription: ${subcriptionId}`);
-          return pipe(
-            apimService.deleteSubscription(subcriptionId),
-            TE.orElse((err) => {
-              if ("statusCode" in err && err.statusCode === NOT_FOUND_STATUS) {
-                logger.info(
-                  `Subscription ${subcriptionId} already gone (404), continuing`,
-                );
-                return TE.right(undefined);
-              }
-              return TE.left(
-                err instanceof Error
-                  ? err
-                  : new Error(err.name || "APIM RestError"),
-              );
-            }),
-          );
-        }),
-        ROA.sequence(TE.ApplicativeSeq),
-      ),
-    ),
-    TE.map((_) => void 0),
-  );
-
-/**
  * Purge a single aggregate institution from APIM:
  * - look up the APIM user by the institution's email
- * - delete all their subscriptions
- * - delete the user
+ * - delete the user and all the subscriptions related
  * 404 at any step is treated as "already purged", continue.
  */
 const purgeAggregate = (
@@ -136,33 +83,16 @@ const purgeAggregate = (
         );
         return TE.right(undefined);
       }
-      logger.info(`APIM user: ${userId}`);
+      logger.info(`Deleting APIM user and subscriptions for: ${userId}`);
       return pipe(
-        deleteAllSubscriptionsForUser(apimService, userId),
-        TE.orElse((err) =>
-          TE.left(
-            new Error(
-              `Failed deleting subscriptions for user ${userId}: ${JSON.stringify(err)}`,
-            ),
-          ),
-        ),
-        TE.chainW(() => {
-          logger.info(`Deleting APIM user: ${userId}`);
-          return pipe(
-            apimService.deleteUser(userId),
-            TE.orElse((err) => {
-              if ("statusCode" in err && err.statusCode === NOT_FOUND_STATUS) {
-                logger.info(
-                  `APIM user ${userId} already gone (404), continuing`,
-                );
-                return TE.right(undefined);
-              }
-              return TE.left(
-                new Error(
-                  `Failed deleting user ${userId}: ${JSON.stringify(err)}`,
-                ),
-              );
-            }),
+        apimService.deleteUser(userId, "*", true),
+        TE.orElse((err) => {
+          if ("statusCode" in err && err.statusCode === NOT_FOUND_STATUS) {
+            logger.info(`APIM user ${userId} already gone (404), continuing`);
+            return TE.right(undefined);
+          }
+          return TE.left(
+            new Error(`Failed deleting user ${userId}: ${JSON.stringify(err)}`),
           );
         }),
       );

@@ -1662,6 +1662,9 @@ describe("ApimService Test", () => {
         anApimServiceName,
         anUserId,
         "*",
+        {
+          deleteSubscriptions: true,
+        },
       );
     });
 
@@ -1686,6 +1689,35 @@ describe("ApimService Test", () => {
         anApimServiceName,
         anUserId,
         customIfMatch,
+        {
+          deleteSubscriptions: true,
+        },
+      );
+    });
+
+    it("should not delete subscriptions on false flag", async () => {
+      // given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      mockApimClient.user.beginDeleteAndWait.mockResolvedValueOnce(void 0);
+
+      // when
+      const result = await apimService.deleteUser(anUserId, "*", false)();
+
+      // then
+      expect(E.isRight(result)).toBeTruthy();
+      expect(mockApimClient.user.beginDeleteAndWait).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        anUserId,
+        "*",
+        {
+          deleteSubscriptions: false,
+        },
       );
     });
 
@@ -1717,6 +1749,9 @@ describe("ApimService Test", () => {
         anApimServiceName,
         anUserId,
         "*",
+        {
+          deleteSubscriptions: true,
+        },
       );
     });
 
