@@ -12,11 +12,10 @@ const mocks = vi.hoisted(() => ({
   updateSubscription: vi.fn(),
 }));
 
-vi.mock("../utils", async () => {
-  const actual = await vi.importActual<typeof import("../utils")>("../utils");
-
+vi.mock("../utils", async (importOriginal) => {
+  const original = await importOriginal<typeof import("../utils")>();
   return {
-    ...actual,
+    ...original,
     getSubscription: mocks.getSubscription,
     updateSubscription: mocks.updateSubscription,
   };
@@ -56,7 +55,9 @@ describe("syncSubscription", () => {
     if (E.isLeft(result)) {
       expect(result.left).toStrictEqual(expectedError);
     }
-    expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(deps.apimService);
+    expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(
+      deps.apimService,
+    );
     expect(mockedGetSubscriptionTask).toHaveBeenCalledExactlyOnceWith(
       ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + item.id,
     );
@@ -85,7 +86,9 @@ describe("syncSubscription", () => {
     if (E.isRight(result)) {
       expect(result.right).toBeUndefined();
     }
-    expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(deps.apimService);
+    expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(
+      deps.apimService,
+    );
     expect(mockedGetSubscriptionTask).toHaveBeenCalledExactlyOnceWith(
       ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + item.id,
     );
@@ -133,14 +136,18 @@ describe("syncSubscription", () => {
       if (E.isLeft(result)) {
         expect(result.left).toStrictEqual(expectedError);
       }
-      expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(deps.apimService);
+      expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(
+        deps.apimService,
+      );
       expect(mockedGetSubscriptionTask).toHaveBeenCalledExactlyOnceWith(
         ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + item.id,
       );
       expect(mocks.updateSubscription).toHaveBeenCalledExactlyOnceWith(
         deps.apimService,
       );
-      expect(mockedUpdateSubscriptionTask).toHaveBeenCalledExactlyOnceWith(item);
+      expect(mockedUpdateSubscriptionTask).toHaveBeenCalledExactlyOnceWith(
+        item,
+      );
     },
   );
 
@@ -171,7 +178,9 @@ describe("syncSubscription", () => {
     if (E.isRight(result)) {
       expect(result.right).toBeUndefined();
     }
-    expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(deps.apimService);
+    expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(
+      deps.apimService,
+    );
     expect(mockedGetSubscriptionTask).toHaveBeenCalledExactlyOnceWith(
       ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + item.id,
     );
@@ -209,11 +218,15 @@ describe("syncSubscription", () => {
     if (E.isRight(result)) {
       expect(result.right).toBeUndefined();
     }
-    expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(deps.apimService);
+    expect(mocks.getSubscription).toHaveBeenCalledExactlyOnceWith(
+      deps.apimService,
+    );
     expect(mockedGetSubscriptionTask).toHaveBeenCalledExactlyOnceWith(
       ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + item.id,
     );
-    expect(mocks.updateSubscription).toHaveBeenCalledExactlyOnceWith(deps.apimService);
+    expect(mocks.updateSubscription).toHaveBeenCalledExactlyOnceWith(
+      deps.apimService,
+    );
     expect(mockedUpdateSubscriptionTask).toHaveBeenCalledExactlyOnceWith(item);
   });
 });

@@ -5,8 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 import { Cidr } from "../../../../generated/api/Cidr";
 import { SubscriptionKeyTypeEnum } from "../../../../generated/api/SubscriptionKeyType";
 import {
+  ExportFileNotFoundError,
+  ExportFileNotReadyError,
+  ManagedInternalError,
+} from "../../errors";
+import { FileStateEnum } from "../api-keys-exports-port";
+import {
   deleteManageSubscription,
   generateApiKeysExports,
+  generateApiKeysExportsDownloadLink,
   getManageSubscriptions,
   regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
   regenerateManageSubscriptionApiKey,
@@ -14,16 +21,9 @@ import {
   retrieveInstitutionAggregateManageSubscriptionsKeys,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
-  generateApiKeysExportsDownloadLink,
   upsertManageSubscription,
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "../business";
-import {
-  ExportFileNotFoundError,
-  ExportFileNotReadyError,
-  ManagedInternalError,
-} from "../../errors";
-import { FileStateEnum } from "../api-keys-exports-port";
 
 const mocks: {
   anOwnerId: string;
@@ -102,15 +102,13 @@ vi.mock("@/lib/be/apim-service", () => ({
   }),
 }));
 
-vi.mock("@io-services-cms/external-clients", async () => {
-  const actual = await vi.importActual<
-    typeof import("@io-services-cms/external-clients")
-  >("@io-services-cms/external-clients");
-
+vi.mock("@io-services-cms/external-clients", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("@io-services-cms/external-clients")>();
   return {
-    ...actual,
+    ...original,
     ApimUtils: {
-      ...actual.ApimUtils,
+      ...original.ApimUtils,
       formatEmailForOrganization: mocks.formatEmailForOrganization,
     },
   };

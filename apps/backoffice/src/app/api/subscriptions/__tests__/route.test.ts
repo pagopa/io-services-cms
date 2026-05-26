@@ -4,7 +4,6 @@ import * as E from "fp-ts/lib/Either";
 import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { BackOfficeUser } from "../../../../../types/next-auth";
-import { BackOfficeUserEnriched } from "../../../../lib/be/wrappers";
 import { CreateManageGroupSubscription } from "../../../../generated/api/CreateManageGroupSubscription";
 import {
   StateEnum,
@@ -16,19 +15,11 @@ import {
   ManagedInternalError,
   PreconditionFailedError,
 } from "../../../../lib/be/errors";
+import { BackOfficeUserEnriched } from "../../../../lib/be/wrappers";
 import { SelfcareRoles } from "../../../../types/auth";
 import { GET, PUT } from "../route";
 
-const userMock = {
-  authorizedInstitutions: [
-    {
-      id: faker.string.uuid(),
-      logo_url: faker.image.url(),
-      name: faker.company.name(),
-      role: SelfcareRoles.admin,
-    },
-  ],
-  email: faker.internet.email(),
+const userMock: BackOfficeUserEnriched = {
   id: faker.string.uuid(),
   institution: {
     fiscalCode: faker.string.numeric(),
@@ -40,7 +31,6 @@ const userMock = {
     isAggregate: faker.datatype.boolean(),
     selcSpecialGroups: [],
   },
-  name: faker.person.fullName(),
   parameters: {
     subscriptionId: faker.string.uuid(),
     userEmail: faker.internet.email(),
@@ -48,8 +38,9 @@ const userMock = {
   },
   permissions: {
     apimGroups: faker.helpers.multiple(faker.string.alpha),
+    selcGroups: [],
   },
-} as BackOfficeUserEnriched;
+};
 
 const stubs = { aGroup: { id: "aGroupId", name: "aGroupName" } };
 
@@ -80,10 +71,10 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("@/lib/be/req-res-utils", async () => {
-  const actual = await vi.importActual("@/lib/be/req-res-utils");
+vi.mock("@/lib/be/req-res-utils", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
   return {
-    ...(actual as any),
+    ...original,
     parseBody: mocks.parseBody,
     parseQueryParam: mocks.parseQueryParam,
     parseLimitQueryParam: mocks.parseLimitQueryParam,
@@ -462,7 +453,7 @@ describe("Subscription API", () => {
         apimUserId: userMock.parameters.userId,
         limit,
         offset,
-        userSelcGroups: undefined,
+        userSelcGroups: [],
         institutionSelcSpecialGroups: userMock.institution.selcSpecialGroups,
       });
     });

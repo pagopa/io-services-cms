@@ -5,8 +5,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { getMockInstitution } from "../../../../mocks/data/selfcare-data";
 import { Configuration } from "../../../config";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
-import { IdentityTokenPayload } from "../types";
 import { authorize } from "../auth";
+import { IdentityTokenPayload } from "../types";
 
 vi.hoisted(() => {
   const originalEnv = process.env;
@@ -149,15 +149,12 @@ vi.mock("@/lib/be/apim-service", () => ({
   upsertSubscription,
 }));
 
-vi.mock("@io-services-cms/external-clients", async () => {
-  const actual = await vi.importActual<
-    typeof import("@io-services-cms/external-clients")
-  >("@io-services-cms/external-clients");
-
+vi.mock("@io-services-cms/external-clients", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
   return {
-    ...actual,
+    ...original,
     ApimUtils: {
-      ...actual.ApimUtils,
+      ...original.ApimUtils,
       formatEmailForOrganization: formatEmailForOrganization,
     },
   };
@@ -168,7 +165,7 @@ const { jwtVerify } = vi.hoisted(() => ({
 }));
 
 vi.mock("jose", async (importOriginal) => {
-  const mod = await importOriginal();
+  const mod = await importOriginal<typeof import("jose")>();
 
   return {
     ...(mod as any),

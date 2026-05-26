@@ -103,10 +103,10 @@ const { create, isAxiosError, getMock } = vi.hoisted(() => {
   };
 });
 
-vi.mock("axios", async () => {
-  const actual = await vi.importActual("axios");
+vi.mock("axios", async (importOriginal) => {
+  const original = await importOriginal<typeof import("axios")>();
   return {
-    ...(actual as any),
+    ...original,
     default: { create, isAxiosError },
   };
 });
