@@ -1,14 +1,12 @@
+import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import * as E from "fp-ts/lib/Either";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { getMockInstitutionProducts } from "../mocks/data/selfcare-data";
 import { TypeEnum } from "../../generated/selfcare/DelegationResponse";
 import { DelegationWithPaginationResponse } from "../../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../../generated/selfcare/InstitutionResponse";
 import { PageOfUserGroupResource } from "../../generated/selfcare/PageOfUserGroupResource";
-import { ProductResource } from "../../generated/selfcare/ProductResource";
 import { StatusEnum } from "../../generated/selfcare/UserGroupResource";
 import { getSelfcareClient, resetInstance, UserInstitutions } from "../index";
-import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 
 const mocks: {
   institution: InstitutionResponse;
@@ -96,10 +94,10 @@ const { create, isAxiosError, getMock } = vi.hoisted(() => {
   };
 });
 
-vi.mock("axios", async () => {
-  const actual = await vi.importActual("axios");
+vi.mock("axios", async (importOriginal) => {
+  const original = await importOriginal<typeof import("axios")>();
   return {
-    ...(actual as any),
+    ...original,
     default: { create, isAxiosError },
   };
 });

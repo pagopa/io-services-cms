@@ -64,10 +64,10 @@ vi.mock("@/lib/be/subscriptions/business", () => ({
   generateApiKeysExportsDownloadLink: mocks.generateApiKeysExportsDownloadLink,
 }));
 
-vi.mock("@/lib/be/errors", async () => {
-  const actual = await vi.importActual("@/lib/be/errors");
+vi.mock("@/lib/be/errors", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
   return {
-    ...(actual as any),
+    ...original,
   };
 });
 
