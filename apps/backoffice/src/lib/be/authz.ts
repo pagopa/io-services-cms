@@ -27,12 +27,8 @@ export const userAuthz = (user: BackOfficeUserEnriched) => {
   const isUserAllowedOnGroup = (
     groupId: string,
     checkActive?: boolean,
-  ): boolean => {
-    const { selcGroups } = user.permissions;
-    if (!selcGroups) {
-      return false;
-    }
-    return selcGroups.some((group) => {
+  ): boolean =>
+    user.permissions.selcGroups.some((group) => {
       if (typeof group === "string") {
         return group === groupId;
       } else {
@@ -42,7 +38,6 @@ export const userAuthz = (user: BackOfficeUserEnriched) => {
         );
       }
     });
-  };
 
   return {
     /**
