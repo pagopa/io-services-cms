@@ -1,10 +1,13 @@
+import { SelfcareRoles } from "@/types/auth";
 import {
   EmailString,
   FiscalCode,
   NonEmptyString,
   OrganizationFiscalCode,
 } from "@pagopa/ts-commons/lib/strings";
+import { enumType } from "@pagopa/ts-commons/lib/types";
 import * as t from "io-ts";
+import { readonlyNonEmptyArray } from "io-ts-types/lib/readonlyNonEmptyArray";
 
 export type SessionTokenInstitution = t.TypeOf<typeof SessionTokenInstitution>;
 export const SessionTokenInstitution = t.intersection([
@@ -56,12 +59,17 @@ export const SessionTokenPayload = t.type({
   uid: t.string,
 });
 
+const SelfcareRolesEnum = enumType<SelfcareRoles>(
+  SelfcareRoles,
+  "SelfcareRoles",
+);
+
 export type IdentityTokenOrganizationRole = t.TypeOf<
   typeof IdentityTokenOrganizationRole
 >;
 export const IdentityTokenOrganizationRole = t.type({
   partyRole: NonEmptyString,
-  role: NonEmptyString,
+  role: SelfcareRolesEnum,
 });
 export type IdentityTokenOrganization = t.TypeOf<
   typeof IdentityTokenOrganization
@@ -71,7 +79,7 @@ export const IdentityTokenOrganization = t.intersection([
     fiscal_code: OrganizationFiscalCode,
     id: NonEmptyString,
     name: NonEmptyString,
-    roles: t.array(IdentityTokenOrganizationRole),
+    roles: readonlyNonEmptyArray(IdentityTokenOrganizationRole),
   }),
   t.partial({
     groups: t.array(NonEmptyString),
