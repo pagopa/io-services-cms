@@ -9,7 +9,10 @@ import {
   extractTryCatchError,
   handlerErrorLog,
 } from "@/lib/be/errors";
-import { getInstitutionById } from "@/lib/be/institutions/selfcare";
+import {
+  getInstitutionById,
+  hasAggregators,
+} from "@/lib/be/institutions/selfcare";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
@@ -60,9 +63,24 @@ export const authorize =
         pipe(apimUser, retrieveOrCreateUserSubscriptionManage),
       ),
       TE.bindW("institution", ({ identityTokenPayload }) =>
-        TE.tryCatch(
-          () => pipe(identityTokenPayload.organization.id, getInstitutionById),
-          extractTryCatchError,
+        pipe(
+          TE.tryCatch(
+            () =>
+              pipe(identityTokenPayload.organization.id, getInstitutionById),
+            extractTryCatchError,
+          ),
+          TE.chain((institution) =>
+            pipe(
+              TE.tryCatch(
+                () => hasAggregators(institution.id),
+                extractTryCatchError,
+              ),
+              TE.map((hasAggregators) => ({
+                ...institution,
+                hasAggregators,
+              })),
+            ),
+          ),
         ),
       ),
       TE.map(toUser),
@@ -300,7 +318,7 @@ const toUser = ({
 }: {
   apimUser: ApimUser;
   identityTokenPayload: IdentityTokenPayload;
-  institution: InstitutionResponse;
+  institution: { hasAggregators: boolean } & InstitutionResponse;
   subscriptionManage: Subscription;
 }): User => ({
   email: identityTokenPayload.email,
@@ -308,6 +326,7 @@ const toUser = ({
   institution: {
     fiscalCode: identityTokenPayload.organization.fiscal_code,
     id: identityTokenPayload.organization.id,
+    isAggregate: institution.hasAggregators,
     isAggregator: isAggregator(institution),
     logo_url: institution.logo,
     name: identityTokenPayload.organization.name,

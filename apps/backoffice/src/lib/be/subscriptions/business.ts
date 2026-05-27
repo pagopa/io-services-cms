@@ -42,6 +42,7 @@ import {
   getInstitutionDelegations,
   getInstitutionGroups,
 } from "../institutions/selfcare";
+import { SpecialGroup } from "../wrappers";
 import { ApiKeysExportsPort, FileStateEnum } from "./api-keys-exports-port";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
@@ -186,20 +187,29 @@ export async function upsertManageSubscription(
  * @param apimUserId The id of the user to check the subscription ownership for
  * @param limit The maximum number of subscriptions to retrieve
  * @param offset The number of subscriptions to skip
- * @param selcGroups The groups to filter the subscriptions by (only for GROUP subscriptions)
+ * @param userSelcGroups The groups to filter the subscriptions by (only for GROUP subscriptions)
+ * @param institutionSelcSpecialGroups The special groups to exclude from subscriptions listing
  * @returns The list of manage subscriptions for the user
  */
-export async function getManageSubscriptions(
-  subscriptionType: SubscriptionType,
-  apimUserId: string,
-  limit?: number,
-  offset?: number,
-  selcGroups?: Group[],
-): Promise<Subscription[]> {
+export async function getManageSubscriptions({
+  apimUserId,
+  institutionSelcSpecialGroups,
+  limit,
+  offset,
+  subscriptionType,
+  userSelcGroups,
+}: {
+  apimUserId: string;
+  institutionSelcSpecialGroups: SpecialGroup[];
+  limit?: number;
+  offset?: number;
+  subscriptionType: SubscriptionType;
+  userSelcGroups?: Group[];
+}): Promise<Subscription[]> {
   let filter;
   switch (subscriptionType) {
     case SubscriptionTypeEnum.MANAGE_ROOT:
-      if (selcGroups && selcGroups.length > 0) {
+      if (userSelcGroups && userSelcGroups.length > 0) {
         // Non-admin users who have at least one group are not allowed to retrieve "ROOT MANAGE" subscription
         return Promise.resolve([]);
       }
@@ -207,7 +217,8 @@ export async function getManageSubscriptions(
       break;
     case SubscriptionTypeEnum.MANAGE_GROUP:
       filter = ApimUtils.apim_filters.manageGroupSubscriptionsFilter(
-        selcGroups?.map((group) => group.id),
+        userSelcGroups?.map((group) => group.id) ?? [],
+        institutionSelcSpecialGroups.map((group) => group.id),
       );
       break;
     default:

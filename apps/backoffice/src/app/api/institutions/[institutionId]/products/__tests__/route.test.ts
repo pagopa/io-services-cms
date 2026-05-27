@@ -24,6 +24,7 @@ const userMock = {
     name: faker.company.name(),
     role: SelfcareRoles.admin,
     isAggregator: faker.datatype.boolean(),
+    isAggregate: faker.datatype.boolean(),
   },
   name: faker.person.fullName(),
   parameters: {
@@ -58,10 +59,10 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("@/lib/be/req-res-utils", async () => {
-  const actual = await vi.importActual("@/lib/be/req-res-utils");
+vi.mock("@/lib/be/req-res-utils", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
   return {
-    ...(actual as any),
+    ...original,
     parseBody: mocks.parseBody,
   };
 });

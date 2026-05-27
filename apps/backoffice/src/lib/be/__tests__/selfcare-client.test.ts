@@ -1,6 +1,10 @@
 import * as E from "fp-ts/lib/Either";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
+import {
+  DelegationInstitutionResponse,
+  DelegationTypeEnum,
+} from "../../../generated/selfcare/DelegationInstitutionResponse";
 import { TypeEnum } from "../../../generated/selfcare/DelegationResponse";
 import { DelegationWithPaginationResponse } from "../../../generated/selfcare/DelegationWithPaginationResponse";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
@@ -99,10 +103,10 @@ const { create, isAxiosError, getMock } = vi.hoisted(() => {
   };
 });
 
-vi.mock("axios", async () => {
-  const actual = await vi.importActual("axios");
+vi.mock("axios", async (importOriginal) => {
+  const original = await importOriginal<typeof import("axios")>();
   return {
-    ...(actual as any),
+    ...original,
     default: { create, isAxiosError },
   };
 });
@@ -474,6 +478,105 @@ describe("Selfcare Client", () => {
         commonExpectation();
       },
     );
+
+    describe("getDelegateInstitutions", () => {
+      const institutionId = "institutionId";
+      const endpoint = `/delegations/delegates/${institutionId}`;
+      const delegateInstitutions = [
+        {
+          id: 1,
+          delegationId: "delegationId1",
+          delegationProductId: "productId1",
+          delegationType: DelegationTypeEnum.EA,
+          institution: mocks.institution,
+        },
+        {
+          id: 2,
+          delegationId: "delegationId2",
+          delegationProductId: "productId2",
+          delegationType: DelegationTypeEnum.PT,
+          institution: {
+            ...mocks.institution,
+            id: "institutionId2",
+          } as InstitutionResponse,
+        },
+      ] as DelegationInstitutionResponse[];
+
+      it("should return an error when received an error from selfcare", async () => {
+        // given
+        getMock.mockRejectedValueOnce({
+          message: "Received 400 response",
+          response: { status: 400 },
+        });
+        isAxiosError.mockReturnValueOnce(true);
+
+        // when
+        const result = await getSelfcareClient().getDelegateInstitutions({
+          institutionId,
+        })();
+
+        // then
+        expect(getMock).toHaveBeenCalledWith(endpoint, {
+          params: {
+            size: undefined,
+            type: undefined,
+          },
+        });
+        expect(isAxiosError).toHaveBeenCalled();
+        expect(E.isLeft(result)).toBeTruthy();
+        commonExpectation();
+      });
+
+      it("should return an error when received a bad response from selfcare", async () => {
+        // given
+        getMock.mockResolvedValueOnce({ status: 200, data: "" });
+
+        // when
+        const result = await getSelfcareClient().getDelegateInstitutions({
+          institutionId,
+        })();
+
+        // then
+        expect(getMock).toHaveBeenCalledWith(endpoint, {
+          params: {
+            size: undefined,
+            type: undefined,
+          },
+        });
+        expect(isAxiosError).not.toHaveBeenCalled();
+        expect(E.isLeft(result)).toBeTruthy();
+        commonExpectation();
+      });
+
+      it("should return the delegate institutions for the given institution", async () => {
+        // given
+        getMock.mockResolvedValueOnce({
+          status: 200,
+          data: delegateInstitutions,
+        });
+
+        // when
+        const result = await getSelfcareClient().getDelegateInstitutions({
+          institutionId,
+          size: 5,
+          type: DelegationTypeEnum.EA,
+        })();
+
+        // then
+        expect(getMock).toHaveBeenCalledWith(endpoint, {
+          params: {
+            size: 5,
+            type: DelegationTypeEnum.EA,
+          },
+        });
+        expect(isAxiosError).not.toHaveBeenCalled();
+        expect(E.isRight(result)).toBeTruthy();
+        if (E.isRight(result)) {
+          expect(result.right).toEqual(delegateInstitutions);
+        }
+        commonExpectation();
+      });
+    });
   });
 
   describe("getInstitutionProducts", () => {

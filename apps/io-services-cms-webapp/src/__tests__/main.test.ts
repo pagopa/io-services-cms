@@ -178,7 +178,7 @@ vi.mock("../lib/azure/cosmos", () => ({
 }));
 
 vi.mock("../lib/azure/misc", async (importOriginal) => {
-  const actual = (await importOriginal()) as any;
+  const actual = await importOriginal<typeof import("../lib/azure/misc")>();
   return {
     ...actual,
     processBatchOf: mocks.processBatchOf,
@@ -187,7 +187,7 @@ vi.mock("../lib/azure/misc", async (importOriginal) => {
 });
 
 vi.mock("../lib/azure/adapters", async (importOriginal) => {
-  const actual = (await importOriginal()) as any;
+  const actual = await importOriginal<typeof import("../lib/azure/adapters")>();
   return {
     ...actual,
     toAzureFunctionHandler: mocks.toAzureFunctionHandler,
@@ -195,7 +195,8 @@ vi.mock("../lib/azure/adapters", async (importOriginal) => {
 });
 
 vi.mock("../utils/cosmos-helper", async (importOriginal) => {
-  const actual = (await importOriginal()) as any;
+  const actual =
+    await importOriginal<typeof import("../utils/cosmos-helper")>();
   return {
     ...actual,
     makeCosmosHelper: mocks.makeCosmosHelper,

@@ -5,8 +5,15 @@ import { afterEach, beforeEach, describe, expect, it, Mock, vi } from "vitest";
 import { Cidr } from "../../../../generated/api/Cidr";
 import { SubscriptionKeyTypeEnum } from "../../../../generated/api/SubscriptionKeyType";
 import {
+  ExportFileNotFoundError,
+  ExportFileNotReadyError,
+  ManagedInternalError,
+} from "../../errors";
+import { FileStateEnum } from "../api-keys-exports-port";
+import {
   deleteManageSubscription,
   generateApiKeysExports,
+  generateApiKeysExportsDownloadLink,
   getManageSubscriptions,
   regenerateInstitutionAggregateManageSubscriptionApiKeyByAggregator,
   regenerateManageSubscriptionApiKey,
@@ -14,16 +21,9 @@ import {
   retrieveInstitutionAggregateManageSubscriptionsKeys,
   retrieveManageSubscriptionApiKeys,
   retrieveManageSubscriptionAuthorizedCIDRs,
-  generateApiKeysExportsDownloadLink,
   upsertManageSubscription,
   upsertManageSubscriptionAuthorizedCIDRs,
 } from "../business";
-import {
-  ExportFileNotFoundError,
-  ExportFileNotReadyError,
-  ManagedInternalError,
-} from "../../errors";
-import { FileStateEnum } from "../api-keys-exports-port";
 
 const mocks: {
   anOwnerId: string;
@@ -102,15 +102,13 @@ vi.mock("@/lib/be/apim-service", () => ({
   }),
 }));
 
-vi.mock("@io-services-cms/external-clients", async () => {
-  const actual = await vi.importActual<
-    typeof import("@io-services-cms/external-clients")
-  >("@io-services-cms/external-clients");
-
+vi.mock("@io-services-cms/external-clients", async (importOriginal) => {
+  const original =
+    await importOriginal<typeof import("@io-services-cms/external-clients")>();
   return {
-    ...actual,
+    ...original,
     ApimUtils: {
-      ...actual.ApimUtils,
+      ...original.ApimUtils,
       formatEmailForOrganization: mocks.formatEmailForOrganization,
     },
   };
@@ -271,7 +269,13 @@ describe("Subscriptions Business Logic", () => {
       );
 
       await expect(() =>
-        getManageSubscriptions(subscriptionType, ownerId, limit, offset),
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          institutionSelcSpecialGroups: [],
+        }),
       ).rejects.toThrowError("Error retrieving manage group subscriptions");
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -303,7 +307,13 @@ describe("Subscriptions Business Logic", () => {
       );
 
       await expect(
-        getManageSubscriptions(subscriptionType, ownerId, limit, offset),
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          institutionSelcSpecialGroups: [],
+        }),
       ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -323,9 +333,14 @@ describe("Subscriptions Business Logic", () => {
       mocks.getUserSubscriptions.mockReturnValueOnce(TE.right([]));
 
       await expect(
-        getManageSubscriptions(subscriptionType, ownerId, limit, offset, [
-          group,
-        ]),
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          userSelcGroups: [group],
+          institutionSelcSpecialGroups: [],
+        }),
       ).resolves.toStrictEqual([]);
 
       expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
@@ -337,13 +352,95 @@ describe("Subscriptions Business Logic", () => {
       );
     });
 
+    it("should return a filtered group manage special Subscriptions", async () => {
+      const ownerId = mocks.anOwnerId;
+      const limit = 5;
+      const offset = 0;
+      const group = { id: "gid1", name: "groupName", state: "ACTIVE" };
+      const specialGroup = {
+        id: "sg1",
+        name: "parentInstitutionId",
+        parentInstitutionId: "p1",
+      };
+      const name = "name";
+      const displayName = "displayName";
+      const state = "suspended";
+      const expectedResult = {
+        name,
+        displayName,
+        state,
+        foo: "foo",
+        bar: "bar",
+      };
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([expectedResult]),
+      );
+
+      await expect(
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          userSelcGroups: [group],
+          institutionSelcSpecialGroups: [specialGroup],
+        }),
+      ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
+
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+        ownerId,
+        offset,
+        limit,
+        `name eq 'MANAGE-GROUP-${group.id}'`,
+      );
+    });
+
+    it("should return a filtered group when no groups are provided", async () => {
+      const ownerId = mocks.anOwnerId;
+      const limit = 5;
+      const offset = 0;
+      const name = "name";
+      const displayName = "displayName";
+      const state = "suspended";
+      const expectedResult = {
+        name,
+        displayName,
+        state,
+        foo: "foo",
+        bar: "bar",
+      };
+      mocks.getUserSubscriptions.mockReturnValueOnce(
+        TE.right([expectedResult]),
+      );
+
+      await expect(
+        getManageSubscriptions({
+          subscriptionType,
+          apimUserId: ownerId,
+          limit,
+          offset,
+          userSelcGroups: [],
+          institutionSelcSpecialGroups: [],
+        }),
+      ).resolves.toStrictEqual([{ id: name, name: displayName, state }]);
+
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledOnce();
+      expect(mocks.getUserSubscriptions).toHaveBeenCalledWith(
+        ownerId,
+        offset,
+        limit,
+        `startswith(name, 'MANAGE-GROUP-')`,
+      );
+    });
+
     it.each`
-      scenario                       | selcGroups
-      ${"selcGroups is not defined"} | ${undefined}
-      ${"selcGroups is empty"}       | ${[]}
+      scenario                           | userSelcGroups
+      ${"userSelcGroups is not defined"} | ${undefined}
+      ${"userSelcGroups is empty"}       | ${[]}
     `(
       "should return a single subscription when the root manage is requested and $scenario",
-      async ({ selcGroups }) => {
+      async ({ userSelcGroups }) => {
         const subscriptionType = "MANAGE_ROOT";
         const ownerId = mocks.anOwnerId;
         const limit = 5;
@@ -353,13 +450,14 @@ describe("Subscriptions Business Logic", () => {
         );
 
         await expect(
-          getManageSubscriptions(
+          getManageSubscriptions({
             subscriptionType,
-            ownerId,
+            apimUserId: ownerId,
             limit,
             offset,
-            selcGroups,
-          ),
+            userSelcGroups,
+            institutionSelcSpecialGroups: [],
+          }),
         ).resolves.toStrictEqual([
           {
             id: mocks.aSubscriptionContract.name,
@@ -378,24 +476,25 @@ describe("Subscriptions Business Logic", () => {
       },
     );
 
-    it("should return an empty array when the root manage is requested and selcGroups contains at least one item", async () => {
+    it("should return an empty array when the root manage is requested and userSelcGroups contains at least one item", async () => {
       const subscriptionType = "MANAGE_ROOT";
       const ownerId = mocks.anOwnerId;
       const limit = 5;
       const offset = 0;
-      const selcGroups = ["item"];
+      const userSelcGroups = ["item"];
       mocks.getUserSubscriptions.mockReturnValueOnce(
         TE.right([mocks.aSubscriptionContract]),
       );
 
       await expect(
-        getManageSubscriptions(
+        getManageSubscriptions({
           subscriptionType,
-          ownerId,
+          apimUserId: ownerId,
           limit,
           offset,
-          selcGroups,
-        ),
+          userSelcGroups,
+          institutionSelcSpecialGroups: [],
+        }),
       ).resolves.toStrictEqual([]);
 
       expect(mocks.getUserSubscriptions).not.toHaveBeenCalled();

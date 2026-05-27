@@ -26,10 +26,10 @@ const { getAzureAccessToken } = vi.hoisted(() => ({
   getAzureAccessToken: vi.fn().mockReturnValue(Promise.resolve("aToken")),
 }));
 
-vi.mock("axios", async () => {
-  const actual = await vi.importActual("axios");
+vi.mock("axios", async (importOriginal) => {
+  const original = await importOriginal<typeof import("axios")>();
   return {
-    ...(actual as any),
+    ...original,
     default: { create, isAxiosError },
   };
 });

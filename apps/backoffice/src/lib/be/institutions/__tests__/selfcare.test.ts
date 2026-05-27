@@ -2,32 +2,38 @@ import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as TE from "fp-ts/lib/TaskEither";
 import { beforeEach, describe, expect, it, Mock, vi } from "vitest";
 import { getMockInstitutionProducts } from "../../../../../mocks/data/selfcare-data";
+import { DelegationTypeEnum } from "../../../../generated/selfcare/DelegationInstitutionResponse";
 import {
   getGroup,
   getInstitutionDelegations,
   getInstitutionGroups,
   getInstitutionProducts,
+  hasAggregators,
 } from "../selfcare";
 
 const mocks: {
   getSelfcareClient: Mock;
+  getDelegateInstitutions: Mock;
   getGroup: Mock;
   getInstitutionDelegations: Mock;
   getInstitutionProducts: Mock;
   getInstitutionGroups: Mock;
   isAxiosError: Mock;
 } = vi.hoisted(() => {
+  const getDelegateInstitutions = vi.fn();
   const getGroup = vi.fn();
   const getInstitutionDelegations = vi.fn();
   const getInstitutionProducts = vi.fn();
   const getInstitutionGroups = vi.fn();
   return {
     getSelfcareClient: vi.fn(() => ({
+      getDelegateInstitutions,
       getGroup,
       getInstitutionDelegations,
       getInstitutionProducts,
       getInstitutionGroups,
     })),
+    getDelegateInstitutions,
     getGroup,
     getInstitutionDelegations,
     getInstitutionProducts,
@@ -252,5 +258,58 @@ describe("Selfcare Institutions", () => {
         expect(mocks.isAxiosError).not.toHaveBeenCalled();
       },
     );
+  });
+
+  describe("hasAggregators", () => {
+    const institutionId = "institutionId";
+
+    it("should reject when getDelegateInstitutions fail", async () => {
+      // given
+      mocks.getDelegateInstitutions.mockReturnValueOnce(TE.left("error"));
+
+      // when and then
+      await expect(() => hasAggregators(institutionId)).rejects.toThrowError(
+        "Error calling selfcare getDelegateInstitutions API",
+      );
+      expect(mocks.getDelegateInstitutions).toHaveBeenCalledOnce();
+      expect(mocks.getDelegateInstitutions).toHaveBeenCalledWith({
+        institutionId,
+        size: 1,
+        type: DelegationTypeEnum.EA,
+      });
+      expect(mocks.isAxiosError).not.toHaveBeenCalled();
+    });
+
+    it("should return false when no delegate institutions are found", async () => {
+      // given
+      mocks.getDelegateInstitutions.mockReturnValueOnce(TE.right([]));
+
+      // when and then
+      await expect(hasAggregators(institutionId)).resolves.toBeFalsy();
+      expect(mocks.getDelegateInstitutions).toHaveBeenCalledOnce();
+      expect(mocks.getDelegateInstitutions).toHaveBeenCalledWith({
+        institutionId,
+        size: 1,
+        type: DelegationTypeEnum.EA,
+      });
+      expect(mocks.isAxiosError).not.toHaveBeenCalled();
+    });
+
+    it("should return true when delegate institutions are found", async () => {
+      // given
+      mocks.getDelegateInstitutions.mockReturnValueOnce(
+        TE.right([{ foo: "bar" }]),
+      );
+
+      // when and then
+      await expect(hasAggregators(institutionId)).resolves.toBeTruthy();
+      expect(mocks.getDelegateInstitutions).toHaveBeenCalledOnce();
+      expect(mocks.getDelegateInstitutions).toHaveBeenCalledWith({
+        institutionId,
+        size: 1,
+        type: DelegationTypeEnum.EA,
+      });
+      expect(mocks.isAxiosError).not.toHaveBeenCalled();
+    });
   });
 });

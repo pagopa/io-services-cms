@@ -1,0 +1,48 @@
+name: Deploy App Backend
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+jobs:
+  validate_dispatch:
+    name: Validate workflow_dispatch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check tag matches action intent
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            if [[ ! "${{ github.ref_name }}" =~ ^io-services-app-backend@ ]]; then
+              echo "Tag '${{ github.ref_name }}' does not match the pattern 'io-services-app-backend@*'"
+              echo "This action is intended for deploying io-services-app-backend"
+              exit 1
+            fi
+            echo "Tag '${{ github.ref_name }}' matches expected pattern"
+          else
+            echo "Running from branch: ${{ github.ref_name }}"
+          fi
+
+  deploy_to_azure:
+    needs: validate_dispatch
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event_name == 'release' &&
+        startsWith(github.event.release.tag_name, 'io-services-app-backend@')
+      )
+    name: Deploy io-services-app-backend
+    uses: pagopa/dx/.github/workflows/release-azure-appsvc-v1.yaml@76fa9d0cf942bdc2fb5f74853e271511a48269c4
+    with:
+      environment: app-prod
+      resource_group_name: 'io-p-itn-svc-rg-01'
+      workspace_name: 'io-services-app-backend'
+      web_app_name: 'io-p-itn-svc-app-be-func-01'
+      disable_auto_staging_deploy: true
+      use_private_agent: true
+    secrets: inherit
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write

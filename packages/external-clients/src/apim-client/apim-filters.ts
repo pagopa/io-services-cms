@@ -217,14 +217,28 @@ export const subscriptionsExceptManageOneApimFilter = () =>
   );
 
 /**
- * User Subscription list filtered by name startswith 'MANAGE-GROUP-'
+ * User Subscription list filtered by 'MANAGE-GROUP-'
+ *  NOTE:
+ * 1. selcGroup also contains special groups except for ADMIN that always has selcGroup forced to empty array
+ * 2. excludeManageGroupSpecialFilter is applied only when groupIds array is empty
+ *    (APIM filter with startsWith clause)
+ * the following table show samples with only one special group
+ * | groupIds  | specialGroupsIds | role     | APIM filter                    |
+ * | --------- | ---------------- | -------- | ------------------------------ |
+ * | []        | [gs1]            | ADMIN    | startsWith() + exclusionFilter |
+ * | [gs1]     | [gs1]            | ADMIN_EA | name eq gs1                    |
+ * | []        | [gs1]            | OPERATOR | startsWith() + exclusionFilter |
+ * | [gs1]     | [gs1]            | OPERATOR | name eq gs1                    |
  *
  * @returns API Management `$filter` property
  */
-export const manageGroupSubscriptionsFilter = (groupIds?: string[]): string =>
+export const manageGroupSubscriptionsFilter = (
+  groupIds: string[],
+  specialGroupsIds: string[],
+): string =>
   pipe(
     groupIds,
-    O.fromNullable,
+    O.fromPredicate(RA.isNonEmpty),
     O.map(
       flow(
         RA.mapWithIndex((i, groupId) =>
@@ -243,7 +257,7 @@ export const manageGroupSubscriptionsFilter = (groupIds?: string[]): string =>
         (groupIdFilters) => groupIdFilters.join(" "),
       ),
     ),
-    O.getOrElse(() =>
+    O.orElse(() =>
       pipe(
         buildApimFilter({
           composeFilter: FilterCompositionEnum.none,
@@ -252,9 +266,42 @@ export const manageGroupSubscriptionsFilter = (groupIds?: string[]): string =>
           inverse: false,
           value: SUBSCRIPTION_MANAGE_GROUP_PREFIX,
         }),
-        O.getOrElse(() => ""),
+        O.chain((startWithFilter) =>
+          pipe(
+            specialGroupsIds,
+            O.fromPredicate(RA.isNonEmpty),
+            O.map(
+              flow(
+                RA.mapWithIndex((i, specialGroupId) =>
+                  pipe(
+                    // to shorten the overall filter length
+                    // instead of using multiple not eq operators
+                    // we construct an unique predicate with OR
+                    // and prepend NOT after in the chain
+                    buildApimFilter({
+                      composeFilter:
+                        i === 0
+                          ? FilterCompositionEnum.none
+                          : FilterCompositionEnum.or,
+                      field: FilterFieldEnum.name,
+                      filterType: FilterSupportedOperatorsEnum.eq,
+                      inverse: false,
+                      value: SUBSCRIPTION_MANAGE_GROUP_PREFIX + specialGroupId,
+                    }),
+                    O.getOrElse(() => ""),
+                  ),
+                ),
+                (exclusionFilters) => exclusionFilters.join(" "),
+                (exclusionFilter) =>
+                  `${startWithFilter} ${FilterCompositionEnum.and}not(${exclusionFilter})`,
+              ),
+            ),
+            O.orElse(() => O.some(startWithFilter)),
+          ),
+        ),
       ),
     ),
+    O.getOrElse(() => ""),
   );
 
 /**
