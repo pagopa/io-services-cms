@@ -4,6 +4,7 @@ export interface Institution {
   fiscalCode: string;
   id: string;
   isAggregator: boolean;
+  isAggregate: boolean;
   logo_url?: string;
   name: string;
   role: string;

@@ -6,7 +6,26 @@ on:
     types: [published]
 
 jobs:
+  validate_dispatch:
+    name: Validate workflow_dispatch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check tag matches action intent
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            if [[ ! "${{ github.ref_name }}" =~ ^io-services-cms-webapp@ ]]; then
+              echo "Tag '${{ github.ref_name }}' does not match the pattern 'io-services-cms-webapp@*'"
+              echo "This action is intended for deploying io-services-cms-webapp"
+              exit 1
+            fi
+            echo "Tag '${{ github.ref_name }}' matches expected pattern"
+          else
+            echo "Running from branch: ${{ github.ref_name }}"
+          fi
+
   deploy_to_azure:
+    needs: validate_dispatch
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (
