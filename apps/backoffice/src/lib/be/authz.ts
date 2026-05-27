@@ -64,7 +64,6 @@ export const userAuthz = (user: BackOfficeUserEnriched) => {
      */
     isAggregatorAdmin,
 
-    // TODO: refactor this method and its usage to simplify the logic of the permission check.
     /**
      * Checks if the provided group is part of a special group within their institution
      * @param groupId - The group identifier to check
@@ -73,6 +72,7 @@ export const userAuthz = (user: BackOfficeUserEnriched) => {
     isAnInstitutionSpecialGroup: (groupId: string): boolean =>
       user.institution.selcSpecialGroups.some((group) => group.id === groupId),
 
+    // TODO: refactor this method and its usage to simplify the logic of the permission check.
     /**
      * Checks if a group is allowed based on user permissions, optionally verifying its active state
      * @param groupId - The group identifier to check
