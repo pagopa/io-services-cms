@@ -95,10 +95,10 @@ const toServiceStatus = (
         value: ServiceLifecycleStatusTypeEnum[fsm.state],
       };
 
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = fsm;
       return ServiceLifecycleStatusTypeEnum[fsm];
+    }
   }
 };
 
@@ -109,10 +109,10 @@ const toScopeType = (
     case "LOCAL":
     case "NATIONAL":
       return ScopeEnum[s];
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = s;
       return ScopeEnum[s];
+    }
   }
 };
 

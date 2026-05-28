@@ -29,7 +29,7 @@ export const DELETE = withJWTAuthHandler(
   ) => {
     const userRole: SelfcareRoles = backofficeUser.institution.role;
     switch (userRole) {
-      case SelfcareRoles.admin:
+      case SelfcareRoles.admin: {
         if (
           !params.subscriptionId.startsWith(
             ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX,
@@ -48,13 +48,14 @@ export const DELETE = withJWTAuthHandler(
           );
         }
         break;
+      }
       case SelfcareRoles.adminAggregator:
       case SelfcareRoles.operator:
         return handleForbiddenErrorResponse("Role not authorized");
-      default:
-        // eslint-disable-next-line no-case-declarations
+      default: {
         const _: never = userRole; // This will make sure that all cases are handled in the switch
         throw new Error("Invalid user role");
+      }
     }
 
     try {

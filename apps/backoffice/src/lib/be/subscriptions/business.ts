@@ -74,10 +74,10 @@ const parseState = (state: SubscriptionState): StateEnum => {
       return StateEnum.submitted;
     case "suspended":
       return StateEnum.suspended;
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = state;
       throw new Error(`Invalid state: ${state}`);
+    }
   }
 };
 
@@ -221,10 +221,10 @@ export async function getManageSubscriptions({
         institutionSelcSpecialGroups.map((group) => group.id),
       );
       break;
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = subscriptionType;
       throw new Error(`Invalid subscriptionType: '${subscriptionType}'`);
+    }
   }
   const maybeSubscriptions = await getApimService().getUserSubscriptions(
     apimUserId,
@@ -799,10 +799,10 @@ export async function generateApiKeysExportsDownloadLink(
       return AggregatedInstitutionsManageKeysExportFileDownloadLink.encode({
         downloadLink: url.href,
       });
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = mostRecentExport.state;
       throw new ManagedInternalError("Unrecognized export state");
+    }
   }
 }
 
@@ -837,9 +837,9 @@ export async function retrieveApiKeysExportMetadata(
         expirationDate: expirationDate.toISOString(),
         state: mostRecentExport.state as unknown as StateEnumReady,
       });
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = mostRecentExport.state;
       throw new ManagedInternalError("Unrecognized export state");
+    }
   }
 }

@@ -50,10 +50,10 @@ export const regenerateManageSubscriptionKeyHandler = async (
       break;
     case SelfcareRoles.operator:
       return handleForbiddenErrorResponse("Role not authorized");
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = userRole; // This will make sure that all cases are handled in the switch
       throw new Error("Invalid user role");
+    }
   }
 
   try {

@@ -47,10 +47,10 @@ export const getManageSubscriptionKeysHandler = async (
         );
       }
       break;
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = userRole; // This will make sure that all cases are handled in the switch
       throw new Error("Invalid user role");
+    }
   }
 
   try {

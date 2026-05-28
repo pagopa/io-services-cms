@@ -232,9 +232,9 @@ export function upsertSubscription(
         ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX + value?.id,
         value?.name,
       );
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = type;
       throw new Error("Invalid type");
+    }
   }
 }
