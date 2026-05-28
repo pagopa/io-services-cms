@@ -24,7 +24,8 @@
     "ghcr.io/devcontainers-extra/features/pre-commit:2": {},
     "ghcr.io/pagopa/devcontainer-features/trivy:1": {},
     "ghcr.io/pagopa/devcontainer-features/plantuml:1": {},
-    "ghcr.io/pagopa/devcontainer-features/azure-functions-core-tools:1": {}
+    "ghcr.io/pagopa/devcontainer-features/azure-functions-core-tools:1": {},
+    "ghcr.io/devcontainers/features/copilot-cli:1": {}
   },
   "postStartCommand": {
     "set-workspace-as-safe-dir": "git config --global --add safe.directory ${containerWorkspaceFolder}",
