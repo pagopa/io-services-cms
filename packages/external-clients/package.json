@@ -35,7 +35,6 @@
     "io-ts-types": "catalog:",
     "monocle-ts": "^2.3.13",
     "newtype-ts": "^0.3.5",
-    "next": "^15.5.15",
     "ulid": "^3.0.2"
   },
   "devDependencies": {
