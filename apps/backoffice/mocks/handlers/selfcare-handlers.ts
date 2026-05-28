@@ -106,6 +106,21 @@ export const buildHandlers = () => {
 
       return resultArray[0];
     }),
+    http.get(`${baseURL}/delegations/delegates/:institutionId`, () => {
+      const resultArray = [
+        HttpResponse.json([], {
+          status: 200,
+        }),
+        HttpResponse.json(getSelfCareProblemResponse(404) as any, {
+          status: 404,
+        }),
+        HttpResponse.json(getSelfCareProblemResponse(500) as any, {
+          status: 500,
+        }),
+      ];
+
+      return resultArray[0];
+    }),
   ];
 };
 
