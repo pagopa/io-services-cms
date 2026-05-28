@@ -1,30 +1,24 @@
 import { faker } from "@faker-js/faker/locale/it";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { BackOfficeUser } from "../../../../types/next-auth";
 import { SelfcareRoles } from "../../../types/auth";
 import { isAdmin, isInstitutionIdSameAsCaller, userAuthz } from "../authz";
+import { BackOfficeUserEnriched } from "../wrappers";
 
-const backofficeUserMock = {
+const backofficeUserMock: BackOfficeUserEnriched = {
   id: faker.string.uuid(),
-  name: faker.person.fullName(),
-  email: faker.internet.email(),
   institution: {
     id: "institutionId",
     name: faker.company.name(),
     fiscalCode: faker.string.numeric(),
     role: SelfcareRoles.admin,
     logo_url: faker.image.url(),
+    isAggregator: false,
+    isAggregate: false,
+    selcSpecialGroups: [],
   },
-  authorizedInstitutions: [
-    {
-      id: faker.string.uuid(),
-      name: faker.company.name(),
-      role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
-      logo_url: faker.image.url(),
-    },
-  ],
   permissions: {
     apimGroups: faker.helpers.multiple(faker.string.alpha),
+    selcGroups: [],
   },
   parameters: {
     userId: faker.string.uuid(),
@@ -33,7 +27,7 @@ const backofficeUserMock = {
   },
 };
 
-const differentBackofficeOperatorUserMock = {
+const differentBackofficeOperatorUserMock: BackOfficeUserEnriched = {
   ...backofficeUserMock,
   institution: {
     id: "differentInstitutionId",
@@ -41,6 +35,9 @@ const differentBackofficeOperatorUserMock = {
     fiscalCode: faker.string.numeric(),
     role: SelfcareRoles.operator,
     logo_url: faker.image.url(),
+    isAggregator: false,
+    isAggregate: false,
+    selcSpecialGroups: [],
   },
 };
 
@@ -81,13 +78,15 @@ describe("userAuthz", () => {
     it.each`
       expectedResult | role
       ${true}        | ${SelfcareRoles.admin}
+      ${false}       | ${SelfcareRoles.adminAggregator}
+      ${false}       | ${SelfcareRoles.operator}
     `(
       'should return $expectedResult for "$role" user',
       ({ expectedResult, role }) => {
         expect(
           userAuthz({
             institution: { role },
-          } as BackOfficeUser).isAdmin(),
+          } as unknown as BackOfficeUserEnriched).isAdmin(),
         ).toBe(expectedResult);
       },
     );
@@ -105,33 +104,28 @@ describe("userAuthz", () => {
         expect(
           userAuthz({
             institution: { role },
-          } as BackOfficeUser).isAggregatorAdmin(),
+          } as unknown as BackOfficeUserEnriched).isAggregatorAdmin(),
         ).toBe(expectedResult);
       },
     );
   });
 
-  describe("isAnAggregatorAdminAllowedOnGroup", () => {
+  describe("isAnInstitutionSpecialGroup", () => {
     it.each`
-      scenario                                                                          | expectedResult | role                             | selcGroups                                                  | groupId                | checkActive
-      ${"It is an Aggregator Admin and the group is allowed"}                           | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
-      ${"It is an Aggregator Admin and the group is both allowed and active (checked)"} | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${true}
-      ${"It is an Aggregator Admin and the group is allowed (explicitly unchecked)"}    | ${true}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${false}
-      ${"It is an Aggregator Admin and the group is allowed but not active"}            | ${false}        | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "DELETED" }]} | ${"groupId"}           | ${true}
-      ${"It is an Aggregator Admin and the group is allowed (groupId as string)"}       | ${true}        | ${SelfcareRoles.adminAggregator} | ${["groupId"]}                                              | ${"groupId"}           | ${undefined}
-      ${"It is an Aggregator Admin but the group does not match"}                       | ${false}       | ${SelfcareRoles.adminAggregator} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"different_groupId"} | ${undefined}
-      ${"It is an Aggregator Admin and there are no groups"}                            | ${false}       | ${SelfcareRoles.adminAggregator} | ${undefined}                                                | ${"groupId"}           | ${undefined}
-      ${"It is an Aggregator Admin and the group list is empty"}                        | ${false}       | ${SelfcareRoles.adminAggregator} | ${[]}                                                       | ${"groupId"}           | ${undefined}
-      ${"It is an Operator and the group is active"}                                    | ${false}       | ${SelfcareRoles.operator}        | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
-      ${"It is an Admin and the group is active"}                                       | ${false}       | ${SelfcareRoles.admin}           | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}  | ${"groupId"}           | ${undefined}
+      scenario                                             | expectedResult | selcSpecialGroups                                                                                                                                                             | groupId
+      ${"selcSpecialGroups is empty"}                      | ${false}       | ${[]}                                                                                                                                                                         | ${"groupId"}
+      ${"groupId is in selcSpecialGroups"}                 | ${true}        | ${[{ id: "groupId", parentInstitutionId: "parentId", name: "groupName", state: "ACTIVE" }]}                                                                                   | ${"groupId"}
+      ${"groupId is not in selcSpecialGroups"}             | ${false}       | ${[{ id: "groupId", parentInstitutionId: "parentId", name: "groupName", state: "ACTIVE" }]}                                                                                   | ${"different_groupId"}
+      ${"groupId is in one of multiple selcSpecialGroups"} | ${true}        | ${[{ id: "other", parentInstitutionId: "parentId", name: "other", state: "ACTIVE" }, { id: "groupId", parentInstitutionId: "parentId", name: "groupName", state: "ACTIVE" }]} | ${"groupId"}
     `(
-      'should return $expectedResult for "$role" user with selcGroups: $selcGroups and groupId: $groupId',
-      ({ expectedResult, role, selcGroups, groupId, checkActive }) => {
+      "should return $expectedResult when $scenario",
+      ({ expectedResult, selcSpecialGroups, groupId }) => {
         expect(
           userAuthz({
-            institution: { role },
-            permissions: { selcGroups },
-          } as BackOfficeUser).isAnAggregatorAdminAllowedOnGroup(groupId, checkActive),
+            institution: { selcSpecialGroups },
+          } as unknown as BackOfficeUserEnriched).isAnInstitutionSpecialGroup(
+            groupId,
+          ),
         ).toBe(expectedResult);
       },
     );
@@ -148,7 +142,9 @@ describe("userAuthz", () => {
         expect(
           userAuthz({
             institution: { id: allowedInstitutionId },
-          } as BackOfficeUser).isInstitutionAllowed(providedInstitutionId),
+          } as unknown as BackOfficeUserEnriched).isInstitutionAllowed(
+            providedInstitutionId,
+          ),
         ).toBe(expectedResult);
       },
     );
@@ -157,8 +153,7 @@ describe("userAuthz", () => {
   describe("isGroupAllowed", () => {
     it.each`
       scenario                                                                                                                               | expectedResult | role                      | selcGroups                                                    | groupId                | active
-      ${"is admin"}                                                                                                                          | ${true}        | ${SelfcareRoles.admin}    | ${undefined}                                                  | ${""}                  | ${undefined}
-      ${"is not admin and selcGroups is not defined"}                                                                                        | ${true}        | ${SelfcareRoles.operator} | ${undefined}                                                  | ${""}                  | ${undefined}
+      ${"is admin"}                                                                                                                          | ${true}        | ${SelfcareRoles.admin}    | ${[]}                                                         | ${""}                  | ${undefined}
       ${"is not admin and selcGroups is empty"}                                                                                              | ${true}        | ${SelfcareRoles.operator} | ${[]}                                                         | ${""}                  | ${undefined}
       ${"is not admin and provided groupId is included in selcGroups"}                                                                       | ${true}        | ${SelfcareRoles.operator} | ${["groupId"]}                                                | ${"groupId"}           | ${undefined}
       ${"is not admin and provided groupId is not included in selcGroups"}                                                                   | ${false}       | ${SelfcareRoles.operator} | ${["groupId"]}                                                | ${"different_groupId"} | ${undefined}
@@ -175,7 +170,10 @@ describe("userAuthz", () => {
           userAuthz({
             institution: { role },
             permissions: { selcGroups },
-          } as BackOfficeUser).isGroupAllowed(groupId, active),
+          } as unknown as BackOfficeUserEnriched).isGroupAllowed(
+            groupId,
+            active,
+          ),
         ).toBe(expectedResult);
       },
     );
@@ -184,7 +182,6 @@ describe("userAuthz", () => {
   describe("isUserAllowedOnGroup", () => {
     it.each`
       scenario                                                                                             | expectedResult | selcGroups                                                    | groupId                | checkActive
-      ${"selcGroups is not defined"}                                                                       | ${false}       | ${undefined}                                                  | ${"groupId"}           | ${undefined}
       ${"selcGroups is empty"}                                                                             | ${false}       | ${[]}                                                         | ${"groupId"}           | ${undefined}
       ${"groupId is included in selcGroups as string"}                                                     | ${true}        | ${["groupId"]}                                                | ${"groupId"}           | ${undefined}
       ${"groupId is not included in selcGroups as string"}                                                 | ${false}       | ${["groupId"]}                                                | ${"different_groupId"} | ${undefined}
@@ -200,7 +197,10 @@ describe("userAuthz", () => {
           userAuthz({
             institution: { role: SelfcareRoles.operator },
             permissions: { selcGroups },
-          } as BackOfficeUser).isUserAllowedOnGroup(groupId, checkActive),
+          } as unknown as BackOfficeUserEnriched).isUserAllowedOnGroup(
+            groupId,
+            checkActive,
+          ),
         ).toBe(expectedResult);
       },
     );
@@ -218,7 +218,7 @@ describe("userAuthz", () => {
         expect(
           userAuthz({
             permissions: { selcGroups },
-          } as BackOfficeUser).hasSelcGroups(),
+          } as unknown as BackOfficeUserEnriched).hasSelcGroups(),
         ).toBe(expectedResult);
       },
     );
