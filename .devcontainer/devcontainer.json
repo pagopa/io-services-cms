@@ -72,9 +72,13 @@
       },
       "mcp": {
         "servers": {
-          "dx": {
+          "dx-mpc-server": {
             "type": "http",
             "url": "https://api.dx.pagopa.it/mcp"
+          },
+          "azure-learn-mpc-server": {
+            "type": "http",
+            "url": "https://learn.microsoft.com/api/mcp"
           }
         }
       }
