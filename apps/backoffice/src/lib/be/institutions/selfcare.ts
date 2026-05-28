@@ -1,4 +1,5 @@
 import { HTTP_STATUS_NOT_FOUND } from "@/config/constants";
+import { DelegationTypeEnum } from "@/generated/selfcare/DelegationInstitutionResponse";
 import { InstitutionResponse } from "@/generated/selfcare/InstitutionResponse";
 import { PageOfUserGroupResource } from "@/generated/selfcare/PageOfUserGroupResource";
 import {
@@ -179,4 +180,29 @@ export const getInstitutionProducts = async (
   }
 
   return apiResult.right;
+};
+
+/**
+ * Check if an institution has any aggregators.
+ * @param institutionId the institution id
+ * @returns a boolean indicating if the institution has aggregators
+ * @throws ManagedInternalError if the API call fails
+ */
+export const hasAggregators = async (
+  institutionId: string,
+): Promise<boolean> => {
+  const apiResult = await getSelfcareClient().getDelegateInstitutions({
+    institutionId,
+    size: 1,
+    type: DelegationTypeEnum.EA,
+  })();
+
+  if (E.isLeft(apiResult)) {
+    throw new ManagedInternalError(
+      "Error calling selfcare getDelegateInstitutions API",
+      apiResult.left.message,
+    );
+  }
+
+  return apiResult.right.length > 0;
 };

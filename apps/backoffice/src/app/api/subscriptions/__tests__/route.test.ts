@@ -15,19 +15,11 @@ import {
   ManagedInternalError,
   PreconditionFailedError,
 } from "../../../../lib/be/errors";
+import { BackOfficeUserEnriched } from "../../../../lib/be/wrappers";
 import { SelfcareRoles } from "../../../../types/auth";
 import { GET, PUT } from "../route";
 
-const userMock = {
-  authorizedInstitutions: [
-    {
-      id: faker.string.uuid(),
-      logo_url: faker.image.url(),
-      name: faker.company.name(),
-      role: SelfcareRoles.admin,
-    },
-  ],
-  email: faker.internet.email(),
+const userMock: BackOfficeUserEnriched = {
   id: faker.string.uuid(),
   institution: {
     fiscalCode: faker.string.numeric(),
@@ -36,8 +28,9 @@ const userMock = {
     name: faker.company.name(),
     role: SelfcareRoles.admin,
     isAggregator: faker.datatype.boolean(),
+    isAggregate: faker.datatype.boolean(),
+    selcSpecialGroups: [],
   },
-  name: faker.person.fullName(),
   parameters: {
     subscriptionId: faker.string.uuid(),
     userEmail: faker.internet.email(),
@@ -45,8 +38,9 @@ const userMock = {
   },
   permissions: {
     apimGroups: faker.helpers.multiple(faker.string.alpha),
+    selcGroups: [],
   },
-} as BackOfficeUser;
+};
 
 const stubs = { aGroup: { id: "aGroupId", name: "aGroupName" } };
 
@@ -77,10 +71,10 @@ const mocks = vi.hoisted(() => {
   };
 });
 
-vi.mock("@/lib/be/req-res-utils", async () => {
-  const actual = await vi.importActual("@/lib/be/req-res-utils");
+vi.mock("@/lib/be/req-res-utils", async (importOriginal) => {
+  const original = (await importOriginal()) as any;
   return {
-    ...(actual as any),
+    ...original,
     parseBody: mocks.parseBody,
     parseQueryParam: mocks.parseQueryParam,
     parseLimitQueryParam: mocks.parseLimitQueryParam,
@@ -454,23 +448,24 @@ describe("Subscription API", () => {
       expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
       expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
       expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
-      expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
-        kind,
-        userMock.parameters.userId,
+      expect(mocks.getManageSubscriptions).toHaveBeenCalledWith({
+        subscriptionType: kind,
+        apimUserId: userMock.parameters.userId,
         limit,
         offset,
-        undefined,
-      );
+        userSelcGroups: [],
+        institutionSelcSpecialGroups: userMock.institution.selcSpecialGroups,
+      });
     });
 
     it.each`
-      scenario                                 | userRole                  | selcGroups
+      scenario                                 | userRole                  | userSelcGroups
       ${"user is admin"}                       | ${SelfcareRoles.admin}    | ${undefined}
       ${"user is not admin and has no groups"} | ${SelfcareRoles.operator} | ${undefined}
       ${"user is not admin and has groups"}    | ${SelfcareRoles.operator} | ${["g1"]}
     `(
       "should return the subscriptions when getManageSubscriptions do not fails and $scenario",
-      async ({ userRole, selcGroups }) => {
+      async ({ userRole, userSelcGroups }) => {
         // given
         const kind = "MANAGE_ROOT";
         const limit = 10;
@@ -491,7 +486,7 @@ describe("Subscription API", () => {
           },
           permissions: {
             ...userMock.permissions,
-            selcGroups: selcGroups,
+            selcGroups: userSelcGroups,
           },
         }));
 
@@ -513,13 +508,14 @@ describe("Subscription API", () => {
         expect(mocks.parseLimitQueryParam).toHaveBeenCalledOnce();
         expect(mocks.parseOffsetQueryParam).toHaveBeenCalledOnce();
         expect(mocks.getManageSubscriptions).toHaveBeenCalledOnce();
-        expect(mocks.getManageSubscriptions).toHaveBeenCalledWith(
-          kind,
-          userMock.parameters.userId,
+        expect(mocks.getManageSubscriptions).toHaveBeenCalledWith({
+          subscriptionType: kind,
+          apimUserId: userMock.parameters.userId,
           limit,
           offset,
-          userRole === SelfcareRoles.admin ? undefined : selcGroups,
-        );
+          userSelcGroups,
+          institutionSelcSpecialGroups: userMock.institution.selcSpecialGroups,
+        });
       },
     );
   });
