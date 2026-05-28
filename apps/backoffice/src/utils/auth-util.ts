@@ -82,9 +82,6 @@ export const hasManageKeyRoot =
       return true;
     }
 
-    console.log("###### SESSION");
-    console.log(session);
-
     if (hasWritePermission(session, SelfcareRoles.admin)) {
       return true;
     }
