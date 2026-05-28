@@ -48,10 +48,17 @@ export const isAtLeastInOneGroup = (session: Session | null) =>
 export const isGroupRequired = (
   session: Session | null,
   groupApiKeyEnabled: boolean,
-): boolean =>
-  hasApiKeyGroupsFeatures(groupApiKeyEnabled)(session) &&
-  isOperator(session) &&
-  isAtLeastInOneGroup(session);
+): boolean => {
+  if (!hasApiKeyGroupsFeatures(groupApiKeyEnabled)(session)) {
+    return false;
+  }
+
+  if (!isAtLeastInOneGroup(session)) {
+    return false;
+  }
+
+  return isOperator(session) || isAdminAggregator(session);
+};
 
 /**
  * Check if the session has `ApiServiceWrite` permission for the given role
@@ -74,6 +81,9 @@ export const hasManageKeyRoot =
     if (!groupApiKeyEnabled) {
       return true;
     }
+
+    console.log("###### SESSION");
+    console.log(session);
 
     if (hasWritePermission(session, SelfcareRoles.admin)) {
       return true;
