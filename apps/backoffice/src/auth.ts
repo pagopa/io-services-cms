@@ -1,4 +1,5 @@
 import { getConfiguration } from "@/config";
+import { isBackOfficeUserToken } from "@/lib/auth/token-guards";
 import { ROUTES } from "@/lib/routes";
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -35,6 +36,9 @@ const authConfig: NextAuthConfig = {
     session({ session, token }) {
       /* update the session.user based on the token object */
       if (token && session.user) {
+        if (!isBackOfficeUserToken(token)) {
+          throw new Error("Invalid token structure");
+        }
         session.user.id = token.id;
         session.user.institution = token.institution;
         session.user.permissions = token.permissions;

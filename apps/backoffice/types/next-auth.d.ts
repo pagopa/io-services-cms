@@ -3,8 +3,8 @@ import { DefaultSession } from "next-auth";
 export interface Institution {
   fiscalCode: string;
   id: string;
-  isAggregator: boolean;
   isAggregate: boolean;
+  isAggregator: boolean;
   logo_url?: string;
   name: string;
   role: SelfcareRoles;
@@ -36,11 +36,16 @@ declare module "next-auth" {
   interface Session {
     user: BackOfficeUser & DefaultSession["user"];
   }
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface User extends BackOfficeUser {}
 }
 
+declare module "next-auth/jwt" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface JWT extends BackOfficeUser {}
+}
+
 declare module "@auth/core/jwt" {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface JWT extends BackOfficeUser {}
 }
