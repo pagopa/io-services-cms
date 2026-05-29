@@ -1,10 +1,33 @@
-import { ApiManagementClient } from "@azure/arm-apimanagement";
+import {
+  ApiManagementClient,
+  ApiManagementClientOptionalParams,
+} from "@azure/arm-apimanagement";
+import { DefaultAzureCredential } from "@azure/identity";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApimRestError, formatEmailForOrganization, getApimService, parseIdFromFullPath } from "..";
+import {
+  ApimRestError,
+  formatEmailForOrganization,
+  getApimClient,
+  getApimService,
+  parseIdFromFullPath,
+} from "..";
 import { SubscriptionKeyTypeEnum } from "../../generated/api/SubscriptionKeyType";
+
+vi.mock("@azure/identity", () => ({
+  DefaultAzureCredential: vi.fn(),
+}));
+
+vi.mock("@azure/arm-apimanagement", async (importOriginal) => {
+  const actual =
+    await importOriginal<typeof import("@azure/arm-apimanagement")>();
+  return {
+    ...actual,
+    ApiManagementClient: vi.fn(),
+  };
+});
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -38,6 +61,35 @@ describe("ApimService Test", () => {
       anApimServiceName,
       anApimProductName,
     );
+
+  describe("getApimClient", () => {
+    const aSubscriptionId = "aSubscriptionId";
+
+    it("should create an ApiManagementClient with default credentials and no options", () => {
+      getApimClient(aSubscriptionId);
+
+      expect(DefaultAzureCredential).toHaveBeenCalledTimes(1);
+      expect(ApiManagementClient).toHaveBeenCalledWith(
+        expect.any(DefaultAzureCredential),
+        aSubscriptionId,
+        undefined,
+      );
+    });
+
+    it("should forward optional params to ApiManagementClient", () => {
+      const options: ApiManagementClientOptionalParams = {
+        requestContentType: "application/json",
+      };
+
+      getApimClient(aSubscriptionId, options);
+
+      expect(ApiManagementClient).toHaveBeenCalledWith(
+        expect.any(DefaultAzureCredential),
+        aSubscriptionId,
+        options,
+      );
+    });
+  });
 
   describe("getUser", () => {
     it("should return a user", async () => {
@@ -466,6 +518,7 @@ describe("ApimService Test", () => {
         anApimResourceGroup,
         anApimServiceName,
         aServiceId,
+        { requestOptions: { timeout: undefined } },
       );
 
       expect(E.isRight(result)).toBeTruthy();
@@ -482,16 +535,14 @@ describe("ApimService Test", () => {
       // mock ApimClient
       const mockApimClient = {
         subscription: {
-          listSecrets: vi.fn((_, __, userId) =>
-            Promise.reject({ statusCode: 503 }),
-          ),
+          listSecrets: vi.fn(() => Promise.reject({ statusCode: 503 })),
         },
       } as unknown as ApiManagementClient;
 
       // create ApimService
       const apimService = mockApimService(mockApimClient);
 
-      // call getUser
+      // call listSecrets
       const result = await apimService.listSecrets(aServiceId)();
 
       // expect result
@@ -499,12 +550,48 @@ describe("ApimService Test", () => {
         anApimResourceGroup,
         anApimServiceName,
         aServiceId,
+        { requestOptions: { timeout: undefined } },
       );
 
       expect(E.isLeft(result)).toBeTruthy();
       if (E.isLeft(result)) {
         expect(result.left).toEqual({
           statusCode: 503,
+        });
+      }
+    });
+
+    it("should pass requestTimeoutInMs as request option timeout", async () => {
+      const aTimeout = 5000;
+      const mockApimClient = {
+        subscription: {
+          listSecrets: vi.fn(() =>
+            Promise.resolve({
+              _etag: "_etag",
+              primaryKey: aPrimaryKey,
+              secondaryKey: aSecondaryKey,
+            }),
+          ),
+        },
+      } as unknown as ApiManagementClient;
+
+      const apimService = mockApimService(mockApimClient);
+
+      const result = await apimService.listSecrets(aServiceId, aTimeout)();
+
+      expect(mockApimClient.subscription.listSecrets).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        aServiceId,
+        { requestOptions: { timeout: aTimeout } },
+      );
+
+      expect(E.isRight(result)).toBeTruthy();
+      if (E.isRight(result)) {
+        expect(result.right).toEqual({
+          _etag: "_etag",
+          primaryKey: aPrimaryKey,
+          secondaryKey: aSecondaryKey,
         });
       }
     });

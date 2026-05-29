@@ -4,8 +4,14 @@ import * as E from "fp-ts/lib/Either";
 import { getApimService } from "../apim-service";
 import { SubscriptionNotFoundError } from "../errors";
 
-export async function listSubscriptionSecrets(subscriptionId: string) {
-  const result = await getApimService().listSecrets(subscriptionId)();
+export async function listSubscriptionSecrets(
+  subscriptionId: string,
+  requestTimeoutInMs = 6000,
+) {
+  const result = await getApimService().listSecrets(
+    subscriptionId,
+    requestTimeoutInMs,
+  )();
 
   if (E.isLeft(result)) {
     const error = result.left;

@@ -8,8 +8,10 @@ import { SubscriptionCollection } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { Agent, HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
+import { NumberFromString } from "@pagopa/ts-commons/lib/numbers";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import { withDefault } from "@pagopa/ts-commons/lib/types";
 import axios, { AxiosError } from "axios";
 import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
@@ -35,6 +37,17 @@ const Config = t.intersection([
     AZURE_APIM_RESOURCE_GROUP: NonEmptyString,
     AZURE_APIM_SUBSCRIPTIONS_API_BASE_URL: NonEmptyString,
     AZURE_SUBSCRIPTION_ID: NonEmptyString,
+  }),
+  t.type({
+    AZURE_APIM_CLIENT_MAX_RETRIES: withDefault(t.string, "3").pipe(
+      NumberFromString,
+    ),
+    AZURE_APIM_CLIENT_MAX_RETRY_DELAY_MS: withDefault(t.string, "1500").pipe(
+      NumberFromString,
+    ),
+    AZURE_APIM_CLIENT_RETRY_DELAY_MS: withDefault(t.string, "100").pipe(
+      NumberFromString,
+    ),
   }),
   HttpAgentConfig,
 ]);
@@ -67,7 +80,13 @@ const getApimConfig = (): Config => {
 const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
-  const apimClient = ApimUtils.getApimClient(apimConfig.AZURE_SUBSCRIPTION_ID);
+  const apimClient = ApimUtils.getApimClient(apimConfig.AZURE_SUBSCRIPTION_ID, {
+    retryOptions: {
+      maxRetries: apimConfig.AZURE_APIM_CLIENT_MAX_RETRIES,
+      maxRetryDelayInMs: apimConfig.AZURE_APIM_CLIENT_MAX_RETRY_DELAY_MS,
+      retryDelayInMs: apimConfig.AZURE_APIM_CLIENT_RETRY_DELAY_MS,
+    },
+  });
   return ApimUtils.getApimService(
     apimClient,
     apimConfig.AZURE_APIM_RESOURCE_GROUP,

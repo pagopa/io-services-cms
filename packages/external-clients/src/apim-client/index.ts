@@ -1,5 +1,6 @@
 import {
   ApiManagementClient,
+  ApiManagementClientOptionalParams,
   GroupContract,
   ProductContract,
   Resource,
@@ -85,8 +86,15 @@ const chainApimMappedError = <T>(
     ),
   );
 
-export function getApimClient(subscriptionId: string): ApiManagementClient {
-  return new ApiManagementClient(new DefaultAzureCredential(), subscriptionId);
+export function getApimClient(
+  subscriptionId: string,
+  options?: ApiManagementClientOptionalParams,
+): ApiManagementClient {
+  return new ApiManagementClient(
+    new DefaultAzureCredential(),
+    subscriptionId,
+    options,
+  );
 }
 
 export interface ApimService {
@@ -134,6 +142,7 @@ export interface ApimService {
   ) => TE.TaskEither<ApimRestError, readonly SubscriptionContract[]>;
   readonly listSecrets: (
     subscriptionId: string,
+    requestTimeoutInMs?: number,
   ) => TE.TaskEither<ApimRestError, SubscriptionKeysContract>;
   readonly regenerateSubscriptionKey: (
     subscriptionId: string,
@@ -236,8 +245,14 @@ export const getApimService = (
       offset,
       limit,
     ),
-  listSecrets: (subscriptionId) =>
-    listSecrets(apimClient, apimResourceGroup, apimServiceName, subscriptionId),
+  listSecrets: (subscriptionId, requestTimeoutInMs) =>
+    listSecrets(
+      apimClient,
+      apimResourceGroup,
+      apimServiceName,
+      subscriptionId,
+      requestTimeoutInMs,
+    ),
   regenerateSubscriptionKey: (subscriptionId, keyType) =>
     regenerateSubscriptionKey(
       apimClient,
@@ -413,6 +428,7 @@ const listSecrets = (
   apimResourceGroup: string,
   apimServiceName: string,
   subscriptionId: string,
+  requestTimeoutInMs?: number,
 ) =>
   pipe(
     TE.tryCatch(
@@ -421,6 +437,11 @@ const listSecrets = (
           apimResourceGroup,
           apimServiceName,
           subscriptionId,
+          {
+            requestOptions: {
+              timeout: requestTimeoutInMs,
+            },
+          },
         ),
       identity,
     ),
