@@ -13,7 +13,7 @@
     },
     "api-definitions:internal": {
       "inputs": ["api/internal.yaml"],
-      "outputs": ["src/generated/definitions/*"],
+      "outputs": ["src/generated/definitions/internal/*"],
       "dependsOn": ["api-definitions:bundle-internal"],
       "outputLogs": "errors-only"
     },
