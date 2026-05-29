@@ -362,6 +362,7 @@
   },
   "roles": {
     "admin": "Amministratore",
+    "admin_aggregator": "Amministratore",
     "operator": "Operatore"
   },
   "routes": {

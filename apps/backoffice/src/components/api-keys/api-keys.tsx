@@ -23,18 +23,24 @@ export interface ApiKeysProps {
  *
  * Used to show, copy, regenerate `keys` _(primary/secondary)_.
  * */
-export const ApiKeys = (props: ApiKeysProps) => (
+export const ApiKeys = ({
+  description,
+  keys,
+  onRegenerateKey,
+  scope,
+  title,
+}: ApiKeysProps) => (
   <Box
     bgcolor="background.paper"
     borderRadius={0.5}
     id="card-details"
     padding={3}
   >
-    <ApiKeysHeader description={props.description} title={props.title} />
+    <ApiKeysHeader description={description} title={title} />
     <ApiKeysCouple
-      keys={props.keys}
-      onRegenerateKey={props.onRegenerateKey}
-      scope={props.scope}
+      keys={keys}
+      onRegenerateKey={onRegenerateKey}
+      scope={scope}
     />
   </Box>
 );

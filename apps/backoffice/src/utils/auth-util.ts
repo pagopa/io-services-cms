@@ -48,10 +48,26 @@ export const isAtLeastInOneGroup = (session: Session | null) =>
 export const isGroupRequired = (
   session: Session | null,
   groupApiKeyEnabled: boolean,
-): boolean =>
-  hasApiKeyGroupsFeatures(groupApiKeyEnabled)(session) &&
-  isOperator(session) &&
-  isAtLeastInOneGroup(session);
+): boolean => {
+  if (!hasApiKeyGroupsFeatures(groupApiKeyEnabled)(session)) {
+    return false;
+  }
+
+  if (!isAtLeastInOneGroup(session)) {
+    return false;
+  }
+
+  return isOperator(session) || isAdminAggregator(session);
+};
+
+/**
+ * Check if the session has `ApiServiceWrite` permission for the given role
+ */
+const hasWritePermission = (session: Session | null, role: SelfcareRoles) =>
+  hasRequiredAuthorizations(session, {
+    requiredPermissions: ["ApiServiceWrite"],
+    requiredRole: role,
+  });
 
 /**
  * Can fetch & show Manage ApiKey (root) only for:
@@ -61,42 +77,54 @@ export const isGroupRequired = (
  * @returns
  */
 export const hasManageKeyRoot =
-  (groupApiKeyEnabled: boolean) => (session: Session | null) =>
-    !groupApiKeyEnabled ||
-    hasRequiredAuthorizations(session, {
-      requiredPermissions: ["ApiServiceWrite"],
-      requiredRole: SelfcareRoles.admin,
-    }) ||
-    (hasRequiredAuthorizations(session, {
-      requiredPermissions: ["ApiServiceWrite"],
-      requiredRole: SelfcareRoles.operator,
-    }) &&
-      (!session?.user?.permissions.selcGroups ||
-        session?.user?.permissions.selcGroups.length === 0));
+  (groupApiKeyEnabled: boolean) => (session: Session | null) => {
+    if (!groupApiKeyEnabled) {
+      return true;
+    }
+
+    if (hasWritePermission(session, SelfcareRoles.admin)) {
+      return true;
+    }
+
+    return (
+      hasWritePermission(session, SelfcareRoles.operator) &&
+      !isAtLeastInOneGroup(session)
+    );
+  };
 
 /**
  * Can fetch & show Manage Group ApiKey (group) only for:
  * - `groupApiKeyEnabled=true`
  *   - **admin** users
+ *   - **admin_aggregator** users
  *   - **operator** users who are in one or more selfcare groups
  * @returns
  */
 export const hasManageKeyGroup =
-  (groupApiKeyEnabled: boolean) => (session: Session | null) =>
-    hasApiKeyGroupsFeatures(groupApiKeyEnabled)(session) &&
-    (hasRequiredAuthorizations(session, {
-      requiredPermissions: ["ApiServiceWrite"],
-      requiredRole: SelfcareRoles.admin,
-    }) ||
-      (hasRequiredAuthorizations(session, {
-        requiredPermissions: ["ApiServiceWrite"],
-        requiredRole: SelfcareRoles.operator,
-      }) &&
-        session?.user?.permissions.selcGroups &&
-        session?.user?.permissions.selcGroups.length > 0));
+  (groupApiKeyEnabled: boolean) => (session: Session | null) => {
+    if (!groupApiKeyEnabled) {
+      return false;
+    }
+
+    if (hasWritePermission(session, SelfcareRoles.admin)) {
+      return true;
+    }
+
+    if (hasWritePermission(session, SelfcareRoles.adminAggregator)) {
+      return true;
+    }
+
+    return (
+      hasWritePermission(session, SelfcareRoles.operator) &&
+      isAtLeastInOneGroup(session)
+    );
+  };
 
 export const isAdmin = (session: Session | null) =>
   session?.user?.institution.role === SelfcareRoles.admin;
+
+export const isAdminAggregator = (session: Session | null) =>
+  session?.user?.institution.role === SelfcareRoles.adminAggregator;
 
 export const isOperator = (session: Session | null) =>
   session?.user?.institution.role === SelfcareRoles.operator;

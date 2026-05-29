@@ -1,7 +1,7 @@
 import { getConfiguration } from "@/config";
 import { SubscriptionKeyTypeEnum } from "@/generated/services-cms/SubscriptionKeyType";
 import { ApiKeyScopeType } from "@/types/api-key";
-import { isAdmin } from "@/utils/auth-util";
+import { isAdmin, isAdminAggregator } from "@/utils/auth-util";
 import { Sync, Visibility, VisibilityOff } from "@mui/icons-material";
 import {
   Box,
@@ -33,8 +33,6 @@ export interface ApiSingleKeyProps {
 export const ApiSingleKey = ({
   keyType,
   keyValue,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  onBlockClick,
   onCopyClick,
   onRegenerateClick,
   scope,
@@ -43,10 +41,11 @@ export const ApiSingleKey = ({
   const { data: session } = useSession();
   const [isVisible, setIsVisible] = useState(false);
 
-  const handleEnableRegenerateAction = () =>
-    scope === "use" ||
-    !GROUP_APIKEY_ENABLED ||
-    (GROUP_APIKEY_ENABLED && isAdmin(session));
+  const handleEnableRegenerateAction = () => {
+    const hasPrivilegedRole = isAdmin(session) || isAdminAggregator(session);
+
+    return scope === "use" || !GROUP_APIKEY_ENABLED || hasPrivilegedRole;
+  };
 
   return (
     <Grid columnSpacing={4} container rowSpacing={3}>
@@ -57,7 +56,7 @@ export const ApiSingleKey = ({
             <IconButton
               aria-label="show-hide"
               color="primary"
-              onClick={(_) => setIsVisible(!isVisible)}
+              onClick={() => setIsVisible((prev) => !prev)}
               sx={{ margin: 1 }}
             >
               {isVisible ? (
