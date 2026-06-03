@@ -1,3 +1,4 @@
+import { exportByStateCounter } from "@/lib/metrics/api-keys-exports";
 import { DefaultAzureCredential } from "@azure/identity";
 import {
   BlobSASPermissions,
@@ -79,6 +80,10 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
           state: FileStateEnum.DONE,
           userId,
         },
+      });
+
+      exportByStateCounter.add(1, {
+        state: FileStateEnum.DONE,
       });
     } catch (error) {
       throw new ManagedInternalError(
@@ -207,6 +212,9 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
           userId,
         },
       });
+      exportByStateCounter.add(1, {
+        state: FileStateEnum.IN_PROGRESS,
+      });
     } catch (error) {
       throw new ManagedInternalError(
         "Errore durante l'inizializzazione del file",
@@ -227,6 +235,9 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
         institutionId,
         state: FileStateEnum.FAILED,
         userId,
+      });
+      exportByStateCounter.add(1, {
+        state: FileStateEnum.FAILED,
       });
     } catch (error) {
       throw new ManagedInternalError(

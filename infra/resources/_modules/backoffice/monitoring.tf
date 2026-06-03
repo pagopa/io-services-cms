@@ -128,3 +128,36 @@ resource "azurerm_monitor_autoscale_setting" "backoffice" {
 
   tags = var.tags
 }
+
+##########
+# Alerts #
+##########
+
+resource "azurerm_monitor_scheduled_query_rules_alert_v2" "api-keys-export-failed" {
+  name                = "[${module.backoffice.app_service.app_service.name}] API keys export failed"
+  resource_group_name = var.resource_group_name
+  scopes              = [data.azurerm_application_insights.ai_common.id]
+  location            = var.location
+  description         = "Backoffice failed at least an API keys export. The user can retry the export operation. No action is needed."
+  severity            = 4
+
+  window_duration      = "P1D"
+  evaluation_frequency = "P1D"
+
+  criteria {
+    query                   = <<-QUERY
+      customMetrics
+      | where name == "export_count_total"
+      | where tostring(customDimensions.state) == "FAILED"
+    QUERY
+    operator                = "GreaterThan"
+    time_aggregation_method = "Count"
+    threshold               = 0
+  }
+
+  action {
+    action_groups = [var.error_action_group_id]
+  }
+
+  tags = var.tags
+}
