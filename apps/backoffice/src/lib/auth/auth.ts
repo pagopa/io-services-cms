@@ -16,6 +16,7 @@ import {
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { readableReport } from "@pagopa/ts-commons/lib/reporters";
 import { EmailString, NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as RNEA from "fp-ts/ReadonlyNonEmptyArray";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as RA from "fp-ts/lib/ReadonlyArray";
@@ -330,7 +331,7 @@ const toUser = ({
     isAggregator: isAggregator(institution),
     logo_url: institution.logo,
     name: identityTokenPayload.organization.name,
-    role: identityTokenPayload.organization.roles[0]?.role,
+    role: RNEA.head(identityTokenPayload.organization.roles).role,
   },
   name: `${identityTokenPayload.name} ${identityTokenPayload.family_name}`,
   parameters: {

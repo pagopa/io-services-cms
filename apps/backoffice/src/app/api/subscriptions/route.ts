@@ -41,16 +41,21 @@ export const PUT = withJWTAuthHandler(
     request: NextRequest,
     { backofficeUser }: { backofficeUser: BackOfficeUserEnriched },
   ): Promise<NextResponse<ResponseError | Subscription>> => {
-    if (!userAuthz(backofficeUser).isAdmin()) {
+    const userAuthzUtils = userAuthz(backofficeUser);
+    if (!userAuthzUtils.isAdmin()) {
       return handleForbiddenErrorResponse("Role not authorized");
     }
-
-    let requestPayload;
+    let requestPayload: CreateManageGroupSubscription;
     try {
       requestPayload = await parseBody(request, CreateManageGroupSubscription);
     } catch (error) {
       return handleBadRequestErrorResponse(
         error instanceof Error ? error.message : "Failed to parse JSON body",
+      );
+    }
+    if (userAuthzUtils.isAnInstitutionSpecialGroup(requestPayload.groupId)) {
+      return handleForbiddenErrorResponse(
+        "Cannot create subscription related to 'special' groups",
       );
     }
     try {

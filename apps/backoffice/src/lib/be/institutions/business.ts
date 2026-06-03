@@ -142,10 +142,10 @@ const parseState = (state: StatusEnum): StateEnum => {
       return StateEnum.SUSPENDED;
     case StatusEnum.DELETED:
       return StateEnum.DELETED;
-    default:
-      // eslint-disable-next-line no-case-declarations
+    default: {
       const _: never = state;
       throw new Error(`Invalid state: ${state}`);
+    }
   }
 };
 

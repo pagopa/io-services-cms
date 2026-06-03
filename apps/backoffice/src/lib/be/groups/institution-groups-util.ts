@@ -77,10 +77,10 @@ export const institutionGroupBaseHandler = async (
             params.institutionId,
           );
           break;
-        default:
-          // eslint-disable-next-line no-case-declarations
+        default: {
           const _: never = maybeFilter.right;
           throw new Error(`Invalid filter: ${maybeFilter.right}`);
+        }
       }
       return groupHandler(groups);
     } catch (error) {

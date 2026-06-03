@@ -21,6 +21,9 @@ catalogs:
     axios:
       specifier: ^1.6.5
       version: 1.6.5
+    io-ts-types:
+      specifier: ^0.5.19
+      version: 0.5.19
     prettier:
       specifier: ^3.5.3
       version: 3.5.3
@@ -207,6 +210,9 @@ importers:
       io-ts:
         specifier: ^2.2.21
         version: 2.2.21(fp-ts@2.16.5)
+      io-ts-types:
+        specifier: 'catalog:'
+        version: 0.5.19(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))(monocle-ts@2.3.13(fp-ts@2.16.5))(newtype-ts@0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5)))
       jose:
         specifier: ^4.15.5
         version: 4.15.5
@@ -377,7 +383,7 @@ importers:
         specifier: ^2.2.21
         version: 2.2.21(fp-ts@2.16.5)
       io-ts-types:
-        specifier: ^0.5.19
+        specifier: 'catalog:'
         version: 0.5.19(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))(monocle-ts@2.3.13(fp-ts@2.16.5))(newtype-ts@0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5)))
       knex:
         specifier: ^2.4.2
@@ -450,7 +456,7 @@ importers:
         specifier: ^2.2.21
         version: 2.2.21(fp-ts@2.16.5)
       io-ts-types:
-        specifier: ^0.5.19
+        specifier: 'catalog:'
         version: 0.5.19(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))(monocle-ts@2.3.13(fp-ts@2.16.5))(newtype-ts@0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5)))
       monocle-ts:
         specifier: ^2.3.13
@@ -512,7 +518,7 @@ importers:
         specifier: ^2.2.21
         version: 2.2.21(fp-ts@2.16.5)
       io-ts-types:
-        specifier: ^0.5.19
+        specifier: 'catalog:'
         version: 0.5.19(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))(monocle-ts@2.3.13(fp-ts@2.16.5))(newtype-ts@0.3.5(fp-ts@2.16.5)(monocle-ts@2.3.13(fp-ts@2.16.5)))
       monocle-ts:
         specifier: ^2.3.13

@@ -7,6 +7,7 @@ import {
 } from "@/lib/be/errors";
 import { deleteManageSubscription } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import { SelfcareRoles } from "@/types/auth";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -26,17 +27,35 @@ export const DELETE = withJWTAuthHandler(
       params: { subscriptionId: string };
     },
   ) => {
-    if (!userAuthz(backofficeUser).isAdmin()) {
-      return handleForbiddenErrorResponse("Role not authorized");
-    }
-    if (
-      !params.subscriptionId.startsWith(
-        ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX,
-      )
-    ) {
-      return handleForbiddenErrorResponse(
-        "Only MANAGE_GROUP Subscriptions can be deleted",
-      );
+    const userRole: SelfcareRoles = backofficeUser.institution.role;
+    switch (userRole) {
+      case SelfcareRoles.admin: {
+        if (
+          !params.subscriptionId.startsWith(
+            ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX,
+          )
+        ) {
+          return handleForbiddenErrorResponse(
+            "Only MANAGE_GROUP Subscriptions can be deleted",
+          );
+        }
+        const groupId = params.subscriptionId.substring(
+          ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+        );
+        if (userAuthz(backofficeUser).isAnInstitutionSpecialGroup(groupId)) {
+          return handleForbiddenErrorResponse(
+            "Cannot delete subscription related to 'special' groups",
+          );
+        }
+        break;
+      }
+      case SelfcareRoles.adminAggregator:
+      case SelfcareRoles.operator:
+        return handleForbiddenErrorResponse("Role not authorized");
+      default: {
+        const _: never = userRole; // This will make sure that all cases are handled in the switch
+        throw new Error("Invalid user role");
+      }
     }
 
     try {

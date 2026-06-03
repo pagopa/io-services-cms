@@ -1,10 +1,17 @@
 import { faker } from "@faker-js/faker/locale/it";
+import {
+  EmailString,
+  FiscalCode,
+  NonEmptyString,
+  OrganizationFiscalCode,
+} from "@pagopa/ts-commons/lib/strings";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { getMockInstitution } from "../../../../mocks/data/selfcare-data";
 import { Configuration } from "../../../config";
 import { InstitutionResponse } from "../../../generated/selfcare/InstitutionResponse";
+import { SelfcareRoles } from "../../../types/auth";
 import { authorize } from "../auth";
 import { IdentityTokenPayload } from "../types";
 
@@ -22,33 +29,35 @@ const mockConfig = {
   AZURE_APIM_PRODUCT_NAME: faker.string.alpha(),
 } as unknown as Configuration;
 
-const aValidJwtPayload = {
+const aValidJwtPayload: IdentityTokenPayload = {
   exp: faker.number.int(),
   iat: faker.number.int(),
   aud: faker.string.alphanumeric(),
   iss: faker.string.alphanumeric(),
   jti: faker.string.alphanumeric(),
-  family_name: faker.person.lastName(),
-  name: faker.person.firstName(),
-  email: faker.internet.email(),
-  uid: faker.string.uuid(),
+  family_name: faker.person.lastName() as NonEmptyString,
+  name: faker.person.firstName() as NonEmptyString,
+  email: faker.internet.email() as EmailString,
+  uid: faker.string.uuid() as NonEmptyString,
   fiscal_number: faker.helpers.fromRegExp(
     /[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]/,
-  ),
+  ) as FiscalCode,
   desired_exp: faker.number.int(),
   organization: {
-    id: faker.string.uuid(),
-    fiscal_code: faker.helpers.fromRegExp(/[0-9]{11}/),
-    name: faker.company.name(),
+    id: faker.string.uuid() as NonEmptyString,
+    fiscal_code: faker.helpers.fromRegExp(
+      /[0-9]{11}/,
+    ) as OrganizationFiscalCode,
+    name: faker.company.name() as NonEmptyString,
     roles: [
       {
-        partyRole: faker.string.alpha(),
-        role: faker.string.alpha(),
+        partyRole: faker.string.alpha() as NonEmptyString,
+        role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
       },
     ],
-    groups: [faker.string.alpha()],
+    groups: [faker.string.alpha() as NonEmptyString],
   },
-} as IdentityTokenPayload;
+};
 
 const aValidApimUser = {
   id: faker.string.uuid(),

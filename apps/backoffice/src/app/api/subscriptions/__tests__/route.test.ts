@@ -97,7 +97,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe("Subscription API", () => {
+describe("Subscriptions API route handlers", () => {
   describe("Upsert Subscription API", () => {
     const aCorrectRequestBody: CreateManageGroupSubscription = {
       groupId: "groupId" as NonEmptyString,
@@ -155,6 +155,45 @@ describe("Subscription API", () => {
       expect(mocks.upsertManageSubscription).not.toHaveBeenCalled();
     });
 
+    it("should return a forbidden response when the group is a special group", async () => {
+      // given
+      const body = aCorrectRequestBody;
+      mocks.getUser.mockImplementationOnce(() => ({
+        ...userMock,
+        institution: {
+          ...userMock.institution,
+          role: SelfcareRoles.admin,
+          selcSpecialGroups: [
+            {
+              id: body.groupId,
+              parentInstitutionId: "parentId",
+              name: "specialGroup",
+              state: "ACTIVE",
+            },
+          ],
+        },
+      }));
+      mocks.parseBody.mockResolvedValueOnce(body);
+      const request = new NextRequest(new URL("http://localhost"));
+
+      // when
+      const result = await PUT(request, {});
+
+      // then
+      expect(result.status).toBe(403);
+      const responseBody = await result.json();
+      expect(responseBody.detail).toEqual(
+        "Cannot create subscription related to 'special' groups",
+      );
+      expect(mocks.parseBody).toHaveBeenCalledOnce();
+      expect(mocks.parseBody).toHaveBeenCalledWith(
+        request,
+        CreateManageGroupSubscription,
+      );
+      expect(mocks.getGroup).not.toHaveBeenCalled();
+      expect(mocks.upsertManageSubscription).not.toHaveBeenCalled();
+    });
+
     it("should return a bad request when the provided group is not found", async () => {
       // given
       mocks.getUser.mockImplementationOnce(() => ({
@@ -193,87 +232,59 @@ describe("Subscription API", () => {
       expect(mocks.upsertManageSubscription).not.toHaveBeenCalled();
     });
 
-    it("should fails when upsertManageSubscription return an error", async () => {
-      // given
-      mocks.getUser.mockImplementationOnce(() => ({
-        ...userMock,
-        institution: {
-          ...userMock.institution,
-          role: SelfcareRoles.admin,
-        },
-      }));
-      const body = aCorrectRequestBody;
-      mocks.parseBody.mockResolvedValueOnce(body);
-      mocks.getGroup.mockResolvedValueOnce(stubs.aGroup);
-      const errorMessage = "error message";
-      mocks.upsertManageSubscription.mockRejectedValueOnce(
-        new ManagedInternalError(errorMessage),
-      );
-      const nextRequest = new NextRequest("http://localhost", {
-        method: "PUT",
-        body: JSON.stringify(body),
-      });
+    it.each([
+      {
+        error: new ManagedInternalError("error message"),
+        expectedStatusCode: 500,
+        expectedTitle: "SubscriptionCreateError",
+        expectedDetail: "error message",
+      },
+      {
+        error: new PreconditionFailedError("error message"),
+        expectedStatusCode: 412,
+        expectedTitle: "Precondition Failed",
+        expectedDetail: "error message",
+      },
+    ])(
+      "should return an error response when upsertManageSubscription rejects with $expectedTitle",
+      async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {
+        // given
+        mocks.getUser.mockImplementationOnce(() => ({
+          ...userMock,
+          institution: {
+            ...userMock.institution,
+            role: SelfcareRoles.admin,
+          },
+        }));
+        const body = aCorrectRequestBody;
+        mocks.parseBody.mockResolvedValueOnce(body);
+        mocks.getGroup.mockResolvedValueOnce(stubs.aGroup);
+        mocks.upsertManageSubscription.mockRejectedValueOnce(error);
+        const nextRequest = new NextRequest("http://localhost", {
+          method: "PUT",
+          body: JSON.stringify(body),
+        });
 
-      // when
-      const result = await PUT(nextRequest, {});
+        // when
+        const result = await PUT(nextRequest, {});
 
-      // then
-      expect(result.status).toBe(500);
-      const responseBody = await result.json();
-      expect(responseBody.title).toEqual("SubscriptionCreateError");
-      expect(responseBody.detail).toEqual(errorMessage);
-      expect(mocks.getGroup).toHaveBeenCalledOnce();
-      expect(mocks.getGroup).toHaveBeenCalledWith(
-        body.groupId,
-        userMock.institution.id,
-      );
-      expect(mocks.upsertManageSubscription).toHaveBeenCalledOnce();
-      expect(mocks.upsertManageSubscription).toHaveBeenCalledWith(
-        userMock.parameters.userId,
-        stubs.aGroup,
-      );
-    });
-
-    it("should return 412 when upsertManageSubscription return a Precondition failed error", async () => {
-      // given
-      mocks.getUser.mockImplementationOnce(() => ({
-        ...userMock,
-        institution: {
-          ...userMock.institution,
-          role: SelfcareRoles.admin,
-        },
-      }));
-      const body = aCorrectRequestBody;
-      mocks.parseBody.mockResolvedValueOnce(body);
-      mocks.getGroup.mockResolvedValueOnce(stubs.aGroup);
-      const errorMessage = "error message";
-      mocks.upsertManageSubscription.mockRejectedValueOnce(
-        new PreconditionFailedError(errorMessage),
-      );
-      const nextRequest = new NextRequest("http://localhost", {
-        method: "PUT",
-        body: JSON.stringify(body),
-      });
-
-      // when
-      const result = await PUT(nextRequest, {});
-
-      // then
-      expect(result.status).toBe(412);
-      const responseBody = await result.json();
-      expect(responseBody.title).toEqual("Precondition Failed");
-      expect(responseBody.detail).toEqual(errorMessage);
-      expect(mocks.getGroup).toHaveBeenCalledOnce();
-      expect(mocks.getGroup).toHaveBeenCalledWith(
-        body.groupId,
-        userMock.institution.id,
-      );
-      expect(mocks.upsertManageSubscription).toHaveBeenCalledOnce();
-      expect(mocks.upsertManageSubscription).toHaveBeenCalledWith(
-        userMock.parameters.userId,
-        stubs.aGroup,
-      );
-    });
+        // then
+        expect(result.status).toBe(expectedStatusCode);
+        const responseBody = await result.json();
+        expect(responseBody.title).toEqual(expectedTitle);
+        expect(responseBody.detail).toEqual(expectedDetail);
+        expect(mocks.getGroup).toHaveBeenCalledOnce();
+        expect(mocks.getGroup).toHaveBeenCalledWith(
+          body.groupId,
+          userMock.institution.id,
+        );
+        expect(mocks.upsertManageSubscription).toHaveBeenCalledOnce();
+        expect(mocks.upsertManageSubscription).toHaveBeenCalledWith(
+          userMock.parameters.userId,
+          stubs.aGroup,
+        );
+      },
+    );
 
     it("should return the upserted manage subscription", async () => {
       // given
