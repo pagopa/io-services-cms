@@ -99,7 +99,7 @@ const purgeAggregate = (
     }),
   );
 
-const PAGE_SIZE = 100;
+const PAGE_SIZE = 1000;
 
 /**
  * Fetches all delegations for the given aggregatorInstitutionId via pagination.
