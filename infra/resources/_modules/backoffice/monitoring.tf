@@ -141,8 +141,8 @@ resource "azurerm_monitor_scheduled_query_rules_alert_v2" "api-keys-export-faile
   description         = "Backoffice failed at least an API keys export. The user can retry the export operation. No action is needed."
   severity            = 4
 
-  window_duration      = "PT15M"
-  evaluation_frequency = "PT15M"
+  window_duration      = "P1D"
+  evaluation_frequency = "P1D"
 
   criteria {
     query                   = <<-QUERY
