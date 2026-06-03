@@ -40,12 +40,12 @@ const parseConfig = (): Config => {
 const NOT_FOUND_STATUS = 404;
 
 /**
- * Purge a single aggregate institution from APIM:
+ * Purge a single APIM user form institutionId:
  * - look up the APIM user by the institution's email
  * - delete the user and all the subscriptions related
  * 404 at any step is treated as "already purged", continue.
  */
-const purgeAggregate = (
+const purgeUserFromInstId = (
   apimService: ApimUtils.ApimService,
   institutionId: string,
 ): TE.TaskEither<Error, void> =>
@@ -151,14 +151,21 @@ const run = async (): Promise<void> => {
       describe: "The Selfcare institution ID of the aggregator",
       type: "string",
     })
+    .option("purgeAggregator", {
+      alias: "pa",
+      default: false,
+      describe: "If specified, also purge the aggregator",
+      type: "boolean",
+    })
     .strict()
     .help()
     .parse();
 
-  const { aggregatorInstitutionId } = argv;
+  const { aggregatorInstitutionId, purgeAggregator } = argv;
 
   logger.info(
-    `Starting purge-all-aggregates for aggregator: ${aggregatorInstitutionId}`,
+    `Starting purge-all-aggregates for aggregator: ${aggregatorInstitutionId}
+    Purge aggregator: ${purgeAggregator}`,
   );
   const startTime = Date.now();
 
@@ -192,13 +199,31 @@ const run = async (): Promise<void> => {
     const { institutionId, institutionName } = delegation;
     logger.info(`Processing aggregate: ${institutionName} (${institutionId})`);
 
-    const result = await purgeAggregate(apimService, institutionId)();
+    const result = await purgeUserFromInstId(apimService, institutionId)();
 
     if (E.isLeft(result)) {
       logger.error(`ERROR purging ${institutionId}: ${result.left.message}`);
       errorCount++;
     } else {
       logger.info(`Done: ${institutionId}`);
+      successCount++;
+    }
+  }
+
+  if (purgeAggregator) {
+    logger.info(`Processing aggregator: ${aggregatorInstitutionId}`);
+    const result = await purgeUserFromInstId(
+      apimService,
+      aggregatorInstitutionId,
+    )();
+
+    if (E.isLeft(result)) {
+      logger.error(
+        `ERROR purging ${aggregatorInstitutionId}: ${result.left.message}`,
+      );
+      errorCount++;
+    } else {
+      logger.info(`Done: ${aggregatorInstitutionId}`);
       successCount++;
     }
   }

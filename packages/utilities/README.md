@@ -33,8 +33,10 @@ pnpm install --frozen-lockfile && pnpm --filter @io-services-cms/utilities build
 
 Purges all aggregates for an aggregator via APIM and Selfcare APIs.
 
+Optionally pass `--purgeAggregator` to also purge the aggregator itself.
+
 ```sh
-pnpm --filter @io-services-cms/utilities purge-all-aggregates --aggregatorInstitutionId <AGGREGATOR_ID>
+pnpm --filter @io-services-cms/utilities purge-all-aggregates --aggregatorInstitutionId <AGGREGATOR_ID> --purgeAggregator
 ```
 
 > **Note:** The script reads configuration from the `.env` file using Node's `--env-file` flag, so make sure it is populated before running.
