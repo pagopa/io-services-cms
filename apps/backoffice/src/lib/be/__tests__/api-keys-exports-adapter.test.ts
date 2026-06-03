@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => {
   const upload = vi.fn();
   const uploadStream = vi.fn();
   const setTags = vi.fn();
+  const exportByStateCounterAdd = vi.fn();
   const getBlockBlobClient = vi.fn(() => ({
     upload,
     uploadStream,
@@ -49,8 +50,15 @@ const mocks = vi.hoisted(() => {
     defaultAzureCredentialConstructor,
     getUserDelegationKey,
     generateBlobSASQueryParameters,
+    exportByStateCounterAdd,
   };
 });
+
+vi.mock("@/lib/metrics/api-keys-exports", () => ({
+  exportByStateCounter: {
+    add: mocks.exportByStateCounterAdd,
+  },
+}));
 
 vi.mock("@azure/identity", () => ({
   DefaultAzureCredential: mocks.defaultAzureCredentialConstructor,
@@ -321,6 +329,10 @@ describe("initializeFile", () => {
         state: FileStateEnum.IN_PROGRESS,
       },
     });
+    expect(mocks.exportByStateCounterAdd).toHaveBeenCalledOnce();
+    expect(mocks.exportByStateCounterAdd).toHaveBeenCalledWith(1, {
+      state: FileStateEnum.IN_PROGRESS,
+    });
   });
 });
 
@@ -404,6 +416,10 @@ describe("finalizeFile", () => {
         },
       },
     );
+    expect(mocks.exportByStateCounterAdd).toHaveBeenCalledOnce();
+    expect(mocks.exportByStateCounterAdd).toHaveBeenCalledWith(1, {
+      state: FileStateEnum.DONE,
+    });
   });
 });
 
@@ -451,6 +467,10 @@ describe("markFileAsFailed", () => {
       state: FileStateEnum.FAILED,
       institutionId: "aggregatorId",
       userId: "userId",
+    });
+    expect(mocks.exportByStateCounterAdd).toHaveBeenCalledOnce();
+    expect(mocks.exportByStateCounterAdd).toHaveBeenCalledWith(1, {
+      state: FileStateEnum.FAILED,
     });
   });
 });
