@@ -1633,4 +1633,148 @@ describe("ApimService Test", () => {
       expect(res).toBe("1234a75ae4bbd512a88c680x");
     });
   });
+
+  describe("deleteUser", () => {
+    const mockApimClient = {
+      user: {
+        beginDeleteAndWait: vi.fn(),
+      },
+    };
+
+    it("should return OK after the deletion of the user", async () => {
+      // given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      mockApimClient.user.beginDeleteAndWait.mockResolvedValueOnce(void 0);
+
+      // when
+      const result = await apimService.deleteUser(anUserId)();
+
+      // then
+      expect(E.isRight(result)).toBeTruthy();
+      expect(mockApimClient.user.beginDeleteAndWait).toHaveBeenCalledOnce();
+      expect(mockApimClient.user.beginDeleteAndWait).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        anUserId,
+        "*",
+        {
+          deleteSubscriptions: true,
+        },
+      );
+    });
+
+    it("should use a custom ifMatch when provided", async () => {
+      // given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      const customIfMatch = "custom-etag";
+      mockApimClient.user.beginDeleteAndWait.mockResolvedValueOnce(void 0);
+
+      // when
+      const result = await apimService.deleteUser(anUserId, customIfMatch)();
+
+      // then
+      expect(E.isRight(result)).toBeTruthy();
+      expect(mockApimClient.user.beginDeleteAndWait).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        anUserId,
+        customIfMatch,
+        {
+          deleteSubscriptions: true,
+        },
+      );
+    });
+
+    it("should not delete subscriptions on false flag", async () => {
+      // given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      mockApimClient.user.beginDeleteAndWait.mockResolvedValueOnce(void 0);
+
+      // when
+      const result = await apimService.deleteUser(anUserId, "*", false)();
+
+      // then
+      expect(E.isRight(result)).toBeTruthy();
+      expect(mockApimClient.user.beginDeleteAndWait).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        anUserId,
+        "*",
+        {
+          deleteSubscriptions: false,
+        },
+      );
+    });
+
+    it("should return error when APIM responds with an APIM error", async () => {
+      // given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      const error: ApimRestError = {
+        statusCode: 404,
+        name: "UserNotFound",
+        details: { error: { message: "user not found" } },
+      };
+      mockApimClient.user.beginDeleteAndWait.mockRejectedValueOnce(error);
+
+      // when
+      const result = await apimService.deleteUser(anUserId)();
+
+      // then
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left).toStrictEqual(error);
+      }
+      expect(mockApimClient.user.beginDeleteAndWait).toHaveBeenCalledWith(
+        anApimResourceGroup,
+        anApimServiceName,
+        anUserId,
+        "*",
+        {
+          deleteSubscriptions: true,
+        },
+      );
+    });
+
+    it("should return error when APIM responds with an unknown error", async () => {
+      // given
+      const apimService = getApimService(
+        mockApimClient as unknown as ApiManagementClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+      );
+      const error = new Error("unexpected APIM error");
+      mockApimClient.user.beginDeleteAndWait.mockRejectedValueOnce(error);
+
+      // when
+      const result = await apimService.deleteUser(anUserId)();
+
+      // then
+      expect(E.isLeft(result)).toBeTruthy();
+      if (E.isLeft(result)) {
+        expect(result.left).toStrictEqual({ statusCode: 500 });
+      }
+      expect(mockApimClient.user.beginDeleteAndWait).toHaveBeenCalledOnce();
+    });
+  });
 });
