@@ -1,10 +1,12 @@
 import { DefaultSession } from "next-auth";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { JWT } from "next-auth/jwt";
 
 export interface Institution {
   fiscalCode: string;
   id: string;
-  isAggregator: boolean;
   isAggregate: boolean;
+  isAggregator: boolean;
   logo_url?: string;
   name: string;
   role: SelfcareRoles;
@@ -27,7 +29,6 @@ export interface BackOfficeUser {
   parameters: BackOfficeUserParameters;
   permissions: BackOfficeUserPermissions;
 }
-
 declare module "next-auth" {
   /**
    * Extends the built-in Session.user with custom BackOffice fields.
@@ -36,11 +37,11 @@ declare module "next-auth" {
   interface Session {
     user: BackOfficeUser & DefaultSession["user"];
   }
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface User extends BackOfficeUser {}
 }
 
-declare module "@auth/core/jwt" {
-  // eslint-disable-next-line @typescript-eslint/no-empty-interface
+declare module "next-auth/jwt" {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
   interface JWT extends BackOfficeUser {}
 }
