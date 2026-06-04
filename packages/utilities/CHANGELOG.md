@@ -1,5 +1,13 @@
 # @io-services-cms/utilities
 
+## 0.1.2
+
+### Patch Changes
+
+- 9b7a6d5c: Release with CI/CD fix
+- Updated dependencies [9b7a6d5c]
+  - @io-services-cms/external-clients@1.12.1
+
 ## 0.1.1
 
 ### Patch Changes
