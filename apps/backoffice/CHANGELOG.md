@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.6.2
+
+### Patch Changes
+
+- e91c9b64: update turbo repo
+
 ## 2.6.1
 
 ### Patch Changes
