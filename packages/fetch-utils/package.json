@@ -30,7 +30,9 @@
   },
   "devDependencies": {
     "@types/node": "catalog:",
-    "prettier": "catalog:"
+    "@vitest/coverage-v8": "catalog:",
+    "prettier": "catalog:",
+    "vitest": "catalog:"
   },
   "imports": {
     "#package.json": "./package.json"
