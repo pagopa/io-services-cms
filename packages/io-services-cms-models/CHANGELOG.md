@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.29.2
+
+### Patch Changes
+
+- 079597b0: Release with new CI/CD
+
 ## 1.29.1
 
 ### Patch Changes

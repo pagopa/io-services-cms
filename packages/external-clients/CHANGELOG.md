@@ -1,5 +1,17 @@
 # @io-services-cms/external-clients
 
+## 1.12.0
+
+### Minor Changes
+
+- d0582df0: APIM client improvements
+
+### Patch Changes
+
+- 079597b0: Release with new CI/CD
+- Updated dependencies [079597b0]
+  - @io-services-cms/fetch-utils@1.0.5
+
 ## 1.11.0
 
 ### Minor Changes
