@@ -17,6 +17,6 @@ jobs:
       pull-requests: write
     uses: pagopa/dx/.github/workflows/release-v1.yaml@main
     with:
-      environment: npm-prod-cd
+      environment: release
     secrets:
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      github-token: ${{ secrets.BOT_TOKEN }}
