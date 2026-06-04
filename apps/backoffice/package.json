@@ -36,6 +36,7 @@
     "@mui/lab": "^5.0.0-alpha.142",
     "@mui/material": "^5.14.5",
     "@mui/system": "^5.14.5",
+    "@opentelemetry/api": "^1.9.1",
     "@opentelemetry/instrumentation-pino": "^0.55.0",
     "@pagopa/azure-tracing": "^0.4.18",
     "@pagopa/io-functions-commons": "^29.1.2",
@@ -47,6 +48,7 @@
     "front-matter": "^4.0.2",
     "i18next": "^23.5.1",
     "io-ts": "^2.2.21",
+    "io-ts-types": "catalog:",
     "jose": "^4.15.5",
     "lodash": "^4.17.21",
     "mixpanel-browser": "^2.55.1",
@@ -61,8 +63,7 @@
     "react-i18next": "^13.2.2",
     "react-markdown": "^9.0.0",
     "xss": "^1.0.14",
-    "zod": "^4.0.0",
-    "io-ts-types": "catalog:"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.3",
