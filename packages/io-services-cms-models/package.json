@@ -23,7 +23,9 @@
     "lint:fix": "eslint --fix \"src/**\""
   },
   "devDependencies": {
-    "prettier": "catalog:"
+    "@vitest/coverage-v8": "catalog:",
+    "prettier": "catalog:",
+    "vitest": "catalog:"
   },
   "dependencies": {
     "@azure/cosmos": "^4.0.0",
