@@ -1,5 +1,13 @@
 # io-services-app-backend
 
+## 3.1.1
+
+### Patch Changes
+
+- 079597b0: Release with new CI/CD
+- Updated dependencies [079597b0]
+  - @io-services-cms/models@1.29.2
+
 ## 3.1.0
 
 ### Minor Changes

@@ -1,5 +1,24 @@
 # io-services-cms-backoffice
 
+## 2.6.0
+
+### Minor Changes
+
+- 984a2f45: extend API Key Manage Group permissions to admin_aggregator role
+- 00a6fd39: Track blob metrics
+- d0582df0: APIM client improvements
+
+### Patch Changes
+
+- 079597b0: Release with new CI/CD
+- 1091d9aa: fix user permission checks
+- 8b5cb393: add and handle new isAggregate field from user session
+- Updated dependencies [079597b0]
+- Updated dependencies [d0582df0]
+  - @io-services-cms/external-clients@1.12.0
+  - @io-services-cms/fetch-utils@1.0.5
+  - @io-services-cms/models@1.29.2
+
 ## 2.5.0
 
 ### Minor Changes

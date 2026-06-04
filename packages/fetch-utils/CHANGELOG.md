@@ -1,5 +1,11 @@
 # @io-services-cms/fetch-utils
 
+## 1.0.5
+
+### Patch Changes
+
+- 079597b0: Release with new CI/CD
+
 ## 1.0.4
 
 ### Patch Changes

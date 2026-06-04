@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 2.1.3
+
+### Patch Changes
+
+- 079597b0: Release with new CI/CD
+- Updated dependencies [079597b0]
+- Updated dependencies [d0582df0]
+  - @io-services-cms/external-clients@1.12.0
+  - @io-services-cms/fetch-utils@1.0.5
+  - @io-services-cms/models@1.29.2
+
 ## 2.1.2
 
 ### Patch Changes
