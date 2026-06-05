@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.1.6
+
+### Patch Changes
+
+- e2f674d0: use latest release-azure-appsvc-v1 DX action
+
 ## 2.1.5
 
 ### Patch Changes

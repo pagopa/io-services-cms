@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 3.1.4
+
+### Patch Changes
+
+- e2f674d0: use latest release-azure-appsvc-v1 DX action
+
 ## 3.1.3
 
 ### Patch Changes
