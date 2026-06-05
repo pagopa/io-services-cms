@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.6.3
+
+### Patch Changes
+
+- e2f674d0: use latest release-azure-appsvc-v1 DX action
+
 ## 2.6.2
 
 ### Patch Changes
