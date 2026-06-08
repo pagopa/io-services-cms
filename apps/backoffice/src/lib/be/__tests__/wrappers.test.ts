@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, Mock, vi } from "vitest";
 import { BackOfficeUser } from "../../../../types/next-auth";
 import { withJWTAuthHandler } from "../wrappers";
 
 const mocks: {
   jwtMock: BackOfficeUser;
+  isSpecialGroup: Mock;
 } = vi.hoisted(() => ({
   jwtMock: {
     institution: {
@@ -20,6 +21,7 @@ const mocks: {
       subscriptionId: "aSubscriptionId",
     },
   } as unknown as BackOfficeUser,
+  isSpecialGroup: vi.fn(() => false),
 }));
 
 const { auth } = vi.hoisted(() => ({
@@ -36,6 +38,7 @@ vi.mock("@/auth", () => ({
 
 vi.mock("../institutions/business", () => ({
   retrieveInstitutionGroups,
+  isSpecialGroup: mocks.isSpecialGroup,
 }));
 
 afterEach(() => {
@@ -172,6 +175,9 @@ describe("withJWTAuthHandler", () => {
     jwtMock.institution.role = "operator";
     jwtMock.institution.isAggregate = true;
     jwtMock.permissions.selcGroups = ["id1"];
+    mocks.isSpecialGroup.mockImplementation(
+      (group) => group.id === "idSpecial",
+    );
 
     auth.mockResolvedValueOnce({ user: jwtMock });
     const aMockedHandler = vi.fn(() =>
@@ -181,7 +187,16 @@ describe("withJWTAuthHandler", () => {
       { id: "id1", name: "group1", state: "ACTIVE" },
       { id: "id2", name: "group2", state: "ACTIVE" },
     ];
-    retrieveInstitutionGroups.mockResolvedValueOnce(selcGroups);
+    const selcSpecialGroups = [
+      {
+        id: "idSpecial",
+        name: "groupSpecial",
+        state: "ACTIVE",
+        parentInstitutionId: "anInstitutionId",
+      },
+    ];
+    const selcGroupsPlusSpecial = [...selcGroups, ...selcSpecialGroups];
+    retrieveInstitutionGroups.mockResolvedValueOnce(selcGroupsPlusSpecial);
     const nextRequestMock = new NextRequest(new URL("http://localhost"));
 
     //when
@@ -198,6 +213,10 @@ describe("withJWTAuthHandler", () => {
           permissions: {
             ...jwtMock.permissions,
             selcGroups: [selcGroups[0]],
+          },
+          institution: {
+            ...jwtMock.institution,
+            selcSpecialGroups,
           },
         },
         params: {},

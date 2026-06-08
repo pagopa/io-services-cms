@@ -1,5 +1,11 @@
+import type { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
+import type { Cidr } from "@/generated/api/Cidr";
+import type { Group } from "@/generated/api/Group";
+import type { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
+import type { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import type { SubscriptionState } from "@azure/arm-apimanagement";
+
 import { AggregatedInstitutionsManageKeysExportFileDownloadLink } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileDownloadLink";
-import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import {
   AggregatedInstitutionsManageKeysExportFileMetadataNotReady,
   StateEnum as StateEnumNotReady,
@@ -9,17 +15,12 @@ import {
   StateEnum as StateEnumReady,
 } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadataReady";
 import { AggregatedInstitutionsManageKeysExportFileStateEnum } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileState";
-import { Cidr } from "@/generated/api/Cidr";
-import { Group } from "@/generated/api/Group";
-import { StateEnum, Subscription } from "@/generated/api/Subscription";
-import { SubscriptionKeyType } from "@/generated/api/SubscriptionKeyType";
-import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
+import { StateEnum, type Subscription } from "@/generated/api/Subscription";
 import {
-  SubscriptionType,
+  type SubscriptionType,
   SubscriptionTypeEnum,
 } from "@/generated/api/SubscriptionType";
 import { getApimService, upsertSubscription } from "@/lib/be/apim-service";
-import { SubscriptionState } from "@azure/arm-apimanagement";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import archiver from "archiver";
@@ -28,6 +29,8 @@ import { randomBytes } from "crypto";
 import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+
+import type { SpecialGroup } from "../institutions/business";
 
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import {
@@ -42,8 +45,10 @@ import {
   getInstitutionDelegations,
   getInstitutionGroups,
 } from "../institutions/selfcare";
-import { SpecialGroup } from "../wrappers";
-import { ApiKeysExportsPort, FileStateEnum } from "./api-keys-exports-port";
+import {
+  type ApiKeysExportsPort,
+  FileStateEnum,
+} from "./api-keys-exports-port";
 import { listSubscriptionSecrets, regenerateSubscriptionKey } from "./apim";
 import {
   getSubscriptionAuthorizedCIDRs,

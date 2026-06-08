@@ -4,6 +4,7 @@ import { UserInstitutions } from "../../../lib/be/selfcare-client";
 
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { getMockInstitutionProducts } from "../../../../mocks/data/selfcare-data";
+import { StateEnum } from "../../../generated/api/Group";
 import { DelegationWithPaginationResponse } from "../../../generated/selfcare/DelegationWithPaginationResponse";
 import { PageOfUserGroupResource } from "../../../generated/selfcare/PageOfUserGroupResource";
 import {
@@ -13,8 +14,10 @@ import {
 import { InstitutionProducts } from "../../../lib/be/selfcare-client";
 import { GroupNotFoundError } from "../errors";
 import {
+  DomainGroup,
   getUserInstitutionProducts,
   groupExists,
+  isSpecialGroup,
   retrieveInstitution,
   retrieveInstitutionAggregates,
   retrieveInstitutionGroups,
@@ -506,6 +509,35 @@ describe("Institutions", () => {
         institutionId,
         userId,
       );
+    });
+  });
+
+  describe("isSpecialGroup", () => {
+    it("should return true if the group is a special group", () => {
+      // given
+      const group: DomainGroup = {
+        id: "groupId",
+        name: "groupName",
+        institutionId: "institutionId",
+        parentInstitutionId: "parentInstitutionId",
+        state: StateEnum.ACTIVE,
+      };
+
+      // when and then
+      expect(isSpecialGroup(group)).toBe(true);
+    });
+
+    it("should return false if the group is not a special group", () => {
+      // given
+      const group: DomainGroup = {
+        id: "groupId",
+        name: "groupName",
+        institutionId: "institutionId",
+        state: StateEnum.ACTIVE,
+      };
+
+      // when and then
+      expect(isSpecialGroup(group)).toBe(false);
     });
   });
 });
