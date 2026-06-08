@@ -1,9 +1,10 @@
+import type { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
+import type { ResponseError } from "@/generated/api/ResponseError";
+
 import { getConfiguration } from "@/config";
 import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
-import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
 import { CreateServicePayload } from "@/generated/api/CreateServicePayload";
 import { StateEnum } from "@/generated/api/Group";
-import { ResponseError } from "@/generated/api/ResponseError";
 import { userAuthz } from "@/lib/be/authz";
 import {
   GroupNotFoundError,
@@ -12,16 +13,19 @@ import {
   handleInternalErrorResponse,
   handlerErrorLog,
 } from "@/lib/be/errors";
-import { getGroup } from "@/lib/be/institutions/business";
+import { getGroup, isSpecialGroup } from "@/lib/be/institutions/business";
 import { parseBody } from "@/lib/be/req-res-utils";
 import {
   bulkPatch,
   forwardIoServicesCmsRequest,
 } from "@/lib/be/services/business";
-import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
+import {
+  type BackOfficeUserEnriched,
+  withJWTAuthHandler,
+} from "@/lib/be/wrappers";
 import { getServiceOrganizationName } from "@/utils/organization-name-utils";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import { NextRequest, NextResponse } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 
 /**
  * @description Create a new Service with the attributes provided in the request payload
@@ -170,6 +174,11 @@ const checkGroupExistenceAndStatus = async (
     if (group.state !== StateEnum.ACTIVE) {
       return handleForbiddenErrorResponse(
         `Provided group_id '${groupId}' is not active`,
+      );
+    }
+    if (isSpecialGroup(group)) {
+      return handleForbiddenErrorResponse(
+        `Provided group_id '${groupId}' is a 'special' group`,
       );
     }
   } catch (error) {
