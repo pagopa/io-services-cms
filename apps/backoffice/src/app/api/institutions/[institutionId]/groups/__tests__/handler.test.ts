@@ -31,6 +31,7 @@ const mocks = vi.hoisted(() => {
     parseQueryParam: vi.fn(),
     retrieveInstitutionGroups: vi.fn(),
     retrieveUnboundInstitutionGroups: vi.fn(),
+    isSpecialGroup: vi.fn(() => false),
   };
 });
 
@@ -43,6 +44,7 @@ vi.mock("@/lib/be/req-res-utils", () => ({
 vi.mock("@/lib/be/institutions/business", () => ({
   retrieveUnboundInstitutionGroups: mocks.retrieveUnboundInstitutionGroups,
   retrieveInstitutionGroups: mocks.retrieveInstitutionGroups,
+  isSpecialGroup: mocks.isSpecialGroup,
 }));
 
 beforeEach(() => {
@@ -196,8 +198,8 @@ describe("groups handler", () => {
 
     it.each`
       scenario                        | role          | filterType                     | institutionGroupsMock                     | expectedInstitutionGroupsMockParams                        | selcGroups
-      ${"is admin"}                   | ${"admin"}    | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.retrieveUnboundInstitutionGroups} | ${[backofficeUserMock.parameters.userId, "institutionId"]} | ${[]}
-      ${"is admin"}                   | ${"admin"}    | ${GroupFilterTypeEnum.ALL}     | ${mocks.retrieveInstitutionGroups}        | ${["institutionId"]}                                       | ${[]}
+      ${"is admin"}                   | ${"admin"}    | ${GroupFilterTypeEnum.UNBOUND} | ${mocks.retrieveUnboundInstitutionGroups} | ${[backofficeUserMock.parameters.userId, "institutionId"]} | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }, { id: "specialGroupId", name: "specialGroupName", state: "ACTIVE", parentInstitutionId: "aggregatorId" }]}
+      ${"is admin"}                   | ${"admin"}    | ${GroupFilterTypeEnum.ALL}     | ${mocks.retrieveInstitutionGroups}        | ${["institutionId"]}                                       | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }, { id: "specialGroupId", name: "specialGroupName", state: "ACTIVE", parentInstitutionId: "aggregatorId" }]}
       ${"is operator with groups"}    | ${"operator"} | ${GroupFilterTypeEnum.ALL}     | ${undefined}                              | ${["institutionId"]}                                       | ${[{ id: "groupId", name: "groupName", state: "ACTIVE" }]}
       ${"is operator without groups"} | ${"operator"} | ${GroupFilterTypeEnum.ALL}     | ${mocks.retrieveInstitutionGroups}        | ${["institutionId"]}                                       | ${[]}
     `(
@@ -220,23 +222,29 @@ describe("groups handler", () => {
             backofficeUserMock.permissions.selcGroups = selcGroups;
           }
         }
-        const groups = selcGroups;
+        let groups = selcGroups;
         mocks.parseQueryParam.mockReturnValueOnce(E.right(filterType));
         if (institutionGroupsMock) {
+          groups = groups.filter((group) => !group.parentInstitutionId);
           institutionGroupsMock.mockResolvedValueOnce(groups);
         }
+        const groupHandlerMock = vi.fn((groups) =>
+          NextResponse.json(groups, { status: 200 }),
+        );
 
         // when
         const result = await institutionGroupBaseHandler(nextRequest, {
           backofficeUser: backofficeUserMock,
           params: { institutionId },
-          groupHandler: (groups) => NextResponse.json(groups),
+          groupHandler: groupHandlerMock,
         });
 
         // then
         expect(result.status).toBe(200);
         const jsonBody = await result.json();
         expect(jsonBody).toEqual(groups);
+        expect(groupHandlerMock).toHaveBeenCalledOnce();
+        expect(groupHandlerMock).toHaveBeenCalledWith(groups);
         expect(mocks.isInstitutionAllowed).toHaveBeenCalledOnce();
         expect(mocks.isInstitutionAllowed).toHaveBeenCalledWith(institutionId);
         if (filterType === GroupFilterTypeEnum.UNBOUND) {

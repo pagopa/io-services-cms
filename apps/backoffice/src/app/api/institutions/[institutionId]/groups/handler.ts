@@ -1,3 +1,6 @@
+import type { BackOfficeUserEnriched } from "@/lib/be/wrappers";
+import type { NextRequest, NextResponse } from "next/server";
+
 import { StateEnum } from "@/generated/api/Group";
 import {
   GroupFilterType,
@@ -12,14 +15,13 @@ import {
 } from "@/lib/be/errors";
 import {
   type DomainGroup,
+  isSpecialGroup,
   retrieveInstitutionGroups,
   retrieveUnboundInstitutionGroups,
 } from "@/lib/be/institutions/business";
 import { parseQueryParam } from "@/lib/be/req-res-utils";
-import type { BackOfficeUserEnriched } from "@/lib/be/wrappers";
 import { withDefault } from "@pagopa/ts-commons/lib/types";
 import * as E from "fp-ts/lib/Either";
-import type { NextRequest, NextResponse } from "next/server";
 
 const FILTER_DEFAULT_VALUE = withDefault(
   GroupFilterType,
@@ -65,17 +67,21 @@ export const institutionGroupBaseHandler = async (
               (group) => group.state === StateEnum.ACTIVE,
             );
           } else {
-            groups = await retrieveInstitutionGroups(params.institutionId);
+            groups = (
+              await retrieveInstitutionGroups(params.institutionId)
+            ).filter((group) => !isSpecialGroup(group));
           }
           break;
         case GroupFilterTypeEnum.UNBOUND:
           if (!userAuthz.isAdmin()) {
             return handleForbiddenErrorResponse("Role not authorized");
           }
-          groups = await retrieveUnboundInstitutionGroups(
-            backofficeUser.parameters.userId,
-            params.institutionId,
-          );
+          groups = (
+            await retrieveUnboundInstitutionGroups(
+              backofficeUser.parameters.userId,
+              params.institutionId,
+            )
+          ).filter((group) => !isSpecialGroup(group));
           break;
         default: {
           const _: never = maybeFilter.right;
