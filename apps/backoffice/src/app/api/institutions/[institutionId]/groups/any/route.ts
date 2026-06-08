@@ -3,6 +3,7 @@ import {
   withJWTAuthHandler,
 } from "@/lib/be/wrappers";
 import { type NextRequest, NextResponse } from "next/server";
+
 import { institutionGroupBaseHandler } from "../handler";
 
 /**
