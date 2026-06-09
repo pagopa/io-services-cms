@@ -21,8 +21,8 @@ resource "azurerm_monitor_action_group" "oncall_action_group" {
   short_name          = "${var.domain}-oncall"
 
   webhook_receiver {
-    name                    = "CallOpsgenie"
-    service_uri             = "https://api.opsgenie.com/v1/json/azure?apiKey=${data.azurerm_key_vault_secret.opsgenie_svc_api_key.value}"
+    name                    = "SentToJSM"
+    service_uri             = local.incident_mgmt_system.service_uri
     use_common_alert_schema = true
   }
 

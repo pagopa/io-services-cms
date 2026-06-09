@@ -48,17 +48,7 @@ variable "resource_group_name" {
   description = "Resource group name for the Monitor services"
 }
 
-###########################
-#  Azure KeyVault Secrets #
-###########################
-
-variable "key_vault" {
-  type = object({
-    id = string
-    secrets_name = object({
-      slack_svc_monitor_email = string
-      opsgenie_svc_api_key    = string
-    })
-  })
-  description = "Azure KeyVault references"
+variable "key_vault_id" {
+  type        = string
+  description = "Key Vault ID where secrets for Monitor services are stored"
 }

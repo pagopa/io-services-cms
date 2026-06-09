@@ -18,13 +18,7 @@ module "monitor" {
   domain              = local.domain
   location            = local.location
   resource_group_name = data.azurerm_resource_group.rg.name
-  key_vault = {
-    id = module.key_vault.key_vault_id
-    secrets_name = {
-      slack_svc_monitor_email = module.key_vault.secrets_name.slack_svc_monitor_email
-      opsgenie_svc_api_key    = module.key_vault.secrets_name.opsgenie_svc_api_key
-    }
-  }
+  key_vault_id        = module.key_vault.key_vault_id
 
   tags = local.tags
 }
