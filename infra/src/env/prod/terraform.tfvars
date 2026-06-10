@@ -14,7 +14,6 @@ io_common = {
   application_insights_name = "io-p-ai-common"
   action_group_email_name   = "EmailPagoPA"
   action_group_slack_name   = "SlackPagoPA"
-  appgateway_snet_name      = "io-p-appgateway-snet"
 }
 
 ## Network

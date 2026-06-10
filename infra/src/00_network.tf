@@ -29,12 +29,6 @@ data "azurerm_private_dns_zone" "privatelink_postgres_database_azure_com" {
   resource_group_name = var.io_common.resource_group_name
 }
 
-data "azurerm_subnet" "appgateway_snet" {
-  name                 = var.io_common.appgateway_snet_name
-  virtual_network_name = var.io_common.vnet_name
-  resource_group_name  = var.io_common.resource_group_name
-}
-
 # TODO: remove me after "closing" Dev Portal
 data "azurerm_subnet" "devportal_snet" {
   name                 = "${var.prefix}-p-selfcare-be-common-snet"
