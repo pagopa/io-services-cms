@@ -1,5 +1,5 @@
 import { DefaultAzureCredential } from "@azure/identity";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import { ManagedInternalError } from "../errors";
 import { FileStateEnum } from "../subscriptions/api-keys-exports-port";
@@ -87,12 +87,18 @@ const createAsyncIterable = <T>(items: readonly T[]) => ({
   },
 });
 
+const mockDate = new Date(2026, 0, 1);
+
 beforeEach(() => {
   vi.clearAllMocks();
   resetAdapterSingleton();
+  vi.useFakeTimers();
+  vi.setSystemTime(mockDate);
 });
 
-const mockDate = new Date(2026, 0, 1);
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("getInstance", () => {
   it("should throw an error when env config is invalid", () => {
@@ -277,6 +283,95 @@ describe("findExportsFiles", () => {
       expect(result).toStrictEqual(expectedResult);
     },
   );
+
+  it("should skip blobs whose expiration date has already passed", async () => {
+    // given
+    const adapter = ApiKeysExportsAdapter.getInstance(environment);
+    // last modified more than EXPORTS_API_KEYS_DURATION_IN_HOURS (24h) before now
+    const hoursOffset = adapter.EXPORTS_API_KEYS_DURATION_IN_HOURS + 1;
+    const expiredDate = new Date(
+      mockDate.getTime() - hoursOffset * 60 * 60 * 1000,
+    );
+    mocks.listBlobsFlat.mockReturnValueOnce(
+      createAsyncIterable([
+        {
+          name: "expired.zip",
+          properties: { createdOn: expiredDate, lastModified: expiredDate },
+          tags: { state: FileStateEnum.DONE },
+        },
+      ]),
+    );
+
+    // when
+    const result = await adapter.findExportsFiles("institutionId", "userId");
+
+    // then
+    expect(mocks.listBlobsFlat).toHaveBeenCalledOnce();
+    expect(result).toStrictEqual([]);
+  });
+
+  it("should skip blobs whose expiration date is exactly now", async () => {
+    // given
+    const adapter = ApiKeysExportsAdapter.getInstance(environment);
+    // expiration date === now (expiration is exclusive: expirationDate <= now is skipped)
+    const lastModified = new Date(
+      mockDate.getTime() -
+        adapter.EXPORTS_API_KEYS_DURATION_IN_HOURS * 60 * 60 * 1000,
+    );
+    mocks.listBlobsFlat.mockReturnValueOnce(
+      createAsyncIterable([
+        {
+          name: "boundary.zip",
+          properties: { createdOn: lastModified, lastModified },
+          tags: { state: FileStateEnum.DONE },
+        },
+      ]),
+    );
+
+    // when
+    const result = await adapter.findExportsFiles("institutionId", "userId");
+
+    // then
+    expect(mocks.listBlobsFlat).toHaveBeenCalledOnce();
+    expect(result).toStrictEqual([]);
+  });
+
+  it("should return only non-expired blobs and skip expired ones", async () => {
+    // given
+    const adapter = ApiKeysExportsAdapter.getInstance(environment);
+    const hoursOffset = adapter.EXPORTS_API_KEYS_DURATION_IN_HOURS + 1;
+    const expiredDate = new Date(
+      mockDate.getTime() - hoursOffset * 60 * 60 * 1000,
+    );
+    mocks.listBlobsFlat.mockReturnValueOnce(
+      createAsyncIterable([
+        {
+          name: "valid.zip",
+          properties: { createdOn: mockDate, lastModified: mockDate },
+          tags: { state: FileStateEnum.DONE },
+        },
+        {
+          name: "expired.zip",
+          properties: { createdOn: expiredDate, lastModified: expiredDate },
+          tags: { state: FileStateEnum.DONE },
+        },
+      ]),
+    );
+
+    // when
+    const result = await adapter.findExportsFiles("institutionId", "userId");
+
+    // then
+    expect(mocks.listBlobsFlat).toHaveBeenCalledOnce();
+    expect(result).toStrictEqual([
+      {
+        fileName: "valid.zip",
+        state: FileStateEnum.DONE,
+        lastModifiedDate: mockDate,
+        creationDate: mockDate,
+      },
+    ]);
+  });
 });
 
 describe("initializeFile", () => {

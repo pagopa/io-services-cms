@@ -142,6 +142,16 @@ export class ApiKeysExportsAdapter implements ApiKeysExportsPort {
           continue;
         }
 
+        // Calculate the expiration date of the export file based on its last modified date and the configured duration,
+        // if the current date is past the expiration date, we skip this file.
+        const expirationDate = new Date(
+          lastModifiedDate.getTime() +
+            this.EXPORTS_API_KEYS_DURATION_IN_HOURS * 60 * 60 * 1000,
+        );
+        if (expirationDate.getTime() <= Date.now()) {
+          continue;
+        }
+
         blobs.push({
           creationDate,
           fileName: blob.name,
