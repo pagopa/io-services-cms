@@ -107,6 +107,8 @@ interface MixPanelEventsStructure {
   readonly IO_BO_EA_FILE_GENERATE_END: { result: TechEventResult };
   readonly IO_BO_EA_FILE_GENERATE_COMPLETED: Record<string, unknown>;
   readonly IO_BO_EA_FILE_DOWNLOAD: Record<string, unknown>;
+  readonly IO_BO_EA_FILE_DOWNLOAD_SUCCESS: Record<string, never>;
+  readonly IO_BO_EA_FILE_DOWNLOAD_ERROR: Record<string, never>;
   readonly IO_BO_EA_FILE_GENERATE_ERROR: Record<string, unknown>;
 }
 
@@ -506,4 +508,12 @@ export const trackEaFileGenerateDownloadEvent = () => {
 
 export const trackEaFileGenerateErrorEvent = () => {
   logToMixpanel("IO_BO_EA_FILE_GENERATE_ERROR", "KO", {}, "screen_view");
+};
+
+export const trackEaFileDownloadSuccessEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_DOWNLOAD_SUCCESS", "TECH", {});
+};
+
+export const trackEaFileDownloadErrorEvent = () => {
+  logToMixpanel("IO_BO_EA_FILE_DOWNLOAD_ERROR", "TECH", {});
 };

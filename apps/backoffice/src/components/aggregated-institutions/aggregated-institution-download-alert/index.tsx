@@ -2,6 +2,8 @@ import { AggregatedInstitutionsManageKeysExportFileDownloadLink } from "@/genera
 import { AggregatedInstitutionsManageKeysExportFileMetadata } from "@/generated/api/AggregatedInstitutionsManageKeysExportFileMetadata";
 import useFetch from "@/hooks/use-fetch";
 import {
+  trackEaFileDownloadErrorEvent,
+  trackEaFileDownloadSuccessEvent,
   trackEaFileGenerateCompletedEvent,
   trackEaFileGenerateEndEvent,
   trackEaFileGenerateErrorEvent,
@@ -41,6 +43,8 @@ export const AggregatedInstitutionDownloadAlert = ({
       { notify: "errors" },
     );
     if (result.success && result.data?.downloadLink) {
+      trackEaFileDownloadSuccessEvent();
+
       const link = document.createElement("a");
       link.href = result.data.downloadLink;
       link.setAttribute(
@@ -52,6 +56,8 @@ export const AggregatedInstitutionDownloadAlert = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+    } else {
+      trackEaFileDownloadErrorEvent();
     }
   }, [fetchDownloadLink, t]);
 
