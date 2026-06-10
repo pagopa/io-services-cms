@@ -174,8 +174,7 @@ variable "io_common" {
   type = object({
     resource_group_name = string
     # Network
-    vnet_name            = string
-    appgateway_snet_name = string
+    vnet_name = string
     # Monitor
     application_insights_name = string
     action_group_email_name   = string

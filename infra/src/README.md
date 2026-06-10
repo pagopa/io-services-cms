@@ -61,7 +61,6 @@
 | [azurerm_private_dns_zone.privatelink_documents_azure_com](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/private_dns_zone) | data source |
 | [azurerm_private_dns_zone.privatelink_postgres_database_azure_com](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/private_dns_zone) | data source |
 | [azurerm_resource_group.svc_itn_01](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/resource_group) | data source |
-| [azurerm_subnet.appgateway_snet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.devportal_snet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.github_runner_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
 | [azurerm_subnet.private_endpoints_subnet](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/subnet) | data source |
@@ -80,7 +79,7 @@
 | <a name="input_cosmos_private_endpoint_enabled"></a> [cosmos\_private\_endpoint\_enabled](#input\_cosmos\_private\_endpoint\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_cosmos_public_network_access_enabled"></a> [cosmos\_public\_network\_access\_enabled](#input\_cosmos\_public\_network\_access\_enabled) | n/a | `bool` | n/a | yes |
 | <a name="input_env_short"></a> [env\_short](#input\_env\_short) | n/a | `string` | n/a | yes |
-| <a name="input_io_common"></a> [io\_common](#input\_io\_common) | Name of common resources of IO platform | <pre>object({<br/>    resource_group_name = string<br/>    # Network<br/>    vnet_name            = string<br/>    appgateway_snet_name = string<br/>    # Monitor<br/>    application_insights_name = string<br/>    action_group_email_name   = string<br/>    action_group_slack_name   = string<br/>  })</pre> | n/a | yes |
+| <a name="input_io_common"></a> [io\_common](#input\_io\_common) | Name of common resources of IO platform | <pre>object({<br/>    resource_group_name = string<br/>    # Network<br/>    vnet_name = string<br/>    # Monitor<br/>    application_insights_name = string<br/>    action_group_email_name   = string<br/>    action_group_slack_name   = string<br/>  })</pre> | n/a | yes |
 | <a name="input_key_vault_common"></a> [key\_vault\_common](#input\_key\_vault\_common) | n/a | <pre>object({<br/>    resource_group_name = string<br/>    name                = string<br/>    pat_secret_name     = string<br/>  })</pre> | n/a | yes |
 | <a name="input_legacy_cosmosdb_container_services"></a> [legacy\_cosmosdb\_container\_services](#input\_legacy\_cosmosdb\_container\_services) | The collection of the database where legacy data is | `string` | `"services"` | no |
 | <a name="input_legacy_cosmosdb_container_services_lease"></a> [legacy\_cosmosdb\_container\_services\_lease](#input\_legacy\_cosmosdb\_container\_services\_lease) | The lease collection that keeps track of our reads to the service collection change feed | `string` | `"services-cms--legacy-watcher-lease"` | no |
