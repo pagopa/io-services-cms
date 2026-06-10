@@ -4,7 +4,7 @@
 ## Requirements
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="requirement_azuread"></a> [azuread](#requirement\_azuread) | 2.48.0 |
 | <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) | ~> 4.23 |
 | <a name="requirement_dx"></a> [dx](#requirement\_dx) | ~> 0.6 |
@@ -13,14 +13,14 @@
 ## Providers
 
 | Name | Version |
-| ---- | ------- |
+|------|---------|
 | <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.71.0 |
 | <a name="provider_dx"></a> [dx](#provider\_dx) | ~> 0.6 |
 
 ## Modules
 
 | Name | Source | Version |
-| ---- | ------ | ------- |
+|------|--------|---------|
 | <a name="module_ai_search"></a> [ai\_search](#module\_ai\_search) | ../_modules/ai_search | n/a |
 | <a name="module_apim_external"></a> [apim\_external](#module\_apim\_external) | ../_modules/apim_external | n/a |
 | <a name="module_apim_platform"></a> [apim\_platform](#module\_apim\_platform) | ../_modules/apim_platform | n/a |
@@ -37,7 +37,7 @@
 ## Resources
 
 | Name | Type |
-| ---- | ---- |
+|------|------|
 | [dx_available_subnet_cidr.next_cidr_cae](https://registry.terraform.io/providers/pagopa-dx/azure/latest/docs/resources/available_subnet_cidr) | resource |
 | [azurerm_api_management.apim_external](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/api_management) | data source |
 | [azurerm_api_management.apim_platform](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/api_management) | data source |
