@@ -89,7 +89,7 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByText(
-        "routes.aggregated-institutions.downloadAlert.success.description:15-04-2026",
+        "routes.aggregated-institutions.downloadAlert.success.description:15-04-2026, 10:00:00",
       ),
     ).toBeInTheDocument();
 
