@@ -34,9 +34,17 @@ import {
   SubscriptionKeyType,
   SubscriptionKeyTypeEnum,
 } from "../generated/api/SubscriptionKeyType";
+import { retryTaskEither } from "../utils/retries";
 import { subscriptionsExceptManageOneApimFilter } from "./apim-filters";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type ApimClientCustomRetryOptions = {
+  readonly initialDelayMs?: number;
+  readonly maxDelayMs?: number;
+  readonly maxRetries?: number;
+};
 
 export const ApimRestError = t.intersection([
   t.type({
@@ -183,6 +191,7 @@ export const getApimService = (
   apimResourceGroup: string,
   apimServiceName: string,
   apimProductName: NonEmptyString,
+  retryOptions?: ApimClientCustomRetryOptions,
 ): ApimService => ({
   createGroupUser: (groupId, userId) =>
     createGroupUser(
@@ -272,6 +281,7 @@ export const getApimService = (
       apimServiceName,
       subscriptionId,
       requestTimeoutInMs,
+      retryOptions,
     ),
   regenerateSubscriptionKey: (subscriptionId, keyType) =>
     regenerateSubscriptionKey(
@@ -449,21 +459,36 @@ const listSecrets = (
   apimServiceName: string,
   subscriptionId: string,
   requestTimeoutInMs?: number,
+  retryOptions?: ApimClientCustomRetryOptions,
 ) =>
   pipe(
-    TE.tryCatch(
-      () =>
-        apimClient.subscription.listSecrets(
-          apimResourceGroup,
-          apimServiceName,
-          subscriptionId,
-          {
-            requestOptions: {
-              timeout: requestTimeoutInMs,
+    retryTaskEither(
+      TE.tryCatch(
+        () =>
+          apimClient.subscription.listSecrets(
+            apimResourceGroup,
+            apimServiceName,
+            subscriptionId,
+            {
+              requestOptions: {
+                timeout: requestTimeoutInMs,
+              },
             },
-          },
-        ),
-      identity,
+          ),
+        identity,
+      ),
+      retryOptions?.maxRetries ?? 0,
+      retryOptions?.initialDelayMs ?? 0,
+      retryOptions?.maxDelayMs ?? 0,
+      (error: unknown) => {
+        if (typeof error !== "object" || error === null) {
+          return false;
+        }
+        const e = error as Record<string, unknown>;
+        const isTimeout = e.name === "AbortError" || e.code === "ETIMEOUT";
+        const isServerError = e.statusCode === 500 || e.statusCode === 504;
+        return isTimeout || isServerError;
+      },
     ),
     chainApimMappedError,
   );

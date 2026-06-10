@@ -80,18 +80,20 @@ const getApimConfig = (): Config => {
 const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
-  const apimClient = ApimUtils.getApimClient(apimConfig.AZURE_SUBSCRIPTION_ID, {
-    retryOptions: {
-      maxRetries: apimConfig.AZURE_APIM_CLIENT_MAX_RETRIES,
-      maxRetryDelayInMs: apimConfig.AZURE_APIM_CLIENT_MAX_RETRY_DELAY_MS,
-      retryDelayInMs: apimConfig.AZURE_APIM_CLIENT_RETRY_DELAY_MS,
-    },
-  });
+  const apimClient = ApimUtils.getApimClient(
+    apimConfig.AZURE_SUBSCRIPTION_ID,
+    {},
+  );
   return ApimUtils.getApimService(
     apimClient,
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
     apimConfig.AZURE_APIM,
     apimConfig.AZURE_APIM_PRODUCT_NAME,
+    {
+      initialDelayMs: apimConfig.AZURE_APIM_CLIENT_RETRY_DELAY_MS,
+      maxDelayMs: apimConfig.AZURE_APIM_CLIENT_MAX_RETRY_DELAY_MS,
+      maxRetries: apimConfig.AZURE_APIM_CLIENT_MAX_RETRIES,
+    },
   );
 };
 
