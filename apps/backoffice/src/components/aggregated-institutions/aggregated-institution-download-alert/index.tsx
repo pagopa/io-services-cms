@@ -5,6 +5,7 @@ import {
   trackEaFileDownloadErrorEvent,
   trackEaFileDownloadSuccessEvent,
   trackEaFileGenerateCompletedEvent,
+  trackEaFileGenerateDownloadEvent,
   trackEaFileGenerateEndEvent,
   trackEaFileGenerateErrorEvent,
   trackEaFileGenerateProgressEvent,
@@ -36,6 +37,7 @@ export const AggregatedInstitutionDownloadAlert = ({
     useFetch<AggregatedInstitutionsManageKeysExportFileDownloadLink>();
 
   const handleDownloadClick = useCallback(async () => {
+    trackEaFileGenerateDownloadEvent();
     const result = await fetchDownloadLink(
       "generateDirectDownloadLinkForAggregatedInstitutionsManageKeys",
       {},

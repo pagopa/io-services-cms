@@ -5,8 +5,10 @@ import { AggregatedInstitutionDownloadAlert } from "../../components/aggregated-
 import { StateEnum as NotReadyStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysExportFileMetadataNotReady";
 import { StateEnum as ReadyStateEnum } from "../../generated/api/AggregatedInstitutionsManageKeysExportFileMetadataReady";
 import {
+  trackEaFileDownloadErrorEvent,
+  trackEaFileDownloadSuccessEvent,
   trackEaFileGenerateCompletedEvent,
-  // trackEaFileGenerateDownloadEvent,
+  trackEaFileGenerateDownloadEvent,
   trackEaFileGenerateEndEvent,
   trackEaFileGenerateErrorEvent,
   trackEaFileGenerateProgressEvent,
@@ -39,6 +41,8 @@ vi.mock("@/hooks/use-fetch", () => ({
 }));
 
 vi.mock("../../utils/mix-panel", () => ({
+  trackEaFileDownloadErrorEvent: vi.fn(),
+  trackEaFileDownloadSuccessEvent: vi.fn(),
   trackEaFileGenerateCompletedEvent: vi.fn(),
   trackEaFileGenerateDownloadEvent: vi.fn(),
   trackEaFileGenerateEndEvent: vi.fn(),
@@ -132,6 +136,13 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
         expect.anything(),
         { notify: "errors" },
       );
+      expect(vi.mocked(trackEaFileGenerateDownloadEvent)).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(vi.mocked(trackEaFileDownloadSuccessEvent)).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(vi.mocked(trackEaFileDownloadErrorEvent)).not.toHaveBeenCalled();
       expect(anchorClickSpy).toHaveBeenCalledOnce();
     });
 
@@ -165,6 +176,49 @@ describe("[AggregatedInstitutionDownloadAlert] Component", () => {
 
     await waitFor(() => {
       expect(mockFetchDownloadLink).toHaveBeenCalledOnce();
+      expect(vi.mocked(trackEaFileGenerateDownloadEvent)).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(vi.mocked(trackEaFileDownloadErrorEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileDownloadSuccessEvent)).not.toHaveBeenCalled();
+      expect(anchorClickSpy).not.toHaveBeenCalled();
+    });
+
+    anchorClickSpy.mockRestore();
+  });
+
+  it("should track download error when fetchDownloadLink succeeds without link", async () => {
+    const anchorClickSpy = vi
+      .spyOn(HTMLElement.prototype, "click")
+      .mockImplementation(() => undefined);
+    mockFetchDownloadLink.mockResolvedValueOnce({
+      data: {},
+      success: true,
+    });
+
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{
+          expirationDate: "2026-04-15T10:00:00",
+          state: ReadyStateEnum.DONE,
+        }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "routes.aggregated-institutions.downloadAlert.success.action",
+      }),
+    );
+
+    await waitFor(() => {
+      expect(mockFetchDownloadLink).toHaveBeenCalledOnce();
+      expect(vi.mocked(trackEaFileGenerateDownloadEvent)).toHaveBeenCalledTimes(
+        1,
+      );
+      expect(vi.mocked(trackEaFileDownloadErrorEvent)).toHaveBeenCalledTimes(1);
+      expect(vi.mocked(trackEaFileDownloadSuccessEvent)).not.toHaveBeenCalled();
       expect(anchorClickSpy).not.toHaveBeenCalled();
     });
 
@@ -262,26 +316,31 @@ describe("[AggregatedInstitutionDownloadAlert] Tracking events", () => {
     expect(vi.mocked(trackEaFileGenerateRefreshEvent)).not.toHaveBeenCalled();
   });
 
-  // it("should fire completedEvent and endEvent(success) when state is DONE", () => {
-  //   render(
-  //     <AggregatedInstitutionDownloadAlert
-  //       data={{
-  //         expirationDate: "2026-04-15T10:00:00",
-  //         state: ReadyStateEnum.DONE,
-  //       }}
-  //       onRefresh={vi.fn()}
-  //     />,
-  //   );
+  it("should fire completedEvent and endEvent(success) when state is DONE", () => {
+    mockFetchDownloadLink.mockResolvedValueOnce({
+      data: {},
+      success: true,
+    });
 
-  //   expect(vi.mocked(trackEaFileGenerateCompletedEvent)).toHaveBeenCalledTimes(
-  //     1,
-  //   );
-  //   expect(vi.mocked(trackEaFileGenerateEndEvent)).toHaveBeenCalledWith(
-  //     "success",
-  //   );
-  //   expect(vi.mocked(trackEaFileGenerateProgressEvent)).not.toHaveBeenCalled();
-  //   expect(vi.mocked(trackEaFileGenerateErrorEvent)).not.toHaveBeenCalled();
-  // });
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{
+          expirationDate: "2026-04-15T10:00:00",
+          state: ReadyStateEnum.DONE,
+        }}
+        onRefresh={vi.fn()}
+      />,
+    );
+
+    expect(vi.mocked(trackEaFileGenerateCompletedEvent)).toHaveBeenCalledTimes(
+      1,
+    );
+    expect(vi.mocked(trackEaFileGenerateEndEvent)).toHaveBeenCalledWith(
+      "success",
+    );
+    expect(vi.mocked(trackEaFileGenerateProgressEvent)).not.toHaveBeenCalled();
+    expect(vi.mocked(trackEaFileGenerateErrorEvent)).not.toHaveBeenCalled();
+  });
 
   it("should fire errorEvent and endEvent(error) when state is FAILED", () => {
     render(
@@ -299,27 +358,27 @@ describe("[AggregatedInstitutionDownloadAlert] Tracking events", () => {
     expect(vi.mocked(trackEaFileGenerateProgressEvent)).not.toHaveBeenCalled();
   });
 
-  // it("should fire downloadEvent when the download link is clicked", () => {
-  //   render(
-  //     <AggregatedInstitutionDownloadAlert
-  //       data={{
-  //         expirationDate: "2026-04-15T10:00:00",
-  //         state: ReadyStateEnum.DONE,
-  //       }}
-  //       onRefresh={vi.fn()}
-  //     />,
-  //   );
+  it("should fire downloadEvent when the download link is clicked", () => {
+    render(
+      <AggregatedInstitutionDownloadAlert
+        data={{
+          expirationDate: "2026-04-15T10:00:00",
+          state: ReadyStateEnum.DONE,
+        }}
+        onRefresh={vi.fn()}
+      />,
+    );
 
-  //   fireEvent.click(
-  //     screen.getByRole("button", {
-  //       name: "routes.aggregated-institutions.downloadAlert.success.action",
-  //     }),
-  //   );
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "routes.aggregated-institutions.downloadAlert.success.action",
+      }),
+    );
 
-  //   expect(vi.mocked(trackEaFileGenerateDownloadEvent)).toHaveBeenCalledTimes(
-  //     1,
-  //   );
-  // });
+    expect(vi.mocked(trackEaFileGenerateDownloadEvent)).toHaveBeenCalledTimes(
+      1,
+    );
+  });
 
   it("should fire refreshEvent when the refresh button is clicked", () => {
     render(
