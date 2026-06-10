@@ -65,9 +65,17 @@
         "ms-azuretools.vscode-cosmosdb"
       ],
       "settings": {
-        "eslint.run": "onSave", // Forces linting logic to trigger when saving
-        "eslint.options": {
-          "resolvePluginsRelativeTo": "."
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": "explicit",
+          "source.organizeImports": "explicit"
+        },
+        "eslint.enable": true,
+        "eslint.probe": ["typescript"],
+        "eslint.workingDirectories": [{ "mode": "auto" }],
+        "[terraform]": {
+          "editor.defaultFormatter": "hashicorp.terraform"
         }
       },
       "mcp": {
