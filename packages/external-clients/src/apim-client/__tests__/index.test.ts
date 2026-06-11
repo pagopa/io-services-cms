@@ -8,7 +8,7 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  ApimClientCustomRetryOptions,
+  ApimClientTimeoutRetryOptions,
   ApimRestError,
   formatEmailForOrganization,
   getApimClient,
@@ -612,7 +612,7 @@ describe("ApimService Test", () => {
         subscription: { listSecrets: mockListSecrets },
       } as unknown as ApiManagementClient;
 
-      const retryOptions: ApimClientCustomRetryOptions = {
+      const retryOptions: ApimClientTimeoutRetryOptions = {
         initialDelayMs: 0,
         maxDelayMs: 0,
         maxRetries: 2,
@@ -648,6 +648,34 @@ describe("ApimService Test", () => {
       expect(mockListSecrets).toHaveBeenCalledTimes(1);
     });
 
+    // SDK level retries will handle this
+    it("should not retry on server errors (5xx)", async () => {
+      const serverError = { statusCode: 500 };
+      const mockListSecrets = vi.fn().mockRejectedValue(serverError);
+      const mockApimClient = {
+        subscription: { listSecrets: mockListSecrets },
+      } as unknown as ApiManagementClient;
+
+      const retryOptions: ApimClientTimeoutRetryOptions = {
+        initialDelayMs: 0,
+        maxDelayMs: 0,
+        maxRetries: 3,
+      };
+      const apimService = getApimService(
+        mockApimClient,
+        anApimResourceGroup,
+        anApimServiceName,
+        anApimProductName,
+        retryOptions,
+      );
+
+      const resultPromise = apimService.listSecrets(aServiceId)();
+      const result = await resultPromise;
+
+      expect(E.isLeft(result)).toBeTruthy();
+      expect(mockListSecrets).toHaveBeenCalledTimes(1);
+    });
+
     it("should not retry on non-retriable errors", async () => {
       const nonRetriableError = { statusCode: 400 };
       const mockListSecrets = vi.fn().mockRejectedValue(nonRetriableError);
@@ -655,7 +683,7 @@ describe("ApimService Test", () => {
         subscription: { listSecrets: mockListSecrets },
       } as unknown as ApiManagementClient;
 
-      const retryOptions: ApimClientCustomRetryOptions = {
+      const retryOptions: ApimClientTimeoutRetryOptions = {
         initialDelayMs: 0,
         maxDelayMs: 0,
         maxRetries: 3,

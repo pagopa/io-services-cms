@@ -40,7 +40,16 @@ import { subscriptionsExceptManageOneApimFilter } from "./apim-filters";
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ApimClientCustomRetryOptions = {
+/**
+ * Retry options for timeout-triggered failures on APIM operations.
+ *
+ * The Azure SDK (@azure/core-rest-pipeline) handles HTTP-level errors (e.g. 500,
+ * 503) via its built-in exponential retry policy, but it does NOT retry requests
+ * that are aborted by a client-side timeout: when a request times out, the SDK
+ * throws an AbortError immediately and skips all retry strategies. These options
+ * configure an application-level retry layer to fill that gap.
+ */
+export type ApimClientTimeoutRetryOptions = {
   readonly initialDelayMs?: number;
   readonly maxDelayMs?: number;
   readonly maxRetries?: number;
@@ -191,7 +200,7 @@ export const getApimService = (
   apimResourceGroup: string,
   apimServiceName: string,
   apimProductName: NonEmptyString,
-  retryOptions?: ApimClientCustomRetryOptions,
+  retryOptions?: ApimClientTimeoutRetryOptions,
 ): ApimService => ({
   createGroupUser: (groupId, userId) =>
     createGroupUser(
@@ -459,7 +468,7 @@ const listSecrets = (
   apimServiceName: string,
   subscriptionId: string,
   requestTimeoutInMs?: number,
-  retryOptions?: ApimClientCustomRetryOptions,
+  retryOptions?: ApimClientTimeoutRetryOptions,
 ) =>
   pipe(
     retryTaskEither(
@@ -485,9 +494,7 @@ const listSecrets = (
           return false;
         }
         const e = error as Record<string, unknown>;
-        const isTimeout = e.name === "AbortError" || e.code === "ETIMEOUT";
-        const isServerError = e.statusCode === 500 || e.statusCode === 504;
-        return isTimeout || isServerError;
+        return e.name === "AbortError" || e.code === "ETIMEOUT";
       },
     ),
     chainApimMappedError,
