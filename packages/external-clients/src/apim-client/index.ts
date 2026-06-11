@@ -39,7 +39,6 @@ import { subscriptionsExceptManageOneApimFilter } from "./apim-filters";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 /**
  * Retry options for timeout-triggered failures on APIM operations.
  *
@@ -49,6 +48,7 @@ export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
  * throws an AbortError immediately and skips all retry strategies. These options
  * configure an application-level retry layer to fill that gap.
  */
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type ApimClientTimeoutRetryOptions = {
   readonly initialDelayMs?: number;
   readonly maxDelayMs?: number;
