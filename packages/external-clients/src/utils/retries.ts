@@ -13,7 +13,7 @@ export type RetryOptions = {
  * Retries a TaskEither action with exponential backoff.
  *
  * @param action - The TaskEither action to execute and potentially retry.
- * @param retryOptions - Retry options for retry operation (undefined or 0 maxRetries means no retries).
+ * @param retryOptions - Retry options for retry operation (0 maxRetries means no retries).
  * @param shouldRetry - Predicate to determine if the error is retriable.
  */
 export const retryTaskEither =
