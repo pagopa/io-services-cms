@@ -1,5 +1,5 @@
 import { DefaultAzureCredential } from "@azure/identity";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { ApiKeysExportsAdapter } from "../api-keys-exports-adapter";
 import { ManagedInternalError } from "../errors";
 import { FileStateEnum } from "../subscriptions/api-keys-exports-port";
@@ -87,12 +87,18 @@ const createAsyncIterable = <T>(items: readonly T[]) => ({
   },
 });
 
+const mockDate = new Date(2026, 0, 1);
+
 beforeEach(() => {
   vi.clearAllMocks();
   resetAdapterSingleton();
+  vi.useFakeTimers();
+  vi.setSystemTime(mockDate);
 });
 
-const mockDate = new Date(2026, 0, 1);
+afterEach(() => {
+  vi.useRealTimers();
+});
 
 describe("getInstance", () => {
   it("should throw an error when env config is invalid", () => {
@@ -275,6 +281,124 @@ describe("findExportsFiles", () => {
         prefix: "institutionId_userId",
       });
       expect(result).toStrictEqual(expectedResult);
+    },
+  );
+
+  it.each([
+    {
+      hoursSinceExpiration: 1,
+      expiredBlobs: [
+        {
+          name: "expired_in_progress.zip",
+          tags: { state: FileStateEnum.IN_PROGRESS },
+        },
+        {
+          name: "expired_failed.zip",
+          tags: { state: FileStateEnum.FAILED },
+        },
+        {
+          name: "expired_done.zip",
+          tags: { state: FileStateEnum.DONE },
+        },
+      ],
+    },
+    {
+      hoursSinceExpiration: 0,
+      expiredBlobs: [
+        {
+          name: "boundary_in_progress.zip",
+          tags: { state: FileStateEnum.IN_PROGRESS },
+        },
+        {
+          name: "boundary_failed.zip",
+          tags: { state: FileStateEnum.FAILED },
+        },
+        {
+          name: "boundary_done.zip",
+          tags: { state: FileStateEnum.DONE },
+        },
+      ],
+    },
+    {
+      validBlobs: [
+        {
+          name: "valid_in_progress.zip",
+          tags: { state: FileStateEnum.IN_PROGRESS },
+        },
+        {
+          name: "valid_failed.zip",
+          tags: { state: FileStateEnum.FAILED },
+        },
+        {
+          name: "valid_done.zip",
+          tags: { state: FileStateEnum.DONE },
+        },
+      ],
+      hoursSinceExpiration: 1,
+      expiredBlobs: [
+        {
+          name: "expired_in_progress.zip",
+          tags: { state: FileStateEnum.IN_PROGRESS },
+        },
+        {
+          name: "expired_failed.zip",
+          tags: { state: FileStateEnum.FAILED },
+        },
+        {
+          name: "expired_done.zip",
+          tags: { state: FileStateEnum.DONE },
+        },
+      ],
+    },
+    {
+      validBlobs: [],
+      hoursSinceExpiration: 0,
+      expiredBlobs: [],
+    },
+  ])(
+    "should skip expired blobs",
+    async ({
+      validBlobs = [],
+      hoursSinceExpiration = 0,
+      expiredBlobs = [],
+    }) => {
+      // given
+      const adapter = ApiKeysExportsAdapter.getInstance(environment);
+      const hoursOffset =
+        adapter.EXPORTS_API_KEYS_DURATION_IN_HOURS + hoursSinceExpiration;
+      const expiredDate = new Date(
+        mockDate.getTime() - hoursOffset * 60 * 60 * 1000,
+      );
+      const allBlobs = [
+        ...validBlobs.map((blob) => ({
+          name: blob.name,
+          properties: { createdOn: mockDate, lastModified: mockDate },
+          tags: blob.tags,
+        })),
+        ...expiredBlobs.map((blob) => ({
+          name: blob.name,
+          properties: { createdOn: expiredDate, lastModified: expiredDate },
+          tags: blob.tags,
+        })),
+      ];
+      mocks.listBlobsFlat.mockReturnValueOnce(createAsyncIterable(allBlobs));
+
+      // when
+      const result = await adapter.findExportsFiles("institutionId", "userId");
+
+      // then
+      expect(mocks.listBlobsFlat).toHaveBeenCalledExactlyOnceWith({
+        includeTags: true,
+        prefix: "institutionId_userId",
+      });
+      expect(result).toStrictEqual(
+        validBlobs.map((blob) => ({
+          fileName: blob.name,
+          state: blob.tags.state,
+          lastModifiedDate: mockDate,
+          creationDate: mockDate,
+        })),
+      );
     },
   );
 });
