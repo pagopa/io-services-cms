@@ -295,9 +295,19 @@ describe("findExportsFiles", () => {
     mocks.listBlobsFlat.mockReturnValueOnce(
       createAsyncIterable([
         {
-          name: "expired.zip",
+          name: "expired_done.zip",
           properties: { createdOn: expiredDate, lastModified: expiredDate },
           tags: { state: FileStateEnum.DONE },
+        },
+        {
+          name: "expired_in_progress.zip",
+          properties: { createdOn: expiredDate, lastModified: expiredDate },
+          tags: { state: FileStateEnum.IN_PROGRESS },
+        },
+        {
+          name: "expired_failed.zip",
+          properties: { createdOn: expiredDate, lastModified: expiredDate },
+          tags: { state: FileStateEnum.FAILED },
         },
       ]),
     );
@@ -321,9 +331,19 @@ describe("findExportsFiles", () => {
     mocks.listBlobsFlat.mockReturnValueOnce(
       createAsyncIterable([
         {
-          name: "boundary.zip",
+          name: "boundary_done.zip",
           properties: { createdOn: lastModified, lastModified },
           tags: { state: FileStateEnum.DONE },
+        },
+        {
+          name: "boundary_in_progress.zip",
+          properties: { createdOn: lastModified, lastModified },
+          tags: { state: FileStateEnum.IN_PROGRESS },
+        },
+        {
+          name: "boundary_failed.zip",
+          properties: { createdOn: lastModified, lastModified },
+          tags: { state: FileStateEnum.FAILED },
         },
       ]),
     );
@@ -343,19 +363,44 @@ describe("findExportsFiles", () => {
     const expiredDate = new Date(
       mockDate.getTime() - hoursOffset * 60 * 60 * 1000,
     );
+
+    const expiredBlobs = [
+      {
+        name: "expired_done.zip",
+        properties: { createdOn: expiredDate, lastModified: expiredDate },
+        tags: { state: FileStateEnum.DONE },
+      },
+      {
+        name: "expired_in_progress.zip",
+        properties: { createdOn: expiredDate, lastModified: expiredDate },
+        tags: { state: FileStateEnum.IN_PROGRESS },
+      },
+      {
+        name: "expired_failed.zip",
+        properties: { createdOn: expiredDate, lastModified: expiredDate },
+        tags: { state: FileStateEnum.FAILED },
+      },
+    ];
+    const validBlobs = [
+      {
+        name: "valid_done.zip",
+        properties: { createdOn: mockDate, lastModified: mockDate },
+        tags: { state: FileStateEnum.DONE },
+      },
+      {
+        name: "valid_in_progress.zip",
+        properties: { createdOn: mockDate, lastModified: mockDate },
+        tags: { state: FileStateEnum.IN_PROGRESS },
+      },
+      {
+        name: "valid_failed.zip",
+        properties: { createdOn: mockDate, lastModified: mockDate },
+        tags: { state: FileStateEnum.FAILED },
+      },
+    ];
+
     mocks.listBlobsFlat.mockReturnValueOnce(
-      createAsyncIterable([
-        {
-          name: "valid.zip",
-          properties: { createdOn: mockDate, lastModified: mockDate },
-          tags: { state: FileStateEnum.DONE },
-        },
-        {
-          name: "expired.zip",
-          properties: { createdOn: expiredDate, lastModified: expiredDate },
-          tags: { state: FileStateEnum.DONE },
-        },
-      ]),
+      createAsyncIterable([...expiredBlobs, ...validBlobs]),
     );
 
     // when
@@ -363,14 +408,14 @@ describe("findExportsFiles", () => {
 
     // then
     expect(mocks.listBlobsFlat).toHaveBeenCalledOnce();
-    expect(result).toStrictEqual([
-      {
-        fileName: "valid.zip",
-        state: FileStateEnum.DONE,
-        lastModifiedDate: mockDate,
-        creationDate: mockDate,
-      },
-    ]);
+    expect(result).toStrictEqual(
+      validBlobs.map((blob) => ({
+        fileName: blob.name,
+        state: blob.tags.state,
+        lastModifiedDate: blob.properties.lastModified,
+        creationDate: blob.properties.createdOn,
+      })),
+    );
   });
 });
 
