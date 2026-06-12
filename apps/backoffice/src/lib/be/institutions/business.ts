@@ -1,11 +1,12 @@
-import { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
-import { Group, StateEnum } from "@/generated/api/Group";
-import { Institution as BackofficeInstitution } from "@/generated/api/Institution";
+import type { AggregatedInstitutionPagination } from "@/generated/api/AggregatedInstitutionPagination";
+import type { Institution as BackofficeInstitution } from "@/generated/api/Institution";
+import type { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
+import type { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
+import type { UserInstitutionProducts } from "@/generated/api/UserInstitutionProducts";
+import type { InstitutionResponse as SelfcareInstitution } from "@/generated/selfcare/InstitutionResponse";
+
+import { type Group, StateEnum } from "@/generated/api/Group";
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
-import { UserAuthorizedInstitution } from "@/generated/api/UserAuthorizedInstitution";
-import { UserAuthorizedInstitutions } from "@/generated/api/UserAuthorizedInstitutions";
-import { UserInstitutionProducts } from "@/generated/api/UserInstitutionProducts";
-import { InstitutionResponse as SelfcareInstitution } from "@/generated/selfcare/InstitutionResponse";
 import { StatusEnum } from "@/generated/selfcare/UserGroupResource";
 import {
   getInstitutionById,
@@ -31,6 +32,16 @@ type ReadonlyArrayElementType<T> = T extends readonly (infer U)[] ? U : never; /
 export type DomainGroup = {
   parentInstitutionId?: string;
 } & Group;
+
+export type SpecialGroup = { parentInstitutionId: string } & DomainGroup;
+
+/**
+ * Check if a group is a 'special' group, meaning that it has a parent institution id (aggregator id reference) defined
+ * @param group the group to check
+ * @returns true if the group is a special group, false otherwise
+ */
+export const isSpecialGroup = (group: DomainGroup): group is SpecialGroup =>
+  group.parentInstitutionId !== undefined;
 
 /**
  * Retrieve the institutions from which the user is authorized to operate

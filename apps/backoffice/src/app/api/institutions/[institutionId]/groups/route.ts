@@ -1,10 +1,13 @@
-import {
-  institutionGroupBaseHandler,
-  toGroupsResponse,
-} from "@/lib/be/groups/institution-groups-util";
+import type { NextRequest } from "next/server";
+
+import { toGroupsResponse } from "@/lib/be/groups/institution-groups-util";
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
-import { BackOfficeUserEnriched, withJWTAuthHandler } from "@/lib/be/wrappers";
-import { NextRequest } from "next/server";
+import {
+  type BackOfficeUserEnriched,
+  withJWTAuthHandler,
+} from "@/lib/be/wrappers";
+
+import { institutionGroupBaseHandler } from "./handler";
 
 /**
  * @operationId getInstitutionGroups

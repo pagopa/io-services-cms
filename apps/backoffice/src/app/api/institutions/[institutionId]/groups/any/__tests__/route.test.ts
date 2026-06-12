@@ -8,9 +8,8 @@ import {
 } from "../../../../../../../config/constants";
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Group } from "../../../../../../../generated/api/Group";
-import { GET } from "../route";
 import type { BackOfficeUserEnriched } from "../../../../../../../lib/be/wrappers";
+import { GET } from "../route";
 
 const backofficeUserMock = {
   parameters: { userId: "userId" },
@@ -46,13 +45,9 @@ vi.mock("@/lib/be/wrappers", async (importOriginal) => {
   };
 });
 
-vi.mock("@/lib/be/groups/institution-groups-util", async (importOriginal) => {
-  const original = (await importOriginal()) as any;
-  return {
-    ...original,
-    institutionGroupBaseHandler: mocks.institutionGroupBaseHandler,
-  };
-});
+vi.mock("../../handler", () => ({
+  institutionGroupBaseHandler: mocks.institutionGroupBaseHandler,
+}));
 
 beforeEach(() => {
   vi.restoreAllMocks();

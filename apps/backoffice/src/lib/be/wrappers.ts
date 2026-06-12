@@ -1,14 +1,18 @@
+import type { NextRequest, NextResponse } from "next/server";
+
 import { auth } from "@/auth";
 import { SelfcareRoles } from "@/types/auth";
-import { NextRequest, NextResponse } from "next/server";
 
-import {
+import type {
   BackOfficeUser,
   BackOfficeUserPermissions,
 } from "../../../types/next-auth";
+
 import { handleUnauthorizedErrorResponse } from "./errors";
 import {
-  DomainGroup,
+  type DomainGroup,
+  type SpecialGroup,
+  isSpecialGroup,
   retrieveInstitutionGroups,
 } from "./institutions/business";
 
@@ -71,8 +75,6 @@ export const withJWTAuthHandler =
     });
   };
 
-export type SpecialGroup = { parentInstitutionId: string } & DomainGroup;
-
 export type BackOfficeUserEnriched = {
   institution: {
     /**
@@ -87,6 +89,3 @@ export type BackOfficeUserEnriched = {
     selcGroups: DomainGroup[];
   } & Omit<BackOfficeUserPermissions, "selcGroups">;
 } & Omit<BackOfficeUser, "permissions">;
-
-const isSpecialGroup = (group: DomainGroup): group is SpecialGroup =>
-  group.parentInstitutionId !== undefined;

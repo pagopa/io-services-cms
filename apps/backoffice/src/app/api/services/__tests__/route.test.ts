@@ -9,43 +9,48 @@ import { CreateServicePayload } from "../../../../generated/api/CreateServicePay
 import { ScopeEnum } from "../../../../generated/api/ServiceBaseMetadata";
 import {
   GroupNotFoundError,
-  ManagedInternalError
+  ManagedInternalError,
 } from "../../../../lib/be/errors";
+import { BackOfficeUserEnriched } from "../../../../lib/be/wrappers";
 import { SelfcareRoles } from "../../../../types/auth";
 import { PATCH, POST } from "../route";
 
-const backofficeUserMock: BackOfficeUser = {
+const backofficeUserMock: BackOfficeUserEnriched = {
   id: faker.string.uuid(),
-  name: faker.person.fullName(),
-  email: faker.internet.email(),
   institution: {
     id: faker.string.uuid(),
     name: faker.company.name(),
     fiscalCode: faker.string.numeric(),
     role: faker.helpers.arrayElement(Object.values(SelfcareRoles)),
-    logo_url: faker.image.url()
+    logo_url: faker.image.url(),
+    isAggregate: faker.datatype.boolean(),
+    isAggregator: faker.datatype.boolean(),
+    selcSpecialGroups: [],
   },
-  permissions: { apimGroups: faker.helpers.multiple(faker.string.alpha) },
+  permissions: {
+    apimGroups: faker.helpers.multiple(faker.string.alpha),
+    selcGroups: faker.helpers.multiple(faker.string.alpha),
+  },
   parameters: {
     userId: faker.string.uuid(),
     userEmail: faker.internet.email(),
-    subscriptionId: faker.string.uuid()
-  }
+    subscriptionId: faker.string.uuid(),
+  },
 };
 const aValidServicePayload: CreateServicePayload = {
   name: "aServiceName" as NonEmptyString,
   description: "aServiceDescription" as NonEmptyString,
   metadata: {
     scope: ScopeEnum.LOCAL,
-    topic_id: 1
+    topic_id: 1,
   },
-  max_allowed_payment_amount: 0 as any
+  max_allowed_payment_amount: 0 as any,
 };
 const aSelcGroupActive = [
-  { id: "aGroupId", name: "groupName", state: "ACTIVE" }
+  { id: "aGroupId", name: "groupName", state: "ACTIVE" },
 ];
 const aSelcGroupNotActive = [
-  { id: "aGroupId", name: "groupName", state: "SUSPENDED" }
+  { id: "aGroupId", name: "groupName", state: "SUSPENDED" },
 ];
 const aGroup = { id: "group_id", name: "group name" };
 
@@ -53,7 +58,7 @@ vi.hoisted(() => {
   const originalEnv = process.env;
   process.env = {
     ...originalEnv,
-    GROUP_AUTHZ_ENABLED: "true"
+    GROUP_AUTHZ_ENABLED: "true",
   };
 });
 
@@ -66,60 +71,64 @@ const {
   getGroupMock,
   forwardIoServicesCmsRequestMock,
   bulkPatchMock,
-  withJWTAuthHandlerMock
+  withJWTAuthHandlerMock,
+  isSpecialGroupMock,
 } = vi.hoisted(() => {
   const isAdminMock = vi.fn(() => true);
   const isGroupAllowedMock = vi.fn(() => true);
   return {
     isAdminMock,
     isGroupAllowedMock,
+    isSpecialGroupMock: vi.fn(() => false),
     userAuthzMock: vi.fn(() => ({
       isAdmin: isAdminMock,
-      isGroupAllowed: isGroupAllowedMock
+      isGroupAllowed: isGroupAllowedMock,
     })),
     parseBodyMock: vi.fn(),
     groupExistsMock: vi.fn(),
     getGroupMock: vi.fn(),
     forwardIoServicesCmsRequestMock: vi.fn(() =>
-      Promise.resolve(NextResponse.json({}, { status: 200 }))
+      Promise.resolve(NextResponse.json({}, { status: 200 })),
     ),
     bulkPatchMock: vi.fn(),
     withJWTAuthHandlerMock: vi.fn(
       (
         handler: (
           nextRequest: NextRequest,
-          context: { params: any; backofficeUser: BackOfficeUser }
-        ) => Promise<NextResponse> | Promise<Response>
-      ) => async (nextRequest: NextRequest, { params }: { params: {} }) => {
-        return handler(nextRequest, {
-          params,
-          backofficeUser: backofficeUserMock
-        });
-      }
-    )
+          context: { params: any; backofficeUser: BackOfficeUser },
+        ) => Promise<NextResponse> | Promise<Response>,
+      ) =>
+        async (nextRequest: NextRequest, { params }: { params: {} }) => {
+          return handler(nextRequest, {
+            params,
+            backofficeUser: backofficeUserMock,
+          });
+        },
+    ),
   };
 });
 
 vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock
+  userAuthz: userAuthzMock,
 }));
 
 vi.mock("@/lib/be/req-res-utils", () => ({
-  parseBody: parseBodyMock
+  parseBody: parseBodyMock,
 }));
 
 vi.mock("@/lib/be/institutions/business", () => ({
   groupExists: groupExistsMock,
-  getGroup: getGroupMock
+  getGroup: getGroupMock,
+  isSpecialGroup: isSpecialGroupMock,
 }));
 
 vi.mock("@/lib/be/services/business", () => ({
   forwardIoServicesCmsRequest: forwardIoServicesCmsRequestMock,
-  bulkPatch: bulkPatchMock
+  bulkPatch: bulkPatchMock,
 }));
 
 vi.mock("@/lib/be/wrappers", () => ({
-  withJWTAuthHandler: withJWTAuthHandlerMock
+  withJWTAuthHandler: withJWTAuthHandlerMock,
 }));
 
 beforeEach(() => {
@@ -134,8 +143,10 @@ describe("Services API", () => {
       parseBodyMock.mockRejectedValueOnce(new Error(errorMessage));
       const request = new NextRequest(new URL("http://localhost"));
 
+      // when
       const result = await POST(request, {});
 
+      // then
       expect(result.status).toBe(400);
       const responseBody = await result.json();
       expect(responseBody.detail).toStrictEqual(errorMessage);
@@ -159,15 +170,15 @@ describe("Services API", () => {
         selcGroups,
         isGroupAllowed,
         expectedStatusCode,
-        expectedDetail
+        expectedDetail,
       }) => {
         // given
         const jsonBodyMock = {
           ...aValidServicePayload,
           metadata: {
             ...aValidServicePayload.metadata,
-            group_id
-          }
+            group_id,
+          },
         };
         isAdminMock.mockReturnValueOnce(false);
         isGroupAllowedMock.mockReturnValueOnce(isGroupAllowed);
@@ -185,7 +196,7 @@ describe("Services API", () => {
         expect(parseBodyMock).toHaveBeenCalledOnce();
         expect(parseBodyMock).toHaveBeenCalledWith(
           request,
-          CreateServicePayload
+          CreateServicePayload,
         );
         expect(userAuthzMock).toHaveBeenCalledOnce();
         expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
@@ -193,7 +204,7 @@ describe("Services API", () => {
         expect(isAdminMock).toHaveBeenCalledWith();
         expect(groupExistsMock).not.toHaveBeenCalled();
         expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
-      }
+      },
     );
 
     it("should return a bad request when user is admin group is set and the group doesn't exist", async () => {
@@ -202,8 +213,8 @@ describe("Services API", () => {
         ...aValidServicePayload,
         metadata: {
           ...aValidServicePayload.metadata,
-          group_id: "nonExistingGroupId"
-        }
+          group_id: "nonExistingGroupId",
+        },
       };
       parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
       const groupNotFoundError = new GroupNotFoundError("group doesn't exist");
@@ -217,7 +228,7 @@ describe("Services API", () => {
       expect(result.status).toBe(400);
       const responseBody = await result.json();
       expect(responseBody.detail).toEqual(
-        "Provided group_id 'nonExistingGroupId' does not exists"
+        "Provided group_id 'nonExistingGroupId' does not exists",
       );
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(request, CreateServicePayload);
@@ -228,46 +239,55 @@ describe("Services API", () => {
       expect(getGroupMock).toHaveBeenCalledOnce();
       expect(getGroupMock).toHaveBeenCalledWith(
         jsonBodyMock.metadata.group_id,
-        backofficeUserMock.institution.id
+        backofficeUserMock.institution.id,
       );
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
 
-    it("should return a forbidden response when group exists but is not active and user is admin", async () => {
-      // given
-      const jsonBodyMock = {
-        ...aValidServicePayload,
-        metadata: {
-          ...aValidServicePayload.metadata,
-          group_id: "group_id"
-        }
-      };
-      parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
-      getGroupMock.mockResolvedValueOnce(aSelcGroupNotActive[0]);
-      const request = new NextRequest(new URL("http://localhost"));
+    it.each`
+      scenario                            | mockGroup                 | isSpecialGroup | expectedDetail
+      ${"group is not active"}            | ${aSelcGroupNotActive[0]} | ${false}       | ${"Provided group_id 'group_id' is not active"}
+      ${"group is active but is special"} | ${aSelcGroupActive[0]}    | ${true}        | ${"Provided group_id 'group_id' is a 'special' group"}
+    `(
+      "should return a forbidden response when $scenario and user is admin",
+      async ({ mockGroup, isSpecialGroup, expectedDetail }) => {
+        // given
+        const jsonBodyMock = {
+          ...aValidServicePayload,
+          metadata: {
+            ...aValidServicePayload.metadata,
+            group_id: "group_id",
+          },
+        };
+        parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
+        getGroupMock.mockResolvedValueOnce(mockGroup);
+        isSpecialGroupMock.mockReturnValueOnce(isSpecialGroup);
+        const request = new NextRequest(new URL("http://localhost"));
 
-      // when
-      const result = await POST(request, {});
+        // when
+        const result = await POST(request, {});
 
-      // then
-      expect(result.status).toBe(403);
-      const responseBody = await result.json();
-      expect(responseBody.detail).toEqual(
-        "Provided group_id 'group_id' is not active"
-      );
-      expect(parseBodyMock).toHaveBeenCalledOnce();
-      expect(parseBodyMock).toHaveBeenCalledWith(request, CreateServicePayload);
-      expect(userAuthzMock).toHaveBeenCalledOnce();
-      expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-      expect(isAdminMock).toHaveBeenCalledOnce();
-      expect(isAdminMock).toHaveBeenCalledWith();
-      expect(getGroupMock).toHaveBeenCalledOnce();
-      expect(getGroupMock).toHaveBeenCalledWith(
-        jsonBodyMock.metadata.group_id,
-        backofficeUserMock.institution.id
-      );
-      expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
-    });
+        // then
+        expect(result.status).toBe(403);
+        const responseBody = await result.json();
+        expect(responseBody.detail).toEqual(expectedDetail);
+        expect(parseBodyMock).toHaveBeenCalledOnce();
+        expect(parseBodyMock).toHaveBeenCalledWith(
+          request,
+          CreateServicePayload,
+        );
+        expect(userAuthzMock).toHaveBeenCalledOnce();
+        expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
+        expect(isAdminMock).toHaveBeenCalledOnce();
+        expect(isAdminMock).toHaveBeenCalledWith();
+        expect(getGroupMock).toHaveBeenCalledOnce();
+        expect(getGroupMock).toHaveBeenCalledWith(
+          jsonBodyMock.metadata.group_id,
+          backofficeUserMock.institution.id,
+        );
+        expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
+      },
+    );
 
     it("should return an internal error when group is set but checking group fn fails ", async () => {
       // given
@@ -275,13 +295,13 @@ describe("Services API", () => {
         ...aValidServicePayload,
         metadata: {
           ...aValidServicePayload.metadata,
-          group_id: "nonExistingGroupId"
-        }
+          group_id: "nonExistingGroupId",
+        },
       };
       parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
       const errorMessage = "errorMessage";
       getGroupMock.mockRejectedValueOnce(
-        new ManagedInternalError(errorMessage)
+        new ManagedInternalError(errorMessage),
       );
       const request = new NextRequest(new URL("http://localhost"));
 
@@ -301,7 +321,7 @@ describe("Services API", () => {
       expect(getGroupMock).toHaveBeenCalledOnce();
       expect(getGroupMock).toHaveBeenCalledWith(
         jsonBodyMock.metadata.group_id,
-        backofficeUserMock.institution.id
+        backofficeUserMock.institution.id,
       );
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
     });
@@ -322,8 +342,8 @@ describe("Services API", () => {
           ...aValidServicePayload,
           metadata: {
             ...aValidServicePayload.metadata,
-            group_id
-          }
+            group_id,
+          },
         };
         if (userRole !== SelfcareRoles.admin) {
           isAdminMock.mockReturnValueOnce(false);
@@ -344,7 +364,7 @@ describe("Services API", () => {
         expect(parseBodyMock).toHaveBeenCalledOnce();
         expect(parseBodyMock).toHaveBeenCalledWith(
           request,
-          CreateServicePayload
+          CreateServicePayload,
         );
         expect(userAuthzMock).toHaveBeenCalledOnce();
         expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
@@ -354,7 +374,7 @@ describe("Services API", () => {
           expect(getGroupMock).toHaveBeenCalledOnce();
           expect(getGroupMock).toHaveBeenCalledWith(
             jsonBodyMock.metadata.group_id,
-            backofficeUserMock.institution.id
+            backofficeUserMock.institution.id,
           );
         } else {
           expect(getGroupMock).not.toHaveBeenCalled();
@@ -369,12 +389,12 @@ describe("Services API", () => {
               ...jsonBodyMock,
               organization: {
                 name: backofficeUserMock.institution.name,
-                fiscal_code: backofficeUserMock.institution.fiscalCode
-              }
-            }
-          }
+                fiscal_code: backofficeUserMock.institution.fiscalCode,
+              },
+            },
+          },
         );
-      }
+      },
     );
 
     it("should forward request with request organization name modified if organization is PagoPA", async () => {
@@ -388,8 +408,8 @@ describe("Services API", () => {
         ...aValidServicePayload,
         metadata: {
           ...aValidServicePayload.metadata,
-          group_id
-        }
+          group_id,
+        },
       };
 
       parseBodyMock.mockResolvedValueOnce(jsonBodyMock);
@@ -413,7 +433,7 @@ describe("Services API", () => {
       expect(getGroupMock).toHaveBeenCalledOnce();
       expect(getGroupMock).toHaveBeenCalledWith(
         jsonBodyMock.metadata.group_id,
-        backofficeUserMock.institution.id
+        backofficeUserMock.institution.id,
       );
       expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledOnce();
       expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
@@ -425,10 +445,10 @@ describe("Services API", () => {
             ...jsonBodyMock,
             organization: {
               name: "IO - L'app dei servizi pubblici",
-              fiscal_code: backofficeUserMock.institution.fiscalCode
-            }
-          }
-        }
+              fiscal_code: backofficeUserMock.institution.fiscalCode,
+            },
+          },
+        },
       );
     });
   });
@@ -476,7 +496,7 @@ describe("Services API", () => {
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(
         request,
-        BulkPatchServicePayload
+        BulkPatchServicePayload,
       );
       expect(getGroupMock).not.toHaveBeenCalled();
       expect(bulkPatchMock).not.toHaveBeenCalled();
@@ -490,9 +510,9 @@ describe("Services API", () => {
         services: [
           {
             id: faker.string.uuid(),
-            metadata: { group_id: faker.string.uuid() }
-          }
-        ]
+            metadata: { group_id: faker.string.uuid() },
+          },
+        ],
       };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
       getGroupMock.mockReturnValueOnce(aSelcGroupNotActive[0]);
@@ -504,7 +524,7 @@ describe("Services API", () => {
       expect(result.status).toBe(403);
       const responseBody = await result.json();
       expect(responseBody.detail).toStrictEqual(
-        `Provided group_id '${requestPayload.services[0].metadata.group_id}' is not active`
+        `Provided group_id '${requestPayload.services[0].metadata.group_id}' is not active`,
       );
       expect(userAuthzMock).toHaveBeenCalledOnce();
       expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
@@ -513,12 +533,12 @@ describe("Services API", () => {
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(
         request,
-        BulkPatchServicePayload
+        BulkPatchServicePayload,
       );
       expect(getGroupMock).toHaveBeenCalledOnce();
       expect(getGroupMock).toHaveBeenCalledWith(
         requestPayload.services[0].metadata.group_id,
-        backofficeUserMock.institution.id
+        backofficeUserMock.institution.id,
       );
       expect(bulkPatchMock).not.toHaveBeenCalled();
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
@@ -531,9 +551,9 @@ describe("Services API", () => {
         services: [
           {
             id: faker.string.uuid(),
-            metadata: { group_id: faker.string.uuid() }
-          }
-        ]
+            metadata: { group_id: faker.string.uuid() },
+          },
+        ],
       };
       const groupNotFoundError = new GroupNotFoundError("group not found");
       parseBodyMock.mockResolvedValueOnce(requestPayload);
@@ -546,7 +566,7 @@ describe("Services API", () => {
       expect(result.status).toBe(400);
       const responseBody = await result.json();
       expect(responseBody.detail).toStrictEqual(
-        `Provided group_id '${requestPayload.services[0].metadata.group_id}' does not exists`
+        `Provided group_id '${requestPayload.services[0].metadata.group_id}' does not exists`,
       );
       expect(userAuthzMock).toHaveBeenCalledOnce();
       expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
@@ -555,12 +575,12 @@ describe("Services API", () => {
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(
         request,
-        BulkPatchServicePayload
+        BulkPatchServicePayload,
       );
       expect(getGroupMock).toHaveBeenCalledOnce();
       expect(getGroupMock).toHaveBeenCalledWith(
         requestPayload.services[0].metadata.group_id,
-        backofficeUserMock.institution.id
+        backofficeUserMock.institution.id,
       );
       expect(bulkPatchMock).not.toHaveBeenCalled();
       expect(forwardIoServicesCmsRequestMock).not.toHaveBeenCalled();
@@ -573,9 +593,9 @@ describe("Services API", () => {
         services: [
           {
             id: faker.string.uuid(),
-            metadata: { group_id: faker.string.uuid() }
-          }
-        ]
+            metadata: { group_id: faker.string.uuid() },
+          },
+        ],
       };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
       getGroupMock.mockReturnValue(aSelcGroupActive[0]);
@@ -595,12 +615,12 @@ describe("Services API", () => {
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(
         request,
-        BulkPatchServicePayload
+        BulkPatchServicePayload,
       );
       expect(getGroupMock).toHaveBeenCalledOnce();
       expect(getGroupMock).toHaveBeenCalledWith(
         requestPayload.services[0].metadata.group_id,
-        backofficeUserMock.institution.id
+        backofficeUserMock.institution.id,
       );
       expect(bulkPatchMock).toHaveBeenCalledOnce();
       expect(bulkPatchMock).toHaveBeenCalledWith(requestPayload.services);
@@ -614,17 +634,17 @@ describe("Services API", () => {
         services: [
           {
             id: faker.string.uuid(),
-            metadata: { group_id: faker.string.uuid() }
+            metadata: { group_id: faker.string.uuid() },
           },
           {
             id: faker.string.uuid(),
-            metadata: { group_id: faker.string.uuid() }
+            metadata: { group_id: faker.string.uuid() },
           },
           {
             id: faker.string.uuid(),
-            metadata: { group_id: undefined }
-          }
-        ]
+            metadata: { group_id: undefined },
+          },
+        ],
       };
       parseBodyMock.mockResolvedValueOnce(requestPayload);
       getGroupMock.mockReturnValue(aSelcGroupActive[0]);
@@ -642,18 +662,18 @@ describe("Services API", () => {
       expect(parseBodyMock).toHaveBeenCalledOnce();
       expect(parseBodyMock).toHaveBeenCalledWith(
         request,
-        BulkPatchServicePayload
+        BulkPatchServicePayload,
       );
       const requestPayloadFiltered = requestPayload.services.filter(
-        item => item.metadata.group_id
+        (item) => item.metadata.group_id,
       );
       expect(getGroupMock).toHaveBeenCalledTimes(requestPayloadFiltered.length);
       requestPayloadFiltered.forEach((item, i) =>
         expect(getGroupMock).toHaveBeenNthCalledWith(
           i + 1,
           item.metadata.group_id,
-          backofficeUserMock.institution.id
-        )
+          backofficeUserMock.institution.id,
+        ),
       );
       expect(bulkPatchMock).toHaveBeenCalledOnce();
       expect(bulkPatchMock).toHaveBeenCalledWith(requestPayload.services);
