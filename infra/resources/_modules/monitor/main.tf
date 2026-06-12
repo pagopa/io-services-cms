@@ -21,7 +21,7 @@ resource "azurerm_monitor_action_group" "oncall_action_group" {
   short_name          = "${var.domain}-oncall"
 
   webhook_receiver {
-    name                    = "SentToJSM"
+    name                    = "SendToIncidentManagementService"
     service_uri             = local.incident_mgmt_system.service_uri
     use_common_alert_schema = true
   }
