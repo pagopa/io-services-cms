@@ -8,7 +8,6 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
-  ApimClientTimeoutRetryOptions,
   ApimRestError,
   formatEmailForOrganization,
   getApimClient,
@@ -16,6 +15,7 @@ import {
   parseIdFromFullPath,
 } from "..";
 import { SubscriptionKeyTypeEnum } from "../../generated/api/SubscriptionKeyType";
+import { RetryOptions } from "../../utils/retries";
 
 vi.mock("@azure/identity", () => ({
   DefaultAzureCredential: vi.fn(),
@@ -597,10 +597,7 @@ describe("ApimService Test", () => {
       }
     });
 
-    it.each([
-      { name: "AbortError" },
-      { code: "ETIMEDOUT" },
-    ])(
+    it.each([{ name: "AbortError" }, { code: "ETIMEDOUT" }])(
       "should retry on timeout error %o when retryOptions are provided",
       async (timeoutError) => {
         const secrets = {
@@ -616,7 +613,7 @@ describe("ApimService Test", () => {
           subscription: { listSecrets: mockListSecrets },
         } as unknown as ApiManagementClient;
 
-        const retryOptions: ApimClientTimeoutRetryOptions = {
+        const retryOptions: RetryOptions = {
           initialDelayMs: 0,
           maxDelayMs: 0,
           maxRetries: 2,
@@ -660,7 +657,7 @@ describe("ApimService Test", () => {
         subscription: { listSecrets: mockListSecrets },
       } as unknown as ApiManagementClient;
 
-      const retryOptions: ApimClientTimeoutRetryOptions = {
+      const retryOptions: RetryOptions = {
         initialDelayMs: 0,
         maxDelayMs: 0,
         maxRetries: 3,
@@ -687,7 +684,7 @@ describe("ApimService Test", () => {
         subscription: { listSecrets: mockListSecrets },
       } as unknown as ApiManagementClient;
 
-      const retryOptions: ApimClientTimeoutRetryOptions = {
+      const retryOptions: RetryOptions = {
         initialDelayMs: 0,
         maxDelayMs: 0,
         maxRetries: 3,
