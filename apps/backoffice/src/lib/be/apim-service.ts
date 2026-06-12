@@ -95,9 +95,9 @@ const buildApimService: () => ApimUtils.ApimService = () => {
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
     apimConfig.AZURE_APIM,
     apimConfig.AZURE_APIM_PRODUCT_NAME,
-    // Application-level timeout retries for listSecrets: the SDK does not retry
+    // Application-level timeout retries: the SDK does not retry
     // timed-out requests (AbortError is thrown before retry strategies run),
-    // so this fills the gap specifically for that operation.
+    // so this fills the gap specifically for some operations.
     {
       initialDelayMs: apimConfig.AZURE_APIM_CLIENT_RETRY_DELAY_MS,
       maxDelayMs: apimConfig.AZURE_APIM_CLIENT_MAX_RETRY_DELAY_MS,

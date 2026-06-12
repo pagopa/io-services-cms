@@ -597,43 +597,47 @@ describe("ApimService Test", () => {
       }
     });
 
-    it("should retry on timeout errors when retryOptions are provided", async () => {
-      const timeoutError = { name: "AbortError" };
-      const secrets = {
-        _etag: "_etag",
-        primaryKey: aPrimaryKey,
-        secondaryKey: aSecondaryKey,
-      };
-      const mockListSecrets = vi
-        .fn()
-        .mockRejectedValueOnce(timeoutError)
-        .mockResolvedValueOnce(secrets);
-      const mockApimClient = {
-        subscription: { listSecrets: mockListSecrets },
-      } as unknown as ApiManagementClient;
+    it.each([
+      { name: "AbortError" },
+      { code: "ETIMEDOUT" },
+    ])(
+      "should retry on timeout error %o when retryOptions are provided",
+      async (timeoutError) => {
+        const secrets = {
+          _etag: "_etag",
+          primaryKey: aPrimaryKey,
+          secondaryKey: aSecondaryKey,
+        };
+        const mockListSecrets = vi
+          .fn()
+          .mockRejectedValueOnce(timeoutError)
+          .mockResolvedValueOnce(secrets);
+        const mockApimClient = {
+          subscription: { listSecrets: mockListSecrets },
+        } as unknown as ApiManagementClient;
 
-      const retryOptions: ApimClientTimeoutRetryOptions = {
-        initialDelayMs: 0,
-        maxDelayMs: 0,
-        maxRetries: 2,
-      };
-      const apimService = getApimService(
-        mockApimClient,
-        anApimResourceGroup,
-        anApimServiceName,
-        anApimProductName,
-        retryOptions,
-      );
+        const retryOptions: ApimClientTimeoutRetryOptions = {
+          initialDelayMs: 0,
+          maxDelayMs: 0,
+          maxRetries: 2,
+        };
+        const apimService = getApimService(
+          mockApimClient,
+          anApimResourceGroup,
+          anApimServiceName,
+          anApimProductName,
+          retryOptions,
+        );
 
-      const resultPromise = apimService.listSecrets(aServiceId)();
-      const result = await resultPromise;
+        const result = await apimService.listSecrets(aServiceId)();
 
-      expect(E.isRight(result)).toBeTruthy();
-      expect(mockListSecrets).toHaveBeenCalledTimes(2);
-    });
+        expect(E.isRight(result)).toBeTruthy();
+        expect(mockListSecrets).toHaveBeenCalledTimes(2);
+      },
+    );
 
     it("should use default retry config when retryOptions are not provided", async () => {
-      const timeoutError = { code: "ETIMEOUT" };
+      const timeoutError = { code: "ETIMEDOUT" };
       const mockListSecrets = vi.fn().mockRejectedValue(timeoutError);
       const mockApimClient = {
         subscription: { listSecrets: mockListSecrets },

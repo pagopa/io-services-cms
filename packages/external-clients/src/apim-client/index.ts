@@ -34,26 +34,10 @@ import {
   SubscriptionKeyType,
   SubscriptionKeyTypeEnum,
 } from "../generated/api/SubscriptionKeyType";
-import { retryTaskEither } from "../utils/retries";
+import { RetryOptions, retryTaskEither } from "../utils/retries";
 import { subscriptionsExceptManageOneApimFilter } from "./apim-filters";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
-
-/**
- * Retry options for timeout-triggered failures on APIM operations.
- *
- * The Azure SDK (@azure/core-rest-pipeline) handles HTTP-level errors (e.g. 500,
- * 503) via its built-in exponential retry policy, but it does NOT retry requests
- * that are aborted by a client-side timeout: when a request times out, the SDK
- * throws an AbortError immediately and skips all retry strategies. These options
- * configure an application-level retry layer to fill that gap.
- */
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type ApimClientTimeoutRetryOptions = {
-  readonly initialDelayMs?: number;
-  readonly maxDelayMs?: number;
-  readonly maxRetries?: number;
-};
 
 export const ApimRestError = t.intersection([
   t.type({
@@ -195,12 +179,20 @@ export interface ApimService {
   ) => TE.TaskEither<ApimRestError | Error, SubscriptionContract>;
 }
 
+/**
+ * @param apimClient - The Azure API Management client.
+ * @param apimResourceGroup - The resource group containing the APIM instance.
+ * @param apimServiceName - The name of the APIM service.
+ * @param apimProductName - The APIM product name.
+ * @param timeoutRetryOptions - Optional application-level retry for operations
+ *   that are subject to timeouts.
+ */
 export const getApimService = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apimServiceName: string,
   apimProductName: NonEmptyString,
-  retryOptions?: ApimClientTimeoutRetryOptions,
+  timeoutRetryOptions?: RetryOptions,
 ): ApimService => ({
   createGroupUser: (groupId, userId) =>
     createGroupUser(
@@ -290,7 +282,7 @@ export const getApimService = (
       apimServiceName,
       subscriptionId,
       requestTimeoutInMs,
-      retryOptions,
+      timeoutRetryOptions,
     ),
   regenerateSubscriptionKey: (subscriptionId, keyType) =>
     regenerateSubscriptionKey(
@@ -468,35 +460,32 @@ const listSecrets = (
   apimServiceName: string,
   subscriptionId: string,
   requestTimeoutInMs?: number,
-  retryOptions?: ApimClientTimeoutRetryOptions,
+  timeoutRetryOptions?: RetryOptions,
 ) =>
   pipe(
-    retryTaskEither(
-      TE.tryCatch(
-        () =>
-          apimClient.subscription.listSecrets(
-            apimResourceGroup,
-            apimServiceName,
-            subscriptionId,
-            {
-              requestOptions: {
-                timeout: requestTimeoutInMs,
-              },
+    TE.tryCatch(
+      () =>
+        apimClient.subscription.listSecrets(
+          apimResourceGroup,
+          apimServiceName,
+          subscriptionId,
+          {
+            requestOptions: {
+              timeout: requestTimeoutInMs,
             },
-          ),
-        identity,
-      ),
-      retryOptions?.maxRetries ?? 0,
-      retryOptions?.initialDelayMs ?? 0,
-      retryOptions?.maxDelayMs ?? 0,
-      (error: unknown) => {
-        if (typeof error !== "object" || error === null) {
-          return false;
-        }
-        const e = error as Record<string, unknown>;
-        return e.name === "AbortError" || e.code === "ETIMEOUT";
-      },
+          },
+        ),
+      identity,
     ),
+    timeoutRetryOptions
+      ? retryTaskEither(timeoutRetryOptions, (error: unknown) => {
+          if (typeof error !== "object" || error === null) {
+            return false;
+          }
+          const e = error as Record<string, unknown>;
+          return e.name === "AbortError" || e.code === "ETIMEDOUT";
+        })
+      : identity,
     chainApimMappedError,
   );
 

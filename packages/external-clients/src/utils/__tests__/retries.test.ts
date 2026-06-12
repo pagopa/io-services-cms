@@ -10,7 +10,10 @@ describe("retryTaskEither", () => {
   it("should return right immediately when action succeeds on the first attempt", async () => {
     const action = TE.right("success");
 
-    const result = await retryTaskEither(action, 3, 100, 500, alwaysRetry)();
+    const result = await retryTaskEither(
+      { maxRetries: 3, initialDelayMs: 100, maxDelayMs: 500 },
+      alwaysRetry,
+    )(action)();
 
     expect(result).toEqual(E.right("success"));
   });
@@ -23,15 +26,10 @@ describe("retryTaskEither", () => {
       return "success";
     });
 
-    const resultPromise = retryTaskEither(
-      TE.tryCatch(action, (e) => e as Error),
-      3,
-      100,
-      500,
+    const result = await retryTaskEither(
+      { maxRetries: 3, initialDelayMs: 100, maxDelayMs: 500 },
       alwaysRetry,
-    )();
-
-    const result = await resultPromise;
+    )(TE.tryCatch(action, (e) => e as Error))();
 
     expect(result).toEqual(E.right("success"));
     expect(counter).toBe(2);
@@ -41,15 +39,10 @@ describe("retryTaskEither", () => {
     const error = new Error("persistent failure");
     const action = vi.fn(() => Promise.reject(error));
 
-    const resultPromise = retryTaskEither(
-      TE.tryCatch(action, (e) => e as Error),
-      3,
-      100,
-      500,
+    const result = await retryTaskEither(
+      { maxRetries: 3, initialDelayMs: 100, maxDelayMs: 500 },
       alwaysRetry,
-    )();
-
-    const result = await resultPromise;
+    )(TE.tryCatch(action, (e) => e as Error))();
 
     expect(result).toEqual(E.left(error));
     expect(action).toHaveBeenCalledTimes(4);
@@ -59,15 +52,10 @@ describe("retryTaskEither", () => {
     const error = new Error("non-retriable");
     const action = vi.fn(() => Promise.reject(error));
 
-    const resultPromise = retryTaskEither(
-      TE.tryCatch(action, (e) => e as Error),
-      3,
-      100,
-      500,
+    const result = await retryTaskEither(
+      { maxRetries: 3, initialDelayMs: 100, maxDelayMs: 500 },
       neverRetry,
-    )();
-
-    const result = await resultPromise;
+    )(TE.tryCatch(action, (e) => e as Error))();
 
     expect(result).toEqual(E.left(error));
     expect(action).toHaveBeenCalledTimes(1);
@@ -77,15 +65,10 @@ describe("retryTaskEither", () => {
     const error = new Error("fail");
     const action = vi.fn(() => Promise.reject(error));
 
-    const resultPromise = retryTaskEither(
-      TE.tryCatch(action, (e) => e as Error),
-      0,
-      100,
-      500,
+    const result = await retryTaskEither(
+      { maxRetries: 0, initialDelayMs: 100, maxDelayMs: 500 },
       alwaysRetry,
-    )();
-
-    const result = await resultPromise;
+    )(TE.tryCatch(action, (e) => e as Error))();
 
     expect(result).toEqual(E.left(error));
     expect(action).toHaveBeenCalledTimes(1);
@@ -104,15 +87,10 @@ describe("retryTaskEither", () => {
       throw new Error("fail");
     });
 
-    const resultPromise = retryTaskEither(
-      TE.tryCatch(action, (e) => e as Error),
-      3,
-      100,
-      500,
+    await retryTaskEither(
+      { maxRetries: 3, initialDelayMs: 100, maxDelayMs: 500 },
       alwaysRetry,
-    )();
-
-    await resultPromise;
+    )(TE.tryCatch(action, (e) => e as Error))();
 
     expect(delays[0]).toBeGreaterThanOrEqual(100);
     expect(delays[1]).toBeGreaterThanOrEqual(150);
@@ -127,15 +105,10 @@ describe("retryTaskEither", () => {
       throw new Error("fail");
     });
 
-    const resultPromise = retryTaskEither(
-      TE.tryCatch(action, (e) => e as Error),
-      4,
-      100,
-      150,
+    await retryTaskEither(
+      { maxRetries: 4, initialDelayMs: 100, maxDelayMs: 150 },
       alwaysRetry,
-    )();
-
-    await resultPromise;
+    )(TE.tryCatch(action, (e) => e as Error))();
 
     const measuredDelays = timestamps.slice(1).map((t, i) => t - timestamps[i]);
     expect(measuredDelays[1]).toBeLessThanOrEqual(160);
@@ -155,15 +128,10 @@ describe("retryTaskEither", () => {
 
     const shouldRetry = vi.fn((e: Error) => e === retriableError);
 
-    const resultPromise = retryTaskEither(
-      TE.tryCatch(action, (e) => e as Error),
-      3,
-      100,
-      500,
+    const result = await retryTaskEither(
+      { maxRetries: 3, initialDelayMs: 100, maxDelayMs: 500 },
       shouldRetry,
-    )();
-
-    const result = await resultPromise;
+    )(TE.tryCatch(action, (e) => e as Error))();
 
     expect(result).toEqual(E.left(nonRetriableError));
     expect(action).toHaveBeenCalledTimes(2);
