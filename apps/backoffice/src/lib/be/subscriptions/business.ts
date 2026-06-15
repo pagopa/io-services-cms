@@ -565,19 +565,20 @@ async function generateApiKeysExportsInner(
   password: string,
   fileName: string,
 ): Promise<void> {
-  const { aggregateMap, groupsCounter: _ } =
+  const { aggregateMap, groupsCounter } =
     await retrieveAggregatorGroups(aggregatorId);
 
-  const { aggregatesCounter: __, enrichedAggregateData } =
-    await retrieveAggregates(aggregatorId, aggregateMap);
+  const { aggregatesCounter, enrichedAggregateData } = await retrieveAggregates(
+    aggregatorId,
+    aggregateMap,
+  );
 
-  // TODO: revert this after selfcare EA fix
-  // if (aggregatesCounter !== groupsCounter) {
-  // throw new ManagedInternalError(
-  //   "Data inconsistency",
-  //   `The number of aggregates related to the aggregator '${aggregatorId}' is different from the number of groups related to the aggregator. Groups count: ${groupsCounter}, Aggregates count: ${aggregatesCounter}`,
-  // );
-  // }
+  if (aggregatesCounter !== groupsCounter) {
+    throw new ManagedInternalError(
+      "Data inconsistency",
+      `The number of aggregates related to the aggregator '${aggregatorId}' is different from the number of groups related to the aggregator. Groups count: ${groupsCounter}, Aggregates count: ${aggregatesCounter}`,
+    );
+  }
 
   const enrichedAggregateDataWithKeys = [];
   for (const aggregate of enrichedAggregateData) {
