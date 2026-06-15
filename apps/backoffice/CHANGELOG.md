@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 2.7.1
+
+### Patch Changes
+
+- 60ac7417: Revert previous error skip
+- 24a8f80d: Bump next from 15.5.15 to 15.5.18
+
 ## 2.7.0
 
 ### Minor Changes
