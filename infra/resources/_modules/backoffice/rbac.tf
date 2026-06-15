@@ -18,7 +18,7 @@ module "bo_roles" {
     resource_group_name  = var.sa_ext.resource_group_name
     description          = "To allow managing blobs in the delegated access storage account"
     role                 = "writer"
-    container_name       = local.containers["api-keys"].name
+    container_name       = var.sa_ext.blob.api_keys_container_name
     }
   ]
 }
@@ -50,7 +50,7 @@ module "bo_staging_slot_roles" {
     resource_group_name  = var.sa_ext.resource_group_name
     description          = "To allow managing blobs in the delegated access storage account"
     role                 = "writer"
-    container_name       = local.containers["api-keys"].name
+    container_name       = var.sa_ext.blob.api_keys_container_name
     }
   ]
 }

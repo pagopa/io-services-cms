@@ -1,9 +1,6 @@
 
 locals {
   app_name = "bo"
-  containers = {
-    "api-keys" = { name = "api-keys" }
-  }
   backoffice = {
     size = "P0v3"
     base_app_settings = {
