@@ -1,5 +1,12 @@
 # @io-services-cms/utilities
 
+## 0.1.3
+
+### Patch Changes
+
+- Updated dependencies [2eb1aa34]
+  - @io-services-cms/external-clients@1.13.0
+
 ## 0.1.2
 
 ### Patch Changes

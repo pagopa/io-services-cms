@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.13.0
+
+### Minor Changes
+
+- 2eb1aa34: Introduced manual retries for listSecrets APIM utility
+
 ## 1.12.1
 
 ### Patch Changes

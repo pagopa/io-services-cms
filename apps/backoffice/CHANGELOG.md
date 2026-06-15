@@ -1,5 +1,21 @@
 # io-services-cms-backoffice
 
+## 2.7.0
+
+### Minor Changes
+
+- bb015124: Added event tracking for EA file download success and error
+
+### Patch Changes
+
+- 2eb1aa34: Introduced manual retries for listSecrets APIM utility
+- b8c798e3: Format date in AggregatedInstitutionDownloadAlert component
+- d0a187ab: Add special-group validation and filtering
+- 6234ec5d: Temporarily skip data inconsistency check for EA
+- 07673dff: Exclude expired blobs from `findExportsFiles`
+- Updated dependencies [2eb1aa34]
+  - @io-services-cms/external-clients@1.13.0
+
 ## 2.6.3
 
 ### Patch Changes
