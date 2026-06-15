@@ -34,6 +34,7 @@ import {
   SubscriptionKeyType,
   SubscriptionKeyTypeEnum,
 } from "../generated/api/SubscriptionKeyType";
+import { RetryOptions, retryTaskEither } from "../utils/retries";
 import { subscriptionsExceptManageOneApimFilter } from "./apim-filters";
 
 export type ApimMappedErrors = IResponseErrorInternal | IResponseErrorNotFound;
@@ -178,11 +179,20 @@ export interface ApimService {
   ) => TE.TaskEither<ApimRestError | Error, SubscriptionContract>;
 }
 
+/**
+ * @param apimClient - The Azure API Management client.
+ * @param apimResourceGroup - The resource group containing the APIM instance.
+ * @param apimServiceName - The name of the APIM service.
+ * @param apimProductName - The APIM product name.
+ * @param timeoutRetryOptions - Optional application-level retry for operations
+ *   that are subject to timeouts.
+ */
 export const getApimService = (
   apimClient: ApiManagementClient,
   apimResourceGroup: string,
   apimServiceName: string,
   apimProductName: NonEmptyString,
+  timeoutRetryOptions?: RetryOptions,
 ): ApimService => ({
   createGroupUser: (groupId, userId) =>
     createGroupUser(
@@ -272,6 +282,7 @@ export const getApimService = (
       apimServiceName,
       subscriptionId,
       requestTimeoutInMs,
+      timeoutRetryOptions,
     ),
   regenerateSubscriptionKey: (subscriptionId, keyType) =>
     regenerateSubscriptionKey(
@@ -449,6 +460,7 @@ const listSecrets = (
   apimServiceName: string,
   subscriptionId: string,
   requestTimeoutInMs?: number,
+  timeoutRetryOptions?: RetryOptions,
 ) =>
   pipe(
     TE.tryCatch(
@@ -465,6 +477,15 @@ const listSecrets = (
         ),
       identity,
     ),
+    timeoutRetryOptions
+      ? retryTaskEither(timeoutRetryOptions, (error: unknown) => {
+          if (typeof error !== "object" || error === null) {
+            return false;
+          }
+          const e = error as Record<string, unknown>;
+          return e.name === "AbortError" || e.code === "ETIMEDOUT";
+        })
+      : identity,
     chainApimMappedError,
   );
 

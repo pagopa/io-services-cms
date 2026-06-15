@@ -80,6 +80,9 @@ const getApimConfig = (): Config => {
 const buildApimService: () => ApimUtils.ApimService = () => {
   // Apim Service, used to operates on Apim resources
   const apimConfig = getApimConfig();
+  // SDK-level retries: the Azure APIM client uses @azure/core-rest-pipeline's
+  // built-in exponential retry policy, which handles HTTP-level errors (408,
+  // 5xx) for all APIM operations automatically.
   const apimClient = ApimUtils.getApimClient(apimConfig.AZURE_SUBSCRIPTION_ID, {
     retryOptions: {
       maxRetries: apimConfig.AZURE_APIM_CLIENT_MAX_RETRIES,
@@ -92,6 +95,14 @@ const buildApimService: () => ApimUtils.ApimService = () => {
     apimConfig.AZURE_APIM_RESOURCE_GROUP,
     apimConfig.AZURE_APIM,
     apimConfig.AZURE_APIM_PRODUCT_NAME,
+    // Application-level timeout retries: the SDK does not retry
+    // timed-out requests (AbortError is thrown before retry strategies run),
+    // so this fills the gap specifically for some operations.
+    {
+      initialDelayMs: apimConfig.AZURE_APIM_CLIENT_RETRY_DELAY_MS,
+      maxDelayMs: apimConfig.AZURE_APIM_CLIENT_MAX_RETRY_DELAY_MS,
+      maxRetries: apimConfig.AZURE_APIM_CLIENT_MAX_RETRIES,
+    },
   );
 };
 
