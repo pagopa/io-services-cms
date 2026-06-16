@@ -62,28 +62,37 @@ const FallbackSettings = {
 const FallbackOptionalSettings = t.partial(FallbackSettings);
 const FallbackRequiredSettings = t.type(FallbackSettings);
 
-const UNUSED_FALLBACK_CONFIGURATION_VALUE =
-  "__unused_when_use_managed_identity_true__" as NonEmptyString;
-
-type ManagedIdentityDisabledConfiguration = {
+type RuntimeModeDisabledConfiguration = {
   USE_MANAGED_IDENTITY: false;
-} & t.TypeOf<typeof ManagedIdentityOptionalSettings>;
+} & t.TypeOf<typeof FallbackRequiredSettings> &
+  t.TypeOf<typeof ManagedIdentityOptionalSettings>;
 
-type ManagedIdentityEnabledConfiguration = {
+type RuntimeModeEnabledConfiguration = {
   USE_MANAGED_IDENTITY: true;
-} & t.TypeOf<typeof ManagedIdentityRequiredSettings>;
+} & t.TypeOf<typeof FallbackOptionalSettings> &
+  t.TypeOf<typeof ManagedIdentityRequiredSettings>;
 
-const ManagedIdentityConfigurationCodec: t.Type<
-  ManagedIdentityDisabledConfiguration | ManagedIdentityEnabledConfiguration,
-  ManagedIdentityDisabledConfiguration | ManagedIdentityEnabledConfiguration,
+const RuntimeModeDisabledSettings = t.intersection([
+  ManagedIdentityOptionalSettings,
+  FallbackRequiredSettings,
+]);
+
+const RuntimeModeEnabledSettings = t.intersection([
+  ManagedIdentityRequiredSettings,
+  FallbackOptionalSettings,
+]);
+
+const RuntimeModeConfigurationCodec: t.Type<
+  RuntimeModeDisabledConfiguration | RuntimeModeEnabledConfiguration,
+  RuntimeModeDisabledConfiguration | RuntimeModeEnabledConfiguration,
   unknown
 > = new t.Type(
-  "ManagedIdentityConfiguration",
+  "RuntimeModeConfiguration",
   (
     input,
   ): input is
-    | ManagedIdentityDisabledConfiguration
-    | ManagedIdentityEnabledConfiguration =>
+    | RuntimeModeDisabledConfiguration
+    | RuntimeModeEnabledConfiguration =>
     typeof input === "object" && input !== null,
   (input, context) => {
     const useManagedIdentityOrErrors = ManagedIdentityFlag.validate(
@@ -99,18 +108,18 @@ const ManagedIdentityConfigurationCodec: t.Type<
 
     return useManagedIdentityOrErrors.right
       ? pipe(
-          ManagedIdentityRequiredSettings.validate(input, context),
+          RuntimeModeEnabledSettings.validate(input, context),
           E.map(
-            (settings): ManagedIdentityEnabledConfiguration => ({
+            (settings): RuntimeModeEnabledConfiguration => ({
               USE_MANAGED_IDENTITY: true,
               ...settings,
             }),
           ),
         )
       : pipe(
-          ManagedIdentityOptionalSettings.validate(input, context),
+          RuntimeModeDisabledSettings.validate(input, context),
           E.map(
-            (settings): ManagedIdentityDisabledConfiguration => ({
+            (settings): RuntimeModeDisabledConfiguration => ({
               USE_MANAGED_IDENTITY: false,
               ...settings,
             }),
@@ -120,74 +129,21 @@ const ManagedIdentityConfigurationCodec: t.Type<
   t.identity,
 );
 
-export type ManagedIdentityConfiguration = t.TypeOf<
-  typeof ManagedIdentityConfigurationCodec
+export type RuntimeModeConfiguration = t.TypeOf<
+  typeof RuntimeModeConfigurationCodec
 >;
 
-export const ManagedIdentityConfiguration = ManagedIdentityConfigurationCodec;
+export const RuntimeModeConfiguration = RuntimeModeConfigurationCodec;
 
-type FallbackConfiguration = t.TypeOf<typeof FallbackRequiredSettings>;
+export type ManagedIdentityConfiguration = Pick<
+  RuntimeModeConfiguration,
+  "USE_MANAGED_IDENTITY" | keyof typeof ManagedIdentitySettings
+>;
 
-const FallbackConfigurationCodec: t.Type<
-  FallbackConfiguration,
-  FallbackConfiguration,
-  unknown
-> = new t.Type(
-  "FallbackConfiguration",
-  (input): input is FallbackConfiguration =>
-    typeof input === "object" && input !== null,
-  (input, context) => {
-    const useManagedIdentityOrErrors = ManagedIdentityFlag.validate(
-      typeof input === "object" && input !== null
-        ? (input as Record<string, unknown>).USE_MANAGED_IDENTITY
-        : undefined,
-      context,
-    );
-
-    if (E.isLeft(useManagedIdentityOrErrors)) {
-      return useManagedIdentityOrErrors;
-    }
-
-    return useManagedIdentityOrErrors.right
-      ? pipe(
-          FallbackOptionalSettings.validate(input, context),
-          E.map(
-            (settings): FallbackConfiguration => ({
-              ACTIVATIONS_EVENT_HUB_CONNECTION_STRING:
-                settings.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING ??
-                UNUSED_FALLBACK_CONFIGURATION_VALUE,
-              COSMOSDB_CONNECTIONSTRING:
-                settings.COSMOSDB_CONNECTIONSTRING ??
-                UNUSED_FALLBACK_CONFIGURATION_VALUE,
-              COSMOSDB_KEY:
-                settings.COSMOSDB_KEY ?? UNUSED_FALLBACK_CONFIGURATION_VALUE,
-              LEGACY_COSMOSDB_CONNECTIONSTRING:
-                settings.LEGACY_COSMOSDB_CONNECTIONSTRING ??
-                UNUSED_FALLBACK_CONFIGURATION_VALUE,
-              LEGACY_COSMOSDB_KEY:
-                settings.LEGACY_COSMOSDB_KEY ??
-                UNUSED_FALLBACK_CONFIGURATION_VALUE,
-              SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING:
-                settings.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING ??
-                UNUSED_FALLBACK_CONFIGURATION_VALUE,
-              SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING:
-                settings.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING ??
-                UNUSED_FALLBACK_CONFIGURATION_VALUE,
-              SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING:
-                settings.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING ??
-                UNUSED_FALLBACK_CONFIGURATION_VALUE,
-              SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING:
-                settings.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING ??
-                UNUSED_FALLBACK_CONFIGURATION_VALUE,
-            }),
-          ),
-        )
-      : FallbackRequiredSettings.validate(input, context);
-  },
-  t.identity,
-);
-
-export const FallbackConfiguration = FallbackConfigurationCodec;
+type FallbackConfiguration = Pick<
+  RuntimeModeConfiguration,
+  keyof typeof FallbackSettings
+>;
 
 const ServicePayloadConfig = t.type({
   MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
@@ -519,11 +475,7 @@ export const IConfig = t.intersection([
         t.type({ isProduction: t.boolean }),
         InternalStorageAccount,
       ]),
-      t.intersection([
-        ManagedIdentityConfiguration,
-        FallbackConfiguration,
-        JiraConfig,
-      ]),
+      t.intersection([RuntimeModeConfiguration, JiraConfig]),
       t.intersection([ReviewerPostgreSqlConfig, ServicePayloadConfig]),
     ]),
     t.intersection([
