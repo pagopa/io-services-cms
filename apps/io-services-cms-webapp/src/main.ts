@@ -267,39 +267,77 @@ const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 
 const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 
+const defaultAzureCredential = new DefaultAzureCredential();
+const useManagedIdentity = config.USE_MANAGED_IDENTITY;
+
+const requireManagedIdentitySetting = (
+  value: string | undefined,
+  name: string,
+): string => {
+  if (!value) {
+    throw new Error(`Missing managed identity setting: ${name}`);
+  }
+  return value;
+};
+
+const createEventHubProducer = (
+  connectionString: string,
+  eventHubName: string,
+): EventHubProducerClient =>
+  useManagedIdentity
+    ? new EventHubProducerClient(
+        requireManagedIdentitySetting(
+          config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+          "SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE",
+        ),
+        eventHubName,
+        defaultAzureCredential,
+      )
+    : new EventHubProducerClient(connectionString, eventHubName);
+
+const internalStorageBindingConnection = useManagedIdentity
+  ? "CMS_INTERNAL_STORAGE"
+  : "INTERNAL_STORAGE_CONNECTION_STRING";
+const cmsCosmosBindingConnection = useManagedIdentity
+  ? "CMS_COSMOSDB"
+  : "COSMOSDB_CONNECTIONSTRING";
+const legacyCosmosBindingConnection = useManagedIdentity
+  ? "CMS_LEGACY_COSMOSDB"
+  : "LEGACY_COSMOSDB_CONNECTIONSTRING";
+
 // eventhub producer for ServicePublication
-const servicePublicationEventHubProducer = new EventHubProducerClient(
+const servicePublicationEventHubProducer = createEventHubProducer(
   config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
 );
 
 // eventhub producer for ServiceTopics
-const serviceTopicsEventHubProducer = new EventHubProducerClient(
+const serviceTopicsEventHubProducer = createEventHubProducer(
   config.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_TOPICS_EVENT_HUB_NAME,
 );
 
 // eventhub producer for ServiceLifecycle
-const serviceLifecycleEventHubProducer = new EventHubProducerClient(
+const serviceLifecycleEventHubProducer = createEventHubProducer(
   config.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
 );
 
 // eventhub producer for ServiceHistory
-const serviceHistoryEventHubProducer = new EventHubProducerClient(
+const serviceHistoryEventHubProducer = createEventHubProducer(
   config.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING,
   config.SERVICES_HISTORY_EVENT_HUB_NAME,
 );
 
 // eventhub producer for Activations
-const activationEventHubProducer = new EventHubProducerClient(
+const activationEventHubProducer = createEventHubProducer(
   config.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING,
   config.ACTIVATIONS_EVENT_HUB_NAME,
 );
 
 const blobServiceClient = new BlobServiceClient(
   `https://${config.STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
-  new DefaultAzureCredential(),
+  defaultAzureCredential,
 );
 
 const eventHubRetryPolicy: ExponentialBackoffRetryOptions = {
@@ -955,40 +993,40 @@ app.http("UploadServiceLogo", {
 });
 
 app.storageQueue("OnRequestReview", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: createRequestReviewEntryPoint,
   queueName: "%REQUEST_REVIEW_QUEUE%",
 });
 
 app.storageQueue("OnRequestPublication", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: createRequestPublicationEntryPoint,
   queueName: "%REQUEST_PUBLICATION_QUEUE%",
 });
 
 app.storageQueue("OnRequestDeletion", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: createRequestDeletionEntryPoint,
   queueName: "%REQUEST_DELETION_QUEUE%",
 });
 
 app.storageQueue("OnRequestSyncCms", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: onRequestSyncCmsEntryPoint,
   queueName: "%REQUEST_SYNC_CMS_QUEUE%",
 });
 
 app.storageQueue("OnRequestSyncLegacy", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: onRequestSyncLegacyEntryPoint,
   queueName: "%REQUEST_SYNC_LEGACY_QUEUE%",
 });
 
 app.storageQueue("OnRequestHistoricization", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   extraOutputs: [
     output.generic({
-      connection: "COSMOSDB_CONNECTIONSTRING",
+      connection: cmsCosmosBindingConnection,
       containerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
       createIfNotExists: false,
       databaseName: "%COSMOSDB_NAME%",
@@ -1001,10 +1039,10 @@ app.storageQueue("OnRequestHistoricization", {
 });
 
 app.storageQueue("OnRequestDetail", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   extraOutputs: [
     output.generic({
-      connection: "COSMOSDB_CONNECTIONSTRING",
+      connection: cmsCosmosBindingConnection,
       containerName: "%COSMOSDB_CONTAINER_SERVICES_DETAILS%",
       createIfNotExists: false,
       databaseName: "%COSMOSDB_APP_BE_NAME%",
@@ -1017,16 +1055,16 @@ app.storageQueue("OnRequestDetail", {
 });
 
 app.storageQueue("OnRequestReviewLegacy", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: createRequestReviewLegacyEntryPoint,
   queueName: "%REQUEST_REVIEW_LEGACY_QUEUE%",
 });
 
 app.storageQueue("OnRequestValidation", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestReview",
       queueName: "%REQUEST_REVIEW_QUEUE%",
       type: "queue",
@@ -1037,49 +1075,49 @@ app.storageQueue("OnRequestValidation", {
 });
 
 app.storageQueue("OnRequestServicesPublicationIngestionRetry", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: createRequestServicesPublicationIngestionRetryEntryPoint,
   queueName: "%REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE%",
 });
 
 app.storageQueue("OnRequestServicesLifecycleIngestionRetry", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: createRequestServicesLifecycleIngestionRetryEntryPoint,
   queueName: "%REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE%",
 });
 
 app.storageQueue("OnRequestServicesHistoryIngestionRetry", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: createRequestServicesHistoryIngestionRetryEntryPoint,
   queueName: "%REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE%",
 });
 
 app.cosmosDB("ServiceLifecycleWatcher", {
-  connection: "COSMOSDB_CONNECTIONSTRING",
+  connection: cmsCosmosBindingConnection,
   containerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestDeletion",
       queueName: "%REQUEST_DELETION_QUEUE%",
       type: "queue",
     }),
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestReview",
       queueName: "%REQUEST_VALIDATION_QUEUE%",
       type: "queue",
     }),
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestPublication",
       queueName: "%REQUEST_PUBLICATION_QUEUE%",
       type: "queue",
     }),
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestHistoricization",
       queueName: "%REQUEST_HISTORICIZATION_QUEUE%",
       type: "queue",
@@ -1093,13 +1131,13 @@ app.cosmosDB("ServiceLifecycleWatcher", {
 });
 
 app.cosmosDB("ServicePublicationWatcher", {
-  connection: "COSMOSDB_CONNECTIONSTRING",
+  connection: cmsCosmosBindingConnection,
   containerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestHistoricization",
       queueName: "%REQUEST_HISTORICIZATION_QUEUE%",
       type: "queue",
@@ -1113,13 +1151,13 @@ app.cosmosDB("ServicePublicationWatcher", {
 });
 
 app.cosmosDB("LegacyServiceWatcher", {
-  connection: "LEGACY_COSMOSDB_CONNECTIONSTRING",
+  connection: legacyCosmosBindingConnection,
   containerName: "%LEGACY_COSMOSDB_CONTAINER_SERVICES%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%LEGACY_COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestSyncCms",
       queueName: "%REQUEST_SYNC_CMS_QUEUE%",
       type: "queue",
@@ -1133,13 +1171,13 @@ app.cosmosDB("LegacyServiceWatcher", {
 });
 
 app.cosmosDB("ServiceHistoryWatcher", {
-  connection: "COSMOSDB_CONNECTIONSTRING",
+  connection: cmsCosmosBindingConnection,
   containerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestSyncLegacy",
       queueName: "%REQUEST_SYNC_LEGACY_QUEUE%",
       type: "queue",
@@ -1153,13 +1191,13 @@ app.cosmosDB("ServiceHistoryWatcher", {
 });
 
 app.cosmosDB("ServiceDetailPublicationWatcher", {
-  connection: "COSMOSDB_CONNECTIONSTRING",
+  connection: cmsCosmosBindingConnection,
   containerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestDetailPublication",
       queueName: "%REQUEST_DETAIL_QUEUE%",
       type: "queue",
@@ -1173,13 +1211,13 @@ app.cosmosDB("ServiceDetailPublicationWatcher", {
 });
 
 app.cosmosDB("ServiceDetailLifecycleWatcher", {
-  connection: "COSMOSDB_CONNECTIONSTRING",
+  connection: cmsCosmosBindingConnection,
   containerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "requestDetailLifecycle",
       queueName: "%REQUEST_DETAIL_QUEUE%",
       type: "queue",
@@ -1199,7 +1237,7 @@ app.eventHub("SelfcareGroupWatcher", {
   eventHubName: "%EH_SC_USERGROUP_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "syncGroupPoisonQueue",
       queueName: "%SYNC_GROUP_POISON_QUEUE%",
       type: "queue",
@@ -1210,13 +1248,13 @@ app.eventHub("SelfcareGroupWatcher", {
 });
 
 app.cosmosDB("ActivationsSyncFromLegacy", {
-  connection: "LEGACY_COSMOSDB_CONNECTIONSTRING",
+  connection: legacyCosmosBindingConnection,
   containerName: "%LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%LEGACY_COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "activationsSyncFromLegacyPoisonQueue",
       queueName: "%SYNC_ACTIVATIONS_FROM_LEGACY_POISON_QUEUE%",
       type: "queue",
@@ -1230,13 +1268,13 @@ app.cosmosDB("ActivationsSyncFromLegacy", {
 });
 
 app.cosmosDB("IngestionServicePublicationWatcher", {
-  connection: "COSMOSDB_CONNECTIONSTRING",
+  connection: cmsCosmosBindingConnection,
   containerName: "%COSMOSDB_CONTAINER_SERVICES_PUBLICATION%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "ingestionError",
       queueName: "%REQUEST_SERVICES_PUBLICATION_INGESTION_RETRY_QUEUE%",
       type: "queue",
@@ -1250,13 +1288,13 @@ app.cosmosDB("IngestionServicePublicationWatcher", {
 });
 
 app.cosmosDB("IngestionServiceLifecycleWatcher", {
-  connection: "COSMOSDB_CONNECTIONSTRING",
+  connection: cmsCosmosBindingConnection,
   containerName: "%COSMOSDB_CONTAINER_SERVICES_LIFECYCLE%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "ingestionError",
       queueName: "%REQUEST_SERVICES_LIFECYCLE_INGESTION_RETRY_QUEUE%",
       type: "queue",
@@ -1269,13 +1307,13 @@ app.cosmosDB("IngestionServiceLifecycleWatcher", {
 });
 
 app.cosmosDB("IngestionServiceHistoryWatcher", {
-  connection: "COSMOSDB_CONNECTIONSTRING",
+  connection: cmsCosmosBindingConnection,
   containerName: "%COSMOSDB_CONTAINER_SERVICES_HISTORY%",
   createLeaseContainerIfNotExists: true,
   databaseName: "%COSMOSDB_NAME%",
   extraOutputs: [
     output.generic({
-      connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+      connection: internalStorageBindingConnection,
       name: "ingestionError",
       queueName: "%REQUEST_SERVICES_HISTORY_INGESTION_RETRY_QUEUE%",
       type: "queue",
@@ -1288,7 +1326,7 @@ app.cosmosDB("IngestionServiceHistoryWatcher", {
 });
 
 app.storageBlob("IngestionActivationWatcher", {
-  connection: "INTERNAL_STORAGE_CONNECTION_STRING",
+  connection: internalStorageBindingConnection,
   handler: onIngestionActivationChangeEntryPoint,
   path: "%ACTIVATIONS_CONTAINER_NAME%/{name}",
 });

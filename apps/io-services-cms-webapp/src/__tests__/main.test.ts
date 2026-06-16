@@ -30,6 +30,7 @@ const mocks = vi.hoisted(() => {
     SERVICES_HISTORY_EVENT_HUB_NAME: "test-history-name",
     APPINSIGHTS_INSTRUMENTATIONKEY: "test-key",
     ACTIVATIONS_CONTAINER_NAME: "test-activations",
+    USE_MANAGED_IDENTITY: false,
   };
 
   const mockEventHubProducer = {

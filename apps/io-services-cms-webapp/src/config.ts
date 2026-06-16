@@ -9,6 +9,7 @@ import { HttpAgentConfig } from "@io-services-cms/fetch-utils";
 import { ServiceLifecycle } from "@io-services-cms/models";
 import { CIDR } from "@pagopa/io-functions-commons/dist/generated/definitions/CIDR";
 import { EmailAddress } from "@pagopa/io-functions-commons/dist/generated/definitions/EmailAddress";
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import {
   IntegerFromString,
   NonNegativeInteger,
@@ -32,6 +33,22 @@ import {
 const InternalStorageAccount = t.type({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
 });
+
+export type ManagedIdentityConfiguration = t.TypeOf<
+  typeof ManagedIdentityConfiguration
+>;
+export const ManagedIdentityConfiguration = t.intersection([
+  t.type({
+    USE_MANAGED_IDENTITY: withDefault(BooleanFromString, true),
+  }),
+  t.partial({
+    CMS_COSMOSDB__accountEndpoint: NonEmptyString,
+    CMS_INTERNAL_STORAGE__blobServiceUri: NonEmptyString,
+    CMS_INTERNAL_STORAGE__queueServiceUri: NonEmptyString,
+    CMS_LEGACY_COSMOSDB__accountEndpoint: NonEmptyString,
+    SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE: NonEmptyString,
+  }),
+]);
 
 const ServicePayloadConfig = t.type({
   MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
@@ -334,11 +351,12 @@ export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
   t.intersection([
     t.intersection([
-      t.type({ isProduction: t.boolean }),
-      InternalStorageAccount,
-      JiraConfig,
-      ReviewerPostgreSqlConfig,
-      ServicePayloadConfig,
+      t.intersection([
+        t.type({ isProduction: t.boolean }),
+        InternalStorageAccount,
+      ]),
+      t.intersection([ManagedIdentityConfiguration, JiraConfig]),
+      t.intersection([ReviewerPostgreSqlConfig, ServicePayloadConfig]),
     ]),
     t.intersection([
       CosmosConfig,
