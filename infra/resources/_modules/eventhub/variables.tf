@@ -67,6 +67,11 @@ variable "cms_fn_principal_id" {
   description = "Principal ID of the Services CMS Function App"
 }
 
+variable "cms_fn_staging_slot_principal_id" {
+  type        = string
+  description = "Principal ID of the Services CMS Function App staging slot"
+}
+
 
 ################
 #  Monitoring  #

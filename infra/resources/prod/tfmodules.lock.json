@@ -106,5 +106,17 @@
     "version": "2.2.4",
     "name": "azure_storage_account",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-storage-account/azurerm/2.2.4"
+  },
+  "eventhub.cms_fn_event_hub_roles": {
+    "hash": "a8c1a6fa085349f937017deb20236170f0bb9dd78b5ded85ec75d7caeba7a872",
+    "version": "1.3.3",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.3"
+  },
+  "eventhub.cms_fn_staging_slot_event_hub_roles": {
+    "hash": "a8c1a6fa085349f937017deb20236170f0bb9dd78b5ded85ec75d7caeba7a872",
+    "version": "1.3.3",
+    "name": "azure_role_assignments",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-role-assignments/azurerm/1.3.3"
   }
 }
