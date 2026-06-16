@@ -47,17 +47,28 @@ const checkManagedIdentityHealth = (
 ): healthcheck.HealthCheck<"AzureManagedIdentity"> =>
   TE.tryCatch(async () => {
     const credential = new DefaultAzureCredential();
+
+    // Validate queue data-plane access using a peek on a known queue.
+    // This exercises Storage Queue Data Contributor permissions (read+write)
+    // that the queue triggers actually need at runtime.
     const queueServiceClient = new QueueServiceClient(
       config.CMS_INTERNAL_STORAGE__queueServiceUri,
       credential,
     );
-    await queueServiceClient.getProperties();
+    const queueClient = queueServiceClient.getQueueClient(
+      config.REQUEST_REVIEW_QUEUE,
+    );
+    await queueClient.peekMessages({ numberOfMessages: 1 });
 
+    // Validate blob data-plane access on the actual container used by triggers
     const blobServiceClient = new BlobServiceClient(
       config.CMS_INTERNAL_STORAGE__blobServiceUri,
       credential,
     );
-    await blobServiceClient.getProperties();
+    const containerClient = blobServiceClient.getContainerClient(
+      config.ACTIVATIONS_CONTAINER_NAME,
+    );
+    await containerClient.getProperties();
 
     const cosmosClient = createManagedIdentityCosmosClient(
       config.CMS_COSMOSDB__accountEndpoint,

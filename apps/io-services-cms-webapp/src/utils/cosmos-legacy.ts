@@ -11,11 +11,6 @@ import {
 
 const config = getConfigOrThrow();
 
-// Setup DocumentDB
-export const cosmosDbUri = config.LEGACY_COSMOSDB_URI;
-export const cosmosDbName = config.LEGACY_COSMOSDB_NAME;
-export const cosmosDbKey = config.LEGACY_COSMOSDB_KEY;
-
 const createLegacyCosmosClient = (
   runtimeConfig: LegacyCosmosConfiguration,
 ): CosmosClient =>
@@ -30,4 +25,6 @@ const createLegacyCosmosClient = (
 
 export const cosmosdbClient: CosmosClient = createLegacyCosmosClient(config);
 
-export const cosmosdbInstance = cosmosdbClient.database(cosmosDbName);
+export const cosmosdbInstance = cosmosdbClient.database(
+  config.LEGACY_COSMOSDB_NAME,
+);
