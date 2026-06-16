@@ -1,90 +1,59 @@
 import { CosmosClient, Database } from "@azure/cosmos";
 import { DefaultAzureCredential } from "@azure/identity";
 
-import {
-  CosmosConfig,
-  RuntimeModeDisabledConfiguration,
-  RuntimeModeEnabledConfiguration,
-} from "../../config";
+import { CosmosConfig, ManagedIdentityConfiguration } from "../../config";
 
-type ManagedIdentityCosmosConfiguration = Omit<
-  CosmosConfig,
-  "COSMOSDB_CONNECTIONSTRING" | "COSMOSDB_KEY"
-> &
-  RuntimeModeEnabledConfiguration;
+const requireManagedIdentityEndpoint = (
+  endpoint: string | undefined,
+  name: string,
+): string => {
+  if (!endpoint) {
+    throw new Error(`Missing managed identity setting: ${name}`);
+  }
 
-type FallbackCosmosConfiguration = CosmosConfig &
-  RuntimeModeDisabledConfiguration;
+  return endpoint;
+};
 
-type CosmosDatabaseConfiguration =
-  | FallbackCosmosConfiguration
-  | ManagedIdentityCosmosConfiguration;
-
-export const createManagedIdentityCosmosClient = (
-  endpoint: string,
-  aadCredentials: DefaultAzureCredential = new DefaultAzureCredential(),
-): CosmosClient =>
-  new CosmosClient({
-    aadCredentials,
-    endpoint,
-  });
-
-export const createFallbackCosmosClient = ({
-  endpoint,
-  key,
-}: {
-  endpoint: string;
-  key: string;
-}): CosmosClient =>
-  new CosmosClient({
-    endpoint,
-    key,
-  });
-
-const getManagedIdentityCosmosDatabase = ({
-  databaseName,
-  endpoint,
-}: {
-  databaseName: string;
-  endpoint: string;
-}): Database =>
-  createManagedIdentityCosmosClient(endpoint).database(databaseName);
-
-const getFallbackCosmosDatabase = ({
-  databaseName,
-  endpoint,
-  key,
-}: {
-  databaseName: string;
-  endpoint: string;
-  key: string;
-}): Database =>
-  createFallbackCosmosClient({ endpoint, key }).database(databaseName);
-
-export const getCmsCosmosDatabase = (
-  config: CosmosDatabaseConfiguration,
-): Database =>
-  config.USE_MANAGED_IDENTITY
-    ? getManagedIdentityCosmosDatabase({
-        databaseName: config.COSMOSDB_NAME,
-        endpoint: config.CMS_COSMOSDB__accountEndpoint,
+export const getCmsCosmosDatabase = ({
+  CMS_COSMOSDB__accountEndpoint,
+  COSMOSDB_KEY,
+  COSMOSDB_NAME,
+  COSMOSDB_URI,
+  USE_MANAGED_IDENTITY,
+}: CosmosConfig & ManagedIdentityConfiguration): Database => {
+  const cosmosdbClient = USE_MANAGED_IDENTITY
+    ? new CosmosClient({
+        aadCredentials: new DefaultAzureCredential(),
+        endpoint: requireManagedIdentityEndpoint(
+          CMS_COSMOSDB__accountEndpoint,
+          "CMS_COSMOSDB__accountEndpoint",
+        ),
       })
-    : getFallbackCosmosDatabase({
-        databaseName: config.COSMOSDB_NAME,
-        endpoint: config.COSMOSDB_URI,
-        key: config.COSMOSDB_KEY,
+    : new CosmosClient({
+        endpoint: COSMOSDB_URI,
+        key: COSMOSDB_KEY,
       });
+  return cosmosdbClient.database(COSMOSDB_NAME);
+};
 
-export const getAppBackendCosmosDatabase = (
-  config: CosmosDatabaseConfiguration,
-): Database =>
-  config.USE_MANAGED_IDENTITY
-    ? getManagedIdentityCosmosDatabase({
-        databaseName: config.COSMOSDB_APP_BE_NAME,
-        endpoint: config.CMS_COSMOSDB__accountEndpoint,
+export const getAppBackendCosmosDatabase = ({
+  CMS_COSMOSDB__accountEndpoint,
+  COSMOSDB_APP_BE_NAME,
+  COSMOSDB_KEY,
+  COSMOSDB_URI,
+  USE_MANAGED_IDENTITY,
+}: CosmosConfig & ManagedIdentityConfiguration): Database => {
+  const cosmosdbClient = USE_MANAGED_IDENTITY
+    ? new CosmosClient({
+        aadCredentials: new DefaultAzureCredential(),
+        endpoint: requireManagedIdentityEndpoint(
+          CMS_COSMOSDB__accountEndpoint,
+          "CMS_COSMOSDB__accountEndpoint",
+        ),
       })
-    : getFallbackCosmosDatabase({
-        databaseName: config.COSMOSDB_APP_BE_NAME,
-        endpoint: config.COSMOSDB_URI,
-        key: config.COSMOSDB_KEY,
+    : new CosmosClient({
+        endpoint: COSMOSDB_URI,
+        key: COSMOSDB_KEY,
       });
+  return cosmosdbClient.database(COSMOSDB_APP_BE_NAME);
+};

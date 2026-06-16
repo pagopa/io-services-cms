@@ -37,11 +37,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
 
-import {
-  RuntimeModeDisabledConfiguration,
-  RuntimeModeEnabledConfiguration,
-  getConfigOrThrow,
-} from "./config";
+import { getConfigOrThrow } from "./config";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
@@ -272,9 +268,17 @@ const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 
 const defaultAzureCredential = new DefaultAzureCredential();
-const runtimeModeConfiguration:
-  | RuntimeModeDisabledConfiguration
-  | RuntimeModeEnabledConfiguration = config;
+const useManagedIdentity = config.USE_MANAGED_IDENTITY;
+
+const requireManagedIdentitySetting = (
+  value: string | undefined,
+  name: string,
+): string => {
+  if (!value) {
+    throw new Error(`Missing managed identity setting: ${name}`);
+  }
+  return value;
+};
 
 const requireFallbackSetting = (
   value: string | undefined,
@@ -293,9 +297,12 @@ const createEventHubProducer = (
   connectionStringName: string,
   eventHubName: string,
 ): EventHubProducerClient =>
-  runtimeModeConfiguration.USE_MANAGED_IDENTITY
+  useManagedIdentity
     ? new EventHubProducerClient(
-        runtimeModeConfiguration.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+        requireManagedIdentitySetting(
+          config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+          "SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE",
+        ),
         eventHubName,
         defaultAzureCredential,
       )
@@ -303,8 +310,6 @@ const createEventHubProducer = (
         requireFallbackSetting(connectionString, connectionStringName),
         eventHubName,
       );
-
-const useManagedIdentity = runtimeModeConfiguration.USE_MANAGED_IDENTITY;
 
 const internalStorageBindingConnection = useManagedIdentity
   ? "CMS_INTERNAL_STORAGE"
