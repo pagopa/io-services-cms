@@ -47,6 +47,24 @@ const ManagedIdentitySettings = {
 const ManagedIdentityOptionalSettings = t.partial(ManagedIdentitySettings);
 const ManagedIdentityRequiredSettings = t.type(ManagedIdentitySettings);
 
+const FallbackSettings = {
+  ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  COSMOSDB_CONNECTIONSTRING: NonEmptyString,
+  COSMOSDB_KEY: NonEmptyString,
+  LEGACY_COSMOSDB_CONNECTIONSTRING: NonEmptyString,
+  LEGACY_COSMOSDB_KEY: NonEmptyString,
+  SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+  SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+};
+
+const FallbackOptionalSettings = t.partial(FallbackSettings);
+const FallbackRequiredSettings = t.type(FallbackSettings);
+
+const UNUSED_FALLBACK_CONFIGURATION_VALUE =
+  "__unused_when_use_managed_identity_true__" as NonEmptyString;
+
 type ManagedIdentityDisabledConfiguration = {
   USE_MANAGED_IDENTITY: false;
 } & t.TypeOf<typeof ManagedIdentityOptionalSettings>;
@@ -107,6 +125,69 @@ export type ManagedIdentityConfiguration = t.TypeOf<
 >;
 
 export const ManagedIdentityConfiguration = ManagedIdentityConfigurationCodec;
+
+type FallbackConfiguration = t.TypeOf<typeof FallbackRequiredSettings>;
+
+const FallbackConfigurationCodec: t.Type<
+  FallbackConfiguration,
+  FallbackConfiguration,
+  unknown
+> = new t.Type(
+  "FallbackConfiguration",
+  (input): input is FallbackConfiguration =>
+    typeof input === "object" && input !== null,
+  (input, context) => {
+    const useManagedIdentityOrErrors = ManagedIdentityFlag.validate(
+      typeof input === "object" && input !== null
+        ? (input as Record<string, unknown>).USE_MANAGED_IDENTITY
+        : undefined,
+      context,
+    );
+
+    if (E.isLeft(useManagedIdentityOrErrors)) {
+      return useManagedIdentityOrErrors;
+    }
+
+    return useManagedIdentityOrErrors.right
+      ? pipe(
+          FallbackOptionalSettings.validate(input, context),
+          E.map(
+            (settings): FallbackConfiguration => ({
+              ACTIVATIONS_EVENT_HUB_CONNECTION_STRING:
+                settings.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING ??
+                UNUSED_FALLBACK_CONFIGURATION_VALUE,
+              COSMOSDB_CONNECTIONSTRING:
+                settings.COSMOSDB_CONNECTIONSTRING ??
+                UNUSED_FALLBACK_CONFIGURATION_VALUE,
+              COSMOSDB_KEY:
+                settings.COSMOSDB_KEY ?? UNUSED_FALLBACK_CONFIGURATION_VALUE,
+              LEGACY_COSMOSDB_CONNECTIONSTRING:
+                settings.LEGACY_COSMOSDB_CONNECTIONSTRING ??
+                UNUSED_FALLBACK_CONFIGURATION_VALUE,
+              LEGACY_COSMOSDB_KEY:
+                settings.LEGACY_COSMOSDB_KEY ??
+                UNUSED_FALLBACK_CONFIGURATION_VALUE,
+              SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING:
+                settings.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING ??
+                UNUSED_FALLBACK_CONFIGURATION_VALUE,
+              SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING:
+                settings.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING ??
+                UNUSED_FALLBACK_CONFIGURATION_VALUE,
+              SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING:
+                settings.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING ??
+                UNUSED_FALLBACK_CONFIGURATION_VALUE,
+              SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING:
+                settings.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING ??
+                UNUSED_FALLBACK_CONFIGURATION_VALUE,
+            }),
+          ),
+        )
+      : FallbackRequiredSettings.validate(input, context);
+  },
+  t.identity,
+);
+
+export const FallbackConfiguration = FallbackConfigurationCodec;
 
 const ServicePayloadConfig = t.type({
   MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
@@ -188,29 +269,37 @@ export const TopicPostgreSqlConfig = t.intersection([
   }),
 ]);
 
-export type CosmosConfig = t.TypeOf<typeof CosmosConfig>;
-export const CosmosConfig = t.type({
+const CosmosBaseConfig = t.type({
   COSMOSDB_APP_BE_NAME: NonEmptyString,
-  COSMOSDB_CONNECTIONSTRING: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_DETAILS: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_HISTORY: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: NonEmptyString,
   COSMOSDB_CONTAINER_SERVICES_PUBLICATION: NonEmptyString,
-  COSMOSDB_KEY: NonEmptyString,
   COSMOSDB_NAME: NonEmptyString,
   COSMOSDB_URI: NonEmptyString,
 });
 
-export type CosmosLegacyConfig = t.TypeOf<typeof CosmosLegacyConfig>;
-export const CosmosLegacyConfig = t.type({
-  LEGACY_COSMOSDB_CONNECTIONSTRING: NonEmptyString,
+export type CosmosConfig = Pick<
+  FallbackConfiguration,
+  "COSMOSDB_CONNECTIONSTRING" | "COSMOSDB_KEY"
+> &
+  t.TypeOf<typeof CosmosBaseConfig>;
+export const CosmosConfig = CosmosBaseConfig;
+
+const CosmosLegacyBaseConfig = t.type({
   LEGACY_COSMOSDB_CONTAINER_SERVICES: NonEmptyString,
   LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE: NonEmptyString,
-  LEGACY_COSMOSDB_KEY: NonEmptyString,
   LEGACY_COSMOSDB_NAME: NonEmptyString,
   LEGACY_COSMOSDB_URI: NonEmptyString,
   LEGACY_SERVICE_WATCHER_MAX_ITEMS_PER_INVOCATION: NumberFromString,
 });
+
+export type CosmosLegacyConfig = Pick<
+  FallbackConfiguration,
+  "LEGACY_COSMOSDB_CONNECTIONSTRING" | "LEGACY_COSMOSDB_KEY"
+> &
+  t.TypeOf<typeof CosmosLegacyBaseConfig>;
+export const CosmosLegacyConfig = CosmosLegacyBaseConfig;
 
 // Apim configuration
 export const ApimConfig = t.type({
@@ -325,45 +414,62 @@ const DefaultValues = t.type({
   ),
 });
 
-export type ServicesPublicationEventHubConfig = t.TypeOf<
-  typeof ServicesPublicationEventHubConfig
->;
-export const ServicesPublicationEventHubConfig = t.type({
-  SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+const ServicesPublicationEventHubBaseConfig = t.type({
   SERVICES_PUBLICATION_EVENT_HUB_NAME: NonEmptyString,
 });
 
-export type ServicesTopicsEventHubConfig = t.TypeOf<
-  typeof ServicesTopicsEventHubConfig
->;
-export const ServicesTopicsEventHubConfig = t.type({
-  SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+export type ServicesPublicationEventHubConfig = Pick<
+  FallbackConfiguration,
+  "SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING"
+> &
+  t.TypeOf<typeof ServicesPublicationEventHubBaseConfig>;
+export const ServicesPublicationEventHubConfig =
+  ServicesPublicationEventHubBaseConfig;
+
+const ServicesTopicsEventHubBaseConfig = t.type({
   SERVICES_TOPICS_EVENT_HUB_NAME: NonEmptyString,
 });
 
-export type ServicesLifecycleEventHubConfig = t.TypeOf<
-  typeof ServicesLifecycleEventHubConfig
->;
-export const ServicesLifecycleEventHubConfig = t.type({
-  SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+export type ServicesTopicsEventHubConfig = Pick<
+  FallbackConfiguration,
+  "SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING"
+> &
+  t.TypeOf<typeof ServicesTopicsEventHubBaseConfig>;
+export const ServicesTopicsEventHubConfig = ServicesTopicsEventHubBaseConfig;
+
+const ServicesLifecycleEventHubBaseConfig = t.type({
   SERVICES_LIFECYCLE_EVENT_HUB_NAME: NonEmptyString,
 });
 
-export type ServicesHistoryEventHubConfig = t.TypeOf<
-  typeof ServicesHistoryEventHubConfig
->;
-export const ServicesHistoryEventHubConfig = t.type({
-  SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+export type ServicesLifecycleEventHubConfig = Pick<
+  FallbackConfiguration,
+  "SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING"
+> &
+  t.TypeOf<typeof ServicesLifecycleEventHubBaseConfig>;
+export const ServicesLifecycleEventHubConfig =
+  ServicesLifecycleEventHubBaseConfig;
+
+const ServicesHistoryEventHubBaseConfig = t.type({
   SERVICES_HISTORY_EVENT_HUB_NAME: NonEmptyString,
 });
 
-export type ActivationEventHubConfig = t.TypeOf<
-  typeof ServicesHistoryEventHubConfig
->;
-export const ActivationEventHubConfig = t.type({
-  ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
+export type ServicesHistoryEventHubConfig = Pick<
+  FallbackConfiguration,
+  "SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING"
+> &
+  t.TypeOf<typeof ServicesHistoryEventHubBaseConfig>;
+export const ServicesHistoryEventHubConfig = ServicesHistoryEventHubBaseConfig;
+
+const ActivationEventHubBaseConfig = t.type({
   ACTIVATIONS_EVENT_HUB_NAME: NonEmptyString,
 });
+
+export type ActivationEventHubConfig = Pick<
+  FallbackConfiguration,
+  "ACTIVATIONS_EVENT_HUB_CONNECTION_STRING"
+> &
+  t.TypeOf<typeof ActivationEventHubBaseConfig>;
+export const ActivationEventHubConfig = ActivationEventHubBaseConfig;
 
 //PDV tokenizer client configuration
 export type PDVTokenizerClientConfiguration = t.TypeOf<
@@ -413,7 +519,11 @@ export const IConfig = t.intersection([
         t.type({ isProduction: t.boolean }),
         InternalStorageAccount,
       ]),
-      t.intersection([ManagedIdentityConfiguration, JiraConfig]),
+      t.intersection([
+        ManagedIdentityConfiguration,
+        FallbackConfiguration,
+        JiraConfig,
+      ]),
       t.intersection([ReviewerPostgreSqlConfig, ServicePayloadConfig]),
     ]),
     t.intersection([
