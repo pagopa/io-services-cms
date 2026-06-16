@@ -1,1 +1,1 @@
-data "azurerm_subscription" "current" {}
+# No data sources are currently required in this module.
