@@ -573,3 +573,15 @@ export const getConfigOrThrow = (): IConfig =>
       throw new Error(`Invalid configuration: ${readableReport(errors)}`);
     }),
   );
+
+export const getRuntimeModeConfigurationOrThrow = (
+  config: IConfig,
+): RuntimeModeConfiguration =>
+  pipe(
+    RuntimeModeConfiguration.decode(config),
+    E.getOrElseW((errors) => {
+      throw new Error(
+        `Invalid runtime mode configuration: ${readableReport(errors)}`,
+      );
+    }),
+  );

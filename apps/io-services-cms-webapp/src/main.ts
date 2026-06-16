@@ -37,11 +37,7 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
 
-import {
-  RuntimeModeDisabledConfiguration,
-  RuntimeModeEnabledConfiguration,
-  getConfigOrThrow,
-} from "./config";
+import { getConfigOrThrow, getRuntimeModeConfigurationOrThrow } from "./config";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
@@ -272,38 +268,20 @@ const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 
 const defaultAzureCredential = new DefaultAzureCredential();
-const runtimeModeConfiguration:
-  | RuntimeModeDisabledConfiguration
-  | RuntimeModeEnabledConfiguration = config;
+const runtimeModeConfiguration = getRuntimeModeConfigurationOrThrow(config);
 const useManagedIdentity = runtimeModeConfiguration.USE_MANAGED_IDENTITY;
-
-const requireFallbackSetting = (
-  value: string | undefined,
-  name: string,
-): string => {
-  if (!value) {
-    throw new Error(`Missing fallback setting: ${name}`);
-  }
-  return value;
-};
 
 // Producers are created during module bootstrap, so validate the selected
 // credential path here and fail fast before the function app starts serving.
-const createEventHubProducer = (
-  connectionString: string | undefined,
-  connectionStringName: string,
+const createManagedIdentityEventHubProducer = (
+  fullyQualifiedNamespace: string,
   eventHubName: string,
 ): EventHubProducerClient =>
-  useManagedIdentity
-    ? new EventHubProducerClient(
-        runtimeModeConfiguration.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
-        eventHubName,
-        defaultAzureCredential,
-      )
-    : new EventHubProducerClient(
-        requireFallbackSetting(connectionString, connectionStringName),
-        eventHubName,
-      );
+  new EventHubProducerClient(
+    fullyQualifiedNamespace,
+    eventHubName,
+    defaultAzureCredential,
+  );
 
 const internalStorageBindingConnection = useManagedIdentity
   ? "CMS_INTERNAL_STORAGE"
@@ -316,39 +294,63 @@ const legacyCosmosBindingConnection = useManagedIdentity
   : "LEGACY_COSMOSDB_CONNECTIONSTRING";
 
 // eventhub producer for ServicePublication
-const servicePublicationEventHubProducer = createEventHubProducer(
-  config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
-  "SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING",
-  config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
-);
+const servicePublicationEventHubProducer =
+  runtimeModeConfiguration.USE_MANAGED_IDENTITY
+    ? createManagedIdentityEventHubProducer(
+        runtimeModeConfiguration.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+        config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
+      )
+    : new EventHubProducerClient(
+        runtimeModeConfiguration.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
+        config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
+      );
 
 // eventhub producer for ServiceTopics
-const serviceTopicsEventHubProducer = createEventHubProducer(
-  config.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
-  "SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING",
-  config.SERVICES_TOPICS_EVENT_HUB_NAME,
-);
+const serviceTopicsEventHubProducer =
+  runtimeModeConfiguration.USE_MANAGED_IDENTITY
+    ? createManagedIdentityEventHubProducer(
+        runtimeModeConfiguration.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+        config.SERVICES_TOPICS_EVENT_HUB_NAME,
+      )
+    : new EventHubProducerClient(
+        runtimeModeConfiguration.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
+        config.SERVICES_TOPICS_EVENT_HUB_NAME,
+      );
 
 // eventhub producer for ServiceLifecycle
-const serviceLifecycleEventHubProducer = createEventHubProducer(
-  config.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING,
-  "SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING",
-  config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
-);
+const serviceLifecycleEventHubProducer =
+  runtimeModeConfiguration.USE_MANAGED_IDENTITY
+    ? createManagedIdentityEventHubProducer(
+        runtimeModeConfiguration.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+        config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
+      )
+    : new EventHubProducerClient(
+        runtimeModeConfiguration.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING,
+        config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
+      );
 
 // eventhub producer for ServiceHistory
-const serviceHistoryEventHubProducer = createEventHubProducer(
-  config.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING,
-  "SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING",
-  config.SERVICES_HISTORY_EVENT_HUB_NAME,
-);
+const serviceHistoryEventHubProducer =
+  runtimeModeConfiguration.USE_MANAGED_IDENTITY
+    ? createManagedIdentityEventHubProducer(
+        runtimeModeConfiguration.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+        config.SERVICES_HISTORY_EVENT_HUB_NAME,
+      )
+    : new EventHubProducerClient(
+        runtimeModeConfiguration.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING,
+        config.SERVICES_HISTORY_EVENT_HUB_NAME,
+      );
 
 // eventhub producer for Activations
-const activationEventHubProducer = createEventHubProducer(
-  config.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING,
-  "ACTIVATIONS_EVENT_HUB_CONNECTION_STRING",
-  config.ACTIVATIONS_EVENT_HUB_NAME,
-);
+const activationEventHubProducer = runtimeModeConfiguration.USE_MANAGED_IDENTITY
+  ? createManagedIdentityEventHubProducer(
+      runtimeModeConfiguration.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+      config.ACTIVATIONS_EVENT_HUB_NAME,
+    )
+  : new EventHubProducerClient(
+      runtimeModeConfiguration.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING,
+      config.ACTIVATIONS_EVENT_HUB_NAME,
+    );
 
 const blobServiceClient = new BlobServiceClient(
   `https://${config.STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
