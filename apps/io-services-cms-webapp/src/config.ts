@@ -62,12 +62,12 @@ const FallbackSettings = {
 const FallbackOptionalSettings = t.partial(FallbackSettings);
 const FallbackRequiredSettings = t.type(FallbackSettings);
 
-type RuntimeModeDisabledConfiguration = {
+export type RuntimeModeDisabledConfiguration = {
   USE_MANAGED_IDENTITY: false;
 } & t.TypeOf<typeof FallbackRequiredSettings> &
   t.TypeOf<typeof ManagedIdentityOptionalSettings>;
 
-type RuntimeModeEnabledConfiguration = {
+export type RuntimeModeEnabledConfiguration = {
   USE_MANAGED_IDENTITY: true;
 } & t.TypeOf<typeof FallbackOptionalSettings> &
   t.TypeOf<typeof ManagedIdentityRequiredSettings>;
