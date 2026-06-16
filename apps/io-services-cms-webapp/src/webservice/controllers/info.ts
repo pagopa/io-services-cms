@@ -1,4 +1,3 @@
-import { CosmosClient } from "@azure/cosmos";
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
@@ -12,20 +11,12 @@ import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
 import { IConfig, envConfig } from "../../config";
+import { createManagedIdentityCosmosClient } from "../../lib/azure/cosmos";
 import { healthcheck as checkPostgresDbHealth } from "../../lib/clients/pg-client";
+import { requireManagedIdentitySetting } from "../../lib/azure/managed-identity";
 
 // TODO: read these values from package json
 const packageJson = { name: "io-services-cms-webapp", version: "0.0.0" };
-
-const requireManagedIdentitySetting = (
-  value: string | undefined,
-  name: string,
-): string => {
-  if (!value) {
-    throw new Error(`Missing managed identity setting: ${name}`);
-  }
-  return value;
-};
 
 const checkManagedIdentityHealth = (
   config: IConfig,
@@ -50,22 +41,18 @@ const checkManagedIdentityHealth = (
     );
     await blobServiceClient.getProperties();
 
-    const cosmosClient = new CosmosClient({
-      aadCredentials: credential,
-      endpoint: requireManagedIdentitySetting(
-        config.CMS_COSMOSDB__accountEndpoint,
-        "CMS_COSMOSDB__accountEndpoint",
-      ),
-    });
+    const cosmosClient = createManagedIdentityCosmosClient(
+      config.CMS_COSMOSDB__accountEndpoint,
+      "CMS_COSMOSDB__accountEndpoint",
+      credential,
+    );
     await cosmosClient.getDatabaseAccount();
 
-    const legacyCosmosClient = new CosmosClient({
-      aadCredentials: credential,
-      endpoint: requireManagedIdentitySetting(
-        config.CMS_LEGACY_COSMOSDB__accountEndpoint,
-        "CMS_LEGACY_COSMOSDB__accountEndpoint",
-      ),
-    });
+    const legacyCosmosClient = createManagedIdentityCosmosClient(
+      config.CMS_LEGACY_COSMOSDB__accountEndpoint,
+      "CMS_LEGACY_COSMOSDB__accountEndpoint",
+      credential,
+    );
     await legacyCosmosClient.getDatabaseAccount();
 
     const eventHubProducerClient = new EventHubProducerClient(

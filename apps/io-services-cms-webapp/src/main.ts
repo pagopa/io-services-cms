@@ -50,6 +50,7 @@ import {
   getAppBackendCosmosDatabase,
   getCmsCosmosDatabase,
 } from "./lib/azure/cosmos";
+import { requireManagedIdentitySetting } from "./lib/azure/managed-identity";
 import {
   log,
   processAllOf,
@@ -269,16 +270,6 @@ const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 
 const defaultAzureCredential = new DefaultAzureCredential();
 const useManagedIdentity = config.USE_MANAGED_IDENTITY;
-
-const requireManagedIdentitySetting = (
-  value: string | undefined,
-  name: string,
-): string => {
-  if (!value) {
-    throw new Error(`Missing managed identity setting: ${name}`);
-  }
-  return value;
-};
 
 const requireFallbackSetting = (
   value: string | undefined,
