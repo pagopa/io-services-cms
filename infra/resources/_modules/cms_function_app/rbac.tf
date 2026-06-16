@@ -7,8 +7,9 @@ module "cms_fn_roles" {
   storage_blob = [{
     storage_account_name = module.cms_storage_account.name
     resource_group_name  = module.cms_storage_account.resource_group_name
-    description          = "Allow Function App to manage blobs in CMS storage account"
+    description          = "To allow migrating the activations of special services's"
     role                 = "writer"
+    container_name       = local.containers.activations.name
     }
   ]
   storage_queue = [{
@@ -48,8 +49,9 @@ module "cms_fn_staging_slot_roles" {
   storage_blob = [{
     storage_account_name = module.cms_storage_account.name
     resource_group_name  = module.cms_storage_account.resource_group_name
-    description          = "Allow Function App staging slot to manage blobs in CMS storage account"
+    description          = "To allow migrating the activations of special services's"
     role                 = "writer"
+    container_name       = local.containers.activations.name
     }
   ]
   storage_queue = [{
