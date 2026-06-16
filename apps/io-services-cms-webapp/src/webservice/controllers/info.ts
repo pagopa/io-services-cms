@@ -12,6 +12,7 @@ import { pipe } from "fp-ts/lib/function";
 
 import {
   IConfig,
+  RuntimeModeDisabledConfiguration,
   RuntimeModeEnabledConfiguration,
   envConfig,
 } from "../../config";
@@ -23,6 +24,23 @@ const packageJson = { name: "io-services-cms-webapp", version: "0.0.0" };
 
 type ManagedIdentityHealthConfiguration = IConfig &
   RuntimeModeEnabledConfiguration;
+type ConnectionStringHealthConfiguration = IConfig &
+  RuntimeModeDisabledConfiguration;
+
+const checkConnectionStringHealth = (
+  config: ConnectionStringHealthConfiguration,
+) =>
+  pipe(
+    healthcheck.checkAzureStorageHealth(
+      config.INTERNAL_STORAGE_CONNECTION_STRING,
+    ),
+    TE.chainW(() =>
+      healthcheck.checkAzureCosmosDbHealth(
+        config.COSMOSDB_URI,
+        config.COSMOSDB_KEY,
+      ),
+    ),
+  );
 
 const checkManagedIdentityHealth = (
   config: ManagedIdentityHealthConfiguration,
@@ -74,16 +92,7 @@ export const makeInfoHandler = () =>
       (c) =>
         c.USE_MANAGED_IDENTITY
           ? checkManagedIdentityHealth(c)
-          : healthcheck.checkAzureStorageHealth(
-              c.INTERNAL_STORAGE_CONNECTION_STRING,
-            ),
-      (c) =>
-        c.USE_MANAGED_IDENTITY
-          ? TE.right(true as const)
-          : healthcheck.checkAzureCosmosDbHealth(
-              c.COSMOSDB_URI,
-              c.COSMOSDB_KEY,
-            ),
+          : checkConnectionStringHealth(c),
       (c) => checkPostgresDbHealth(c),
     ]),
     TE.mapLeft((problems) => ResponseErrorInternal(problems.join("\n\n"))),
