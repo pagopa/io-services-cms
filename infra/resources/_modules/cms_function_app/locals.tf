@@ -24,7 +24,8 @@ locals {
     tier          = "standard"
     cosmosdb_name = "db-services-cms"
     app_settings = merge({
-      NODE_ENV = "production"
+      NODE_ENV             = "production"
+      USE_MANAGED_IDENTITY = "true"
 
       // Keepalive fields are all optionals
       FETCH_KEEPALIVE_ENABLED             = "true"
