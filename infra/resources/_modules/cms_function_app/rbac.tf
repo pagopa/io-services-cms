@@ -22,8 +22,17 @@ module "cms_fn_roles" {
     {
       account_name        = data.azurerm_cosmosdb_account.cosmos.name
       resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
-      description         = "Allow Function App to read/write all databases in CMS Cosmos account"
+      description         = "Allow Function App to read/write CMS documents and change feed lease containers"
       role                = "writer"
+      database            = local.cms.cosmosdb_name
+    },
+    {
+      account_name        = data.azurerm_cosmosdb_account.cosmos.name
+      resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
+      description         = "Allow Function App to write app-backend service detail documents"
+      role                = "writer"
+      database            = "app-backend"
+      collections         = ["services"]
     },
     {
       account_name        = data.azurerm_cosmosdb_account.cosmos_legacy.name
@@ -64,8 +73,17 @@ module "cms_fn_staging_slot_roles" {
     {
       account_name        = data.azurerm_cosmosdb_account.cosmos.name
       resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
-      description         = "Allow Function App staging slot to read/write all databases in CMS Cosmos account"
+      description         = "Allow Function App staging slot to read/write CMS documents and change feed lease containers"
       role                = "writer"
+      database            = local.cms.cosmosdb_name
+    },
+    {
+      account_name        = data.azurerm_cosmosdb_account.cosmos.name
+      resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
+      description         = "Allow Function App staging slot to write app-backend service detail documents"
+      role                = "writer"
+      database            = "app-backend"
+      collections         = ["services"]
     },
     {
       account_name        = data.azurerm_cosmosdb_account.cosmos_legacy.name
