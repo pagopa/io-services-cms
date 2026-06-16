@@ -245,7 +245,7 @@ export type CosmosConfig = Pick<
 export const CosmosConfig = CosmosBaseConfig;
 
 export type ManagedIdentityCosmosConfiguration =
-  t.TypeOf<typeof CosmosBaseConfig> & RuntimeModeEnabledConfiguration;
+  RuntimeModeEnabledConfiguration & t.TypeOf<typeof CosmosBaseConfig>;
 
 export type FallbackCosmosConfiguration = CosmosConfig &
   RuntimeModeDisabledConfiguration;
@@ -270,7 +270,7 @@ export type CosmosLegacyConfig = Pick<
 export const CosmosLegacyConfig = CosmosLegacyBaseConfig;
 
 export type ManagedIdentityLegacyCosmosConfiguration =
-  t.TypeOf<typeof CosmosLegacyBaseConfig> & RuntimeModeEnabledConfiguration;
+  RuntimeModeEnabledConfiguration & t.TypeOf<typeof CosmosLegacyBaseConfig>;
 
 export type FallbackLegacyCosmosConfiguration = CosmosLegacyConfig &
   RuntimeModeDisabledConfiguration;
