@@ -157,7 +157,6 @@ const mocks = vi.hoisted(() => {
 vi.mock("../config", () => {
   return {
     getConfigOrThrow: mocks.getConfigOrThrow,
-    getRuntimeModeConfigurationOrThrow: vi.fn((config) => config),
     envConfig: mocks.envConfig,
   };
 });
