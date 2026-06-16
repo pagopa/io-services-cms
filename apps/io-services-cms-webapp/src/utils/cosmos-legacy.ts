@@ -5,9 +5,9 @@ import { CosmosClient } from "@azure/cosmos";
 
 import {
   CosmosLegacyConfig,
-  getConfigOrThrow,
   RuntimeModeDisabledConfiguration,
   RuntimeModeEnabledConfiguration,
+  getConfigOrThrow,
 } from "../config";
 import {
   createFallbackCosmosClient,
@@ -24,8 +24,8 @@ type FallbackLegacyCosmosConfiguration = CosmosLegacyConfig &
   RuntimeModeDisabledConfiguration;
 
 type LegacyCosmosConfiguration =
-  | ManagedIdentityLegacyCosmosConfiguration
-  | FallbackLegacyCosmosConfiguration;
+  | FallbackLegacyCosmosConfiguration
+  | ManagedIdentityLegacyCosmosConfiguration;
 
 const config = getConfigOrThrow();
 
@@ -40,7 +40,6 @@ const createLegacyCosmosClient = (
   runtimeConfig.USE_MANAGED_IDENTITY
     ? createManagedIdentityCosmosClient(
         runtimeConfig.CMS_LEGACY_COSMOSDB__accountEndpoint,
-        "CMS_LEGACY_COSMOSDB__accountEndpoint",
       )
     : createFallbackCosmosClient({
         endpoint: runtimeConfig.LEGACY_COSMOSDB_URI,

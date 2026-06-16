@@ -6,7 +6,6 @@ import {
   RuntimeModeDisabledConfiguration,
   RuntimeModeEnabledConfiguration,
 } from "../../config";
-import { requireManagedIdentitySetting } from "./managed-identity";
 
 type ManagedIdentityCosmosConfiguration = Omit<
   CosmosConfig,
@@ -18,20 +17,22 @@ type FallbackCosmosConfiguration = CosmosConfig &
   RuntimeModeDisabledConfiguration;
 
 type CosmosDatabaseConfiguration =
-  | ManagedIdentityCosmosConfiguration
-  | FallbackCosmosConfiguration;
+  | FallbackCosmosConfiguration
+  | ManagedIdentityCosmosConfiguration;
 
 export const createManagedIdentityCosmosClient = (
-  endpoint: string | undefined,
-  name: string,
+  endpoint: string,
   aadCredentials: DefaultAzureCredential = new DefaultAzureCredential(),
 ): CosmosClient =>
   new CosmosClient({
     aadCredentials,
-    endpoint: requireManagedIdentitySetting(endpoint, name),
+    endpoint,
   });
 
-export const createFallbackCosmosClient = ({ endpoint, key }: {
+export const createFallbackCosmosClient = ({
+  endpoint,
+  key,
+}: {
   endpoint: string;
   key: string;
 }): CosmosClient =>
@@ -43,15 +44,11 @@ export const createFallbackCosmosClient = ({ endpoint, key }: {
 const getManagedIdentityCosmosDatabase = ({
   databaseName,
   endpoint,
-  endpointName,
 }: {
   databaseName: string;
-  endpoint: string | undefined;
-  endpointName: string;
+  endpoint: string;
 }): Database =>
-  createManagedIdentityCosmosClient(endpoint, endpointName).database(
-    databaseName,
-  );
+  createManagedIdentityCosmosClient(endpoint).database(databaseName);
 
 const getFallbackCosmosDatabase = ({
   databaseName,
@@ -61,7 +58,8 @@ const getFallbackCosmosDatabase = ({
   databaseName: string;
   endpoint: string;
   key: string;
-}): Database => createFallbackCosmosClient({ endpoint, key }).database(databaseName);
+}): Database =>
+  createFallbackCosmosClient({ endpoint, key }).database(databaseName);
 
 export const getCmsCosmosDatabase = (
   config: CosmosDatabaseConfiguration,
@@ -70,7 +68,6 @@ export const getCmsCosmosDatabase = (
     ? getManagedIdentityCosmosDatabase({
         databaseName: config.COSMOSDB_NAME,
         endpoint: config.CMS_COSMOSDB__accountEndpoint,
-        endpointName: "CMS_COSMOSDB__accountEndpoint",
       })
     : getFallbackCosmosDatabase({
         databaseName: config.COSMOSDB_NAME,
@@ -85,7 +82,6 @@ export const getAppBackendCosmosDatabase = (
     ? getManagedIdentityCosmosDatabase({
         databaseName: config.COSMOSDB_APP_BE_NAME,
         endpoint: config.CMS_COSMOSDB__accountEndpoint,
-        endpointName: "CMS_COSMOSDB__accountEndpoint",
       })
     : getFallbackCosmosDatabase({
         databaseName: config.COSMOSDB_APP_BE_NAME,
