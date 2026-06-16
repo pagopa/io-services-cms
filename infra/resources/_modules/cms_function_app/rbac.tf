@@ -16,7 +16,7 @@ module "cms_fn_roles" {
     storage_account_name = module.cms_storage_account.name
     resource_group_name  = module.cms_storage_account.resource_group_name
     description          = "Allow Function App to process internal workflow queues and poison queues"
-    role                 = "writer"
+    role                 = "owner"
   }]
   cosmos = [
     {
@@ -67,7 +67,7 @@ module "cms_fn_staging_slot_roles" {
     storage_account_name = module.cms_storage_account.name
     resource_group_name  = module.cms_storage_account.resource_group_name
     description          = "Allow Function App staging slot to process internal workflow queues and poison queues"
-    role                 = "writer"
+    role                 = "owner"
   }]
   cosmos = [
     {
