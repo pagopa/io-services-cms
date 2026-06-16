@@ -47,6 +47,9 @@ const ManagedIdentitySettings = {
 const ManagedIdentityOptionalSettings = t.partial(ManagedIdentitySettings);
 const ManagedIdentityRequiredSettings = t.type(ManagedIdentitySettings);
 
+// Keep fallback secrets in the schema during the rollout so deployed apps can
+// switch back via USE_MANAGED_IDENTITY=false and local/emulator setups can
+// still boot with connection strings.
 const FallbackSettings = {
   ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
   COSMOSDB_CONNECTIONSTRING: NonEmptyString,
@@ -84,6 +87,11 @@ const RuntimeModeEnabledSettings = t.intersection([
   FallbackOptionalSettings,
 ]);
 
+const getInputProperty = (input: unknown, key: string): unknown =>
+  typeof input === "object" && input !== null
+    ? Reflect.get(input, key)
+    : undefined;
+
 const RuntimeModeConfigurationCodec: t.Type<
   RuntimeModeDisabledConfiguration | RuntimeModeEnabledConfiguration,
   RuntimeModeDisabledConfiguration | RuntimeModeEnabledConfiguration,
@@ -98,9 +106,7 @@ const RuntimeModeConfigurationCodec: t.Type<
     typeof input === "object" && input !== null,
   (input, context) => {
     const useManagedIdentityOrErrors = ManagedIdentityFlag.validate(
-      typeof input === "object" && input !== null
-        ? (input as Record<string, unknown>).USE_MANAGED_IDENTITY
-        : undefined,
+      getInputProperty(input, "USE_MANAGED_IDENTITY"),
       context,
     );
 
