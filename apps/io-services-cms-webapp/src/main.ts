@@ -280,8 +280,19 @@ const requireManagedIdentitySetting = (
   return value;
 };
 
+const requireFallbackSetting = (
+  value: string | undefined,
+  name: string,
+): string => {
+  if (!value) {
+    throw new Error(`Missing fallback setting: ${name}`);
+  }
+  return value;
+};
+
 const createEventHubProducer = (
-  connectionString: string,
+  connectionString: string | undefined,
+  connectionStringName: string,
   eventHubName: string,
 ): EventHubProducerClient =>
   useManagedIdentity
@@ -293,7 +304,10 @@ const createEventHubProducer = (
         eventHubName,
         defaultAzureCredential,
       )
-    : new EventHubProducerClient(connectionString, eventHubName);
+    : new EventHubProducerClient(
+        requireFallbackSetting(connectionString, connectionStringName),
+        eventHubName,
+      );
 
 const internalStorageBindingConnection = useManagedIdentity
   ? "CMS_INTERNAL_STORAGE"
@@ -308,30 +322,35 @@ const legacyCosmosBindingConnection = useManagedIdentity
 // eventhub producer for ServicePublication
 const servicePublicationEventHubProducer = createEventHubProducer(
   config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
+  "SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING",
   config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
 );
 
 // eventhub producer for ServiceTopics
 const serviceTopicsEventHubProducer = createEventHubProducer(
   config.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
+  "SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING",
   config.SERVICES_TOPICS_EVENT_HUB_NAME,
 );
 
 // eventhub producer for ServiceLifecycle
 const serviceLifecycleEventHubProducer = createEventHubProducer(
   config.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING,
+  "SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING",
   config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
 );
 
 // eventhub producer for ServiceHistory
 const serviceHistoryEventHubProducer = createEventHubProducer(
   config.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING,
+  "SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING",
   config.SERVICES_HISTORY_EVENT_HUB_NAME,
 );
 
 // eventhub producer for Activations
 const activationEventHubProducer = createEventHubProducer(
   config.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING,
+  "ACTIVATIONS_EVENT_HUB_CONNECTION_STRING",
   config.ACTIVATIONS_EVENT_HUB_NAME,
 );
 
