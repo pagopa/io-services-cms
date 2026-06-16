@@ -299,6 +299,24 @@ describe("main", () => {
     verbose: vi.fn(),
     metric: vi.fn(),
   };
+  const primeBootstrapMocks = () => {
+    const mockContainer = {
+      items: vi.fn(),
+      item: vi.fn(),
+    };
+
+    mocks.getCmsCosmosDatabase.mockReturnValue({
+      container: vi.fn().mockReturnValue(mockContainer),
+    });
+    mocks.getAppBackendCosmosDatabase.mockReturnValue({
+      container: vi.fn().mockReturnValue(mockContainer),
+    });
+    mocks.cosmosdbClient.database = vi.fn().mockReturnValue({
+      container: vi.fn().mockReturnValue(mockContainer),
+    });
+    mocks.cosmosdbInstance.container = vi.fn().mockReturnValue(mockContainer);
+  };
+
   const createMockContext = (
     retryCount: number = 0,
     maxRetryCount: number = 3,
@@ -455,6 +473,55 @@ describe("main", () => {
             containerName: mocks.config.ACTIVATIONS_CONTAINER_NAME,
           }),
         }),
+      );
+    });
+  });
+
+  describe("runtime mode bootstrap", () => {
+    it("should allow bootstrap without fallback event hub connection strings when managed identity is enabled", async () => {
+      vi.resetModules();
+      primeBootstrapMocks();
+      mocks.EventHubProducerClient.mockClear();
+      mocks.getConfigOrThrow.mockReturnValue({
+        ...mocks.config,
+        ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: undefined,
+        CMS_COSMOSDB__accountEndpoint:
+          "https://cms-account.documents.azure.com:443/",
+        CMS_INTERNAL_STORAGE__blobServiceUri:
+          "https://cmsstorage.blob.core.windows.net",
+        CMS_INTERNAL_STORAGE__queueServiceUri:
+          "https://cmsstorage.queue.core.windows.net",
+        CMS_LEGACY_COSMOSDB__accountEndpoint:
+          "https://legacy-account.documents.azure.com:443/",
+        SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE:
+          "cms-namespace.servicebus.windows.net",
+        SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING: undefined,
+        SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING: undefined,
+        SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING: undefined,
+        SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING: undefined,
+        USE_MANAGED_IDENTITY: true,
+      });
+
+      await expect(import("../main")).resolves.toBeDefined();
+      expect(mocks.EventHubProducerClient).toHaveBeenCalledWith(
+        "cms-namespace.servicebus.windows.net",
+        "test-pub-name",
+        expect.anything(),
+      );
+    });
+
+    it("should fail fast when fallback mode is enabled and a fallback event hub connection string is missing", async () => {
+      vi.resetModules();
+      primeBootstrapMocks();
+      mocks.EventHubProducerClient.mockClear();
+      mocks.getConfigOrThrow.mockReturnValue({
+        ...mocks.config,
+        ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: undefined,
+        USE_MANAGED_IDENTITY: false,
+      });
+
+      await expect(import("../main")).rejects.toThrow(
+        "Missing fallback setting: ACTIVATIONS_EVENT_HUB_CONNECTION_STRING",
       );
     });
   });
