@@ -244,6 +244,16 @@ export type CosmosConfig = Pick<
   t.TypeOf<typeof CosmosBaseConfig>;
 export const CosmosConfig = CosmosBaseConfig;
 
+export type ManagedIdentityCosmosConfiguration =
+  t.TypeOf<typeof CosmosBaseConfig> & RuntimeModeEnabledConfiguration;
+
+export type FallbackCosmosConfiguration = CosmosConfig &
+  RuntimeModeDisabledConfiguration;
+
+export type CosmosDatabaseConfiguration =
+  | FallbackCosmosConfiguration
+  | ManagedIdentityCosmosConfiguration;
+
 const CosmosLegacyBaseConfig = t.type({
   LEGACY_COSMOSDB_CONTAINER_SERVICES: NonEmptyString,
   LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE: NonEmptyString,
@@ -258,6 +268,16 @@ export type CosmosLegacyConfig = Pick<
 > &
   t.TypeOf<typeof CosmosLegacyBaseConfig>;
 export const CosmosLegacyConfig = CosmosLegacyBaseConfig;
+
+export type ManagedIdentityLegacyCosmosConfiguration =
+  t.TypeOf<typeof CosmosLegacyBaseConfig> & RuntimeModeEnabledConfiguration;
+
+export type FallbackLegacyCosmosConfiguration = CosmosLegacyConfig &
+  RuntimeModeDisabledConfiguration;
+
+export type LegacyCosmosConfiguration =
+  | FallbackLegacyCosmosConfiguration
+  | ManagedIdentityLegacyCosmosConfiguration;
 
 // Apim configuration
 export const ApimConfig = t.type({
