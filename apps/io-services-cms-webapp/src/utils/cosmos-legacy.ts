@@ -3,31 +3,13 @@
  */
 import { CosmosClient } from "@azure/cosmos";
 
-import {
-  CosmosLegacyConfig,
-  RuntimeModeDisabledConfiguration,
-  RuntimeModeEnabledConfiguration,
-  getConfigOrThrow,
-} from "../config";
+import { LegacyCosmosConfiguration, getConfigOrThrow } from "../config";
 import {
   createFallbackCosmosClient,
   createManagedIdentityCosmosClient,
 } from "../lib/azure/cosmos";
 
 const config = getConfigOrThrow();
-
-type ManagedIdentityLegacyCosmosConfiguration = Omit<
-  CosmosLegacyConfig,
-  "LEGACY_COSMOSDB_CONNECTIONSTRING" | "LEGACY_COSMOSDB_KEY"
-> &
-  RuntimeModeEnabledConfiguration;
-
-type FallbackLegacyCosmosConfiguration = CosmosLegacyConfig &
-  RuntimeModeDisabledConfiguration;
-
-type LegacyCosmosConfiguration =
-  | FallbackLegacyCosmosConfiguration
-  | ManagedIdentityLegacyCosmosConfiguration;
 
 // Setup DocumentDB
 export const cosmosDbUri = config.LEGACY_COSMOSDB_URI;

@@ -1,24 +1,7 @@
 import { CosmosClient, Database } from "@azure/cosmos";
 import { DefaultAzureCredential } from "@azure/identity";
 
-import {
-  CosmosConfig,
-  RuntimeModeDisabledConfiguration,
-  RuntimeModeEnabledConfiguration,
-} from "../../config";
-
-type ManagedIdentityCosmosConfiguration = Omit<
-  CosmosConfig,
-  "COSMOSDB_CONNECTIONSTRING" | "COSMOSDB_KEY"
-> &
-  RuntimeModeEnabledConfiguration;
-
-type FallbackCosmosConfiguration = CosmosConfig &
-  RuntimeModeDisabledConfiguration;
-
-type CosmosDatabaseConfiguration =
-  | FallbackCosmosConfiguration
-  | ManagedIdentityCosmosConfiguration;
+import { CosmosDatabaseConfiguration } from "../../config";
 
 export const createManagedIdentityCosmosClient = (
   endpoint: string,
