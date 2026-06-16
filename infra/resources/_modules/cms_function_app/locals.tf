@@ -128,7 +128,7 @@ locals {
       # Automatic service validation
       MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code,data.metadata.scope"
 
-      #EventHubConfing
+      # EventHub config
       SERVICES_PUBLICATION_EVENT_HUB_NAME          = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-publication-01"
       SERVICES_TOPICS_EVENT_HUB_NAME               = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-topic-01"
       SERVICES_LIFECYCLE_EVENT_HUB_NAME            = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-lifecycle-01"
