@@ -157,6 +157,7 @@ const mocks = vi.hoisted(() => {
 vi.mock("../config", () => {
   return {
     getConfigOrThrow: mocks.getConfigOrThrow,
+    getRuntimeModeConfigurationOrThrow: vi.fn((config) => config),
     envConfig: mocks.envConfig,
   };
 });
@@ -510,18 +511,19 @@ describe("main", () => {
       );
     });
 
-    it("should fail fast when fallback mode is enabled and a fallback event hub connection string is missing", async () => {
+    it("should create event hub producers from fallback connection strings when managed identity is disabled", async () => {
       vi.resetModules();
       primeBootstrapMocks();
       mocks.EventHubProducerClient.mockClear();
       mocks.getConfigOrThrow.mockReturnValue({
         ...mocks.config,
-        ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: undefined,
         USE_MANAGED_IDENTITY: false,
       });
 
-      await expect(import("../main")).rejects.toThrow(
-        "Missing fallback setting: ACTIVATIONS_EVENT_HUB_CONNECTION_STRING",
+      await expect(import("../main")).resolves.toBeDefined();
+      expect(mocks.EventHubProducerClient).toHaveBeenCalledWith(
+        "test-pub-conn",
+        "test-pub-name",
       );
     });
   });
