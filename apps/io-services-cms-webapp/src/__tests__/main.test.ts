@@ -29,6 +29,7 @@ const mocks = vi.hoisted(() => {
     SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING: "test-history-conn",
     SERVICES_HISTORY_EVENT_HUB_NAME: "test-history-name",
     APPINSIGHTS_INSTRUMENTATIONKEY: "test-key",
+    ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: "test-activations-conn",
     ACTIVATIONS_CONTAINER_NAME: "test-activations",
     USE_MANAGED_IDENTITY: false,
   };
