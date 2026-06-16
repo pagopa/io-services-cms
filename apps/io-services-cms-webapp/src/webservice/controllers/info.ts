@@ -1,6 +1,7 @@
 import { CosmosClient } from "@azure/cosmos";
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { DefaultAzureCredential } from "@azure/identity";
+import { BlobServiceClient } from "@azure/storage-blob";
 import { QueueServiceClient } from "@azure/storage-queue";
 import * as healthcheck from "@pagopa/io-functions-commons/dist/src/utils/healthcheck";
 import {
@@ -39,6 +40,15 @@ const checkManagedIdentityHealth = (
       credential,
     );
     await queueServiceClient.getProperties();
+
+    const blobServiceClient = new BlobServiceClient(
+      requireManagedIdentitySetting(
+        config.CMS_INTERNAL_STORAGE__blobServiceUri,
+        "CMS_INTERNAL_STORAGE__blobServiceUri",
+      ),
+      credential,
+    );
+    await blobServiceClient.getProperties();
 
     const cosmosClient = new CosmosClient({
       aadCredentials: credential,
