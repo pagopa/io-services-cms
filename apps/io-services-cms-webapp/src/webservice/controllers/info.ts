@@ -52,15 +52,19 @@ const checkManagedIdentityHealth = (
 
     const cosmosClient = new CosmosClient({
       aadCredentials: credential,
-      endpoint: config.CMS_COSMOSDB__accountEndpoint ?? config.COSMOSDB_URI,
+      endpoint: requireManagedIdentitySetting(
+        config.CMS_COSMOSDB__accountEndpoint,
+        "CMS_COSMOSDB__accountEndpoint",
+      ),
     });
     await cosmosClient.getDatabaseAccount();
 
     const legacyCosmosClient = new CosmosClient({
       aadCredentials: credential,
-      endpoint:
-        config.CMS_LEGACY_COSMOSDB__accountEndpoint ??
-        config.LEGACY_COSMOSDB_URI,
+      endpoint: requireManagedIdentitySetting(
+        config.CMS_LEGACY_COSMOSDB__accountEndpoint,
+        "CMS_LEGACY_COSMOSDB__accountEndpoint",
+      ),
     });
     await legacyCosmosClient.getDatabaseAccount();
 
