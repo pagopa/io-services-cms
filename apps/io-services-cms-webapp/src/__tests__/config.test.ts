@@ -16,7 +16,8 @@ const managedIdentitySettings = {
 };
 
 const fallbackSettings = {
-  ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: "Endpoint=sb://activation/;SharedAccessKeyName=test;SharedAccessKey=test",
+  ACTIVATIONS_EVENT_HUB_CONNECTION_STRING:
+    "Endpoint=sb://activation/;SharedAccessKeyName=test;SharedAccessKey=test",
   COSMOSDB_CONNECTIONSTRING:
     "AccountEndpoint=https://cms-account.documents.azure.com:443/;AccountKey=test;",
   COSMOSDB_KEY: "test-key",
