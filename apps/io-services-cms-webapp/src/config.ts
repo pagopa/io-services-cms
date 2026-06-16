@@ -34,21 +34,79 @@ const InternalStorageAccount = t.type({
   INTERNAL_STORAGE_CONNECTION_STRING: NonEmptyString,
 });
 
+const ManagedIdentityFlag = withDefault(BooleanFromString, true);
+
+const ManagedIdentitySettings = {
+  CMS_COSMOSDB__accountEndpoint: NonEmptyString,
+  CMS_INTERNAL_STORAGE__blobServiceUri: NonEmptyString,
+  CMS_INTERNAL_STORAGE__queueServiceUri: NonEmptyString,
+  CMS_LEGACY_COSMOSDB__accountEndpoint: NonEmptyString,
+  SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE: NonEmptyString,
+};
+
+const ManagedIdentityOptionalSettings = t.partial(ManagedIdentitySettings);
+const ManagedIdentityRequiredSettings = t.type(ManagedIdentitySettings);
+
+type ManagedIdentityDisabledConfiguration = {
+  USE_MANAGED_IDENTITY: false;
+} & t.TypeOf<typeof ManagedIdentityOptionalSettings>;
+
+type ManagedIdentityEnabledConfiguration = {
+  USE_MANAGED_IDENTITY: true;
+} & t.TypeOf<typeof ManagedIdentityRequiredSettings>;
+
+const ManagedIdentityConfigurationCodec: t.Type<
+  ManagedIdentityDisabledConfiguration | ManagedIdentityEnabledConfiguration,
+  ManagedIdentityDisabledConfiguration | ManagedIdentityEnabledConfiguration,
+  unknown
+> = new t.Type(
+  "ManagedIdentityConfiguration",
+  (
+    input,
+  ): input is
+    | ManagedIdentityDisabledConfiguration
+    | ManagedIdentityEnabledConfiguration =>
+    typeof input === "object" && input !== null,
+  (input, context) => {
+    const useManagedIdentityOrErrors = ManagedIdentityFlag.validate(
+      typeof input === "object" && input !== null
+        ? (input as Record<string, unknown>).USE_MANAGED_IDENTITY
+        : undefined,
+      context,
+    );
+
+    if (E.isLeft(useManagedIdentityOrErrors)) {
+      return useManagedIdentityOrErrors;
+    }
+
+    return useManagedIdentityOrErrors.right
+      ? pipe(
+          ManagedIdentityRequiredSettings.validate(input, context),
+          E.map(
+            (settings): ManagedIdentityEnabledConfiguration => ({
+              USE_MANAGED_IDENTITY: true,
+              ...settings,
+            }),
+          ),
+        )
+      : pipe(
+          ManagedIdentityOptionalSettings.validate(input, context),
+          E.map(
+            (settings): ManagedIdentityDisabledConfiguration => ({
+              USE_MANAGED_IDENTITY: false,
+              ...settings,
+            }),
+          ),
+        );
+  },
+  t.identity,
+);
+
 export type ManagedIdentityConfiguration = t.TypeOf<
-  typeof ManagedIdentityConfiguration
+  typeof ManagedIdentityConfigurationCodec
 >;
-export const ManagedIdentityConfiguration = t.intersection([
-  t.type({
-    USE_MANAGED_IDENTITY: withDefault(BooleanFromString, true),
-  }),
-  t.partial({
-    CMS_COSMOSDB__accountEndpoint: NonEmptyString,
-    CMS_INTERNAL_STORAGE__blobServiceUri: NonEmptyString,
-    CMS_INTERNAL_STORAGE__queueServiceUri: NonEmptyString,
-    CMS_LEGACY_COSMOSDB__accountEndpoint: NonEmptyString,
-    SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE: NonEmptyString,
-  }),
-]);
+
+export const ManagedIdentityConfiguration = ManagedIdentityConfigurationCodec;
 
 const ServicePayloadConfig = t.type({
   MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
