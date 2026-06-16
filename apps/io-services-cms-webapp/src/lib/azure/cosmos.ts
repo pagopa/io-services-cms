@@ -3,6 +3,17 @@ import { DefaultAzureCredential } from "@azure/identity";
 
 import { CosmosConfig, ManagedIdentityConfiguration } from "../../config";
 
+const requireManagedIdentityEndpoint = (
+  endpoint: string | undefined,
+  name: string,
+): string => {
+  if (!endpoint) {
+    throw new Error(`Missing managed identity setting: ${name}`);
+  }
+
+  return endpoint;
+};
+
 export const getCmsCosmosDatabase = ({
   CMS_COSMOSDB__accountEndpoint,
   COSMOSDB_KEY,
@@ -13,7 +24,10 @@ export const getCmsCosmosDatabase = ({
   const cosmosdbClient = USE_MANAGED_IDENTITY
     ? new CosmosClient({
         aadCredentials: new DefaultAzureCredential(),
-        endpoint: CMS_COSMOSDB__accountEndpoint ?? COSMOSDB_URI,
+        endpoint: requireManagedIdentityEndpoint(
+          CMS_COSMOSDB__accountEndpoint,
+          "CMS_COSMOSDB__accountEndpoint",
+        ),
       })
     : new CosmosClient({
         endpoint: COSMOSDB_URI,
@@ -32,7 +46,10 @@ export const getAppBackendCosmosDatabase = ({
   const cosmosdbClient = USE_MANAGED_IDENTITY
     ? new CosmosClient({
         aadCredentials: new DefaultAzureCredential(),
-        endpoint: CMS_COSMOSDB__accountEndpoint ?? COSMOSDB_URI,
+        endpoint: requireManagedIdentityEndpoint(
+          CMS_COSMOSDB__accountEndpoint,
+          "CMS_COSMOSDB__accountEndpoint",
+        ),
       })
     : new CosmosClient({
         endpoint: COSMOSDB_URI,
