@@ -37,7 +37,11 @@ import { pipe } from "fp-ts/lib/function";
 import * as t from "io-ts";
 import { Json, JsonFromString } from "io-ts-types";
 
-import { getConfigOrThrow } from "./config";
+import {
+  RuntimeModeDisabledConfiguration,
+  RuntimeModeEnabledConfiguration,
+  getConfigOrThrow,
+} from "./config";
 import { createRequestDeletionHandler } from "./deletor/request-deletion-handler";
 import { createRequestDetailHandler } from "./detailRequestor/request-detail-handler";
 import { createRequestHistoricizationHandler } from "./historicizer/request-historicization-handler";
@@ -268,17 +272,10 @@ const legacyServiceModel = new ServiceModel(legacyServicesContainer);
 const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 
 const defaultAzureCredential = new DefaultAzureCredential();
-const useManagedIdentity = config.USE_MANAGED_IDENTITY;
-
-const requireManagedIdentitySetting = (
-  value: string | undefined,
-  name: string,
-): string => {
-  if (!value) {
-    throw new Error(`Missing managed identity setting: ${name}`);
-  }
-  return value;
-};
+const runtimeModeConfiguration:
+  | RuntimeModeDisabledConfiguration
+  | RuntimeModeEnabledConfiguration = config;
+const useManagedIdentity = runtimeModeConfiguration.USE_MANAGED_IDENTITY;
 
 const requireFallbackSetting = (
   value: string | undefined,
@@ -299,10 +296,7 @@ const createEventHubProducer = (
 ): EventHubProducerClient =>
   useManagedIdentity
     ? new EventHubProducerClient(
-        requireManagedIdentitySetting(
-          config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
-          "SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE",
-        ),
+        runtimeModeConfiguration.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
         eventHubName,
         defaultAzureCredential,
       )
