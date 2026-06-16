@@ -72,6 +72,8 @@ type RuntimeModeEnabledConfiguration = {
 } & t.TypeOf<typeof FallbackOptionalSettings> &
   t.TypeOf<typeof ManagedIdentityRequiredSettings>;
 
+// Keep the runtime contract explicit: connection-string mode requires fallback
+// secrets, while managed-identity mode requires only the MI-specific settings.
 const RuntimeModeDisabledSettings = t.intersection([
   ManagedIdentityOptionalSettings,
   FallbackRequiredSettings,

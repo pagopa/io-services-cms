@@ -290,6 +290,8 @@ const requireFallbackSetting = (
   return value;
 };
 
+// Producers are created during module bootstrap, so validate the selected
+// credential path here and fail fast before the function app starts serving.
 const createEventHubProducer = (
   connectionString: string | undefined,
   connectionStringName: string,
