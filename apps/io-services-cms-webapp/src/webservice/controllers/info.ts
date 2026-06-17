@@ -1,4 +1,3 @@
-import { CosmosClient } from "@azure/cosmos";
 import { EventHubProducerClient } from "@azure/event-hubs";
 import { DefaultAzureCredential } from "@azure/identity";
 import { BlobServiceClient } from "@azure/storage-blob";
@@ -11,68 +10,80 @@ import {
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { IConfig, envConfig } from "../../config";
+import {
+  IConfig,
+  RuntimeModeDisabledConfiguration,
+  RuntimeModeEnabledConfiguration,
+  envConfig,
+} from "../../config";
+import { createManagedIdentityCosmosClient } from "../../lib/azure/cosmos";
 import { healthcheck as checkPostgresDbHealth } from "../../lib/clients/pg-client";
 
 // TODO: read these values from package json
 const packageJson = { name: "io-services-cms-webapp", version: "0.0.0" };
 
-const requireManagedIdentitySetting = (
-  value: string | undefined,
-  name: string,
-): string => {
-  if (!value) {
-    throw new Error(`Missing managed identity setting: ${name}`);
-  }
-  return value;
-};
+type ManagedIdentityHealthConfiguration = IConfig &
+  RuntimeModeEnabledConfiguration;
+type ConnectionStringHealthConfiguration = IConfig &
+  RuntimeModeDisabledConfiguration;
+
+const checkConnectionStringHealth = (
+  config: ConnectionStringHealthConfiguration,
+) =>
+  pipe(
+    healthcheck.checkAzureStorageHealth(
+      config.INTERNAL_STORAGE_CONNECTION_STRING,
+    ),
+    TE.chainW(() =>
+      healthcheck.checkAzureCosmosDbHealth(
+        config.COSMOSDB_URI,
+        config.COSMOSDB_KEY,
+      ),
+    ),
+  );
 
 const checkManagedIdentityHealth = (
-  config: IConfig,
+  config: ManagedIdentityHealthConfiguration,
 ): healthcheck.HealthCheck<"AzureManagedIdentity"> =>
   TE.tryCatch(async () => {
     const credential = new DefaultAzureCredential();
+
+    // Validate queue data-plane access using a peek on a known queue.
+    // This exercises Storage Queue Data Contributor permissions (read+write)
+    // that the queue triggers actually need at runtime.
     const queueServiceClient = new QueueServiceClient(
-      requireManagedIdentitySetting(
-        config.CMS_INTERNAL_STORAGE__queueServiceUri,
-        "CMS_INTERNAL_STORAGE__queueServiceUri",
-      ),
+      config.CMS_INTERNAL_STORAGE__queueServiceUri,
       credential,
     );
-    await queueServiceClient.getProperties();
+    const queueClient = queueServiceClient.getQueueClient(
+      config.REQUEST_REVIEW_QUEUE,
+    );
+    await queueClient.peekMessages({ numberOfMessages: 1 });
 
+    // Validate blob data-plane access on the actual container used by triggers
     const blobServiceClient = new BlobServiceClient(
-      requireManagedIdentitySetting(
-        config.CMS_INTERNAL_STORAGE__blobServiceUri,
-        "CMS_INTERNAL_STORAGE__blobServiceUri",
-      ),
+      config.CMS_INTERNAL_STORAGE__blobServiceUri,
       credential,
     );
-    await blobServiceClient.getProperties();
+    const containerClient = blobServiceClient.getContainerClient(
+      config.ACTIVATIONS_CONTAINER_NAME,
+    );
+    await containerClient.getProperties();
 
-    const cosmosClient = new CosmosClient({
-      aadCredentials: credential,
-      endpoint: requireManagedIdentitySetting(
-        config.CMS_COSMOSDB__accountEndpoint,
-        "CMS_COSMOSDB__accountEndpoint",
-      ),
-    });
+    const cosmosClient = createManagedIdentityCosmosClient(
+      config.CMS_COSMOSDB__accountEndpoint,
+      credential,
+    );
     await cosmosClient.getDatabaseAccount();
 
-    const legacyCosmosClient = new CosmosClient({
-      aadCredentials: credential,
-      endpoint: requireManagedIdentitySetting(
-        config.CMS_LEGACY_COSMOSDB__accountEndpoint,
-        "CMS_LEGACY_COSMOSDB__accountEndpoint",
-      ),
-    });
+    const legacyCosmosClient = createManagedIdentityCosmosClient(
+      config.CMS_LEGACY_COSMOSDB__accountEndpoint,
+      credential,
+    );
     await legacyCosmosClient.getDatabaseAccount();
 
     const eventHubProducerClient = new EventHubProducerClient(
-      requireManagedIdentitySetting(
-        config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
-        "SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE",
-      ),
+      config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
       config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
       credential,
     );
@@ -92,16 +103,7 @@ export const makeInfoHandler = () =>
       (c) =>
         c.USE_MANAGED_IDENTITY
           ? checkManagedIdentityHealth(c)
-          : healthcheck.checkAzureStorageHealth(
-              c.INTERNAL_STORAGE_CONNECTION_STRING,
-            ),
-      (c) =>
-        c.USE_MANAGED_IDENTITY
-          ? TE.right(true as const)
-          : healthcheck.checkAzureCosmosDbHealth(
-              c.COSMOSDB_URI,
-              c.COSMOSDB_KEY,
-            ),
+          : checkConnectionStringHealth(c),
       (c) => checkPostgresDbHealth(c),
     ]),
     TE.mapLeft((problems) => ResponseErrorInternal(problems.join("\n\n"))),

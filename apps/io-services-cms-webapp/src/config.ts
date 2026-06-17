@@ -47,6 +47,9 @@ const ManagedIdentitySettings = {
 const ManagedIdentityOptionalSettings = t.partial(ManagedIdentitySettings);
 const ManagedIdentityRequiredSettings = t.type(ManagedIdentitySettings);
 
+// Keep fallback secrets in the schema during the rollout so deployed apps can
+// switch back via USE_MANAGED_IDENTITY=false and local/emulator setups can
+// still boot with connection strings.
 const FallbackSettings = {
   ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: NonEmptyString,
   COSMOSDB_CONNECTIONSTRING: NonEmptyString,
@@ -62,15 +65,24 @@ const FallbackSettings = {
 const FallbackOptionalSettings = t.partial(FallbackSettings);
 const FallbackRequiredSettings = t.type(FallbackSettings);
 
-type RuntimeModeDisabledConfiguration = {
-  USE_MANAGED_IDENTITY: false;
-} & t.TypeOf<typeof FallbackRequiredSettings> &
-  t.TypeOf<typeof ManagedIdentityOptionalSettings>;
+type ManagedIdentityOptionalConfiguration = t.TypeOf<
+  typeof ManagedIdentityOptionalSettings
+>;
+type ManagedIdentityRequiredConfiguration = t.TypeOf<
+  typeof ManagedIdentityRequiredSettings
+>;
+type FallbackOptionalConfiguration = t.TypeOf<typeof FallbackOptionalSettings>;
+type FallbackRequiredConfiguration = t.TypeOf<typeof FallbackRequiredSettings>;
 
-type RuntimeModeEnabledConfiguration = {
+export type RuntimeModeDisabledConfiguration = {
+  USE_MANAGED_IDENTITY: false;
+} & FallbackRequiredConfiguration &
+  ManagedIdentityOptionalConfiguration;
+
+export type RuntimeModeEnabledConfiguration = {
   USE_MANAGED_IDENTITY: true;
-} & t.TypeOf<typeof FallbackOptionalSettings> &
-  t.TypeOf<typeof ManagedIdentityRequiredSettings>;
+} & FallbackOptionalConfiguration &
+  ManagedIdentityRequiredConfiguration;
 
 // Keep the runtime contract explicit: connection-string mode requires fallback
 // secrets, while managed-identity mode requires only the MI-specific settings.
@@ -83,6 +95,11 @@ const RuntimeModeEnabledSettings = t.intersection([
   ManagedIdentityRequiredSettings,
   FallbackOptionalSettings,
 ]);
+
+const getInputProperty = (input: unknown, key: string): unknown =>
+  typeof input === "object" && input !== null
+    ? Reflect.get(input, key)
+    : undefined;
 
 const RuntimeModeConfigurationCodec: t.Type<
   RuntimeModeDisabledConfiguration | RuntimeModeEnabledConfiguration,
@@ -98,9 +115,7 @@ const RuntimeModeConfigurationCodec: t.Type<
     typeof input === "object" && input !== null,
   (input, context) => {
     const useManagedIdentityOrErrors = ManagedIdentityFlag.validate(
-      typeof input === "object" && input !== null
-        ? (input as Record<string, unknown>).USE_MANAGED_IDENTITY
-        : undefined,
+      getInputProperty(input, "USE_MANAGED_IDENTITY"),
       context,
     );
 
@@ -137,15 +152,9 @@ export type RuntimeModeConfiguration = t.TypeOf<
 
 export const RuntimeModeConfiguration = RuntimeModeConfigurationCodec;
 
-export type ManagedIdentityConfiguration = Pick<
-  RuntimeModeConfiguration,
-  "USE_MANAGED_IDENTITY" | keyof typeof ManagedIdentitySettings
->;
-
-type FallbackConfiguration = Pick<
-  RuntimeModeConfiguration,
-  keyof typeof FallbackSettings
->;
+export type ManagedIdentityConfiguration = {
+  USE_MANAGED_IDENTITY: true;
+} & ManagedIdentityRequiredConfiguration;
 
 const ServicePayloadConfig = t.type({
   MAX_ALLOWED_PAYMENT_AMOUNT: withDefault(
@@ -238,11 +247,21 @@ const CosmosBaseConfig = t.type({
 });
 
 export type CosmosConfig = Pick<
-  FallbackConfiguration,
+  FallbackRequiredConfiguration,
   "COSMOSDB_CONNECTIONSTRING" | "COSMOSDB_KEY"
 > &
   t.TypeOf<typeof CosmosBaseConfig>;
 export const CosmosConfig = CosmosBaseConfig;
+
+export type ManagedIdentityCosmosConfiguration =
+  RuntimeModeEnabledConfiguration & t.TypeOf<typeof CosmosBaseConfig>;
+
+export type FallbackCosmosConfiguration = CosmosConfig &
+  RuntimeModeDisabledConfiguration;
+
+export type CosmosDatabaseConfiguration =
+  | FallbackCosmosConfiguration
+  | ManagedIdentityCosmosConfiguration;
 
 const CosmosLegacyBaseConfig = t.type({
   LEGACY_COSMOSDB_CONTAINER_SERVICES: NonEmptyString,
@@ -253,11 +272,21 @@ const CosmosLegacyBaseConfig = t.type({
 });
 
 export type CosmosLegacyConfig = Pick<
-  FallbackConfiguration,
+  FallbackRequiredConfiguration,
   "LEGACY_COSMOSDB_CONNECTIONSTRING" | "LEGACY_COSMOSDB_KEY"
 > &
   t.TypeOf<typeof CosmosLegacyBaseConfig>;
 export const CosmosLegacyConfig = CosmosLegacyBaseConfig;
+
+export type ManagedIdentityLegacyCosmosConfiguration =
+  RuntimeModeEnabledConfiguration & t.TypeOf<typeof CosmosLegacyBaseConfig>;
+
+export type FallbackLegacyCosmosConfiguration = CosmosLegacyConfig &
+  RuntimeModeDisabledConfiguration;
+
+export type LegacyCosmosConfiguration =
+  | FallbackLegacyCosmosConfiguration
+  | ManagedIdentityLegacyCosmosConfiguration;
 
 // Apim configuration
 export const ApimConfig = t.type({
@@ -377,7 +406,7 @@ const ServicesPublicationEventHubBaseConfig = t.type({
 });
 
 export type ServicesPublicationEventHubConfig = Pick<
-  FallbackConfiguration,
+  FallbackRequiredConfiguration,
   "SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING"
 > &
   t.TypeOf<typeof ServicesPublicationEventHubBaseConfig>;
@@ -389,7 +418,7 @@ const ServicesTopicsEventHubBaseConfig = t.type({
 });
 
 export type ServicesTopicsEventHubConfig = Pick<
-  FallbackConfiguration,
+  FallbackRequiredConfiguration,
   "SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING"
 > &
   t.TypeOf<typeof ServicesTopicsEventHubBaseConfig>;
@@ -400,7 +429,7 @@ const ServicesLifecycleEventHubBaseConfig = t.type({
 });
 
 export type ServicesLifecycleEventHubConfig = Pick<
-  FallbackConfiguration,
+  FallbackRequiredConfiguration,
   "SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING"
 > &
   t.TypeOf<typeof ServicesLifecycleEventHubBaseConfig>;
@@ -412,7 +441,7 @@ const ServicesHistoryEventHubBaseConfig = t.type({
 });
 
 export type ServicesHistoryEventHubConfig = Pick<
-  FallbackConfiguration,
+  FallbackRequiredConfiguration,
   "SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING"
 > &
   t.TypeOf<typeof ServicesHistoryEventHubBaseConfig>;
@@ -423,7 +452,7 @@ const ActivationEventHubBaseConfig = t.type({
 });
 
 export type ActivationEventHubConfig = Pick<
-  FallbackConfiguration,
+  FallbackRequiredConfiguration,
   "ACTIVATIONS_EVENT_HUB_CONNECTION_STRING"
 > &
   t.TypeOf<typeof ActivationEventHubBaseConfig>;
@@ -468,27 +497,28 @@ export const SelfcareClientConfig = t.intersection([
   HttpAgentConfig,
 ]);
 
-// Global app configuration
-export type IConfig = t.TypeOf<typeof IConfig>;
-export const IConfig = t.intersection([
+const SharedConfiguration = t.intersection([
   t.intersection([
     t.intersection([
       t.intersection([
         t.type({ isProduction: t.boolean }),
         InternalStorageAccount,
       ]),
-      t.intersection([RuntimeModeConfiguration, JiraConfig]),
-      t.intersection([ReviewerPostgreSqlConfig, ServicePayloadConfig]),
+      t.intersection([
+        JiraConfig,
+        ReviewerPostgreSqlConfig,
+        ServicePayloadConfig,
+      ]),
     ]),
     t.intersection([
-      CosmosConfig,
+      CosmosBaseConfig,
       ApimConfig,
       QueueConfig,
       ServiceIdQualityCheckExclusionList,
       SelfcareClientConfig,
     ]),
     t.intersection([
-      CosmosLegacyConfig,
+      CosmosLegacyBaseConfig,
       PaginationConfig,
       JiraLegacyProjectName,
       ApplicationInsightConfig,
@@ -502,20 +532,84 @@ export const IConfig = t.intersection([
       DefaultValues,
     ]),
     t.intersection([
-      ServicesPublicationEventHubConfig,
-      ServicesTopicsEventHubConfig,
-      ServicesLifecycleEventHubConfig,
-      ServicesHistoryEventHubConfig,
+      ServicesPublicationEventHubBaseConfig,
+      ServicesTopicsEventHubBaseConfig,
+      ServicesLifecycleEventHubBaseConfig,
+      ServicesHistoryEventHubBaseConfig,
     ]),
   ]),
   t.intersection([
     PDVTokenizerClientConfiguration,
-    ActivationEventHubConfig,
+    ActivationEventHubBaseConfig,
     HttpAgentConfig,
     BlobStorageClientConfiguration,
     TestFiscalCodeConfiguration,
   ]),
 ]);
+
+type SharedConfiguration = t.TypeOf<typeof SharedConfiguration>;
+
+const ManagedIdentityAppConfigurationSettings = t.intersection([
+  SharedConfiguration,
+  RuntimeModeEnabledSettings,
+]);
+
+const FallbackAppConfigurationSettings = t.intersection([
+  SharedConfiguration,
+  RuntimeModeDisabledSettings,
+]);
+
+export type ManagedIdentityAppConfiguration = RuntimeModeEnabledConfiguration &
+  SharedConfiguration;
+export type FallbackAppConfiguration = RuntimeModeDisabledConfiguration &
+  SharedConfiguration;
+
+const IConfigCodec: t.Type<
+  FallbackAppConfiguration | ManagedIdentityAppConfiguration,
+  FallbackAppConfiguration | ManagedIdentityAppConfiguration,
+  unknown
+> = new t.Type(
+  "IConfig",
+  (
+    input,
+  ): input is FallbackAppConfiguration | ManagedIdentityAppConfiguration =>
+    typeof input === "object" && input !== null,
+  (input, context) => {
+    const runtimeModeConfigurationOrErrors = RuntimeModeConfiguration.validate(
+      input,
+      context,
+    );
+
+    if (E.isLeft(runtimeModeConfigurationOrErrors)) {
+      return runtimeModeConfigurationOrErrors;
+    }
+
+    return runtimeModeConfigurationOrErrors.right.USE_MANAGED_IDENTITY
+      ? pipe(
+          ManagedIdentityAppConfigurationSettings.validate(input, context),
+          E.map(
+            (settings): ManagedIdentityAppConfiguration => ({
+              USE_MANAGED_IDENTITY: true,
+              ...settings,
+            }),
+          ),
+        )
+      : pipe(
+          FallbackAppConfigurationSettings.validate(input, context),
+          E.map(
+            (settings): FallbackAppConfiguration => ({
+              USE_MANAGED_IDENTITY: false,
+              ...settings,
+            }),
+          ),
+        );
+  },
+  t.identity,
+);
+
+// Global app configuration
+export type IConfig = t.TypeOf<typeof IConfigCodec>;
+export const IConfig = IConfigCodec;
 
 export const envConfig = {
   ...process.env,

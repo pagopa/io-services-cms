@@ -270,46 +270,17 @@ const blobService = createBlobService(config.ASSET_STORAGE_CONNECTIONSTRING);
 const defaultAzureCredential = new DefaultAzureCredential();
 const useManagedIdentity = config.USE_MANAGED_IDENTITY;
 
-const requireManagedIdentitySetting = (
-  value: string | undefined,
-  name: string,
-): string => {
-  if (!value) {
-    throw new Error(`Missing managed identity setting: ${name}`);
-  }
-  return value;
-};
-
-const requireFallbackSetting = (
-  value: string | undefined,
-  name: string,
-): string => {
-  if (!value) {
-    throw new Error(`Missing fallback setting: ${name}`);
-  }
-  return value;
-};
-
 // Producers are created during module bootstrap, so validate the selected
 // credential path here and fail fast before the function app starts serving.
-const createEventHubProducer = (
-  connectionString: string | undefined,
-  connectionStringName: string,
+const createManagedIdentityEventHubProducer = (
+  fullyQualifiedNamespace: string,
   eventHubName: string,
 ): EventHubProducerClient =>
-  useManagedIdentity
-    ? new EventHubProducerClient(
-        requireManagedIdentitySetting(
-          config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
-          "SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE",
-        ),
-        eventHubName,
-        defaultAzureCredential,
-      )
-    : new EventHubProducerClient(
-        requireFallbackSetting(connectionString, connectionStringName),
-        eventHubName,
-      );
+  new EventHubProducerClient(
+    fullyQualifiedNamespace,
+    eventHubName,
+    defaultAzureCredential,
+  );
 
 const internalStorageBindingConnection = useManagedIdentity
   ? "CMS_INTERNAL_STORAGE"
@@ -322,39 +293,59 @@ const legacyCosmosBindingConnection = useManagedIdentity
   : "LEGACY_COSMOSDB_CONNECTIONSTRING";
 
 // eventhub producer for ServicePublication
-const servicePublicationEventHubProducer = createEventHubProducer(
-  config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
-  "SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING",
-  config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
-);
+const servicePublicationEventHubProducer = config.USE_MANAGED_IDENTITY
+  ? createManagedIdentityEventHubProducer(
+      config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+      config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
+    )
+  : new EventHubProducerClient(
+      config.SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING,
+      config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
+    );
 
 // eventhub producer for ServiceTopics
-const serviceTopicsEventHubProducer = createEventHubProducer(
-  config.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
-  "SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING",
-  config.SERVICES_TOPICS_EVENT_HUB_NAME,
-);
+const serviceTopicsEventHubProducer = config.USE_MANAGED_IDENTITY
+  ? createManagedIdentityEventHubProducer(
+      config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+      config.SERVICES_TOPICS_EVENT_HUB_NAME,
+    )
+  : new EventHubProducerClient(
+      config.SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING,
+      config.SERVICES_TOPICS_EVENT_HUB_NAME,
+    );
 
 // eventhub producer for ServiceLifecycle
-const serviceLifecycleEventHubProducer = createEventHubProducer(
-  config.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING,
-  "SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING",
-  config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
-);
+const serviceLifecycleEventHubProducer = config.USE_MANAGED_IDENTITY
+  ? createManagedIdentityEventHubProducer(
+      config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+      config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
+    )
+  : new EventHubProducerClient(
+      config.SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING,
+      config.SERVICES_LIFECYCLE_EVENT_HUB_NAME,
+    );
 
 // eventhub producer for ServiceHistory
-const serviceHistoryEventHubProducer = createEventHubProducer(
-  config.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING,
-  "SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING",
-  config.SERVICES_HISTORY_EVENT_HUB_NAME,
-);
+const serviceHistoryEventHubProducer = config.USE_MANAGED_IDENTITY
+  ? createManagedIdentityEventHubProducer(
+      config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+      config.SERVICES_HISTORY_EVENT_HUB_NAME,
+    )
+  : new EventHubProducerClient(
+      config.SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING,
+      config.SERVICES_HISTORY_EVENT_HUB_NAME,
+    );
 
 // eventhub producer for Activations
-const activationEventHubProducer = createEventHubProducer(
-  config.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING,
-  "ACTIVATIONS_EVENT_HUB_CONNECTION_STRING",
-  config.ACTIVATIONS_EVENT_HUB_NAME,
-);
+const activationEventHubProducer = config.USE_MANAGED_IDENTITY
+  ? createManagedIdentityEventHubProducer(
+      config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
+      config.ACTIVATIONS_EVENT_HUB_NAME,
+    )
+  : new EventHubProducerClient(
+      config.ACTIVATIONS_EVENT_HUB_CONNECTION_STRING,
+      config.ACTIVATIONS_EVENT_HUB_NAME,
+    );
 
 const blobServiceClient = new BlobServiceClient(
   `https://${config.STORAGE_ACCOUNT_NAME}.blob.core.windows.net`,
