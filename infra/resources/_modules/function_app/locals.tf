@@ -3,8 +3,7 @@ locals {
     use_case      = "high_load"
     cosmosdb_name = "app-backend"
     app_settings = {
-      NODE_ENV             = "production"
-      USE_MANAGED_IDENTITY = "true"
+      NODE_ENV = "production"
 
       STORAGE_ACCOUNT_NAME = module.storage_account.name
 
@@ -19,8 +18,6 @@ locals {
       AZURE_SEARCH_INSTITUTIONS_INDEX_NAME = var.ai_search.institution_index_name
       AZURE_SEARCH_SERVICES_INDEX_NAME     = var.ai_search.services_index_name
       COSMOSDB_URI                         = data.azurerm_cosmosdb_account.cosmos.endpoint
-
     }
   }
 }
-
