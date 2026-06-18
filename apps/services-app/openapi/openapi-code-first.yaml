@@ -1,0 +1,75 @@
+openapi: 3.1.0
+info:
+  description: Example Fastify app following the hexagonal architecture pattern.
+  license:
+    identifier: MIT
+    name: MIT
+  title: io-example-fastify
+  version: 0.0.1
+security: []
+servers:
+  - description: Local development server
+    url: http://localhost:7071
+components:
+  securitySchemes:
+    functionKey:
+      description: Azure Functions host key passed as the `x-functions-key` header.
+      in: header
+      name: x-functions-key
+      type: apiKey
+  schemas:
+    ProblemDetails:
+      type: object
+      properties:
+        detail:
+          type: string
+        status:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+          format: uri
+      required:
+        - detail
+        - status
+        - title
+        - type
+      description: "RFC 7807 Problem Details for HTTP APIs. See https://tools.ietf.org/html/rfc7807. Base URL: https://ioapp.it/problems/"
+    InfoOutput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The application name.
+          example: io-example-fastify
+        ok:
+          type: boolean
+          description: Whether the application is healthy.
+          example: true
+        version:
+          type: string
+          description: The application version.
+          example: 0.0.1
+      required:
+        - name
+        - ok
+        - version
+      description: Application health and version information.
+  parameters: {}
+paths:
+  /api/info:
+    get:
+      description: Returns the application name, version, and health status.
+      operationId: getInfo
+      summary: Health check / application info
+      tags:
+        - Info
+      responses:
+        "200":
+          description: Application info returned successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InfoOutput"
+webhooks: {}
