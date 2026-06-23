@@ -39,6 +39,8 @@ locals {
       COSMOSDB_NAME                           = "db-services-cms"
       COSMOSDB_APP_BE_NAME                    = "app-backend"
       COSMOSDB_URI                            = data.azurerm_cosmosdb_account.cosmos.endpoint
+      CMS_COSMOSDB__credential                = "managedidentity"
+      CMS_COSMOSDB__accountEndpoint           = data.azurerm_cosmosdb_account.cosmos.endpoint
       COSMOSDB_KEY                            = data.azurerm_cosmosdb_account.cosmos.primary_key
       COSMOSDB_CONTAINER_SERVICES_LIFECYCLE   = "services-lifecycle"
       COSMOSDB_CONTAINER_SERVICES_PUBLICATION = "services-publication"
@@ -46,6 +48,15 @@ locals {
       COSMOSDB_CONTAINER_SERVICES_DETAILS     = "services"
 
       INTERNAL_STORAGE_CONNECTION_STRING = module.cms_storage_account.primary_connection_string
+      CMS_INTERNAL_STORAGE__credential   = "managedidentity"
+      CMS_INTERNAL_STORAGE__queueServiceUri = format(
+        "https://%s.queue.core.windows.net",
+        module.cms_storage_account.name
+      )
+      CMS_INTERNAL_STORAGE__blobServiceUri = format(
+        "https://%s.blob.core.windows.net",
+        module.cms_storage_account.name
+      )
 
       # JIRA integration for Service review workflow
       JIRA_NAMESPACE_URL                  = "https://pagopa.atlassian.net"
@@ -88,6 +99,8 @@ locals {
       LEGACY_COSMOSDB_CONNECTIONSTRING                = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
       LEGACY_COSMOSDB_NAME                            = "db"
       LEGACY_COSMOSDB_URI                             = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
+      CMS_LEGACY_COSMOSDB__credential                 = "managedidentity"
+      CMS_LEGACY_COSMOSDB__accountEndpoint            = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
       LEGACY_COSMOSDB_KEY                             = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
       LEGACY_COSMOSDB_CONTAINER_SERVICES              = "services"
       LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS           = "activations"
@@ -129,6 +142,7 @@ locals {
       SERVICES_HISTORY_EVENT_HUB_NAME                  = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-history-01"
       ACTIVATIONS_EVENT_HUB_CONNECTION_STRING          = data.azurerm_key_vault_secret.activations_event_hub_connection_string.value
       ACTIVATIONS_EVENT_HUB_NAME                       = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-activations-01"
+      SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE     = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-evhns-01.servicebus.windows.net"
 
       # Fix Service Review Checker pg module
       APPLICATION_INSIGHTS_NO_PATCH_MODULES = "pg"

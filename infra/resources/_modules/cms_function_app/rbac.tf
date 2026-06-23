@@ -12,6 +12,27 @@ module "cms_fn_roles" {
     container_name       = local.containers.activations.name
     }
   ]
+  storage_queue = [{
+    storage_account_name = module.cms_storage_account.name
+    resource_group_name  = module.cms_storage_account.resource_group_name
+    description          = "Allow Function App to process internal workflow queues and poison queues"
+    role                 = "owner"
+  }]
+  cosmos = [
+    {
+      account_name        = data.azurerm_cosmosdb_account.cosmos.name
+      resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
+      description         = "Allow Function App to read/write all databases in CMS Cosmos account"
+      role                = "writer"
+    },
+    {
+      account_name        = data.azurerm_cosmosdb_account.cosmos_legacy.name
+      resource_group_name = data.azurerm_cosmosdb_account.cosmos_legacy.resource_group_name
+      description         = "Allow Function App to read legacy change feeds and manage lease containers"
+      role                = "writer"
+      database            = "db"
+    }
+  ]
   apim = [{
     name                = local.apim.name
     resource_group_name = local.apim.resource_group_name
@@ -31,6 +52,27 @@ module "cms_fn_staging_slot_roles" {
     description          = "To allow migrating the activations of special services's"
     role                 = "writer"
     container_name       = local.containers.activations.name
+    }
+  ]
+  storage_queue = [{
+    storage_account_name = module.cms_storage_account.name
+    resource_group_name  = module.cms_storage_account.resource_group_name
+    description          = "Allow Function App staging slot to process internal workflow queues and poison queues"
+    role                 = "owner"
+  }]
+  cosmos = [
+    {
+      account_name        = data.azurerm_cosmosdb_account.cosmos.name
+      resource_group_name = data.azurerm_cosmosdb_account.cosmos.resource_group_name
+      description         = "Allow Function App staging slot to read/write all databases in CMS Cosmos account"
+      role                = "writer"
+    },
+    {
+      account_name        = data.azurerm_cosmosdb_account.cosmos_legacy.name
+      resource_group_name = data.azurerm_cosmosdb_account.cosmos_legacy.resource_group_name
+      description         = "Allow Function App staging slot to read legacy change feeds and manage lease containers"
+      role                = "writer"
+      database            = "db"
     }
   ]
   apim = [{

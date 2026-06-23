@@ -187,8 +187,9 @@ module "eventhub" {
   resource_group_name = data.azurerm_resource_group.rg.name
 
   # Cms Fn Binding
-  cms_fn_name         = module.cms_function_app.cms_fn_name
-  cms_fn_principal_id = module.cms_function_app.cms_fn_principal_id
+  cms_fn_name                      = module.cms_function_app.cms_fn_name
+  cms_fn_principal_id              = module.cms_function_app.cms_fn_principal_id
+  cms_fn_staging_slot_principal_id = module.cms_function_app.cms_fn_staging_slot_principal_id
 
   peps_snet_id                         = data.azurerm_subnet.private_endpoints_subnet.id
   private_dns_zone_resource_group_name = data.azurerm_resource_group.evt-rg.name
