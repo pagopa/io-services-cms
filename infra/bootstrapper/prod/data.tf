@@ -6,6 +6,10 @@ data "azurerm_key_vault" "svc_kv" {
 data "azurerm_key_vault_secret" "slack_webhook_url" {
   key_vault_id = data.azurerm_key_vault.svc_kv.id
   name         = "slack-webhook-url-terraform-drift"
+
+  depends_on = [
+    azurerm_key_vault_access_policy.bootstrapper_svc_kv
+  ]
 }
 
 data "azurerm_cosmosdb_account" "legacy_api" {

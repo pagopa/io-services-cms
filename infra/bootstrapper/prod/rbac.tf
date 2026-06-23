@@ -16,6 +16,14 @@ resource "azurerm_role_assignment" "infra_cd_legacy_cosmosdb_account_contributor
   principal_id         = module.repo.identities.infra.cd.principal_id
 }
 
+resource "azurerm_key_vault_access_policy" "bootstrapper_svc_kv" {
+  key_vault_id = data.azurerm_key_vault.svc_kv.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = data.azurerm_client_config.current.object_id
+
+  secret_permissions = ["Get"]
+}
+
 resource "azurerm_key_vault_access_policy" "infra_cd_kv_common" {
   for_each = toset(local.keyvault_common_ids)
 
