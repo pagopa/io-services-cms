@@ -41,6 +41,11 @@ locals {
     resource_group_name = "io-p-rg-common"
   }
 
+  legacy_cosmosdb = {
+    name                = "${local.prefix}-${local.env_short}-cosmos-api"
+    resource_group_name = "${local.prefix}-${local.env_short}-rg-internal"
+  }
+
   repo_secrets = {
     "SLACK_WEBHOOK_URL" = data.azurerm_key_vault_secret.slack_webhook_url.value
   }
