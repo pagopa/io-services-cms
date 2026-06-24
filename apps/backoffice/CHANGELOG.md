@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.7.2
+
+### Patch Changes
+
+- 0c82b60c: Make selcGroups required in BackOfficeUserPermissions
+
 ## 2.7.1
 
 ### Patch Changes
