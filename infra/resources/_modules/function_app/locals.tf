@@ -3,8 +3,7 @@ locals {
     use_case      = "high_load"
     cosmosdb_name = "app-backend"
     app_settings = {
-      NODE_ENV             = "production"
-      USE_MANAGED_IDENTITY = "true"
+      NODE_ENV = "production"
 
       STORAGE_ACCOUNT_NAME = module.storage_account.name
 
