@@ -42,8 +42,7 @@ export const hasAggregatorFeatures =
 
 /** Check if user is in one or more Selfcare Group  */
 export const isAtLeastInOneGroup = (session: Session | null) =>
-  session?.user?.permissions?.selcGroups !== undefined &&
-  session?.user?.permissions?.selcGroups?.length > 0;
+  (session?.user.permissions.selcGroups.length ?? 0) > 0;
 
 export const isGroupRequired = (
   session: Session | null,

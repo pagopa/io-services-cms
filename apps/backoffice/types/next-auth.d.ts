@@ -14,7 +14,7 @@ export interface Institution {
 
 export interface BackOfficeUserPermissions {
   apimGroups: string[];
-  selcGroups?: string[];
+  selcGroups: string[];
 }
 
 export interface BackOfficeUserParameters {
