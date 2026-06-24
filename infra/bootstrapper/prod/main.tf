@@ -37,6 +37,8 @@ provider "github" {
 
 data "azurerm_subscription" "current" {}
 
+data "azurerm_client_config" "current" {}
+
 data "azurerm_container_app_environment" "runner" {
   name                = local.runner.cae_name
   resource_group_name = local.runner.cae_resource_group_name

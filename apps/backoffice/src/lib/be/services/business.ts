@@ -74,7 +74,6 @@ const retrieveSubscriptions = (
   serviceId?: string,
 ): TE.TaskEither<Error, SubscriptionCollection> =>
   !userAuthz(backofficeUser).isAdmin() &&
-  backofficeUser.permissions.selcGroups &&
   backofficeUser.permissions.selcGroups.length > 0
     ? pipe(
         backofficeUser.permissions.selcGroups.map((group) => group.id),
@@ -131,7 +130,7 @@ export const retrieveServiceList = async (
                   retrieveInstitutionGroups(backofficeUser.institution.id, "*"),
                 E.toError,
               )
-            : TE.right(backofficeUser.permissions.selcGroups ?? []),
+            : TE.right(backofficeUser.permissions.selcGroups),
         ),
         TE.map(reduceGrops),
       ),
@@ -272,9 +271,9 @@ export async function forwardIoServicesCmsRequest<
       "x-user-groups": backofficeUser.permissions.apimGroups.join(","),
       "x-user-groups-selc": userAuthz(backofficeUser).isAdmin()
         ? ""
-        : (backofficeUser.permissions.selcGroups
-            ?.map((group) => group.id)
-            .join(",") ?? ""),
+        : backofficeUser.permissions.selcGroups
+            .map((group) => group.id)
+            .join(","),
       "x-user-id": backofficeUser.parameters.userId,
     };
 

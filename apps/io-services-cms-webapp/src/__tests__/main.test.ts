@@ -30,7 +30,9 @@ const mocks = vi.hoisted(() => {
     SERVICES_HISTORY_EVENT_HUB_NAME: "test-history-name",
     APPINSIGHTS_INSTRUMENTATIONKEY: "test-key",
     ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: "test-activations-conn",
+    ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: "test-activations-conn",
     ACTIVATIONS_CONTAINER_NAME: "test-activations",
+    USE_MANAGED_IDENTITY: false,
     USE_MANAGED_IDENTITY: false,
   };
 
@@ -53,6 +55,9 @@ const mocks = vi.hoisted(() => {
     find: vi.fn(),
     create: vi.fn(),
     update: vi.fn(),
+  };
+  const defaultAzureCredential = {
+    getToken: vi.fn(),
   };
   return {
     getConfigOrThrow: vi.fn(() => config),
@@ -114,6 +119,8 @@ const mocks = vi.hoisted(() => {
     makeOnLegacyActivationChangeHandler: vi.fn(),
     SUBSCRIPTION_CIDRS_COLLECTION_NAME: "test",
     SERVICE_COLLECTION_NAME: "test",
+    defaultAzureCredential,
+    DefaultAzureCredential: vi.fn(() => defaultAzureCredential),
     envConfig: {},
     makeInfoHandler: vi.fn(() => {}),
     createServiceValidationHandler: vi.fn((...args: any[]) => {}),
@@ -213,6 +220,10 @@ vi.mock("../utils/cosmos-legacy", () => ({
 
 vi.mock("@azure/event-hubs", () => ({
   EventHubProducerClient: mocks.EventHubProducerClient,
+}));
+
+vi.mock("@azure/identity", () => ({
+  DefaultAzureCredential: mocks.DefaultAzureCredential,
 }));
 
 vi.mock("azure-storage", () => ({
@@ -481,7 +492,9 @@ describe("main", () => {
     it("should allow bootstrap without fallback event hub connection strings when managed identity is enabled", async () => {
       vi.resetModules();
       primeBootstrapMocks();
+      mocks.DefaultAzureCredential.mockClear();
       mocks.EventHubProducerClient.mockClear();
+      mocks.makeInfoHandler.mockClear();
       mocks.getConfigOrThrow.mockReturnValue({
         ...mocks.config,
         ACTIVATIONS_EVENT_HUB_CONNECTION_STRING: undefined,
@@ -503,26 +516,36 @@ describe("main", () => {
       });
 
       await expect(import("../main")).resolves.toBeDefined();
+      expect(mocks.DefaultAzureCredential).toHaveBeenCalledTimes(1);
       expect(mocks.EventHubProducerClient).toHaveBeenCalledWith(
         "cms-namespace.servicebus.windows.net",
         "test-pub-name",
         expect.anything(),
+      );
+      expect(mocks.makeInfoHandler).toHaveBeenCalledWith(
+        mocks.defaultAzureCredential,
       );
     });
 
     it("should create event hub producers from fallback connection strings when managed identity is disabled", async () => {
       vi.resetModules();
       primeBootstrapMocks();
+      mocks.DefaultAzureCredential.mockClear();
       mocks.EventHubProducerClient.mockClear();
+      mocks.makeInfoHandler.mockClear();
       mocks.getConfigOrThrow.mockReturnValue({
         ...mocks.config,
         USE_MANAGED_IDENTITY: false,
       });
 
       await expect(import("../main")).resolves.toBeDefined();
+      expect(mocks.DefaultAzureCredential).toHaveBeenCalledTimes(1);
       expect(mocks.EventHubProducerClient).toHaveBeenCalledWith(
         "test-pub-conn",
         "test-pub-name",
+      );
+      expect(mocks.makeInfoHandler).toHaveBeenCalledWith(
+        mocks.defaultAzureCredential,
       );
     });
   });

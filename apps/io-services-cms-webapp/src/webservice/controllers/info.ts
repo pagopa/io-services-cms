@@ -44,10 +44,9 @@ const checkConnectionStringHealth = (
 
 const checkManagedIdentityHealth = (
   config: ManagedIdentityHealthConfiguration,
+  credential: DefaultAzureCredential,
 ): healthcheck.HealthCheck<"AzureManagedIdentity"> =>
   TE.tryCatch(async () => {
-    const credential = new DefaultAzureCredential();
-
     // Validate queue data-plane access using a peek on a known queue.
     // This exercises Storage Queue Data Contributor permissions (read+write)
     // that the queue triggers actually need at runtime.
@@ -96,13 +95,13 @@ const checkManagedIdentityHealth = (
     return true as const;
   }, healthcheck.toHealthProblems("AzureManagedIdentity"));
 
-export const makeInfoHandler = () =>
+export const makeInfoHandler = (credential: DefaultAzureCredential) =>
   pipe(
     envConfig,
     healthcheck.checkApplicationHealth(IConfig, [
       (c) =>
         c.USE_MANAGED_IDENTITY
-          ? checkManagedIdentityHealth(c)
+          ? checkManagedIdentityHealth(c, credential)
           : checkConnectionStringHealth(c),
       (c) => checkPostgresDbHealth(c),
     ]),

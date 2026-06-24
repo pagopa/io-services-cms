@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.1.8
+
+### Patch Changes
+
+- 0b1cb5f6: Migrate Azure client and binding configuration toward managed identity, while keeping the connection-string fallback for rollback and local emulator scenarios.
+
 ## 2.1.7
 
 ### Patch Changes

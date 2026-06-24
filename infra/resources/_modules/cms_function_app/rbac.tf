@@ -8,7 +8,7 @@ module "cms_fn_roles" {
     storage_account_name = module.cms_storage_account.name
     resource_group_name  = module.cms_storage_account.resource_group_name
     description          = "To allow migrating the activations of special services's"
-    role                 = "writer"
+    role                 = "owner"
     container_name       = local.containers.activations.name
     }
   ]
@@ -50,7 +50,7 @@ module "cms_fn_staging_slot_roles" {
     storage_account_name = module.cms_storage_account.name
     resource_group_name  = module.cms_storage_account.resource_group_name
     description          = "To allow migrating the activations of special services's"
-    role                 = "writer"
+    role                 = "owner"
     container_name       = local.containers.activations.name
     }
   ]

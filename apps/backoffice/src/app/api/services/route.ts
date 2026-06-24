@@ -67,10 +67,7 @@ export const POST = withJWTAuthHandler(
               );
             }
           } else {
-            if (
-              backofficeUser.permissions.selcGroups &&
-              backofficeUser.permissions.selcGroups.length > 0
-            ) {
+            if (backofficeUser.permissions.selcGroups.length > 0) {
               return handleBadRequestErrorResponse("group_id is required");
             }
           }

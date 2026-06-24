@@ -715,7 +715,7 @@ export const createRequestServicesHistoryIngestionRetryEntryPoint =
 
 app.http("Info", {
   authLevel: "anonymous",
-  handler: wrapHandlerV4([], makeInfoHandler()),
+  handler: wrapHandlerV4([], makeInfoHandler(defaultAzureCredential)),
   methods: ["GET"],
   route: "info",
 });

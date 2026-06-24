@@ -160,6 +160,7 @@ describe("[auth utils] hasAtLeastOneGroup", () => {
     user: {
       permissions: {
         apimGroups: ["ApiServiceRead"],
+        selcGroups: [],
       },
       institution: { role: "operator" },
     },
@@ -198,7 +199,7 @@ describe("[auth utils] hasAtLeastOneGroup", () => {
     },
   };
 
-  it("should return false for a session without groups", () => {
+  it("should return false for a session with no groups", () => {
     const result = isAtLeastInOneGroup(aSessionWithoutGroups);
     expect(result).toBe(false);
   });
