@@ -122,6 +122,7 @@ const aBackofficeUser: BackOfficeUser = {
   id: "selcUserId",
   permissions: {
     apimGroups: ["permission1", "permission2"],
+    selcGroups: [],
   },
   parameters: {
     userEmail: "anEmail@email.it",
@@ -239,7 +240,7 @@ describe("Services TEST", () => {
     it.each`
       scenario                                | backofficeUser
       ${"user is admin with groups"}          | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: ["id"] }, institution: { role: "admin" } }}
-      ${"user is not admin and has no group"} | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: undefined }, institution: { role: "operator" } }}
+      ${"user is not admin and has no group"} | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: [] }, institution: { role: "operator" } }}
     `(
       "request without body request and with response body when $scenario",
       async ({ backofficeUser }) => {
@@ -278,7 +279,7 @@ describe("Services TEST", () => {
             "x-user-groups-selc":
               backofficeUser.institution.role === "admin"
                 ? ""
-                : (backofficeUser.permissions.selcGroups?.join(",") ?? ""),
+                : backofficeUser.permissions.selcGroups.join(","),
             "x-channel": "BO",
           }),
         );
@@ -335,7 +336,7 @@ describe("Services TEST", () => {
             "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
             "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
             "x-user-groups-selc":
-              aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
+              aBackofficeUser.permissions.selcGroups.join(","),
             "x-channel": "BO",
           }),
         );
@@ -400,7 +401,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
+            aBackofficeUser.permissions.selcGroups.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -452,7 +453,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
+            aBackofficeUser.permissions.selcGroups.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -507,7 +508,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
+            aBackofficeUser.permissions.selcGroups.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -575,7 +576,7 @@ describe("Services TEST", () => {
           "x-subscription-id": aBackofficeUser.parameters.subscriptionId,
           "x-user-groups": aBackofficeUser.permissions.apimGroups.join(","),
           "x-user-groups-selc":
-            aBackofficeUser.permissions.selcGroups?.join(",") ?? "",
+            aBackofficeUser.permissions.selcGroups.join(","),
           "x-channel": "BO",
           body: aBodyPayload,
           serviceId: "test",
@@ -591,7 +592,7 @@ describe("Services TEST", () => {
     it.each`
       scenario                                | backofficeUser
       ${"user is admin with groups"}          | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: ["id"] }, institution: { role: "admin" } }}
-      ${"user is not admin and has no group"} | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: undefined }, institution: { role: "operator" } }}
+      ${"user is not admin and has no group"} | ${{ ...aBackofficeUser, permissions: { ...aBackofficeUser.permissions, selcGroups: [] }, institution: { role: "operator" } }}
     `(
       "should return a list of services with visibility when $scenario",
       async ({ backofficeUser }) => {
@@ -602,8 +603,7 @@ describe("Services TEST", () => {
           backofficeUser.institution.role === "admin",
         );
         hasSelcGroupsMock.mockReturnValueOnce(
-          backofficeUser.permissions.selcGroups &&
-            backofficeUser.permissions.selcGroups.length > 0,
+          backofficeUser.permissions.selcGroups.length > 0,
         );
 
         getSubscriptionsMock.mockReturnValueOnce(
@@ -1111,10 +1111,10 @@ describe("Services TEST", () => {
 
     const getExpectedGetSubscriptionsFilter = (
       authzServiceIds: string[],
-      selcGroups?: string[],
+      selcGroups: string[],
       serviceId?: string,
     ) =>
-      selcGroups && selcGroups.length > 0
+      selcGroups.length > 0
         ? authzServiceIds.length > 0
           ? serviceId
             ? authzServiceIds.includes(serviceId)
@@ -1126,9 +1126,7 @@ describe("Services TEST", () => {
 
     it.each`
       scenario                                                                                          | selcGroups                                                                                                       | serviceId      | authzServiceIds
-      ${"selcGroups is undefined, serviceId is undefined (authzServiceIds doesn't matters)"}            | ${undefined}                                                                                                     | ${undefined}   | ${undefined}
       ${"selcGroups has no elements, serviceId is undefined (authzServiceIds doesn't matters)"}         | ${[]}                                                                                                            | ${undefined}   | ${undefined}
-      ${"selcGroups is undefined, serviceId is defined (authzServiceIds doesn't matters)"}              | ${undefined}                                                                                                     | ${"serviceId"} | ${undefined}
       ${"selcGroups has no elements, serviceId is defined (authzServiceIds doesn't matters)"}           | ${[]}                                                                                                            | ${"serviceId"} | ${undefined}
       ${"selcGroups has at least one element, serviceId is undefined and authzServiceIds is empty"}     | ${[{ id: "g1", name: "group", state: "ACTIVE" }]}                                                                | ${undefined}   | ${[]}
       ${"selcGroups has at least one element, serviceId is undefined and authzServiceIds is empty"}     | ${[{ id: "group_id", name: "group", state: "SUSPENDED" }]}                                                       | ${undefined}   | ${[]}
@@ -1151,7 +1149,7 @@ describe("Services TEST", () => {
             selcGroups,
           },
         };
-        if (selcGroups && selcGroups.length > 0) {
+        if (selcGroups.length > 0) {
           retrieveAuthorizedServiceIdsMock.mockReturnValueOnce(
             TE.right(authzServiceIds),
           );
@@ -1166,7 +1164,7 @@ describe("Services TEST", () => {
         expect(isAdminMock).toHaveBeenCalledOnce();
         expect(isAdminMock).toHaveBeenCalledWith();
 
-        if (selcGroups && selcGroups.length > 0) {
+        if (selcGroups.length > 0) {
           expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledOnce();
           expect(retrieveAuthorizedServiceIdsMock).toHaveBeenCalledWith(
             selcGroups.map((group) => group.id),

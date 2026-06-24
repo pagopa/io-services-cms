@@ -44,10 +44,8 @@ export const withJWTAuthHandler =
       institutionGroups =
         institutionGroups ??
         (await retrieveInstitutionGroups(session.user.institution.id, "*"));
-      selcGroups = institutionGroups.filter(
-        (institutionGroup) =>
-          session.user.permissions.selcGroups?.includes(institutionGroup.id) ??
-          false,
+      selcGroups = institutionGroups.filter((institutionGroup) =>
+        session.user.permissions.selcGroups.includes(institutionGroup.id),
       );
     }
 

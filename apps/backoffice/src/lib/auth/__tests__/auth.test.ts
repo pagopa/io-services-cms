@@ -116,7 +116,7 @@ const getExpectedUser = (
     apimGroups: apimUser.groups
       .filter((group) => group.type === "custom")
       .map((group) => group.name),
-    selcGroups: jwtPayload.organization.groups,
+    selcGroups: jwtPayload.organization.groups ?? [],
   },
   parameters: {
     userId: apimUser.name,

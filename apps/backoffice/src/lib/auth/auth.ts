@@ -344,7 +344,7 @@ const toUser = ({
       .filter((group) => group.type === "custom")
       .map((group) => group.name),
     selcGroups: getConfiguration().GROUP_AUTHZ_ENABLED
-      ? identityTokenPayload.organization.groups
-      : undefined,
+      ? (identityTokenPayload.organization.groups ?? [])
+      : [],
   },
 });

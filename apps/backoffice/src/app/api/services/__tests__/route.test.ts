@@ -328,12 +328,12 @@ describe("Services API", () => {
 
     it.each`
       scenario                                                                         | userRole                  | selcGroups          | group_id      | mockGetGroup
-      ${"user is operator and has no groups and group is not set"}                     | ${SelfcareRoles.operator} | ${undefined}        | ${undefined}  | ${undefined}
+      ${"user is operator and has no groups and group is not set"}                     | ${SelfcareRoles.operator} | ${[]}               | ${undefined}  | ${undefined}
       ${"user is operator and has groups and group is set and included and is active"} | ${SelfcareRoles.operator} | ${aSelcGroupActive} | ${"aGroupId"} | ${undefined}
-      ${"user is admin and has no groups and group is not set"}                        | ${SelfcareRoles.admin}    | ${undefined}        | ${undefined}  | ${undefined}
+      ${"user is admin and has no groups and group is not set"}                        | ${SelfcareRoles.admin}    | ${[]}               | ${undefined}  | ${undefined}
       ${"user is admin and has groups and group is not set"}                           | ${SelfcareRoles.admin}    | ${aSelcGroupActive} | ${undefined}  | ${undefined}
       ${"user is admin and has groups and group is set and valid"}                     | ${SelfcareRoles.admin}    | ${aSelcGroupActive} | ${aGroup.id}  | ${aSelcGroupActive[0]}
-      ${"user is admin and has no groups and group is set and valid"}                  | ${SelfcareRoles.admin}    | ${undefined}        | ${aGroup.id}  | ${aSelcGroupActive[0]}
+      ${"user is admin and has no groups and group is set and valid"}                  | ${SelfcareRoles.admin}    | ${[]}               | ${aGroup.id}  | ${aSelcGroupActive[0]}
     `(
       "should forward request when $scenario",
       async ({ userRole, selcGroups, group_id, mockGetGroup }) => {
