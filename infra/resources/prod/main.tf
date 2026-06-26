@@ -112,21 +112,14 @@ module "cms_function_app" {
   bo_snet_cidr                         = local.bo_snet_cidr
 
   # KeyVault Secrets
-  key_vault_id                                          = module.key_vault.key_vault_id
-  cms_pgres_reviewer_usr_pwd                            = module.key_vault.secrets_value.cms_pgres_reviewer_usr_pwd
-  jira_token_name                                       = module.key_vault.secrets_name.jira_token
-  serviceid_quality_check_exclusion_list_name           = module.key_vault.secrets_name.serviceid_quality_check_exclusion_list
-  legacy_cosmosdb_connectionstring_name                 = module.key_vault.secrets_name.legacy_cosmosdb_connectionstring
-  legacy_cosmosdb_key_name                              = module.key_vault.secrets_name.legacy_cosmosdb_key
-  asset_storage_connectionstring_secret_name            = module.key_vault.secrets_name.asset_storage_connectionstring_secret
-  services_publication_event_hub_connection_string_name = module.key_vault.secrets_name.services_publication_event_hub_connection_string
-  services_topics_event_hub_connection_string_name      = module.key_vault.secrets_name.services_topics_event_hub_connection_string
-  services_lifecycle_event_hub_connection_string_name   = module.key_vault.secrets_name.services_lifecycle_event_hub_connection_string
-  services_history_event_hub_connection_string_name     = module.key_vault.secrets_name.services_history_event_hub_connection_string
-  activations_event_hub_connection_string_name          = module.key_vault.secrets_name.activations_event_hub_connection_string
-  eh_sc_connectionstring_name                           = module.key_vault.secrets_name.eh_sc_connectionstring
-  pdv_tokenizer_api_key_name                            = module.key_vault.secrets_name.pdv_tokenizer_api_key
-  selfcare_api_key_name                                 = module.key_vault.secrets_name.selfcare_api_key
+  key_vault_id                                = module.key_vault.key_vault_id
+  cms_pgres_reviewer_usr_pwd                  = module.key_vault.secrets_value.cms_pgres_reviewer_usr_pwd
+  jira_token_name                             = module.key_vault.secrets_name.jira_token
+  serviceid_quality_check_exclusion_list_name = module.key_vault.secrets_name.serviceid_quality_check_exclusion_list
+  asset_storage_connectionstring_secret_name  = module.key_vault.secrets_name.asset_storage_connectionstring_secret
+  eh_sc_connectionstring_name                 = module.key_vault.secrets_name.eh_sc_connectionstring
+  pdv_tokenizer_api_key_name                  = module.key_vault.secrets_name.pdv_tokenizer_api_key
+  selfcare_api_key_name                       = module.key_vault.secrets_name.selfcare_api_key
 
 
   error_action_group_id = module.monitor.action_group_ids.oncall

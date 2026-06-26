@@ -36,13 +36,11 @@ locals {
       FETCH_KEEPALIVE_TIMEOUT             = "60000"
 
       # Source data
-      COSMOSDB_CONNECTIONSTRING               = format("AccountEndpoint=%s;AccountKey=%s;", data.azurerm_cosmosdb_account.cosmos.endpoint, data.azurerm_cosmosdb_account.cosmos.primary_key)
       COSMOSDB_NAME                           = "db-services-cms"
       COSMOSDB_APP_BE_NAME                    = "app-backend"
       COSMOSDB_URI                            = data.azurerm_cosmosdb_account.cosmos.endpoint
       CMS_COSMOSDB__credential                = "managedidentity"
       CMS_COSMOSDB__accountEndpoint           = data.azurerm_cosmosdb_account.cosmos.endpoint
-      COSMOSDB_KEY                            = data.azurerm_cosmosdb_account.cosmos.primary_key
       COSMOSDB_CONTAINER_SERVICES_LIFECYCLE   = "services-lifecycle"
       COSMOSDB_CONTAINER_SERVICES_PUBLICATION = "services-publication"
       COSMOSDB_CONTAINER_SERVICES_HISTORY     = "services-history"
@@ -97,12 +95,10 @@ locals {
       TOPIC_DB_TABLE       = "topic"
 
       # Legacy source data
-      LEGACY_COSMOSDB_CONNECTIONSTRING                = data.azurerm_key_vault_secret.legacy_cosmosdb_connectionstring.value
       LEGACY_COSMOSDB_NAME                            = "db"
       LEGACY_COSMOSDB_URI                             = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
       CMS_LEGACY_COSMOSDB__credential                 = "managedidentity"
       CMS_LEGACY_COSMOSDB__accountEndpoint            = data.azurerm_cosmosdb_account.cosmos_legacy.endpoint
-      LEGACY_COSMOSDB_KEY                             = data.azurerm_key_vault_secret.legacy_cosmosdb_key.value
       LEGACY_COSMOSDB_CONTAINER_SERVICES              = "services"
       LEGACY_COSMOSDB_CONTAINER_ACTIVATIONS           = "activations"
       LEGACY_COSMOSDB_CONTAINER_SERVICES_LEASE        = "services-cms--legacy-watcher-lease"
@@ -132,18 +128,13 @@ locals {
       # Automatic service validation
       MANUAL_REVIEW_PROPERTIES = "data.name,data.description,data.organization.name,data.organization.fiscal_code,data.metadata.scope"
 
-      #EventHubConfing
-      SERVICES_PUBLICATION_EVENT_HUB_CONNECTION_STRING = data.azurerm_key_vault_secret.services_publication_event_hub_connection_string.value
-      SERVICES_PUBLICATION_EVENT_HUB_NAME              = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-publication-01"
-      SERVICES_TOPICS_EVENT_HUB_CONNECTION_STRING      = data.azurerm_key_vault_secret.services_topics_event_hub_connection_string.value
-      SERVICES_TOPICS_EVENT_HUB_NAME                   = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-topic-01"
-      SERVICES_LIFECYCLE_EVENT_HUB_NAME                = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-lifecycle-01"
-      SERVICES_LIFECYCLE_EVENT_HUB_CONNECTION_STRING   = data.azurerm_key_vault_secret.services_lifecycle_event_hub_connection_string.value
-      SERVICES_HISTORY_EVENT_HUB_CONNECTION_STRING     = data.azurerm_key_vault_secret.services_history_event_hub_connection_string.value
-      SERVICES_HISTORY_EVENT_HUB_NAME                  = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-history-01"
-      ACTIVATIONS_EVENT_HUB_CONNECTION_STRING          = data.azurerm_key_vault_secret.activations_event_hub_connection_string.value
-      ACTIVATIONS_EVENT_HUB_NAME                       = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-activations-01"
-      SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE     = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-evhns-01.servicebus.windows.net"
+      # EventHub config
+      SERVICES_PUBLICATION_EVENT_HUB_NAME          = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-publication-01"
+      SERVICES_TOPICS_EVENT_HUB_NAME               = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-topic-01"
+      SERVICES_LIFECYCLE_EVENT_HUB_NAME            = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-lifecycle-01"
+      SERVICES_HISTORY_EVENT_HUB_NAME              = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-services-history-01"
+      ACTIVATIONS_EVENT_HUB_NAME                   = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-activations-01"
+      SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE = "${var.prefix}-${var.env_short}-${var.location_short}-${var.domain}-elt-evhns-01.servicebus.windows.net"
 
       # Fix Service Review Checker pg module
       APPLICATION_INSIGHTS_NO_PATCH_MODULES = "pg"

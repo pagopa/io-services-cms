@@ -36,46 +36,8 @@ data "azurerm_key_vault_secret" "serviceid_quality_check_exclusion_list" {
   key_vault_id = var.key_vault_id
 }
 
-
-data "azurerm_key_vault_secret" "legacy_cosmosdb_connectionstring" {
-  name         = var.legacy_cosmosdb_connectionstring_name
-  key_vault_id = var.key_vault_id
-}
-
-data "azurerm_key_vault_secret" "legacy_cosmosdb_key" {
-  name         = var.legacy_cosmosdb_key_name
-  key_vault_id = var.key_vault_id
-}
-
 data "azurerm_key_vault_secret" "asset_storage_connectionstring_secret" {
   name         = var.asset_storage_connectionstring_secret_name
-  key_vault_id = var.key_vault_id
-}
-
-
-data "azurerm_key_vault_secret" "services_publication_event_hub_connection_string" {
-  name         = var.services_publication_event_hub_connection_string_name
-  key_vault_id = var.key_vault_id
-}
-
-
-data "azurerm_key_vault_secret" "services_topics_event_hub_connection_string" {
-  name         = var.services_topics_event_hub_connection_string_name
-  key_vault_id = var.key_vault_id
-}
-
-data "azurerm_key_vault_secret" "services_lifecycle_event_hub_connection_string" {
-  name         = var.services_lifecycle_event_hub_connection_string_name
-  key_vault_id = var.key_vault_id
-}
-
-data "azurerm_key_vault_secret" "services_history_event_hub_connection_string" {
-  name         = var.services_history_event_hub_connection_string_name
-  key_vault_id = var.key_vault_id
-}
-
-data "azurerm_key_vault_secret" "activations_event_hub_connection_string" {
-  name         = var.activations_event_hub_connection_string_name
   key_vault_id = var.key_vault_id
 }
 
