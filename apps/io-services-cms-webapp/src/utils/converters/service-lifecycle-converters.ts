@@ -26,6 +26,9 @@ export const payloadToItem = (
     >,
     metadata = {} as ServiceRequestPayload["metadata"],
     require_secure_channel = false,
+    // TODO: Will be mapped to "age" field in future development, for now it is ignored and not stored in the database
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    suitable_for_minors,
     ...data
   }: ServiceRequestPayload,
   sandboxFiscalCode: FiscalCode,
