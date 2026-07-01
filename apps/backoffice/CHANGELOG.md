@@ -1,5 +1,12 @@
 # io-services-cms-backoffice
 
+## 2.7.3
+
+### Patch Changes
+
+- Updated dependencies [b82f5bf7]
+  - @io-services-cms/models@1.30.0
+
 ## 2.7.2
 
 ### Patch Changes
