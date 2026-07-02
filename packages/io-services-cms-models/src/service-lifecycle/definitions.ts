@@ -29,6 +29,12 @@ export const Cidr = PatternString(
 export type HttpOrHttpsUrlString = t.TypeOf<typeof HttpOrHttpsUrlString>;
 export const HttpOrHttpsUrlString = PatternString("^https?:\\S+$");
 
+export type Age = t.TypeOf<typeof Age>;
+export const Age = t.partial({
+  max: WithinRangeInteger<0, 999, IWithinRangeIntegerTag<0, 999>>(0, 999),
+  min: WithinRangeInteger<0, 999, IWithinRangeIntegerTag<0, 999>>(0, 999),
+});
+
 export const OrganizationData = t.intersection([
   t.type({
     fiscal_code: OrganizationFiscalCode,
@@ -41,17 +47,22 @@ export const OrganizationData = t.intersection([
   }),
 ]);
 
-const ServiceData = t.type({
-  authorized_cidrs: withDefault(t.array(Cidr), []),
-  authorized_recipients: withDefault(t.array(FiscalCode), []),
-  description: NonEmptyString,
-  max_allowed_payment_amount: withDefault(
-    MaxAllowedAmount,
-    0 as MaxAllowedAmount,
-  ),
-  name: NonEmptyString,
-  require_secure_channel: withDefault(t.boolean, false),
-});
+const ServiceData = t.intersection([
+  t.type({
+    authorized_cidrs: withDefault(t.array(Cidr), []),
+    authorized_recipients: withDefault(t.array(FiscalCode), []),
+    description: NonEmptyString,
+    max_allowed_payment_amount: withDefault(
+      MaxAllowedAmount,
+      0 as MaxAllowedAmount,
+    ),
+    name: NonEmptyString,
+    require_secure_channel: withDefault(t.boolean, false),
+  }),
+  t.partial({
+    age: Age,
+  }),
+]);
 
 export const ServiceMetadata = t.intersection([
   t.type({
