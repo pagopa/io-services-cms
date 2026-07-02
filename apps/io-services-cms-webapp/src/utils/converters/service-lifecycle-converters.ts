@@ -26,8 +26,6 @@ export const payloadToItem = (
     >,
     metadata = {} as ServiceRequestPayload["metadata"],
     require_secure_channel = false,
-    // TODO: Will be mapped to "age" field in future development, for now it is ignored and not stored in the database
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     suitable_for_minors,
     ...data
   }: ServiceRequestPayload,
@@ -35,6 +33,7 @@ export const payloadToItem = (
 ): ServiceLifecycle.definitions.Service => ({
   data: {
     ...data,
+    age: suitableForMinorsToAge(suitable_for_minors),
     authorized_cidrs: [...authorized_cidrs],
     authorized_recipients: calculateItemAuthorizedRecipients(
       authorized_recipients,
@@ -55,10 +54,45 @@ const calculateItemAuthorizedRecipients = (
     ? [...authorizedRecipients]
     : [...authorizedRecipients, sandboxFiscalCode];
 
+// Min age for a service is 14 years old
+const SUITABLE_FOR_MINORS_MIN_AGE = 14;
+const ADULT_AGE = 18;
+
+/**
+ * API DTO => Service Lifecycle age mapping
+ * If a service is suitable, the min age is set to 14.
+ * No max age is set
+ *
+ * @param suitableForMinors
+ * @returns ServiceLifecycle.definitions.Service["data"]["age"]
+ */
+const suitableForMinorsToAge = (
+  suitableForMinors: ServiceRequestPayload["suitable_for_minors"],
+): ServiceLifecycle.definitions.Service["data"]["age"] =>
+  suitableForMinors
+    ? {
+        min: SUITABLE_FOR_MINORS_MIN_AGE as NonNullable<
+          ServiceLifecycle.definitions.Age["min"]
+        >,
+      }
+    : undefined;
+
+/**
+ * Service Lifecycle age => API DTO suitable_for_minors mapping
+ * If a service has a min age set ant it's below 18, then suitable_for_minors is true.
+ * Otherwise, it's false.
+ * @param age
+ * @returns
+ */
+const ageToSuitableForMinors = (
+  age: ServiceLifecycle.definitions.Service["data"]["age"],
+): boolean => (age?.min !== undefined ? age.min < ADULT_AGE : false);
+
 export const itemToResponse =
   (dbConfig: TopicPostgreSqlConfig) =>
   ({
     data: {
+      age,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       metadata: { category, custom_special_flow, scope, topic_id, ...metadata },
       ...data
@@ -80,6 +114,7 @@ export const itemToResponse =
             ? DateUtils.isoStringfromUnixMillis(modified_at)
             : new Date().toISOString(),
           status: toServiceStatus(fsm),
+          suitable_for_minors: ageToSuitableForMinors(age),
           ...data,
           metadata: {
             ...metadata,
