@@ -1,11 +1,12 @@
+import { configSchema } from "./adapters/inbound/config/config.js";
 import { createApp } from "./app.js";
 
-const { server } = createApp();
-
 const start = async () => {
-  const port = 3000;
+  const config = configSchema.parse(process.env);
+  const { server } = createApp(config);
+
   try {
-    await server.listen({ port });
+    server.listen({ host: config.HOST, port: config.PORT });
   } catch (err) {
     server.log.error(err);
     process.exit(1);

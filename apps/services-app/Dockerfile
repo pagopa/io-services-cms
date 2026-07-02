@@ -23,9 +23,6 @@ RUN pnpm --filter services-app... build
 RUN pnpm --filter services-app --prod deploy --legacy /repo/deploy
 
 FROM public.ecr.aws/docker/library/node:24.16.0-alpine AS runtime
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOST=0.0.0.0
 WORKDIR /app
 
 COPY --chown=node:node --from=builder /repo/deploy/node_modules ./node_modules
@@ -35,4 +32,4 @@ COPY --chown=node:node --from=builder /repo/deploy/package.json ./package.json
 USER node
 EXPOSE 3000
 
-CMD ["node", "dist/main.js"]
+CMD ["npm", "start"]
