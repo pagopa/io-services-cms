@@ -1,6 +1,6 @@
 module "services_ca" {
   source  = "pagopa-dx/azure-container-app/azurerm"
-  version = "~> 5.0"
+  version = "~> 4.0"
 
   environment = {
     prefix          = var.prefix
@@ -13,9 +13,9 @@ module "services_ca" {
 
   container_app_environment_id = module.svc_container_app_environment_itn.id
 
-  log_analytics_workspace_id = var.log_analytics_workspace_id
+  user_assigned_identity_id = module.svc_container_app_environment_itn.user_assigned_identity.id
 
-  containers = [
+  container_app_templates = [
     {
       image = "ghcr.io/pagopa/io-services-app"
       name  = "io-services"
@@ -33,8 +33,6 @@ module "services_ca" {
   ]
 
   autoscaler = {}
-
-  container_port = 3000
 
   resource_group_name = var.resource_group_name
 
