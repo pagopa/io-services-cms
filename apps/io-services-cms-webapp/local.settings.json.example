@@ -3,6 +3,7 @@
   "Values": {
     "FUNCTIONS_WORKER_RUNTIME": "node",
     "USE_MANAGED_IDENTITY": "false",
+    "FF_SUITABLE_FOR_MINORS_ENABLED": "false",
     "AzureWebJobsStorage": "UseDevelopmentStorage=true",
     "AzureWebJobs.ActivationsSyncFromLegacy.Disabled": true,
     "AzureWebJobs.IngestionActivationWatcher.Disabled": true,

@@ -150,7 +150,6 @@ ServiceData:
       default: 0
     suitable_for_minors:
       type: boolean
-      default: false
   required:
     - name
     - description
