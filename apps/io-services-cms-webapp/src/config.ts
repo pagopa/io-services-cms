@@ -128,8 +128,8 @@ const RuntimeModeConfigurationCodec: t.Type<
           RuntimeModeEnabledSettings.validate(input, context),
           E.map(
             (settings): RuntimeModeEnabledConfiguration => ({
-              USE_MANAGED_IDENTITY: true,
               ...settings,
+              USE_MANAGED_IDENTITY: true,
             }),
           ),
         )
@@ -137,8 +137,8 @@ const RuntimeModeConfigurationCodec: t.Type<
           RuntimeModeDisabledSettings.validate(input, context),
           E.map(
             (settings): RuntimeModeDisabledConfiguration => ({
-              USE_MANAGED_IDENTITY: false,
               ...settings,
+              USE_MANAGED_IDENTITY: false,
             }),
           ),
         );
@@ -589,8 +589,8 @@ const IConfigCodec: t.Type<
           ManagedIdentityAppConfigurationSettings.validate(input, context),
           E.map(
             (settings): ManagedIdentityAppConfiguration => ({
-              USE_MANAGED_IDENTITY: true,
               ...settings,
+              USE_MANAGED_IDENTITY: true,
             }),
           ),
         )
@@ -598,8 +598,8 @@ const IConfigCodec: t.Type<
           FallbackAppConfigurationSettings.validate(input, context),
           E.map(
             (settings): FallbackAppConfiguration => ({
-              USE_MANAGED_IDENTITY: false,
               ...settings,
+              USE_MANAGED_IDENTITY: false,
             }),
           ),
         );
