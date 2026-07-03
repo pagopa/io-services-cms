@@ -6,7 +6,7 @@ import {
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { TopicPostgreSqlConfig } from "../../config";
+import { IConfig, TopicPostgreSqlConfig } from "../../config";
 import { Cidr } from "../../generated/api/Cidr";
 import { FiscalCode } from "../../generated/api/FiscalCode";
 import { ScopeEnum } from "../../generated/api/ServiceBaseMetadata";
@@ -89,7 +89,10 @@ const ageToSuitableForMinors = (
 ): boolean => (age?.min !== undefined ? age.min < ADULT_AGE : false);
 
 export const itemToResponse =
-  (dbConfig: TopicPostgreSqlConfig) =>
+  (
+    config: Pick<IConfig, "FF_SUITABLE_FOR_MINORS_ENABLED"> &
+      TopicPostgreSqlConfig,
+  ) =>
   ({
     data: {
       age,
@@ -105,7 +108,7 @@ export const itemToResponse =
     ServiceResponsePayload
   > =>
     pipe(
-      toServiceTopic(dbConfig)(id, topic_id),
+      toServiceTopic(config)(id, topic_id),
       TE.bimap(
         (err) => ResponseErrorInternal(err.message),
         (topic) => ({
@@ -114,7 +117,9 @@ export const itemToResponse =
             ? DateUtils.isoStringfromUnixMillis(modified_at)
             : new Date().toISOString(),
           status: toServiceStatus(fsm),
-          suitable_for_minors: ageToSuitableForMinors(age),
+          ...(config.FF_SUITABLE_FOR_MINORS_ENABLED
+            ? { suitable_for_minors: ageToSuitableForMinors(age) }
+            : {}),
           ...data,
           metadata: {
             ...metadata,

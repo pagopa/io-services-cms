@@ -32,7 +32,9 @@ const fsm: ServiceLifecycle.ItemType["fsm"] = {
 const anAutorizedFiscalCode = "BBBBBB99C88D555I";
 const aSandboxFiscalCode = "AAAAAA00A00A000A";
 
-const mockDbConfig = {} as unknown as TopicPostgreSqlConfig;
+const mockDbConfig = {
+  FF_SUITABLE_FOR_MINORS_ENABLED: true,
+} as unknown as TopicPostgreSqlConfig;
 
 describe("test service-lifecycle-converters", () => {
   test("test service-lifecycle-converters", () => {
@@ -240,7 +242,9 @@ describe("itemToResponse suitable_for_minors mapping", () => {
     }) as unknown as ServiceLifecycle.ItemType;
 
   test("age.min below 18 should map to suitable_for_minors true", async () => {
-    const result = await itemToResponse(mockDbConfig)(buildItemWithAge({ min: 14 }))();
+    const result = await itemToResponse(mockDbConfig)(
+      buildItemWithAge({ min: 14 }),
+    )();
     expect(E.isRight(result)).toBe(true);
     if (E.isRight(result)) {
       expect(result.right.suitable_for_minors).toBe(true);
@@ -256,7 +260,9 @@ describe("itemToResponse suitable_for_minors mapping", () => {
   });
 
   test("age.min greater or equal to 18 should map to suitable_for_minors false", async () => {
-    const result = await itemToResponse(mockDbConfig)(buildItemWithAge({ min: 18 }))();
+    const result = await itemToResponse(mockDbConfig)(
+      buildItemWithAge({ min: 18 }),
+    )();
     expect(E.isRight(result)).toBe(true);
     if (E.isRight(result)) {
       expect(result.right.suitable_for_minors).toBe(false);
@@ -264,10 +270,25 @@ describe("itemToResponse suitable_for_minors mapping", () => {
   });
 
   test("response should not expose the internal age field", async () => {
-    const result = await itemToResponse(mockDbConfig)(buildItemWithAge({ min: 14 }))();
+    const result = await itemToResponse(mockDbConfig)(
+      buildItemWithAge({ min: 14 }),
+    )();
     expect(E.isRight(result)).toBe(true);
     if (E.isRight(result)) {
       expect((result.right as Record<string, unknown>).age).toBeUndefined();
+    }
+  });
+
+  test("suitable_for_minors should be omitted when the feature flag is disabled", async () => {
+    const disabledConfig = {
+      FF_SUITABLE_FOR_MINORS_ENABLED: false,
+    } as unknown as TopicPostgreSqlConfig;
+    const result = await itemToResponse(disabledConfig)(
+      buildItemWithAge({ min: 14 }),
+    )();
+    expect(E.isRight(result)).toBe(true);
+    if (E.isRight(result)) {
+      expect("suitable_for_minors" in result.right).toBe(false);
     }
   });
 });

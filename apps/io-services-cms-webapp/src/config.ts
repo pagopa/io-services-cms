@@ -338,6 +338,15 @@ const ServiceIdQualityCheckExclusionList = t.type({
 });
 
 const FeatureFlags = t.type({
+  /**
+   * Enables exposing the `suitable_for_minors` field in services API responses.
+   * Defaults to `false` (field omitted) to preserve backward compatibility for
+   * external read consumers. Toggle via app setting, no code deploy needed.
+   */
+  FF_SUITABLE_FOR_MINORS_ENABLED: withDefault(
+    BooleanFromString,
+    "false" as unknown as boolean,
+  ),
   // UserId List allowed to automatic service approval
   USERID_AUTOMATIC_SERVICE_APPROVAL_INCLUSION_LIST: withDefault(
     CommaSeparatedListOf(NonEmptyString),
