@@ -141,24 +141,56 @@ describe("RuntimeModeConfiguration", () => {
 
     expect(E.isLeft(result)).toBe(true);
   });
-});
 
-describe("IConfig", () => {
-  it("should allow managed identity mode without fallback connection strings", () => {
-    const result = IConfig.decode({
-      ...sharedSettings,
-      USE_MANAGED_IDENTITY: "true",
-      ...managedIdentitySettings,
+  it("should allow connection string mode when all fallback settings are provided and no managed identity settings are present", () => {
+    const result = RuntimeModeConfiguration.decode({
+      USE_MANAGED_IDENTITY: "false",
+      ...fallbackSettings,
     });
 
     if (E.isLeft(result)) {
       throw new Error(readableReport(result.left));
     }
 
+    expect(result.right.USE_MANAGED_IDENTITY).toBe(false);
+  });
+});
+
+describe("IConfig", () => {
+  it("should allow only managed identity mode without fallback connection strings", () => {
+    const result = IConfig.decode({
+      ...sharedSettings,
+      USE_MANAGED_IDENTITY: "true",
+      ...managedIdentitySettings,
+    });
+
     expect(E.isRight(result)).toBe(true);
   });
 
-  it("should require fallback connection strings when managed identity mode is disabled", () => {
+  it("should require all managed identity settings when managed identity mode is enabled", () => {
+    const { CMS_COSMOSDB__accountEndpoint, ...partialManagedIdentitySettings } =
+      managedIdentitySettings;
+
+    const result = IConfig.decode({
+      ...sharedSettings,
+      USE_MANAGED_IDENTITY: "true",
+      ...partialManagedIdentitySettings,
+    });
+
+    expect(E.isLeft(result)).toBe(true);
+  });
+
+  it("should allow only fallback connection strings when managed identity mode is disabled", () => {
+    const result = IConfig.decode({
+      ...sharedSettings,
+      USE_MANAGED_IDENTITY: "false",
+      ...fallbackSettings,
+    });
+
+    expect(E.isRight(result)).toBe(true);
+  });
+
+  it("should require all fallback connection strings when managed identity mode is disabled", () => {
     const { ACTIVATIONS_EVENT_HUB_CONNECTION_STRING, ...partialFallback } =
       fallbackSettings;
 
