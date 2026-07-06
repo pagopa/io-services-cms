@@ -1,0 +1,24 @@
+name: Deploy (servicess-app)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+  packages: write
+  attestations: write
+
+jobs:
+  release:
+    uses: pagopa/dx/.github/workflows/release-azure-containerapp-v1.yaml@main
+    name: Deploy
+    secrets: inherit
+    with:
+      dockerfile_path: ./apps/services-app/Dockerfile
+      dockerfile_context: .
+      docker_image_name: pagopa/io-services-app
+      docker_image_description: "Microservice that handles the services API."
+      container_app: io-p-itn-svc-services-ca-01
+      resource_group_name: io-p-itn-svc-rg-01
+      environment: app-prod
