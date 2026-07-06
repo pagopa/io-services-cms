@@ -10,7 +10,7 @@ permissions:
   attestations: write
 
 jobs:
-  release:
+  deploy:
     uses: pagopa/dx/.github/workflows/release-azure-containerapp-v1.yaml@main
     name: Deploy
     secrets: inherit
