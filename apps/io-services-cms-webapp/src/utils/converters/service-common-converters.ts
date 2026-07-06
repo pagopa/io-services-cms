@@ -7,7 +7,7 @@ const ADULT_AGE = 18;
 
 /**
  * Service Lifecycle age => API DTO suitable_for_minors mapping
- * If a service has a min age set ant it's below 18, then suitable_for_minors is true.
+ * If a service has a min age set and it's below 18, then suitable_for_minors is true.
  * Otherwise, it's false.
  * @param age
  * @returns
