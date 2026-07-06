@@ -1,6 +1,6 @@
 locals {
   app_be = {
-    use_case      = "high_load"
+    use_case      = "default"
     cosmosdb_name = "app-backend"
     app_settings = {
       NODE_ENV = "production"
