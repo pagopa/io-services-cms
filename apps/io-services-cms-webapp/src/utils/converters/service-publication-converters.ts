@@ -6,19 +6,23 @@ import {
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { TopicPostgreSqlConfig } from "../../config";
+import { IConfig, TopicPostgreSqlConfig } from "../../config";
 import { ServicePublication as ServiceResponsePayload } from "../../generated/api/ServicePublication";
 import {
   ServicePublicationStatusType,
   ServicePublicationStatusTypeEnum,
 } from "../../generated/api/ServicePublicationStatusType";
 import { getDao as getServiceTopicDao } from "../service-topic-dao";
-import { toScopeType } from "./service-lifecycle-converters";
+import {
+  toScopeType,
+  withSuitableForMinors,
+} from "./service-common-converters";
 
 export const itemToResponse =
-  (dbConfig: TopicPostgreSqlConfig) =>
+  (config: IConfig) =>
   ({
     data: {
+      age,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       metadata: { category, custom_special_flow, scope, topic_id, ...metadata },
       ...data
@@ -31,7 +35,7 @@ export const itemToResponse =
     ServiceResponsePayload
   > =>
     pipe(
-      toServiceTopic(dbConfig)(id, topic_id),
+      toServiceTopic(config)(id, topic_id),
       TE.bimap(
         (err) => ResponseErrorInternal(err.message),
         (topic) => ({
@@ -40,6 +44,7 @@ export const itemToResponse =
             ? DateUtils.isoStringfromUnixMillis(modified_at)
             : new Date().toISOString(),
           status: toServiceStatusType(state),
+          ...withSuitableForMinors(config)(age),
           ...data,
           metadata: {
             ...metadata,
