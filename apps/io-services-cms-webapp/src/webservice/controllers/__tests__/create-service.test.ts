@@ -78,6 +78,7 @@ const aNewService = {
     scope: "LOCAL",
     topic_id: 1,
   },
+  suitable_for_minors: false,
   authorized_recipients: ["BBBBBB99C88D555I"],
 };
 const fsmLifecycleClientMock = { create: vi.fn(() => TE.right(aNewService)) };
@@ -233,7 +234,10 @@ describe("createService", () => {
     expect(payloadToItemMock).toHaveBeenCalledOnce();
     expect(payloadToItemMock).toHaveBeenCalledWith(
       expect.any(String),
-      { ...servicePayload, max_allowed_payment_amount: 0 },
+      {
+        ...servicePayload,
+        max_allowed_payment_amount: 0,
+      },
       mockConfig.SANDBOX_FISCAL_CODE,
     );
     expect(itemToResponseMock).toHaveBeenCalledOnce();
