@@ -1,5 +1,15 @@
 # io-services-cms-models
 
+## 1.30.0
+
+### Minor Changes
+
+- b82f5bf7: Add suitable_for_minors in OpenApi DTO
+
+### Patch Changes
+
+- d0dfcdbf: Added new suitable_for_minors implementation and mapping for io-services-cms
+
 ## 1.29.3
 
 ### Patch Changes
