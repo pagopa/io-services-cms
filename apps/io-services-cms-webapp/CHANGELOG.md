@@ -1,5 +1,19 @@
 # io-services-cms-webapp
 
+## 2.2.0
+
+### Minor Changes
+
+- d0dfcdbf: Added new suitable_for_minors implementation and mapping for io-services-cms
+- bfb23e74: Map suitable_for_minors on service converters for GetServicePublication and GetServiceHistory
+
+### Patch Changes
+
+- 5fbaea0f: Fix USE_MANAGED_IDENTITY=false behaviour
+- Updated dependencies [b82f5bf7]
+- Updated dependencies [d0dfcdbf]
+  - @io-services-cms/models@1.30.0
+
 ## 2.1.8
 
 ### Patch Changes
