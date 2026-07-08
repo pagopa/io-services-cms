@@ -161,7 +161,6 @@ export const getMockInstitutionProducts = (_institutionId?: string) => {
     roleManagementURL: "https://roleManagementURL",
     roleMappings: {
       property1: {
-        multiroleAllowed: true,
         phasesAdditionAllowed: ["phase1"],
         roles: [
           {
@@ -174,7 +173,6 @@ export const getMockInstitutionProducts = (_institutionId?: string) => {
         skipUserCreation: true,
       },
       property2: {
-        multiroleAllowed: true,
         phasesAdditionAllowed: ["phase2"],
         roles: [
           {
