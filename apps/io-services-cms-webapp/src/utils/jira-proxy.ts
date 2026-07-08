@@ -135,6 +135,12 @@ export const jiraProxy = (
     \n\n*Limitato:* ${
       delegate.permissions.indexOf("apimessagewrite") !== -1 ? "NO" : "SI"
     }
+    \n\n*Età minima fruizione servizio:* ${formatOptionalStringValue(
+      service.data.age?.min?.toString(),
+    )}
+    \n\n*Età massima fruizione servizio:* ${formatOptionalStringValue(
+      service.data.age?.max?.toString(),
+    )}
     \n\n*Autorizzazioni:* ${delegate.permissions.join(", ")}` as NonEmptyString;
 
   const createJiraIssue = (
