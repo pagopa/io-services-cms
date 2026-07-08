@@ -32,6 +32,9 @@
       "description": "User group endpoint CRUD operations"
     },
     {
+      "name": "Onboarding Controller"
+    },
+    {
       "name": "ContractTemplate"
     },
     {
@@ -39,14 +42,16 @@
     },
     {
       "name": "IAM"
+    },
+    {
+      "name": "Document Content Controller",
+      "description": "Endpoints for creating PDF document content (contracts and attachments)"
     }
   ],
   "paths": {
     "/institutions/{id}": {
       "get": {
-        "tags": [
-          "Institution"
-        ],
+        "tags": ["Institution"],
         "summary": "Gets the corresponding institution using internal institution id",
         "description": "Gets the corresponding institution using internal institution id",
         "operationId": "retrieveInstitutionByIdUsingGET",
@@ -106,18 +111,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/institutions": {
       "get": {
-        "tags": [
-          "Institution"
-        ],
+        "tags": ["Institution"],
         "summary": "Gets institutions filtering by taxCode and/or subunitCode",
         "description": "Gets institutions filtering by taxCode and/or subunitCode",
         "operationId": "getInstitutionsUsingGET",
@@ -217,18 +218,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/delegations": {
       "get": {
-        "tags": [
-          "Delegation"
-        ],
+        "tags": ["Delegation"],
         "summary": "Retrieve institution's delegations",
         "description": "Retrieve institution's delegations",
         "operationId": "getDelegationsUsingGET",
@@ -291,11 +288,7 @@
             "style": "form",
             "schema": {
               "type": "string",
-              "enum": [
-                "NONE",
-                "ASC",
-                "DESC"
-              ]
+              "enum": ["NONE", "ASC", "DESC"]
             }
           },
           {
@@ -358,18 +351,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/institutions/{institutionId}/onboardings": {
       "get": {
-        "tags": [
-          "Institution"
-        ],
+        "tags": ["Institution"],
         "summary": "Retrieve institution information",
         "description": "Retrieve institution information",
         "operationId": "getOnboardingsInstitutionUsingGET",
@@ -429,18 +418,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/delegations/delegators/{institutionId}": {
       "get": {
-        "tags": [
-          "Delegation"
-        ],
+        "tags": ["Delegation"],
         "summary": "Returns the delegators of an institution with the details of each",
         "description": "Returns the list of institutions that have granted a delegation to the institution specified in the request path parameter.<br><br> Example: /delegations/delegators/D --> Returns institution details of A,B,C<br><br> <img src=\"https://img.plantuml.biz/plantuml/svg/SoWkIImgoStCIybDBE0goIzGACbNICelASdFLKZ9B4fDBidCp-FI1efQANZc5PTabfI2H1HSk7Hr5TAAydDHXHsn2pjX5tRcSaW5MWor7000\">",
         "operationId": "getDelegatorInstitutionsUsingGET",
@@ -473,11 +458,7 @@
             "style": "form",
             "schema": {
               "type": "string",
-              "enum": [
-                "PT",
-                "AOO",
-                "EA"
-              ]
+              "enum": ["PT", "AOO", "EA"]
             }
           },
           {
@@ -543,18 +524,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/delegations/delegates/{institutionId}": {
       "get": {
-        "tags": [
-          "Delegation"
-        ],
+        "tags": ["Delegation"],
         "summary": "Returns the delegates of an institution with the details of each",
         "description": "Returns the list of institutions of all delegations created by the institution specified in the request path parameter.<br><br> Example: /delegations/delegates/A --> Returns institution details of B,C,D<br><br> <img src=\"https://img.plantuml.biz/plantuml/svg/SoWkIImgoStCIybDBE0goIzGACbNICelASdFLKZ9B4fDBidCp-FIKaWhoi-rKl3CAox9B2a5YIauScbf0HMZ2ZfX4tJ69kZ2vP0Aj1HgCG00\">",
         "operationId": "getDelegateInstitutionsUsingGET",
@@ -587,11 +564,7 @@
             "style": "form",
             "schema": {
               "type": "string",
-              "enum": [
-                "PT",
-                "AOO",
-                "EA"
-              ]
+              "enum": ["PT", "AOO", "EA"]
             }
           },
           {
@@ -657,18 +630,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/users/{id}": {
       "get": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "summary": "Retrieve user information by userId and optional ProductId",
         "description": "Retrieves user given userId and optional ProductId",
         "operationId": "getUserInfoUsingGET",
@@ -750,18 +719,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/api/acknowledgment/{productId}/message/{messageId}/status/{status}": {
       "post": {
-        "tags": [
-          "conservazione"
-        ],
+        "tags": ["conservazione"],
         "summary": "messageAcknowledgment",
         "description": "Service to acknowledge message consumption by a consumer",
         "operationId": "messageAcknowledgmentUsingPOST",
@@ -794,10 +759,7 @@
             "style": "simple",
             "schema": {
               "type": "string",
-              "enum": [
-                "ACK",
-                "NACK"
-              ]
+              "enum": ["ACK", "NACK"]
             }
           }
         ],
@@ -847,24 +809,29 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
-    "/search/institutions": {
+    "/search/onboardings": {
       "get": {
-        "tags": [],
-        "summary": "Retrieve institutions",
-        "description": "Retrieves a list of institutions based on a search engine query",
-        "operationId": "retrieveInstitutionOnSearchEngine",
+        "tags": ["institution"],
+        "summary": "Retrieve onboardings",
+        "description": "Retrieves a list of onboardings based on a search engine query",
+        "operationId": "retrieveOnboardingOnSearchEngine",
         "parameters": [
+          {
+            "name": "searchText",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "name": "products",
             "in": "query",
-            "description": "List of products to be filtered",
             "required": false,
             "schema": {
               "type": "array",
@@ -876,7 +843,6 @@
           {
             "name": "institutionTypes",
             "in": "query",
-            "description": "List of institution types to be filtered",
             "required": false,
             "schema": {
               "type": "array",
@@ -886,14 +852,105 @@
             }
           },
           {
-            "name": "taxCode",
+            "name": "statuses",
             "in": "query",
-            "description": "Institution fiscal code",
             "required": false,
             "schema": {
-              "type": "string"
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
+          {
+            "name": "createdFromDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "createdToDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int64",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "default": 15
+            }
+          },
+          {
+            "name": "orderBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingIndexSearchResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": ["global"]
+          }
+        ]
+      }
+    },
+    "/search/institutions": {
+      "get": {
+        "tags": ["institution"],
+        "summary": "Retrieve institutions",
+        "description": "Retrieves a list of institutions based on a search engine query",
+        "operationId": "retrieveInstitutionOnSearchEngine",
+        "parameters": [
           {
             "name": "searchText",
             "in": "query",
@@ -911,19 +968,8 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "format": "int32",
+              "format": "int64",
               "default": 50
-            }
-          },
-          {
-            "name": "skip",
-            "in": "query",
-            "description": "Desired page number for result pagination. It is optional, and the default value is 1 when not specified",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "format": "int32",
-              "default": 0
             }
           }
         ],
@@ -956,18 +1002,95 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
+          }
+        ]
+      }
+    },
+    "/institutions/ipa": {
+      "get": {
+        "tags": ["institution"],
+        "summary": "Retrieve IPA institutions",
+        "description": "Retrieves a list of IPA institutions from the Azure AI Search index with optional text search and category filter",
+        "operationId": "searchIpaInstitutionsOnSearchEngine",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Optional search field. Users can provide a search string to filter results",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "*"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "description": "Filter from origin category",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Desired page number for result pagination. It is optional, and the default value is 1 when not specified",
+            "required": false,
+            "schema": {
+              "minimum": 0,
+              "type": "integer",
+              "format": "int32",
+              "default": 0
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "description": "Maximum number of items per page. It is optional, and the default value is 10 when not specified",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InstitutionsResource"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/message/{messageId}/status/{status}": {
       "post": {
-        "tags": [
-          "conservazione"
-        ],
+        "tags": ["conservazione"],
         "summary": "messageAcknowledgment",
         "description": "Service to acknowledge message consumption by a consumer",
         "operationId": "messageAcknowledgmentUsingPOST1",
@@ -990,10 +1113,7 @@
             "style": "simple",
             "schema": {
               "type": "string",
-              "enum": [
-                "ACK",
-                "NACK"
-              ]
+              "enum": ["ACK", "NACK"]
             }
           }
         ],
@@ -1015,7 +1135,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem4"
+                  "$ref": "#/components/schemas/Problem5"
                 }
               }
             }
@@ -1025,7 +1145,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem4"
+                  "$ref": "#/components/schemas/Problem5"
                 }
               }
             }
@@ -1035,7 +1155,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem4"
+                  "$ref": "#/components/schemas/Problem5"
                 }
               }
             }
@@ -1043,9 +1163,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -1055,9 +1173,7 @@
         "summary": "Upload a new contract template version",
         "description": "Upload an html file as a new contract template version to be used in product configuration",
         "operationId": "uploadContractTemplate",
-        "tags": [
-          "ContractTemplate"
-        ],
+        "tags": ["ContractTemplate"],
         "parameters": [
           {
             "name": "createdBy",
@@ -1105,9 +1221,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "file"
-                ],
+                "required": ["file"],
                 "properties": {
                   "file": {
                     "type": "string",
@@ -1135,7 +1249,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1151,7 +1265,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1161,7 +1275,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1169,9 +1283,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       },
@@ -1179,9 +1291,7 @@
         "summary": "List contract templates available",
         "description": "List and filter all the contract templates available",
         "operationId": "listContractTemplates",
-        "tags": [
-          "ContractTemplate"
-        ],
+        "tags": ["ContractTemplate"],
         "parameters": [
           {
             "name": "name",
@@ -1221,7 +1331,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1237,7 +1347,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1245,9 +1355,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -1257,9 +1365,7 @@
         "summary": "Download a contract template version",
         "description": "Download the html file of a specific contract template version",
         "operationId": "downloadContractTemplate",
-        "tags": [
-          "ContractTemplate"
-        ],
+        "tags": ["ContractTemplate"],
         "parameters": [
           {
             "name": "contractTemplateId",
@@ -1302,7 +1408,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1318,7 +1424,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1328,7 +1434,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1336,9 +1442,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -1348,9 +1452,7 @@
         "summary": "Create or update a product configuration",
         "description": "Creates a new product configuration or updates the existing one when a match is found",
         "operationId": "createProduct",
-        "tags": [
-          "Product"
-        ],
+        "tags": ["Product"],
         "parameters": [
           {
             "name": "createdBy",
@@ -1386,7 +1488,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1402,7 +1504,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1410,9 +1512,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -1422,9 +1522,7 @@
         "summary": "Get product origins by productId",
         "description": "Retrieve the list of institution origins for the given product.",
         "operationId": "getProductOriginsById",
-        "tags": [
-          "Product"
-        ],
+        "tags": ["Product"],
         "parameters": [
           {
             "name": "productId",
@@ -1457,7 +1555,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1467,7 +1565,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1475,9 +1573,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -1487,9 +1583,7 @@
         "summary": "Partially update a product by ID",
         "description": "Partially updates an existing product identified by its productId. Only the non-null fields provided in the request body will be updated; all other fields will remain unchanged.",
         "operationId": "patchProductById",
-        "tags": [
-          "Product"
-        ],
+        "tags": ["Product"],
         "parameters": [
           {
             "name": "productId",
@@ -1533,7 +1627,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1549,7 +1643,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1559,7 +1653,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1567,9 +1661,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       },
@@ -1577,9 +1669,7 @@
         "summary": "Get product by productId",
         "description": "Retrieve a product by its unique identifier.",
         "operationId": "getProductById",
-        "tags": [
-          "Product"
-        ],
+        "tags": ["Product"],
         "parameters": [
           {
             "name": "productId",
@@ -1612,7 +1702,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1622,7 +1712,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1630,9 +1720,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       },
@@ -1640,9 +1728,7 @@
         "summary": "Cancel product by ID",
         "description": "Marks the product as DELETED if it exists.",
         "operationId": "deleteProductById",
-        "tags": [
-          "Product"
-        ],
+        "tags": ["Product"],
         "parameters": [
           {
             "name": "productId",
@@ -1669,7 +1755,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1685,7 +1771,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1695,7 +1781,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem5"
+                  "$ref": "#/components/schemas/Problem6"
                 }
               }
             }
@@ -1703,9 +1789,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -1833,9 +1917,7 @@
         "summary": "Saves IAM User",
         "description": "Saves or updates a user with their product-specific roles.",
         "operationId": "saveIAMUser",
-        "tags": [
-          "IAM"
-        ],
+        "tags": ["IAM"],
         "parameters": [
           {
             "name": "productId",
@@ -1871,7 +1953,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -1887,7 +1969,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -1895,9 +1977,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -1907,9 +1987,7 @@
         "summary": "Get IAM user Product Role Permissions List",
         "description": "Retrieves a list of product, role and permissions by user ID and product ID.",
         "operationId": "getIAMProductRolePermissionsList",
-        "tags": [
-          "IAM"
-        ],
+        "tags": ["IAM"],
         "parameters": [
           {
             "name": "uid",
@@ -1949,7 +2027,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -1957,9 +2035,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -1969,9 +2045,7 @@
         "summary": "Get IAM User by Email",
         "description": "Retrieves a user by their email.",
         "operationId": "getIAMUserByEmail",
-        "tags": [
-          "IAM"
-        ],
+        "tags": ["IAM"],
         "parameters": [
           {
             "name": "email",
@@ -2004,7 +2078,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -2020,7 +2094,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -2030,7 +2104,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -2038,9 +2112,7 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -2050,9 +2122,7 @@
         "summary": "Get IAM User",
         "description": "Retrieves a user by their ID and product ID.",
         "operationId": "getIAMUser",
-        "tags": [
-          "IAM"
-        ],
+        "tags": ["IAM"],
         "parameters": [
           {
             "name": "uid",
@@ -2086,7 +2156,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -2102,7 +2172,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -2112,7 +2182,7 @@
             "content": {
               "application/problem+json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Problem6"
+                  "$ref": "#/components/schemas/Problem7"
                 }
               }
             }
@@ -2120,18 +2190,92 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
+          }
+        ]
+      }
+    },
+    "/iam/users/{uid}/roles": {
+      "get": {
+        "summary": "Get IAM user Product Role Permissions List",
+        "description": "Retrieves a list of product, role and permissions by user ID and product ID.",
+        "operationId": "getIAMProductRoles",
+        "tags": ["IAM"],
+        "parameters": [
+          {
+            "name": "uid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProductRolePermissionsList"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem7"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem7"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem7"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/users": {
       "get": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "summary": "getUserInstitution",
         "description": "This endpoint retrieves detailed information about a user's association with various products within an institution. The response provides a comprehensive view of the user's roles, product statuses and the relevant timestamps.",
         "operationId": "v2getUserInstitution",
@@ -2289,16 +2433,12 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       },
       "post": {
-        "tags": [
-          "User"
-        ],
+        "tags": ["User"],
         "summary": "getUserInfo",
         "description": "Service to retrieve user info including institutions and products linked to him, this service retrives 100 institutions at most",
         "operationId": "V2getUserInfoUsingGET",
@@ -2367,18 +2507,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/institutions/{institutionId}/users": {
       "get": {
-        "tags": [
-          "Institution"
-        ],
+        "tags": ["Institution"],
         "summary": "getInstitutionUsersByProduct",
         "description": "Service to get all the active users related to a specific pair of institution-product",
         "operationId": "getInstitutionUsersByProductUsingGET",
@@ -2491,18 +2627,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/institutions/{institutionId}/products": {
       "get": {
-        "tags": [
-          "Institution"
-        ],
+        "tags": ["Institution"],
         "summary": "getInstitutionProducts",
         "description": "Service to retrieve all active products for given institution and logged user",
         "operationId": "getInstitutionProductsUsingGET",
@@ -2585,18 +2717,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/institutions/{institutionId}/contract": {
       "get": {
-        "tags": [
-          "Institution"
-        ],
+        "tags": ["Institution"],
         "summary": "getContract",
         "description": "Service to retrieve a contract given institutionId and productId",
         "operationId": "getContractUsingGET",
@@ -2677,18 +2805,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/tokens/products/{productId}": {
       "get": {
-        "tags": [
-          "Token"
-        ],
+        "tags": ["Token"],
         "summary": "Service to retrieve tokens from product's identifier",
         "description": "Service to retrieve tokens from product's identifier",
         "operationId": "getTokensFromProductUsingGET",
@@ -2792,18 +2916,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/delegations/delegations-with-pagination": {
       "get": {
-        "tags": [
-          "Delegation"
-        ],
+        "tags": ["Delegation"],
         "summary": "Retrieve institution's delegations with pagination",
         "description": "Retrieve institution's delegations with pagination",
         "operationId": "getDelegationsUsingGET_2",
@@ -2867,11 +2987,7 @@
             "schema": {
               "type": "string",
               "default": "NONE",
-              "enum": [
-                "NONE",
-                "ASC",
-                "DESC"
-              ]
+              "enum": ["NONE", "ASC", "DESC"]
             }
           },
           {
@@ -2935,18 +3051,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/user-groups/{id}": {
       "get": {
-        "tags": [
-          "UserGroup"
-        ],
+        "tags": ["UserGroup"],
         "summary": "getUserGroup",
         "description": "Service to get a specific UserGroup entity",
         "operationId": "getUserGroupUsingGET",
@@ -3016,18 +3128,14 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
           }
         ]
       }
     },
     "/user-groups": {
       "get": {
-        "tags": [
-          "UserGroup"
-        ],
+        "tags": ["UserGroup"],
         "summary": "getUserGroups",
         "description": "Service that allows to get a list of UserGroup entities",
         "operationId": "getUserGroupsUsingGET",
@@ -3072,11 +3180,7 @@
             "explode": true,
             "schema": {
               "type": "string",
-              "enum": [
-                "ACTIVE",
-                "SUSPENDED",
-                "DELETED"
-              ]
+              "enum": ["ACTIVE", "SUSPENDED", "DELETED"]
             }
           },
           {
@@ -3182,9 +3286,138 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
+          }
+        ]
+      }
+    },
+    "/onboarding": {
+      "get": {
+        "tags": ["Onboarding Controller"],
+        "summary": "Retrieve paged onboardings with optional filters and sorting.",
+        "description": "The API retrieves paged onboarding using optional filter, order by descending creation date",
+        "operationId": "getOnboardingWithFilter",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "institutionId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "onboardingId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "default": "0",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "productId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "productIds",
+            "in": "query",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "schema": {
+              "format": "int32",
+              "default": "20",
+              "type": "integer"
+            }
+          },
+          {
+            "name": "skipPagination",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/OnboardingStatus"
+            }
+          },
+          {
+            "name": "subunitCode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "taxCode",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OnboardingGetResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -3232,9 +3465,218 @@
         },
         "security": [
           {
-            "apiKeyHeader": [
-              "global"
-            ]
+            "apiKeyHeader": ["global"]
+          }
+        ]
+      }
+    },
+    "/onboarding/{onboardingId}": {
+      "delete": {
+        "tags": ["Onboarding Controller"],
+        "summary": "Perform delete operation of an onboarding request",
+        "description": "Perform delete operation of an onboarding request receiving onboarding id, then invokes async process to set DELETED as status for institution and user onboardings.",
+        "operationId": "deleteOnboarding",
+        "parameters": [
+          {
+            "name": "onboardingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": ["global"]
+          }
+        ]
+      }
+    },
+    "/onboarding/{onboardingId}/complete": {
+      "put": {
+        "tags": ["Onboarding Controller"],
+        "summary": "Complete onboarding by verifying and uploading contract, then trigger async activities.",
+        "description": "Perform complete operation of an onboarding request receiving onboarding id and contract signed by the institution.It checks the contract's signature and upload the contract on an azure storageAt the end, function triggers async activities related to complete onboarding that consist of create the institution, activate the onboarding and sending data to notification queue.",
+        "operationId": "completeOnboardingUsingPUT",
+        "parameters": [
+          {
+            "name": "onboardingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": ["contract"],
+                "type": "object",
+                "properties": {
+                  "contract": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem3"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem3"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Problem3"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": ["global"]
+          }
+        ]
+      }
+    },
+    "/onboarding/{onboardingId}/reject": {
+      "put": {
+        "tags": ["Onboarding Controller"],
+        "summary": "Perform reject operation of an onboarding request",
+        "description": "Perform reject operation of an onboarding request receiving onboarding id.Function change status to REJECT for an onboarding request that is not COMPLETED. ",
+        "operationId": "rejectOnboardingUsingPUT",
+        "parameters": [
+          {
+            "name": "onboardingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {}
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": ["global"]
+          }
+        ]
+      }
+    },
+    "/document-content/{onboardingId}/contract-signed": {
+      "get": {
+        "summary": "Retrieve contract signed for a given onboarding",
+        "description": "Downloads the contract file associated with the specified onboarding ID.",
+        "operationId": "getContractSigned",
+        "tags": ["Document Content Controller"],
+        "parameters": [
+          {
+            "name": "onboardingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "format": "binary",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Not Authorized"
+          },
+          "403": {
+            "description": "Not Allowed"
+          }
+        },
+        "security": [
+          {
+            "apiKeyHeader": ["global"]
           }
         ]
       }
@@ -3244,11 +3686,7 @@
     "schemas": {
       "InstitutionResponse": {
         "title": "InstitutionResponse",
-        "required": [
-          "id",
-          "origin",
-          "originId"
-        ],
+        "required": ["id", "origin", "originId"],
         "type": "object",
         "properties": {
           "id": {
@@ -3526,10 +3964,7 @@
       },
       "Problem": {
         "title": "Problem",
-        "required": [
-          "status",
-          "title"
-        ],
+        "required": ["status", "title"],
         "type": "object",
         "properties": {
           "type": {
@@ -3568,10 +4003,7 @@
       },
       "InvalidParam": {
         "title": "InvalidParam",
-        "required": [
-          "name",
-          "reason"
-        ],
+        "required": ["name", "reason"],
         "type": "object",
         "properties": {
           "name": {
@@ -3622,11 +4054,7 @@
           },
           "type": {
             "type": "string",
-            "enum": [
-              "PT",
-              "AOO",
-              "EA"
-            ]
+            "enum": ["PT", "AOO", "EA"]
           },
           "productId": {
             "type": "string"
@@ -3651,10 +4079,7 @@
           },
           "status": {
             "type": "string",
-            "enum": [
-              "ACTIVE",
-              "DELETED"
-            ]
+            "enum": ["ACTIVE", "DELETED"]
           },
           "createdAt": {
             "type": "string",
@@ -3766,11 +4191,7 @@
           },
           "delegationType": {
             "type": "string",
-            "enum": [
-              "PT",
-              "AOO",
-              "EA"
-            ]
+            "enum": ["PT", "AOO", "EA"]
           },
           "delegationProductId": {
             "type": "string"
@@ -3781,11 +4202,7 @@
         }
       },
       "UserResponse": {
-        "required": [
-          "id",
-          "name",
-          "surname"
-        ],
+        "required": ["id", "name", "surname"],
         "type": "object",
         "properties": {
           "id": {
@@ -3857,10 +4274,7 @@
       },
       "Problem2": {
         "title": "Problem",
-        "required": [
-          "status",
-          "title"
-        ],
+        "required": ["status", "title"],
         "type": "object",
         "properties": {
           "detail": {
@@ -3897,14 +4311,103 @@
       },
       "AckPayloadRequest": {
         "title": "AckPayloadRequest",
-        "required": [
-          "message"
-        ],
+        "required": ["message"],
         "type": "object",
         "properties": {
           "message": {
             "type": "string",
             "description": "Acknowledgment request payload message"
+          }
+        }
+      },
+      "OnboardingIndexSearchResource": {
+        "type": "object",
+        "properties": {
+          "onboardings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnboardingIndexResource"
+            }
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "page": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalPages": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "OnboardingIndexResource": {
+        "required": ["onboardingId"],
+        "type": "object",
+        "properties": {
+          "onboardingId": {
+            "type": "string"
+          },
+          "institutionId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "parentDescription": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "subunitCode": {
+            "type": "string"
+          },
+          "subunitType": {
+            "type": "string"
+          },
+          "productId": {
+            "type": "string"
+          },
+          "institutionType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "isTest": {
+            "type": "boolean"
+          },
+          "city": {
+            "type": "string"
+          },
+          "county": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "activatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiringDate": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
@@ -3923,30 +4426,79 @@
           "taxCode": {
             "type": "string"
           },
-          "products": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "institutionTypes": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "lastModified": {
             "type": "string",
             "format": "date-time"
           }
         }
       },
-      "Problem4": {
+      "InstitutionsResource": {
+        "required": ["count", "items"],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InstitutionResource1"
+            }
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "InstitutionResource1": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "originId": {
+            "type": "string"
+          },
+          "o": {
+            "type": "string"
+          },
+          "ou": {
+            "type": "string"
+          },
+          "aoo": {
+            "type": "string"
+          },
+          "taxCode": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "digitalAddress": {
+            "type": "string"
+          },
+          "address": {
+            "type": "string"
+          },
+          "zipCode": {
+            "type": "string"
+          },
+          "origin": {
+            "type": "string",
+            "enum": ["static", "IPA", "ANAC", "IVASS", "INFOCAMERE"]
+          },
+          "istatCode": {
+            "type": "string"
+          },
+          "updateDate": {
+            "type": "string"
+          }
+        }
+      },
+      "Problem5": {
         "title": "Problem",
-        "required": [
-          "status",
-          "title"
-        ],
+        "required": ["status", "title"],
         "type": "object",
         "properties": {
           "detail": {
@@ -4016,18 +4568,13 @@
       "Instant": {
         "type": "string",
         "format": "date-time",
-        "examples": [
-          "2022-03-10T16:15:50Z"
-        ]
+        "examples": ["2022-03-10T16:15:50Z"]
       },
       "ContractTemplateFileType": {
         "type": "string",
-        "enum": [
-          "HTML",
-          "PDF"
-        ]
+        "enum": ["HTML", "PDF"]
       },
-      "Problem5": {
+      "Problem6": {
         "type": "object",
         "properties": {
           "detail": {
@@ -4075,22 +4622,18 @@
       },
       "ProductStatus": {
         "type": "string",
-        "enum": [
-          "TESTING",
-          "ACTIVE",
-          "DELETED",
-          "SUSPEND"
-        ]
+        "enum": ["TESTING", "ACTIVE", "DELETED", "SUSPEND"]
       },
       "ProductCreateRequest": {
         "type": "object",
-        "required": [
-          "productId"
-        ],
+        "required": ["productId"],
         "properties": {
           "productId": {
             "type": "string",
             "pattern": "\\S"
+          },
+          "parentId": {
+            "type": "string"
           },
           "alias": {
             "type": "string"
@@ -4151,6 +4694,27 @@
             "items": {
               "type": "string"
             }
+          },
+          "institutionTypesAllowed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signingConfiguration": {
+            "$ref": "#/components/schemas/SigningConfiguration"
+          },
+          "managingInstitutions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManagingInstitution"
+            }
+          },
+          "workflowRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowRule"
+            }
           }
         }
       },
@@ -4187,6 +4751,9 @@
             "type": "boolean"
           },
           "invoiceable": {
+            "type": "boolean"
+          },
+          "requiresParentOnboarding": {
             "type": "boolean"
           },
           "expirationDays": {
@@ -4323,15 +4890,13 @@
       },
       "ContractType": {
         "type": "string",
-        "enum": [
-          "CONTRACT",
-          "ATTACHMENT"
-        ]
+        "enum": ["CONTRACT", "ATTACHMENT"]
       },
       "WorkflowType": {
         "type": "string",
         "enum": [
           "CONTRACT_REGISTRATION",
+          "CONTRACT_WITH_COUNTERSIGNATURE",
           "FOR_APPROVE",
           "FOR_APPROVE_PT",
           "FOR_APPROVE_GPU",
@@ -4390,11 +4955,11 @@
             "type": "string"
           },
           "status": {
-            "$ref": "#/components/schemas/OnboardingStatus"
+            "$ref": "#/components/schemas/OnboardingStatus1"
           }
         }
       },
-      "OnboardingStatus": {
+      "OnboardingStatus1": {
         "type": "string",
         "enum": [
           "REQUEST",
@@ -4423,6 +4988,71 @@
           }
         }
       },
+      "SigningConfiguration": {
+        "type": "object",
+        "properties": {
+          "requiredSignatures": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipSignerIdentityCheck": {
+            "type": "boolean"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SigningStep"
+            }
+          }
+        }
+      },
+      "SigningStep": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "label": {
+            "type": "string"
+          },
+          "isFinal": {
+            "type": "boolean"
+          },
+          "final": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ManagingInstitution": {
+        "type": "object",
+        "properties": {
+          "institutionId": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "signingStep": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "WorkflowRule": {
+        "type": "object",
+        "properties": {
+          "institutionType": {
+            "$ref": "#/components/schemas/InstitutionType1"
+          },
+          "origin": {
+            "$ref": "#/components/schemas/Origin1"
+          },
+          "workflowType": {
+            "$ref": "#/components/schemas/WorkflowType"
+          }
+        }
+      },
       "ProductOriginResponse": {
         "type": "object",
         "properties": {
@@ -4436,13 +5066,14 @@
       },
       "ProductPatchRequest": {
         "type": "object",
-        "required": [
-          "productId"
-        ],
+        "required": ["productId"],
         "properties": {
           "productId": {
             "type": "string",
             "pattern": "\\S"
+          },
+          "parentId": {
+            "type": "string"
           },
           "alias": {
             "type": "string"
@@ -4502,19 +5133,41 @@
             "type": "array",
             "items": {
               "type": "string"
+            }
+          },
+          "institutionTypesAllowed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signingConfiguration": {
+            "$ref": "#/components/schemas/SigningConfiguration"
+          },
+          "managingInstitutions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManagingInstitution"
+            }
+          },
+          "workflowRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowRule"
             }
           }
         }
       },
       "ProductResponse": {
         "type": "object",
-        "required": [
-          "productId"
-        ],
+        "required": ["productId"],
         "properties": {
           "productId": {
             "type": "string",
             "pattern": "\\S"
+          },
+          "parentId": {
+            "type": "string"
           },
           "alias": {
             "type": "string"
@@ -4574,6 +5227,27 @@
             "type": "array",
             "items": {
               "type": "string"
+            }
+          },
+          "institutionTypesAllowed": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "signingConfiguration": {
+            "$ref": "#/components/schemas/SigningConfiguration"
+          },
+          "managingInstitutions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ManagingInstitution"
+            }
+          },
+          "workflowRules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkflowRule"
             }
           },
           "id": {
@@ -4604,10 +5278,7 @@
       },
       "WebhookRequest": {
         "type": "object",
-        "required": [
-          "url",
-          "httpMethod"
-        ],
+        "required": ["url", "httpMethod"],
         "properties": {
           "url": {
             "type": "string",
@@ -4688,7 +5359,7 @@
           }
         }
       },
-      "Problem6": {
+      "Problem7": {
         "type": "object",
         "properties": {
           "detail": {
@@ -4711,9 +5382,7 @@
       },
       "SaveUserRequest": {
         "type": "object",
-        "required": [
-          "email"
-        ],
+        "required": ["email"],
         "properties": {
           "email": {
             "type": "string",
@@ -4756,6 +5425,9 @@
           "role": {
             "type": "string"
           },
+          "group": {
+            "type": "string"
+          },
           "permissions": {
             "type": "array",
             "items": {
@@ -4766,9 +5438,7 @@
       },
       "UserInstitutionResource": {
         "title": "UserInstitutionResource",
-        "required": [
-          "userId"
-        ],
+        "required": ["userId"],
         "type": "object",
         "properties": {
           "id": {
@@ -4857,11 +5527,7 @@
       },
       "UserResource": {
         "title": "UserResource",
-        "required": [
-          "id",
-          "name",
-          "surname"
-        ],
+        "required": ["id", "name", "surname"],
         "type": "object",
         "properties": {
           "id": {
@@ -5013,9 +5679,7 @@
       },
       "SearchUserDto": {
         "title": "SearchUserDto",
-        "required": [
-          "fiscalCode"
-        ],
+        "required": ["fiscalCode"],
         "type": "object",
         "properties": {
           "fiscalCode": {
@@ -5124,9 +5788,6 @@
         "title": "ProductRoleInfo",
         "type": "object",
         "properties": {
-          "multiroleAllowed": {
-            "type": "boolean"
-          },
           "skipUserCreation": {
             "type": "boolean"
           },
@@ -5160,6 +5821,12 @@
           },
           "description": {
             "type": "string"
+          },
+          "multiroleGroups": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },
@@ -5259,12 +5926,7 @@
           },
           "env": {
             "type": "string",
-            "enum": [
-              "ROOT",
-              "DEV",
-              "COLL",
-              "PROD"
-            ]
+            "enum": ["ROOT", "DEV", "COLL", "PROD"]
           }
         }
       },
@@ -5541,11 +6203,7 @@
           "status": {
             "type": "string",
             "description": "Users group's status",
-            "enum": [
-              "ACTIVE",
-              "SUSPENDED",
-              "DELETED"
-            ]
+            "enum": ["ACTIVE", "SUSPENDED", "DELETED"]
           },
           "members": {
             "type": "array",
@@ -5613,6 +6271,21 @@
             "type": "integer",
             "description": "The size of the page",
             "format": "int32"
+          }
+        }
+      },
+      "OnboardingGetResponse": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OnboardingGet"
+            }
           }
         }
       },
@@ -5771,11 +6444,7 @@
         }
       },
       "InstitutionPaSubunitType": {
-        "enum": [
-          "AOO",
-          "UO",
-          "EC"
-        ],
+        "enum": ["AOO", "UO", "EC"],
         "type": "string"
       },
       "Origin": {
@@ -5879,13 +6548,7 @@
         }
       },
       "PartyRole": {
-        "enum": [
-          "MANAGER",
-          "DELEGATE",
-          "SUB_DELEGATE",
-          "OPERATOR",
-          "ADMIN_EA"
-        ],
+        "enum": ["MANAGER", "DELEGATE", "SUB_DELEGATE", "OPERATOR", "ADMIN_EA"],
         "type": "string"
       },
       "BillingResponse2": {
@@ -5957,6 +6620,56 @@
             "type": "string"
           },
           "userRequestUid": {
+            "type": "string"
+          }
+        }
+      },
+      "OnboardingStatus": {
+        "enum": [
+          "REQUEST",
+          "TOBEVALIDATED",
+          "PENDING",
+          "PENDING_IN_REVIEW",
+          "COMPLETED",
+          "FAILED",
+          "REJECTED",
+          "DELETED"
+        ],
+        "type": "string"
+      },
+      "Problem3": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProblemError"
+            }
+          }
+        }
+      },
+      "ProblemError": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "detail": {
+            "type": "string"
+          }
+        }
+      },
+      "ReasonRequest": {
+        "type": "object",
+        "properties": {
+          "reasonForReject": {
+            "type": "string"
+          },
+          "userUid": {
             "type": "string"
           }
         }
