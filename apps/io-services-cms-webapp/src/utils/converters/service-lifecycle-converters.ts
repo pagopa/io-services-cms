@@ -9,12 +9,18 @@ import { pipe } from "fp-ts/lib/function";
 import { IConfig, TopicPostgreSqlConfig } from "../../config";
 import { Cidr } from "../../generated/api/Cidr";
 import { FiscalCode } from "../../generated/api/FiscalCode";
-import { ScopeEnum } from "../../generated/api/ServiceBaseMetadata";
 import { ServiceLifecycle as ServiceResponsePayload } from "../../generated/api/ServiceLifecycle";
 import { ServiceLifecycleStatus } from "../../generated/api/ServiceLifecycleStatus";
 import { ServiceLifecycleStatusTypeEnum } from "../../generated/api/ServiceLifecycleStatusType";
 import { ServicePayload as ServiceRequestPayload } from "../../generated/api/ServicePayload";
 import { getDao as getServiceTopicDao } from "../service-topic-dao";
+import {
+  toScopeType,
+  withSuitableForMinors,
+} from "./service-common-converters";
+
+// Min age for a service is 14 years old
+const SUITABLE_FOR_MINORS_MIN_AGE = 14;
 
 export const payloadToItem = (
   id: ServiceLifecycle.definitions.Service["id"],
@@ -54,10 +60,6 @@ const calculateItemAuthorizedRecipients = (
     ? [...authorizedRecipients]
     : [...authorizedRecipients, sandboxFiscalCode];
 
-// Min age for a service is 14 years old
-const SUITABLE_FOR_MINORS_MIN_AGE = 14;
-const ADULT_AGE = 18;
-
 /**
  * API DTO => Service Lifecycle age mapping
  * If a service is suitable, the min age is set to 14.
@@ -76,17 +78,6 @@ const suitableForMinorsToAge = (
         >,
       }
     : undefined;
-
-/**
- * Service Lifecycle age => API DTO suitable_for_minors mapping
- * If a service has a min age set ant it's below 18, then suitable_for_minors is true.
- * Otherwise, it's false.
- * @param age
- * @returns
- */
-const ageToSuitableForMinors = (
-  age: ServiceLifecycle.definitions.Service["data"]["age"],
-): boolean => (age?.min !== undefined ? age.min < ADULT_AGE : false);
 
 export const itemToResponse =
   (
@@ -117,9 +108,7 @@ export const itemToResponse =
             ? DateUtils.isoStringfromUnixMillis(modified_at)
             : new Date().toISOString(),
           status: toServiceStatus(fsm),
-          ...(config.FF_SUITABLE_FOR_MINORS_ENABLED
-            ? { suitable_for_minors: ageToSuitableForMinors(age) }
-            : {}),
+          ...withSuitableForMinors(config)(age),
           ...data,
           metadata: {
             ...metadata,
@@ -170,19 +159,5 @@ export const toServiceStatus = (
       // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
       const _: never = fsm;
       return ServiceLifecycleStatusTypeEnum[fsm];
-  }
-};
-
-export const toScopeType = (
-  s: ServiceLifecycle.ItemType["data"]["metadata"]["scope"],
-): ScopeEnum => {
-  switch (s) {
-    case "LOCAL":
-    case "NATIONAL":
-      return ScopeEnum[s];
-    default:
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-case-declarations
-      const _: never = s;
-      return ScopeEnum[s];
   }
 };

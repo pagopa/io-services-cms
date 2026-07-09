@@ -4,7 +4,7 @@ import * as E from "fp-ts/lib/Either";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { describe, expect, test, vi } from "vitest";
-import { TopicPostgreSqlConfig } from "../../../config";
+import { IConfig, TopicPostgreSqlConfig } from "../../../config";
 import { FiscalCode } from "../../../generated/api/FiscalCode";
 import { ServicePayload } from "../../../generated/api/ServicePayload";
 import {
@@ -34,7 +34,7 @@ const aSandboxFiscalCode = "AAAAAA00A00A000A";
 
 const mockDbConfig = {
   FF_SUITABLE_FOR_MINORS_ENABLED: true,
-} as unknown as TopicPostgreSqlConfig;
+} as unknown as IConfig;
 
 describe("test service-lifecycle-converters", () => {
   test("test service-lifecycle-converters", () => {
@@ -282,7 +282,7 @@ describe("itemToResponse suitable_for_minors mapping", () => {
   test("suitable_for_minors should be omitted when the feature flag is disabled", async () => {
     const disabledConfig = {
       FF_SUITABLE_FOR_MINORS_ENABLED: false,
-    } as unknown as TopicPostgreSqlConfig;
+    } as unknown as IConfig;
     const result = await itemToResponse(disabledConfig)(
       buildItemWithAge({ min: 14 }),
     )();

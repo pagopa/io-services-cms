@@ -3,25 +3,29 @@ import * as E from "fp-ts/lib/Either";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { TopicPostgreSqlConfig } from "../../config";
+import { IConfig, TopicPostgreSqlConfig } from "../../config";
 import { ServiceHistoryItem as ServiceResponsePayload } from "../../generated/api/ServiceHistoryItem";
 import { ServiceHistoryItemStatus } from "../../generated/api/ServiceHistoryItemStatus";
 import { ServiceHistoryStatusKindEnum } from "../../generated/api/ServiceHistoryStatusKind";
 import { ServiceHistoryStatusTypeEnum } from "../../generated/api/ServiceHistoryStatusType";
 import { getDao as getServiceTopicDao } from "../service-topic-dao";
-import { toScopeType } from "./service-lifecycle-converters";
+import {
+  toScopeType,
+  withSuitableForMinors,
+} from "./service-common-converters";
 
 export const itemsToResponse =
-  (dbConfig: TopicPostgreSqlConfig) =>
+  (dbConfig: IConfig) =>
   (
     items: readonly ServiceHistoryCosmosItem[],
   ): TE.TaskEither<Error, readonly ServiceResponsePayload[]> =>
     pipe(items, TE.traverseArray(itemToResponse(dbConfig)));
 
 export const itemToResponse =
-  (dbConfig: TopicPostgreSqlConfig) =>
+  (dbConfig: IConfig) =>
   ({
     data: {
+      age,
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       metadata: { category, custom_special_flow, scope, topic_id, ...metadata },
       ...data
@@ -36,6 +40,7 @@ export const itemToResponse =
         id: serviceId,
         last_update: last_update ?? new Date().toISOString(),
         status: buildStatus(fsm),
+        ...withSuitableForMinors(dbConfig)(age),
         ...data,
         metadata: {
           ...metadata,
