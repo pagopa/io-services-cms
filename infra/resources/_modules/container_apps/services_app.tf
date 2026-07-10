@@ -1,12 +1,6 @@
 module "services_ca" {
-  /* Cannot use the 5.0 version of the pagopa-dx/azure-container-app/azurerm module because the 
-  backend_func_itn uses an old azure_container_app module with azapi ~>2.7.0 constraint while 
-  the new pagopa-dx/azure-container-app/azurerm 5.0 requires the azapi ~>2.9.0. Also we cannot 
-  update the backend_func_itn module because its use_case type(function_app) is no longer supported 
-  on the newest azure_container_app module.
-  */
   source  = "pagopa-dx/azure-container-app/azurerm"
-  version = "~> 4.0"
+  version = "~> 5.0"
 
   environment = {
     prefix          = var.prefix
@@ -19,9 +13,9 @@ module "services_ca" {
 
   container_app_environment_id = module.svc_container_app_environment_itn.id
 
-  user_assigned_identity_id = module.svc_container_app_environment_itn.user_assigned_identity.id
+  log_analytics_workspace_id = var.log_analytics_workspace_id
 
-  container_app_templates = [
+  containers = [
     {
       image = "ghcr.io/pagopa/io-services-app"
       name  = "io-services"
@@ -37,8 +31,14 @@ module "services_ca" {
       }
     },
   ]
-
-  autoscaler = {}
+  
+  container_port = 3000
+  autoscaler = {
+    replicas = {
+      minimum = 0
+      maximum = 8
+    }
+  }
 
   resource_group_name = var.resource_group_name
 
