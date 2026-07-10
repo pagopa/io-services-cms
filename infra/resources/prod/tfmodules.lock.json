@@ -100,5 +100,11 @@
     "version": "2.2.4",
     "name": "azure_storage_account",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-storage-account/azurerm/2.2.4"
+  },
+  "container_apps.services_ca": {
+    "hash": "9571c4d329ac0e58d0ccfb4bc09705b009c66d0e9d154d4def5d043af1b4deb4",
+    "version": "5.0.0",
+    "name": "azure_container_app",
+    "source": "https://registry.terraform.io/modules/pagopa-dx/azure-container-app/azurerm/5.0.0"
   }
 }

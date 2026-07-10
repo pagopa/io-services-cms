@@ -37,6 +37,12 @@ services:
       - ..:/workspace:cached
     command: sleep infinity
 
+  services-app:
+    image: io-services-app:latest
+    env_file: ./apps/services-app/.env
+    ports:
+      - 3000:3000
+
   # "cosmosdb" is the name of the Docker Compose service, and is also used as the hostname for incoming connections
   cosmosdb:
     image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
