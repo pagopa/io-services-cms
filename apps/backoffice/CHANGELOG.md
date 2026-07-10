@@ -1,5 +1,13 @@
 # io-services-cms-backoffice
 
+## 2.7.4
+
+### Patch Changes
+
+- 7a596ba0: update selfcare openapi
+- Updated dependencies [7a596ba0]
+  - @io-services-cms/external-clients@1.13.1
+
 ## 2.7.3
 
 ### Patch Changes

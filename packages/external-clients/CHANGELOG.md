@@ -1,5 +1,11 @@
 # @io-services-cms/external-clients
 
+## 1.13.1
+
+### Patch Changes
+
+- 7a596ba0: update selfcare openapi
+
 ## 1.13.0
 
 ### Minor Changes
