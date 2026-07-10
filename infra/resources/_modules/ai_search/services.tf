@@ -7,6 +7,10 @@
 # step. Keep both pipelines running until the alias switch is validated.
 ########################################################################
 
+# Default age range: when a service does not declare an `age` object, it is
+# assumed to target adults only, so we default ageMin=18 and ageMax=999.
+# This keeps age-restricted filtering conservative (services without an
+# explicit age range are never returned to minors).
 resource "restapi_object" "services_publication_datasource_02" {
   path         = "/datasources"
   query_string = "api-version=2023-11-01"
