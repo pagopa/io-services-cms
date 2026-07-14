@@ -19,7 +19,8 @@ const JIRA_CONFIG = {
   JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: "customfield_5",
   JIRA_ISSUE_HIGH_PRIORITY_ID: "2",
   JIRA_ISSUE_MEDIUM_PRIORITY_ID: "3",
-} as config.JiraConfig;
+  FF_SUITABLE_FOR_MINORS_ENABLED: true,
+} as config.JiraConfig & Pick<config.IConfig, "FF_SUITABLE_FOR_MINORS_ENABLED">;
 
 const mockFetchJson = vitest.fn();
 const getMockFetchWithStatus = (status: number) =>
@@ -256,6 +257,42 @@ describe("Service Review Proxy", () => {
         expect.stringContaining(
           "*Età massima fruizione servizio:* *[ DATO MANCANTE ]*",
         ),
+      headers: expect.any(Object),
+      method: "POST",
+    });
+    expect(E.isRight(serviceReviewTicket)).toBeTruthy();
+  });
+
+  it("should omit the age info from the ticket when the feature flag is disabled", async () => {
+    mockFetchJson.mockImplementationOnce(() =>
+      Promise.resolve(aCreateJiraIssueResponse),
+    );
+    const mockFetch = getMockFetchWithStatus(201);
+
+    const aFfDisabledConfig = {
+      ...JIRA_CONFIG,
+      FF_SUITABLE_FOR_MINORS_ENABLED: false,
+    } as config.JiraConfig &
+      Pick<config.IConfig, "FF_SUITABLE_FOR_MINORS_ENABLED">;
+
+    const aServiceWithAge = {
+      ...aService,
+      data: {
+        ...aService.data,
+        age: { min: 14, max: 65 },
+      },
+    } as unknown as ServiceLifecycle.definitions.Service;
+
+    const aJiraClient: JiraAPIClient = jiraClient(aFfDisabledConfig, mockFetch);
+    const proxy = jiraProxy(aJiraClient, aFfDisabledConfig);
+    const serviceReviewTicket = await proxy.createJiraIssue(
+      aServiceWithAge,
+      aDelegate,
+      true,
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.not.stringContaining("fruizione servizio"),
       headers: expect.any(Object),
       method: "POST",
     });

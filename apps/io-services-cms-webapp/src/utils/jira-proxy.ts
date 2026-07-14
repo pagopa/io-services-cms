@@ -4,7 +4,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { JiraConfig } from "../config";
+import { IConfig, JiraConfig } from "../config";
 import {
   CreateJiraIssueResponse,
   JiraAPIClient,
@@ -77,7 +77,10 @@ export interface Delegate {
 
 export const jiraProxy = (
   jiraClient: JiraAPIClient,
-  jiraConfig: JiraConfig,
+  // The central `FF_SUITABLE_FOR_MINORS_ENABLED` feature flag (also gating the
+  // `suitable_for_minors` output on the public APIs) is required here to gate
+  // the `age` enrichment of the Jira ticket, see `buildIssueDescription`.
+  jiraConfig: JiraConfig & Pick<IConfig, "FF_SUITABLE_FOR_MINORS_ENABLED">,
 ): JiraProxy => {
   const buildIssueCustomFields = (
     service: ServiceLifecycle.definitions.Service,
@@ -134,13 +137,19 @@ export const jiraProxy = (
     \n\n${formatOptionalStringValue(delegate.email)}
     \n\n*Limitato:* ${
       delegate.permissions.indexOf("apimessagewrite") !== -1 ? "NO" : "SI"
+    }${
+      // Gate the `age` info on the same central feature flag that enables the
+      // `suitable_for_minors` field on the public APIs: until the feature is
+      // enabled end-to-end the field is omitted, so support operators don't see
+      // an always-empty (unvalued) field in the ticket.
+      jiraConfig.FF_SUITABLE_FOR_MINORS_ENABLED
+        ? `\n    \n\n*Età minima fruizione servizio:* ${formatOptionalStringValue(
+            service.data.age?.min?.toString(),
+          )}\n    \n\n*Età massima fruizione servizio:* ${formatOptionalStringValue(
+            service.data.age?.max?.toString(),
+          )}`
+        : ""
     }
-    \n\n*Età minima fruizione servizio:* ${formatOptionalStringValue(
-      service.data.age?.min?.toString(),
-    )}
-    \n\n*Età massima fruizione servizio:* ${formatOptionalStringValue(
-      service.data.age?.max?.toString(),
-    )}
     \n\n*Autorizzazioni:* ${delegate.permissions.join(", ")}` as NonEmptyString;
 
   const createJiraIssue = (
