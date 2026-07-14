@@ -19,7 +19,8 @@ const JIRA_CONFIG = {
   JIRA_ORGANIZATION_NAME_CUSTOM_FIELD: "customfield_5",
   JIRA_ISSUE_HIGH_PRIORITY_ID: "2",
   JIRA_ISSUE_MEDIUM_PRIORITY_ID: "3",
-} as config.JiraConfig;
+  FF_SUITABLE_FOR_MINORS_ENABLED: true,
+} as config.JiraConfig & Pick<config.IConfig, "FF_SUITABLE_FOR_MINORS_ENABLED">;
 
 const mockFetchJson = vitest.fn();
 const getMockFetchWithStatus = (status: number) =>
@@ -129,6 +130,169 @@ describe("Service Review Proxy", () => {
         expect.stringContaining(
           `"${aJiraClient.config.JIRA_ORGANIZATION_CF_CUSTOM_FIELD}":"12345678901"`,
         ),
+      headers: expect.any(Object),
+      method: "POST",
+    });
+    expect(E.isRight(serviceReviewTicket)).toBeTruthy();
+  });
+
+  it("should include the age values in the ticket description when age is present", async () => {
+    mockFetchJson.mockImplementationOnce(() =>
+      Promise.resolve(aCreateJiraIssueResponse),
+    );
+    const mockFetch = getMockFetchWithStatus(201);
+
+    const aServiceWithAge = {
+      ...aService,
+      data: {
+        ...aService.data,
+        age: { min: 14, max: 65 },
+      },
+    } as unknown as ServiceLifecycle.definitions.Service;
+
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
+    const serviceReviewTicket = await proxy.createJiraIssue(
+      aServiceWithAge,
+      aDelegate,
+      true,
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body:
+        expect.stringContaining("*Età minima fruizione servizio:* 14") &&
+        expect.stringContaining("*Età massima fruizione servizio:* 65"),
+      headers: expect.any(Object),
+      method: "POST",
+    });
+    expect(E.isRight(serviceReviewTicket)).toBeTruthy();
+  });
+
+  it("should include only the min age value and mark max as missing when only min is present", async () => {
+    mockFetchJson.mockImplementationOnce(() =>
+      Promise.resolve(aCreateJiraIssueResponse),
+    );
+    const mockFetch = getMockFetchWithStatus(201);
+
+    const aServiceWithOnlyMinAge = {
+      ...aService,
+      data: {
+        ...aService.data,
+        age: { min: 14 },
+      },
+    } as unknown as ServiceLifecycle.definitions.Service;
+
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
+    const serviceReviewTicket = await proxy.createJiraIssue(
+      aServiceWithOnlyMinAge,
+      aDelegate,
+      true,
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body:
+        expect.stringContaining("*Età minima fruizione servizio:* 14") &&
+        expect.stringContaining(
+          "*Età massima fruizione servizio:* *[ DATO MANCANTE ]*",
+        ),
+      headers: expect.any(Object),
+      method: "POST",
+    });
+    expect(E.isRight(serviceReviewTicket)).toBeTruthy();
+  });
+
+  it("should include only the max age value and mark min as missing when only max is present", async () => {
+    mockFetchJson.mockImplementationOnce(() =>
+      Promise.resolve(aCreateJiraIssueResponse),
+    );
+    const mockFetch = getMockFetchWithStatus(201);
+
+    const aServiceWithOnlyMaxAge = {
+      ...aService,
+      data: {
+        ...aService.data,
+        age: { max: 65 },
+      },
+    } as unknown as ServiceLifecycle.definitions.Service;
+
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
+    const serviceReviewTicket = await proxy.createJiraIssue(
+      aServiceWithOnlyMaxAge,
+      aDelegate,
+      true,
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body:
+        expect.stringContaining(
+          "*Età minima fruizione servizio:* *[ DATO MANCANTE ]*",
+        ) && expect.stringContaining("*Età massima fruizione servizio:* 65"),
+      headers: expect.any(Object),
+      method: "POST",
+    });
+    expect(E.isRight(serviceReviewTicket)).toBeTruthy();
+  });
+
+  it("should mark the age values as missing in the ticket description when age is absent", async () => {
+    mockFetchJson.mockImplementationOnce(() =>
+      Promise.resolve(aCreateJiraIssueResponse),
+    );
+    const mockFetch = getMockFetchWithStatus(201);
+
+    const aJiraClient: JiraAPIClient = jiraClient(JIRA_CONFIG, mockFetch);
+    const proxy = jiraProxy(aJiraClient, JIRA_CONFIG);
+    const serviceReviewTicket = await proxy.createJiraIssue(
+      aService,
+      aDelegate,
+      true,
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body:
+        expect.stringContaining(
+          "*Età minima fruizione servizio:* *[ DATO MANCANTE ]*",
+        ) &&
+        expect.stringContaining(
+          "*Età massima fruizione servizio:* *[ DATO MANCANTE ]*",
+        ),
+      headers: expect.any(Object),
+      method: "POST",
+    });
+    expect(E.isRight(serviceReviewTicket)).toBeTruthy();
+  });
+
+  it("should omit the age info from the ticket when the feature flag is disabled", async () => {
+    mockFetchJson.mockImplementationOnce(() =>
+      Promise.resolve(aCreateJiraIssueResponse),
+    );
+    const mockFetch = getMockFetchWithStatus(201);
+
+    const aFfDisabledConfig = {
+      ...JIRA_CONFIG,
+      FF_SUITABLE_FOR_MINORS_ENABLED: false,
+    } as config.JiraConfig &
+      Pick<config.IConfig, "FF_SUITABLE_FOR_MINORS_ENABLED">;
+
+    const aServiceWithAge = {
+      ...aService,
+      data: {
+        ...aService.data,
+        age: { min: 14, max: 65 },
+      },
+    } as unknown as ServiceLifecycle.definitions.Service;
+
+    const aJiraClient: JiraAPIClient = jiraClient(aFfDisabledConfig, mockFetch);
+    const proxy = jiraProxy(aJiraClient, aFfDisabledConfig);
+    const serviceReviewTicket = await proxy.createJiraIssue(
+      aServiceWithAge,
+      aDelegate,
+      true,
+    )();
+
+    expect(mockFetch).toBeCalledWith(expect.any(String), {
+      body: expect.not.stringContaining("fruizione servizio"),
       headers: expect.any(Object),
       method: "POST",
     });
