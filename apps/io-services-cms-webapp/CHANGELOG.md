@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.2.2
+
+### Patch Changes
+
+- 369eec92: Added age field info to Jira Issue creation
+
 ## 2.2.1
 
 ### Patch Changes
