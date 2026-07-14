@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "module": "NodeNext",
+    "esModuleInterop": false,
+    "rootDir": "src",
+    "target": "ES2022",
+    "noImplicitAny": true,
+    "moduleResolution": "NodeNext",
+    "outDir": "dist",
+    "strict": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "skipLibCheck": true,
+    "sourceMap": true
+  }
+}
