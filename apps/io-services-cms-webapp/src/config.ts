@@ -213,6 +213,7 @@ export const PostgreSqlConfig = t.type({
     IntegerFromString,
     "50" as unknown as number,
   ),
+  REVIEWER_DB_SSL: withDefault(t.string, "true").pipe(BooleanFromString),
   REVIEWER_DB_USER: NonEmptyString,
 });
 
