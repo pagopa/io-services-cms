@@ -1,5 +1,11 @@
 # io-services-cms-models
 
+## 1.31.0
+
+### Minor Changes
+
+- d78621ef: Syncronize new Age field CMS -> Services-App-Backend
+
 ## 1.30.0
 
 ### Minor Changes

@@ -1,5 +1,16 @@
 # io-services-cms-webapp
 
+## 2.3.0
+
+### Minor Changes
+
+- d78621ef: Syncronize new Age field CMS -> Services-App-Backend
+
+### Patch Changes
+
+- Updated dependencies [d78621ef]
+  - @io-services-cms/models@1.31.0
+
 ## 2.2.2
 
 ### Patch Changes
