@@ -1,13 +1,13 @@
 import { Queue, ServiceDetail } from "@io-services-cms/models";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import * as E from "fp-ts/lib/Either";
-import { Json } from "io-ts-types";
-import { assert, describe, expect, it, vi } from "vitest";
-import { handleQueueItem, toServiceDetail } from "../request-detail-handler";
-import { CosmosHelper } from "../../utils/cosmos-helper";
 import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
+import { Json } from "io-ts-types";
+import { assert, describe, expect, it, vi } from "vitest";
 import { makeInvocationContext } from "../../__tests__/utils/invocation-context";
+import { CosmosHelper } from "../../utils/cosmos-helper";
+import { handleQueueItem, toServiceDetail } from "../request-detail-handler";
 
 const createContext = () => makeInvocationContext("funcname").context;
 
@@ -106,6 +106,33 @@ describe("Service Detail Handler", () => {
     );
   });
 
+  it("[handleQueueItem] should synchronize age", async () => {
+    const context = createContext();
+    const publicationItemWithAge = {
+      ...aGenericPublicationItemType,
+      data: {
+        ...aGenericPublicationItemType.data,
+        age: {
+          max: 65,
+          min: 14,
+        },
+      },
+    } as unknown as Queue.RequestDetailItem;
+
+    await handleQueueItem(
+      context,
+      serviceDetailCosmosHelperMock,
+      publicationItemWithAge,
+    )();
+
+    expect(context.extraOutputs.set).toHaveBeenCalledWith(
+      "serviceDetailDocument",
+      expect.objectContaining({
+        age: publicationItemWithAge.data.age,
+      }),
+    );
+  });
+
   it("[handleQueueItem] should handle lifecycle queue item correctly", async () => {
     const context = createContext();
 
@@ -142,30 +169,55 @@ describe("Service Detail Handler", () => {
     expect(context.extraOutputs.set).not.toHaveBeenCalled();
   });
 
-  it("[buildDocument] should build document starting from a service", async () => {
+  it("[toServiceDetail] should build document starting from a service", async () => {
     const result = toServiceDetail(aGenericPublicationItemType);
     const res = ServiceDetail.decode(result);
-    if (E.isRight(res)) {
-      expect(res.right.id).toBe(aGenericPublicationItemType.id);
-      expect(res.right.name).toBe(aGenericPublicationItemType.data.name);
-      expect(res.right.description).toBe(
-        aGenericPublicationItemType.data.description,
-      );
-      expect(res.right.require_secure_channel).toBe(
-        aGenericPublicationItemType.data.require_secure_channel,
-      );
-      expect(res.right.organization).toBe(
-        aGenericPublicationItemType.data.organization,
-      );
-      expect(res.right.metadata).toBe(
-        aGenericPublicationItemType.data.metadata,
-      );
-      expect(res.right.kind).toBe(aGenericPublicationItemType.kind);
-      expect(res.right.cms_last_update_ts).toBe(
-        aGenericPublicationItemType.cms_last_update_ts,
-      );
-    } else {
-      assert.fail("Expected right");
-    }
+    expect(res).toStrictEqual(
+      E.right(
+        expect.objectContaining({
+          id: aGenericPublicationItemType.id,
+          name: aGenericPublicationItemType.data.name,
+          description: aGenericPublicationItemType.data.description,
+          require_secure_channel:
+            aGenericPublicationItemType.data.require_secure_channel,
+          organization: aGenericPublicationItemType.data.organization,
+          metadata: aGenericPublicationItemType.data.metadata,
+          kind: aGenericPublicationItemType.kind,
+          cms_last_update_ts: aGenericPublicationItemType.cms_last_update_ts,
+        }),
+      ),
+    );
+  });
+
+  it("[toServiceDetail] should map age", () => {
+    const publicationItemWithAge = {
+      ...aGenericPublicationItemType,
+      data: {
+        ...aGenericPublicationItemType.data,
+        age: {
+          max: 65,
+          min: 14,
+        },
+      },
+    } as unknown as Queue.RequestDetailItem;
+
+    const result = toServiceDetail(publicationItemWithAge);
+    const res = ServiceDetail.decode(result);
+    expect(res).toStrictEqual(
+      E.right(
+        expect.objectContaining({
+          age: publicationItemWithAge.data.age,
+          id: publicationItemWithAge.id,
+          name: publicationItemWithAge.data.name,
+          description: publicationItemWithAge.data.description,
+          require_secure_channel:
+            publicationItemWithAge.data.require_secure_channel,
+          organization: publicationItemWithAge.data.organization,
+          metadata: publicationItemWithAge.data.metadata,
+          kind: publicationItemWithAge.kind,
+          cms_last_update_ts: publicationItemWithAge.cms_last_update_ts,
+        }),
+      ),
+    );
   });
 });
