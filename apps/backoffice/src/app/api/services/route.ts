@@ -26,9 +26,11 @@ import {
 import { getServiceOrganizationName } from "@/utils/organization-name-utils";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { type NextRequest, NextResponse } from "next/server";
+import { getGroupPermissionCheckStrategy } from "./factory";
 
 /**
  * @description Create a new Service with the attributes provided in the request payload
+ * @operationId createService
  */
 export const POST = withJWTAuthHandler(
   async (
@@ -45,32 +47,13 @@ export const POST = withJWTAuthHandler(
         );
       }
       if (getConfiguration().GROUP_AUTHZ_ENABLED) {
-        const userAuth = userAuthz(backofficeUser);
-        if (userAuth.isAdmin()) {
-          if (servicePayload.metadata.group_id) {
-            const checkGroup = await checkGroupExistenceAndStatus(
-              servicePayload.metadata.group_id,
-              backofficeUser.institution.id,
-            );
+        const groupPermissionCheckStrategy = getGroupPermissionCheckStrategy(
+          servicePayload.metadata.group_id,
+        );
+        const accessControlError = groupPermissionCheckStrategy(backofficeUser);
 
-            if (checkGroup) {
-              return checkGroup;
-            }
-          }
-        } else {
-          if (servicePayload.metadata.group_id) {
-            if (
-              !userAuth.isGroupAllowed(servicePayload.metadata.group_id, true)
-            ) {
-              return handleForbiddenErrorResponse(
-                "Provided group is out of your scope or inactive",
-              );
-            }
-          } else {
-            if (backofficeUser.permissions.selcGroups.length > 0) {
-              return handleBadRequestErrorResponse("group_id is required");
-            }
-          }
+        if (accessControlError) {
+          return accessControlError;
         }
       }
       return forwardIoServicesCmsRequest("createService", {
