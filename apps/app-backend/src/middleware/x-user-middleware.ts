@@ -1,7 +1,6 @@
 import * as H from "@pagopa/handler-kit";
 import * as E from "fp-ts/Either";
-import * as TE from "fp-ts/TaskEither";
-import * as RTE from "fp-ts/lib/ReaderTaskEither";
+import * as RE from "fp-ts/lib/ReaderEither";
 import { lookup } from "fp-ts/lib/Record";
 import { flow, pipe } from "fp-ts/lib/function";
 
@@ -19,7 +18,7 @@ const X_USER_HEADER_NAME = "x-user";
  *
  * Adapted from io-backend `xUserMiddleware`/`getByXUserToken`.
  */
-export const XUserMiddleware: RTE.ReaderTaskEither<
+export const XUserMiddleware: RE.ReaderEither<
   H.HttpRequest,
   H.HttpUnauthorizedError,
   XUser
@@ -39,5 +38,4 @@ export const XUserMiddleware: RTE.ReaderTaskEither<
       ),
     ),
   ),
-  TE.fromEither,
 );
