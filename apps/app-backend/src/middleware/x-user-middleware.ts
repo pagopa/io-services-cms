@@ -4,7 +4,7 @@ import * as RE from "fp-ts/lib/ReaderEither";
 import { lookup } from "fp-ts/lib/Record";
 import { flow, pipe } from "fp-ts/lib/function";
 
-import { XUser, getByXUserToken } from "../utils/x-user-token";
+import { XUser, decodeToken } from "../utils/x-user-token";
 
 const X_USER_HEADER_NAME = "x-user";
 
@@ -30,8 +30,7 @@ export const XUserMiddleware: RE.ReaderEither<
   ),
   E.chain((token) =>
     pipe(
-      getByXUserToken(token),
-      E.chain(E.fromOption(() => new Error("Empty user identity"))),
+      decodeToken(token),
       E.mapLeft(
         () =>
           new H.HttpUnauthorizedError(`Invalid '${X_USER_HEADER_NAME}' header`),

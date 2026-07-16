@@ -2,8 +2,6 @@ import { DateFromString } from "@pagopa/ts-commons/lib/dates";
 import { errorsToReadableMessages } from "@pagopa/ts-commons/lib/reporters";
 import * as E from "fp-ts/lib/Either";
 import { Either } from "fp-ts/lib/Either";
-import * as O from "fp-ts/lib/Option";
-import { Option } from "fp-ts/lib/Option";
 import { flow, pipe } from "fp-ts/lib/function";
 
 import { UserIdentity } from "../generated/io-auth/UserIdentity";
@@ -64,7 +62,7 @@ const parseUser = (value: string): Either<Error, XUser> =>
  * @param token - The x-user token to decode
  * @returns Either an Error or an XUser object
  */
-const decodeToken = (token: string): Either<Error, XUser> =>
+export const decodeToken = (token: string): Either<Error, XUser> =>
   pipe(
     E.tryCatch(
       () => Buffer.from(token, "base64").toString("utf-8"),
@@ -78,16 +76,3 @@ const decodeToken = (token: string): Either<Error, XUser> =>
     ),
     E.chain(parseUser),
   );
-
-/**
- * Retrieves an `XUser` from an x-user token.
- *
- * This function attempts to decode and parse the provided token into an `XUser`
- * object. If the token is invalid or cannot be parsed, it returns an Error.
- * If successful, it returns an Option containing the `XUser`.
- *
- * @param token - The x-user token to process
- * @returns Either an Error or an Option containing an XUser
- */
-export const getByXUserToken = (token: string): Either<Error, Option<XUser>> =>
-  pipe(decodeToken(token), E.map(O.some));

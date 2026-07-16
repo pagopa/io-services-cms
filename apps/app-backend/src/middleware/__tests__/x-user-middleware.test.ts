@@ -21,10 +21,10 @@ const buildRequest = (headers: Record<string, string>): H.HttpRequest => ({
 });
 
 describe("XUserMiddleware", () => {
-  it("should pass the decoded XUser when the x-user header is valid", async () => {
+  it("should pass the decoded XUser when the x-user header is valid", () => {
     const request = buildRequest({ "x-user": encode(aValidUserIdentity) });
 
-    const result = await XUserMiddleware(request)();
+    const result = XUserMiddleware(request);
 
     expect(E.isRight(result)).toBe(true);
     if (E.isRight(result)) {
@@ -33,8 +33,8 @@ describe("XUserMiddleware", () => {
     }
   });
 
-  it("should return 401 when the x-user header is missing", async () => {
-    const result = await XUserMiddleware(buildRequest({}))();
+  it("should return 401 when the x-user header is missing", () => {
+    const result = XUserMiddleware(buildRequest({}));
 
     expect(E.isLeft(result)).toBe(true);
     if (E.isLeft(result)) {
@@ -42,12 +42,12 @@ describe("XUserMiddleware", () => {
     }
   });
 
-  it("should return 401 when the x-user header is not a valid token", async () => {
+  it("should return 401 when the x-user header is not a valid token", () => {
     const request = buildRequest({
       "x-user": Buffer.from("not-a-json").toString("base64"),
     });
 
-    const result = await XUserMiddleware(request)();
+    const result = XUserMiddleware(request);
 
     expect(E.isLeft(result)).toBe(true);
     if (E.isLeft(result)) {
@@ -55,11 +55,11 @@ describe("XUserMiddleware", () => {
     }
   });
 
-  it("should return 401 when the x-user header payload has an invalid schema", async () => {
+  it("should return 401 when the x-user header payload has an invalid schema", () => {
     const { spid_level, ...invalidIdentity } = aValidUserIdentity;
     const request = buildRequest({ "x-user": encode(invalidIdentity) });
 
-    const result = await XUserMiddleware(request)();
+    const result = XUserMiddleware(request);
 
     expect(E.isLeft(result)).toBe(true);
     if (E.isLeft(result)) {
