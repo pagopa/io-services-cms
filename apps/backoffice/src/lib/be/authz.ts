@@ -28,6 +28,7 @@ export const userAuthz = (user: BackOfficeUserEnriched) => {
     groupId: string,
     checkActive?: boolean,
   ): boolean =>
+    user.permissions.selcGroups.length === 0 ||
     user.permissions.selcGroups.some((group) => {
       if (typeof group === "string") {
         return group === groupId;
