@@ -1,6 +1,6 @@
-# syntax=docker/dockerfile:1
+# syntax=docker/dockerfile:1@sha256:87999aa3d42bdc6bea60565083ee17e86d1f3339802f543c0d03998580f9cb89
 
-FROM public.ecr.aws/docker/library/node:24.16.0-alpine AS base
+FROM public.ecr.aws/docker/library/node:24.16.0-alpine@sha256:21f403ab171f2dc89bad4dd69d7721bfd15f084ccb46cdd225f31f2bc59b5c9a AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -22,7 +22,7 @@ RUN pnpm --filter services-app... build
 
 RUN pnpm --filter services-app --prod deploy --legacy /repo/deploy
 
-FROM public.ecr.aws/docker/library/node:24.16.0-alpine AS runtime
+FROM public.ecr.aws/docker/library/node:24.16.0-alpine@sha256:21f403ab171f2dc89bad4dd69d7721bfd15f084ccb46cdd225f31f2bc59b5c9a AS runtime
 WORKDIR /app
 
 COPY --chown=node:node --from=builder /repo/deploy/node_modules ./node_modules
