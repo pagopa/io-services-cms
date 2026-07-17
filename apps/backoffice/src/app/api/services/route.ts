@@ -26,6 +26,7 @@ import {
 import { getServiceOrganizationName } from "@/utils/organization-name-utils";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
 import { type NextRequest, NextResponse } from "next/server";
+
 import { getGroupPermissionCheckStrategy } from "./factory";
 
 /**

@@ -1,23 +1,24 @@
 import type { ResponseError } from "@/generated/api/ResponseError";
+import type { BackOfficeUserEnriched } from "@/lib/be/wrappers";
+import type { NextResponse } from "next/server";
+
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import { userAuthz } from "@/lib/be/authz";
 import { handleForbiddenErrorResponse } from "@/lib/be/errors";
-import type { BackOfficeUserEnriched } from "@/lib/be/wrappers";
 import { SelfcareRoles } from "@/types/auth";
-import type { NextResponse } from "next/server";
 
-type ParsedManageRootSubscription = {
+interface ParsedManageRootSubscription {
+  readonly subscriptionId: string;
   readonly type: SubscriptionTypeEnum.MANAGE_ROOT;
-  readonly subscriptionId: string;
-};
-type ParsedManageGroupSubscription = {
-  readonly type: SubscriptionTypeEnum.MANAGE_GROUP;
-  readonly subscriptionId: string;
+}
+interface ParsedManageGroupSubscription {
   readonly groupId: string;
-};
+  readonly subscriptionId: string;
+  readonly type: SubscriptionTypeEnum.MANAGE_GROUP;
+}
 export type ParsedManageSubscription =
-  | ParsedManageRootSubscription
-  | ParsedManageGroupSubscription;
+  | ParsedManageGroupSubscription
+  | ParsedManageRootSubscription;
 
 /**
  * @description A function that checks if a backoffice user has the necessary permissions for a subscription.

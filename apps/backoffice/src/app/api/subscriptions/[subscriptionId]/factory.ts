@@ -1,6 +1,7 @@
 import { SubscriptionTypeEnum } from "@/generated/api/SubscriptionType";
 import { handleBadRequestErrorResponse } from "@/lib/be/errors";
 import { ApimUtils } from "@io-services-cms/external-clients";
+
 import {
   type ParsedManageSubscription,
   type PermissionCheckStrategy,
@@ -18,18 +19,18 @@ const parseManageSubscription = (
 ): ParsedManageSubscription | undefined => {
   if (subscriptionId.startsWith(ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX)) {
     return {
-      type: SubscriptionTypeEnum.MANAGE_GROUP,
-      subscriptionId,
       groupId: subscriptionId.slice(
         ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
       ),
+      subscriptionId,
+      type: SubscriptionTypeEnum.MANAGE_GROUP,
     };
   }
   // do not check for MANAGE_ROOT prefix before the MANAGE_GROUP prefix, because the MANAGE_ROOT prefix is a substring of the MANAGE_GROUP prefix
   if (subscriptionId.startsWith(ApimUtils.SUBSCRIPTION_MANAGE_PREFIX)) {
     return {
-      type: SubscriptionTypeEnum.MANAGE_ROOT,
       subscriptionId,
+      type: SubscriptionTypeEnum.MANAGE_ROOT,
     };
   }
 };

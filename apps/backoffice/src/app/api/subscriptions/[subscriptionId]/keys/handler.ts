@@ -1,3 +1,5 @@
+import type { NextRequest, NextResponse } from "next/server";
+
 import { ResponseError } from "@/generated/api/ResponseError";
 import { SubscriptionKeys } from "@/generated/api/SubscriptionKeys";
 import {
@@ -11,7 +13,7 @@ import {
 import { sanitizedNextResponseJson } from "@/lib/be/sanitize";
 import { retrieveManageSubscriptionApiKeys } from "@/lib/be/subscriptions/business";
 import { BackOfficeUserEnriched } from "@/lib/be/wrappers";
-import type { NextRequest, NextResponse } from "next/server";
+
 import { getReadPermissionCheckStrategy } from "../factory";
 
 export const getManageSubscriptionKeysHandler = async (
