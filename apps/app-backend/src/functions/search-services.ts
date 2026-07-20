@@ -8,6 +8,7 @@ import {
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
+import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import { sequenceS } from "fp-ts/lib/Apply";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -20,6 +21,8 @@ import { OrganizationFiscalCode } from "../generated/definitions/internal/Organi
 import { ServiceMinified } from "../generated/definitions/internal/ServiceMinified";
 import { PathParamValidatorMiddleware } from "../middleware/path-params-middleware";
 import { OptionalQueryParamMiddleware } from "../middleware/query-params-middlewares";
+import { XUserMiddleware } from "../middleware/x-user-middleware";
+import { computeAgeFromDateOfBirth } from "../utils/age";
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
 
 /**
@@ -33,16 +36,21 @@ interface SearchServicesRequestParams {
   sessionId: O.Option<NonEmptyString>;
 }
 
+// Search params enriched with the caller's age, resolved from the `x-user` header
+type SearchServicesResolvedParams = {
+  readonly userAge: number;
+} & SearchServicesRequestParams;
+
 export const DEFAULT_ORDER_BY = "name asc";
 
 const executeSearch: (
-  requestQueryParams: SearchServicesRequestParams,
+  requestQueryParams: SearchServicesResolvedParams,
 ) => RTE.ReaderTaskEither<
   AzureSearchClientDependency<ServiceMinified>,
   H.HttpError,
   InstitutionServicesResource
 > =
-  (requestQueryParams: SearchServicesRequestParams) =>
+  (requestQueryParams: SearchServicesResolvedParams) =>
   ({ searchClient }) =>
     pipe(
       sequenceS(TE.ApplyPar)({
@@ -53,7 +61,7 @@ const executeSearch: (
       TE.bind("results", ({ paginationProperties }) =>
         searchClient.fullTextSearch({
           ...paginationProperties,
-          filter: `orgFiscalCode eq '${requestQueryParams.institutionId}'`,
+          filter: `orgFiscalCode eq '${requestQueryParams.institutionId}' and ageMin le ${requestQueryParams.userAge} and ageMax ge ${requestQueryParams.userAge}`,
           orderBy: [DEFAULT_ORDER_BY],
           sessionId: pipe(requestQueryParams.sessionId, O.toUndefined),
         }),
@@ -114,6 +122,35 @@ const extractParams: (
     }),
   );
 
+/**
+ * Resolves the caller identity from the `x-user` header (computing the user's
+ * age) and the request query/path params, following the DR sequence: the
+ * `x-user` resolution (401 on failure) happens before the params validation
+ * (400 on failure). The `...W` combinator widens the error into the union of
+ * both error types, handled downstream by `orElseW`.
+ */
+const resolveSearchParams =
+  (paginationConfig: PaginationConfig) =>
+  (
+    request: H.HttpRequest,
+  ): TE.TaskEither<
+    H.HttpBadRequestError | H.HttpUnauthorizedError,
+    SearchServicesResolvedParams
+  > =>
+    pipe(
+      TE.Do,
+      TE.apS(
+        "userAge",
+        pipe(
+          XUserMiddleware(request),
+          E.map((user) => computeAgeFromDateOfBirth(user.date_of_birth)),
+          TE.fromEither,
+        ),
+      ),
+      TE.apSW("params", extractParams(paginationConfig)(request)),
+      TE.map(({ params, userAge }) => ({ ...params, userAge })),
+    );
+
 export const makeSearchServicesHandler: (
   paginationConfig: PaginationConfig,
 ) => H.Handler<
@@ -125,9 +162,9 @@ export const makeSearchServicesHandler: (
   H.of((request: H.HttpRequest) =>
     pipe(
       request,
-      extractParams(paginationConfig),
+      resolveSearchParams(paginationConfig),
       RTE.fromTaskEither,
-      RTE.chain(executeSearch),
+      RTE.chainW(executeSearch),
       RTE.map(H.successJson),
       RTE.orElseW((error) =>
         pipe(

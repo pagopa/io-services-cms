@@ -4,6 +4,7 @@ import * as TE from "fp-ts/TaskEither";
 import { describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
 import { AzureSearchClient } from "../../utils/azure-search/client";
+import { computeAgeFromDateOfBirth } from "../../utils/age";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
 import { mockSearchServicesResult } from "../__mocks__/search-services-mock";
 import {
@@ -24,10 +25,30 @@ const mockSearchServices = {
   getDocumentCount: vi.fn(),
 } as AzureSearchClient<ServiceMinified>;
 
+const aValidUserIdentity = {
+  date_of_birth: "2000-01-10",
+  family_name: "Rossi",
+  fiscal_code: "TMMEXQ60A10Y526X",
+  name: "Mario",
+  spid_level: "https://www.spid.gov.it/SpidL2",
+};
+const aValidXUserToken = Buffer.from(
+  JSON.stringify(aValidUserIdentity),
+).toString("base64");
+// computed with the same util the handler uses, so the expected filter stays
+// deterministic regardless of the day the test runs
+const anExpectedUserAge = computeAgeFromDateOfBirth(
+  new Date(aValidUserIdentity.date_of_birth),
+);
+const anAgeFilter = `ageMin le ${anExpectedUserAge} and ageMax ge ${anExpectedUserAge}`;
+
+const aValidXUserHeaders = { "x-user": aValidXUserToken };
+
 describe("Search Services Tests", () => {
   it("Should Return found services using default parameter for non specified ones", async () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
+      headers: aValidXUserHeaders,
       path: {
         institutionId: "01234567891",
       },
@@ -64,6 +85,7 @@ describe("Search Services Tests", () => {
   it("Should Return found services for the provided params", async () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
+      headers: aValidXUserHeaders,
       query: {
         limit: "10",
         offset: "0",
@@ -81,7 +103,7 @@ describe("Search Services Tests", () => {
 
     expect(mockSearchServices.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
-        filter: "orgFiscalCode eq '01234567891'",
+        filter: `orgFiscalCode eq '01234567891' and ${anAgeFilter}`,
         orderBy: [DEFAULT_ORDER_BY],
         top: 10,
         skip: 0,
@@ -115,6 +137,7 @@ describe("Search Services Tests", () => {
 
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
+      headers: aValidXUserHeaders,
       query: {
         limit: "10",
         offset: "0",
@@ -132,7 +155,7 @@ describe("Search Services Tests", () => {
 
     expect(mockSearchServicesFail.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
-        filter: "orgFiscalCode eq '01234567891'",
+        filter: `orgFiscalCode eq '01234567891' and ${anAgeFilter}`,
         top: 10,
         skip: 0,
         orderBy: [DEFAULT_ORDER_BY],
@@ -157,6 +180,7 @@ describe("Search Services Tests", () => {
 
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
+      headers: aValidXUserHeaders,
       query: {
         limit: "notValid",
       },
@@ -189,6 +213,7 @@ describe("Search Services Tests", () => {
 
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
+      headers: aValidXUserHeaders,
       query: {
         offset: `${mockedConfiguration.PAGINATION_MAX_OFFSET_AI_SEARCH + 1}`,
       },
@@ -219,6 +244,7 @@ describe("Search Services Tests", () => {
   it("Should pass sessionId parameter when provided", async () => {
     const req: H.HttpRequest = {
       ...H.request("127.0.0.1"),
+      headers: aValidXUserHeaders,
       query: {
         limit: "10",
         offset: "0",
@@ -237,7 +263,7 @@ describe("Search Services Tests", () => {
 
     expect(mockSearchServices.fullTextSearch).toBeCalledWith(
       expect.objectContaining({
-        filter: "orgFiscalCode eq '01234567891'",
+        filter: `orgFiscalCode eq '01234567891' and ${anAgeFilter}`,
         top: 10,
         skip: 0,
         orderBy: [DEFAULT_ORDER_BY],
@@ -255,6 +281,55 @@ describe("Search Services Tests", () => {
             offset: 0,
           },
           statusCode: 200,
+        }),
+      ),
+    );
+  });
+
+  it("Should Return Unauthorized when the x-user header is missing", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      path: {
+        institutionId: "01234567891",
+      },
+    };
+
+    const result = await makeSearchServicesHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchServices,
+    })();
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: expect.objectContaining({ status: 401 }),
+          statusCode: 401,
+        }),
+      ),
+    );
+  });
+
+  it("Should Return Unauthorized when the x-user header is not a valid token", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      headers: { "x-user": Buffer.from("not-a-json").toString("base64") },
+      path: {
+        institutionId: "01234567891",
+      },
+    };
+
+    const result = await makeSearchServicesHandler(mockedConfiguration)({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchServices,
+    })();
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
+          body: expect.objectContaining({ status: 401 }),
+          statusCode: 401,
         }),
       ),
     );
