@@ -15,7 +15,7 @@ import * as RTE from "fp-ts/lib/ReaderTaskEither";
 import * as TE from "fp-ts/lib/TaskEither";
 import { pipe } from "fp-ts/lib/function";
 
-import { PaginationConfig } from "../config";
+import { IConfig, PaginationConfig } from "../config";
 import { InstitutionServicesResource } from "../generated/definitions/internal/InstitutionServicesResource";
 import { OrganizationFiscalCode } from "../generated/definitions/internal/OrganizationFiscalCode";
 import { ServiceMinified } from "../generated/definitions/internal/ServiceMinified";
@@ -41,16 +41,36 @@ type SearchServicesResolvedParams = {
   readonly userAge: number;
 } & SearchServicesRequestParams;
 
+// Handler config: pagination + the feature flag gating the age filter
+type SearchServicesConfig = PaginationConfig &
+  Pick<IConfig, "FF_SUITABLE_FOR_MINORS_ENABLED">;
+
 export const DEFAULT_ORDER_BY = "name asc";
 
-const executeSearch: (
+/**
+ * Builds the AI Search `$filter`. The age-based clause (`ageMin`/`ageMax`) is
+ * appended only when the feature flag is enabled: until the `services` alias is
+ * switched to the age-aware index, the query keeps the original org-only filter.
+ */
+const buildServicesFilter = (
   requestQueryParams: SearchServicesResolvedParams,
-) => RTE.ReaderTaskEither<
-  AzureSearchClientDependency<ServiceMinified>,
-  H.HttpError,
-  InstitutionServicesResource
-> =
-  (requestQueryParams: SearchServicesResolvedParams) =>
+  ageFilterEnabled: boolean,
+): string => {
+  const orgFilter = `orgFiscalCode eq '${requestQueryParams.institutionId}'`;
+  return ageFilterEnabled
+    ? `${orgFilter} and ageMin le ${requestQueryParams.userAge} and ageMax ge ${requestQueryParams.userAge}`
+    : orgFilter;
+};
+
+const executeSearch =
+  (ageFilterEnabled: boolean) =>
+  (
+    requestQueryParams: SearchServicesResolvedParams,
+  ): RTE.ReaderTaskEither<
+    AzureSearchClientDependency<ServiceMinified>,
+    H.HttpError,
+    InstitutionServicesResource
+  > =>
   ({ searchClient }) =>
     pipe(
       sequenceS(TE.ApplyPar)({
@@ -61,7 +81,7 @@ const executeSearch: (
       TE.bind("results", ({ paginationProperties }) =>
         searchClient.fullTextSearch({
           ...paginationProperties,
-          filter: `orgFiscalCode eq '${requestQueryParams.institutionId}' and ageMin le ${requestQueryParams.userAge} and ageMax ge ${requestQueryParams.userAge}`,
+          filter: buildServicesFilter(requestQueryParams, ageFilterEnabled),
           orderBy: [DEFAULT_ORDER_BY],
           sessionId: pipe(requestQueryParams.sessionId, O.toUndefined),
         }),
@@ -152,19 +172,19 @@ const resolveSearchParams =
     );
 
 export const makeSearchServicesHandler: (
-  paginationConfig: PaginationConfig,
+  config: SearchServicesConfig,
 ) => H.Handler<
   H.HttpRequest,
   | H.HttpResponse<H.ProblemJson, H.HttpErrorStatusCode>
   | H.HttpResponse<InstitutionServicesResource, 200>,
   AzureSearchClientDependency<ServiceMinified>
-> = (paginationConfig: PaginationConfig) =>
+> = (config: SearchServicesConfig) =>
   H.of((request: H.HttpRequest) =>
     pipe(
       request,
-      resolveSearchParams(paginationConfig),
+      resolveSearchParams(config),
       RTE.fromTaskEither,
-      RTE.chainW(executeSearch),
+      RTE.chainW(executeSearch(config.FF_SUITABLE_FOR_MINORS_ENABLED)),
       RTE.map(H.successJson),
       RTE.orElseW((error) =>
         pipe(
@@ -179,5 +199,5 @@ export const makeSearchServicesHandler: (
     ),
   );
 
-export const SearchServicesFn = (paginationConfig: PaginationConfig) =>
-  httpAzureFunction(makeSearchServicesHandler(paginationConfig));
+export const SearchServicesFn = (config: SearchServicesConfig) =>
+  httpAzureFunction(makeSearchServicesHandler(config));

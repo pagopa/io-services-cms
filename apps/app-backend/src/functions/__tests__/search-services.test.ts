@@ -14,9 +14,14 @@ import {
 import { ServiceMinified } from "../../generated/definitions/internal/ServiceMinified";
 
 const mockedConfiguration = {
+  FF_SUITABLE_FOR_MINORS_ENABLED: true,
   PAGINATION_DEFAULT_LIMIT: 20,
   PAGINATION_MAX_LIMIT: 101,
   PAGINATION_MAX_OFFSET_AI_SEARCH: 101,
+} as unknown as IConfig;
+const mockedConfigurationAgeFilterDisabled = {
+  ...mockedConfiguration,
+  FF_SUITABLE_FOR_MINORS_ENABLED: false,
 } as unknown as IConfig;
 const mockSearchServices = {
   fullTextSearch: vi
@@ -280,6 +285,45 @@ describe("Search Services Tests", () => {
             limit: 10,
             offset: 0,
           },
+          statusCode: 200,
+        }),
+      ),
+    );
+  });
+
+  it("Should search without the age filter when FF_SUITABLE_FOR_MINORS_ENABLED is disabled", async () => {
+    const req: H.HttpRequest = {
+      ...H.request("127.0.0.1"),
+      headers: aValidXUserHeaders,
+      query: {
+        limit: "10",
+        offset: "0",
+      },
+      path: {
+        institutionId: "01234567891",
+      },
+    };
+
+    const result = await makeSearchServicesHandler(
+      mockedConfigurationAgeFilterDisabled,
+    )({
+      ...httpHandlerInputMocks,
+      input: req,
+      searchClient: mockSearchServices,
+    })();
+
+    expect(mockSearchServices.fullTextSearch).toBeCalledWith(
+      expect.objectContaining({
+        filter: "orgFiscalCode eq '01234567891'",
+        orderBy: [DEFAULT_ORDER_BY],
+        top: 10,
+        skip: 0,
+      }),
+    );
+
+    expect(result).toEqual(
+      E.right(
+        expect.objectContaining({
           statusCode: 200,
         }),
       ),

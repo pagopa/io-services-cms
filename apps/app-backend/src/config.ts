@@ -5,6 +5,7 @@
  * The configuration is evaluate eagerly at the first access to the module. The module exposes convenient methods to access such value.
  */
 
+import { BooleanFromString } from "@pagopa/ts-commons/lib/booleans";
 import {
   IntegerFromString,
   NonNegativeInteger,
@@ -74,6 +75,22 @@ export const PaginationConfig = t.type({
   ),
 });
 
+// Feature flags configuration
+export type FeatureFlagsConfig = t.TypeOf<typeof FeatureFlagsConfig>;
+export const FeatureFlagsConfig = t.type({
+  /**
+   * Enables the age-based filtering (`ageMin`/`ageMax`) on the SearchServices
+   * query. Defaults to `false` to preserve the current behaviour until the
+   * `services` alias is switched to the age-aware index (`idx-services-03`).
+   * Shared env var name across the monorepo apps, so a single switch enables
+   * the whole "suitable for minors" feature end-to-end.
+   */
+  FF_SUITABLE_FOR_MINORS_ENABLED: withDefault(
+    BooleanFromString,
+    "false" as unknown as boolean,
+  ),
+});
+
 // global app configuration
 export type IConfig = t.TypeOf<typeof IConfig>;
 export const IConfig = t.intersection([
@@ -86,7 +103,7 @@ export const IConfig = t.intersection([
   FeaturedItemsConfig,
   AzureSearchConfig,
   PaginationConfig,
-  CosmosConfig,
+  t.intersection([CosmosConfig, FeatureFlagsConfig]),
 ]);
 
 export const envConfig = {
