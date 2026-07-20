@@ -2,16 +2,10 @@ import z from "zod";
 
 import { serviceSchema } from "./service.js";
 
-const publicationFsmSchema = z.discriminatedUnion("state", [
-  z.object({
-    lastTransition: z.string().optional(),
-    state: z.literal("published"),
-  }),
-  z.object({
-    lastTransition: z.string().optional(),
-    state: z.literal("unpublished"),
-  }),
-]);
+const publicationFsmSchema = z.object({
+  lastTransition: z.string().optional(),
+  state: z.union([z.literal("published"), z.literal("unpublished")]),
+});
 
 export const servicePublicationSchema = serviceSchema.extend({
   fsm: publicationFsmSchema,
