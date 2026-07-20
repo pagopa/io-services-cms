@@ -1,7 +1,7 @@
 import z from "zod";
 
 export const serviceTopicSchema = z.object({
-  id: z.number().int(),
+  id: z.int(),
   name: z.string().min(1),
 });
 
