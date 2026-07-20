@@ -20,7 +20,7 @@ export const getPool = (config: PostgreSqlConfig): Pool => {
       max: 20,
       password: config.REVIEWER_DB_PASSWORD,
       port: config.REVIEWER_DB_PORT,
-      ssl: true,
+      ssl: config.REVIEWER_DB_SSL,
       user: config.REVIEWER_DB_USER,
     });
   }
