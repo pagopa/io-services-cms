@@ -1,8 +1,8 @@
-import type { ServicePublicationRepository } from "@/application/ports/service-publication-repository.js";
 import type { Container } from "@azure/cosmos";
 
-import { ServicePublication } from "@/domain/entities/service-publication.js";
+import type { ServicePublicationRepository } from "../../../application/ports/service-publication-repository.js";
 
+import { ServicePublication } from "../../../domain/entities/service-publication.js";
 import { CosmosServiceRepository } from "./cosmos-service-repository.js";
 import {
   type CosmosServicePublicationDto,

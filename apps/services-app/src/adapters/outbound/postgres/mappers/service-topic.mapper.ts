@@ -1,5 +1,4 @@
-import type { ServiceTopic } from "@/domain/entities/service-topic.js";
-
+import type { ServiceTopic } from "../../../../domain/entities/service-topic.js";
 import type { PostgresServiceTopicDto } from "../dto/service-topic.dto.js";
 
 /**

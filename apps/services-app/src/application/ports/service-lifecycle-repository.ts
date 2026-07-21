@@ -1,6 +1,7 @@
-import type { ServiceLifecycle } from "@/domain/entities/service-lifecycle.js";
 import type { GenericError, NotFoundError } from "@pagopa/hexagonal-core";
 import type { Result } from "neverthrow";
+
+import type { ServiceLifecycle } from "../../domain/entities/service-lifecycle.js";
 
 /**
  * Provides access to services in their lifecycle state.

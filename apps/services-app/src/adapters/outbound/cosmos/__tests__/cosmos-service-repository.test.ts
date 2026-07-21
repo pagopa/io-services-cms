@@ -1,11 +1,11 @@
+import { type Container, RestError } from "@azure/cosmos";
+import { describe, expect, it, vi } from "vitest";
+
 import {
   aLifecycleService,
   aPublicationService,
   aService,
-} from "@/__mocks__/services.js";
-import { type Container, RestError } from "@azure/cosmos";
-import { describe, expect, it, vi } from "vitest";
-
+} from "../../../../__mocks__/services.js";
 import { CosmosServiceLifecycleRepository } from "../cosmos-service-lifecycle-repository.js";
 import { CosmosServicePublicationRepository } from "../cosmos-service-publication-repository.js";
 
