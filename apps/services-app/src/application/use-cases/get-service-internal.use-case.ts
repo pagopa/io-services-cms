@@ -11,13 +11,13 @@ import type { ServiceLifecycleRepository } from "../ports/service-lifecycle-repo
 import type { ServicePublicationRepository } from "../ports/service-publication-repository.js";
 import type { TopicRepository } from "../ports/topic-repository.js";
 
-export interface GetServiceInternalInput {
-  serviceId: string;
-}
-
-export type GetServiceInternalOutput = EnrichedService;
-
-type StoredService = ServiceLifecycle | ServicePublication;
+export type GetServiceInternalUseCase = UseCase<
+  {
+    serviceId: string;
+  },
+  EnrichedService,
+  GenericError | NotFoundError
+>;
 
 /**
  * Replaces the persisted topic identifier with the corresponding topic.
@@ -31,7 +31,7 @@ type StoredService = ServiceLifecycle | ServicePublication;
  * @returns The enriched service or an error raised while resolving its topic.
  */
 const enrichWithTopic = async (
-  service: StoredService,
+  service: ServiceLifecycle | ServicePublication,
   topicRepository: TopicRepository,
 ): Promise<Result<EnrichedService, GenericError | NotFoundError>> => {
   const { topic_id: topicId, ...metadata } = service.data.metadata;
@@ -79,11 +79,7 @@ export const makeGetServiceInternalUseCase =
     publicationRepository: ServicePublicationRepository,
     lifecycleRepository: ServiceLifecycleRepository,
     topicRepository: TopicRepository,
-  ): UseCase<
-    GetServiceInternalInput,
-    GetServiceInternalOutput,
-    GenericError | NotFoundError
-  > =>
+  ): GetServiceInternalUseCase =>
   async ({ serviceId }) => {
     const publicationResult = await publicationRepository.get(serviceId);
 
