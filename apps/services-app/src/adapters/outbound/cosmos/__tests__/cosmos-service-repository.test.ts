@@ -71,7 +71,10 @@ describe("CosmosServicePublicationRepository", () => {
       aService.id,
     );
 
-    expect(result._unsafeUnwrapErr().kind).toBe("GenericError");
+    expect(result._unsafeUnwrapErr()).toMatchObject({
+      kind: "GenericError",
+      message: `Generic error: Unable to read ServicePublication '${aService.id}' from Cosmos: Error: Unavailable`,
+    });
   });
 
   it("returns GenericError for non-404 Cosmos errors", async () => {
@@ -86,7 +89,10 @@ describe("CosmosServicePublicationRepository", () => {
       aService.id,
     );
 
-    expect(result._unsafeUnwrapErr().kind).toBe("GenericError");
+    expect(result._unsafeUnwrapErr()).toMatchObject({
+      kind: "GenericError",
+      message: `Generic error: Unable to read ServicePublication '${aService.id}' from Cosmos: RestError: Too many requests: Status Code 429`,
+    });
   });
 
   it("returns GenericError for an invalid document", async () => {

@@ -5,12 +5,12 @@ import {
 import { describe, expect, it } from "vitest";
 
 import {
-  serviceLifecycleDomainToDto,
-  serviceLifecycleDtoToDomain,
+  cosmosServiceLifecycleDtoToDomain,
+  serviceLifecycleDomainToCosmosDto,
 } from "../service-lifecycle.mapper.js";
 import {
-  servicePublicationDomainToDto,
-  servicePublicationDtoToDomain,
+  cosmosServicePublicationDtoToDomain,
+  servicePublicationDomainToCosmosDto,
 } from "../service-publication.mapper.js";
 
 const cosmosMetadata = {
@@ -24,12 +24,12 @@ const cosmosMetadata = {
 describe("service lifecycle Cosmos mapper", () => {
   it("adds Cosmos metadata when mapping domain to DTO", () => {
     expect(
-      serviceLifecycleDomainToDto(aLifecycleService, cosmosMetadata),
+      serviceLifecycleDomainToCosmosDto(aLifecycleService, cosmosMetadata),
     ).toEqual({ ...aLifecycleService, ...cosmosMetadata });
   });
 
   it("removes Cosmos metadata when mapping DTO to domain", () => {
-    const result = serviceLifecycleDtoToDomain({
+    const result = cosmosServiceLifecycleDtoToDomain({
       ...aLifecycleService,
       ...cosmosMetadata,
     });
@@ -40,12 +40,14 @@ describe("service lifecycle Cosmos mapper", () => {
 
 describe("service publication Cosmos mapper", () => {
   it("maps in both directions without leaking Cosmos metadata", () => {
-    const dto = servicePublicationDomainToDto(
+    const dto = servicePublicationDomainToCosmosDto(
       aPublicationService,
       cosmosMetadata,
     );
 
     expect(dto).toEqual({ ...aPublicationService, ...cosmosMetadata });
-    expect(servicePublicationDtoToDomain(dto)).toEqual(aPublicationService);
+    expect(cosmosServicePublicationDtoToDomain(dto)).toEqual(
+      aPublicationService,
+    );
   });
 });

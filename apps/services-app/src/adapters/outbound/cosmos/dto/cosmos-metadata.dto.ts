@@ -3,7 +3,7 @@ import z from "zod";
 /**
  * Schema for system metadata added to documents by Cosmos DB.
  */
-export const cosmosMetadataSchema = z.object({
+export const cosmosMetadataDtoSchema = z.object({
   _attachments: z.string().optional(),
   _etag: z.string().optional(),
   _rid: z.string().optional(),
@@ -14,4 +14,4 @@ export const cosmosMetadataSchema = z.object({
 /**
  * Cosmos DB system metadata associated with a persisted document.
  */
-export type CosmosMetadata = z.infer<typeof cosmosMetadataSchema>;
+export type CosmosMetadataDto = z.infer<typeof cosmosMetadataDtoSchema>;

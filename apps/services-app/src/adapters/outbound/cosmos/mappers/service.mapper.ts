@@ -1,6 +1,6 @@
 import type { Service } from "@/domain/entities/service.js";
 
-import type { ServiceDto } from "../dto/service.dto.js";
+import type { CosmosServiceDto } from "../dto/service.dto.js";
 
 /**
  * Maps the fields shared by Cosmos DB service DTOs to the domain model.
@@ -8,7 +8,7 @@ import type { ServiceDto } from "../dto/service.dto.js";
  * @param dto - The validated service persistence DTO.
  * @returns The shared service domain fields.
  */
-export const serviceDtoToDomain = (dto: ServiceDto): Service => ({
+export const cosmosServiceDtoToDomain = (dto: CosmosServiceDto): Service => ({
   data: {
     age: dto.data.age,
     authorized_cidrs: dto.data.authorized_cidrs,
@@ -55,7 +55,9 @@ export const serviceDtoToDomain = (dto: ServiceDto): Service => ({
  * @param service - The service domain entity.
  * @returns The shared service persistence fields.
  */
-export const serviceDomainToDto = (service: Service): ServiceDto => ({
+export const serviceDomainToCosmosDto = (
+  service: Service,
+): CosmosServiceDto => ({
   data: {
     age: service.data.age,
     authorized_cidrs: service.data.authorized_cidrs,

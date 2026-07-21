@@ -1,28 +1,28 @@
 import z from "zod";
 
-import { cosmosMetadataSchema } from "./cosmos-metadata.dto.js";
-import { serviceDtoSchema } from "./service.dto.js";
+import { cosmosMetadataDtoSchema } from "./cosmos-metadata.dto.js";
+import { cosmosServiceDtoSchema } from "./service.dto.js";
 
-const transitionDtoSchema = z.object({
+const cosmosTransitionDtoSchema = z.object({
   lastTransition: z.string().optional(),
 });
 
-const lifecycleFsmDtoSchema = z.discriminatedUnion("state", [
-  transitionDtoSchema.extend({ state: z.literal("draft") }),
-  transitionDtoSchema.extend({
+const cosmosLifecycleFsmDtoSchema = z.discriminatedUnion("state", [
+  cosmosTransitionDtoSchema.extend({ state: z.literal("draft") }),
+  cosmosTransitionDtoSchema.extend({
     autoPublish: z.boolean(),
     state: z.literal("submitted"),
   }),
-  transitionDtoSchema.extend({
+  cosmosTransitionDtoSchema.extend({
     approvalDate: z.string(),
     autoPublish: z.boolean(),
     state: z.literal("approved"),
   }),
-  transitionDtoSchema.extend({
+  cosmosTransitionDtoSchema.extend({
     reason: z.string(),
     state: z.literal("rejected"),
   }),
-  transitionDtoSchema.extend({ state: z.literal("deleted") }),
+  cosmosTransitionDtoSchema.extend({ state: z.literal("deleted") }),
 ]);
 
 /**
@@ -31,13 +31,15 @@ const lifecycleFsmDtoSchema = z.discriminatedUnion("state", [
  * It defines the persistence fields independently from the domain model and
  * includes optional Cosmos DB system metadata.
  */
-export const serviceLifecycleDtoSchema = z.object({
-  ...serviceDtoSchema.shape,
-  ...cosmosMetadataSchema.shape,
-  fsm: lifecycleFsmDtoSchema,
+export const cosmosServiceLifecycleDtoSchema = z.object({
+  ...cosmosServiceDtoSchema.shape,
+  ...cosmosMetadataDtoSchema.shape,
+  fsm: cosmosLifecycleFsmDtoSchema,
 });
 
 /**
  * Persistence representation of a lifecycle service document.
  */
-export type ServiceLifecycleDto = z.infer<typeof serviceLifecycleDtoSchema>;
+export type CosmosServiceLifecycleDto = z.infer<
+  typeof cosmosServiceLifecycleDtoSchema
+>;

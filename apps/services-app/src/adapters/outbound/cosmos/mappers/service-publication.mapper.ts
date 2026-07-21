@@ -1,9 +1,12 @@
 import type { ServicePublication } from "@/domain/entities/service-publication.js";
 
-import type { CosmosMetadata } from "../dto/cosmos-metadata.dto.js";
-import type { ServicePublicationDto } from "../dto/service-publication.dto.js";
+import type { CosmosMetadataDto } from "../dto/cosmos-metadata.dto.js";
+import type { CosmosServicePublicationDto } from "../dto/service-publication.dto.js";
 
-import { serviceDomainToDto, serviceDtoToDomain } from "./service.mapper.js";
+import {
+  cosmosServiceDtoToDomain,
+  serviceDomainToCosmosDto,
+} from "./service.mapper.js";
 
 /**
  * Maps a validated Cosmos DB publication DTO to a domain entity.
@@ -13,10 +16,10 @@ import { serviceDomainToDto, serviceDtoToDomain } from "./service.mapper.js";
  * @param dto - The validated publication persistence DTO.
  * @returns The publication domain entity.
  */
-export const servicePublicationDtoToDomain = (
-  dto: ServicePublicationDto,
+export const cosmosServicePublicationDtoToDomain = (
+  dto: CosmosServicePublicationDto,
 ): ServicePublication => ({
-  ...serviceDtoToDomain(dto),
+  ...cosmosServiceDtoToDomain(dto),
   fsm: dto.fsm,
 });
 
@@ -27,11 +30,11 @@ export const servicePublicationDtoToDomain = (
  * @param metadata - Optional Cosmos DB system metadata to include.
  * @returns A validated publication persistence DTO.
  */
-export const servicePublicationDomainToDto = (
+export const servicePublicationDomainToCosmosDto = (
   servicePublication: ServicePublication,
-  metadata: CosmosMetadata = {},
-): ServicePublicationDto => ({
-  ...serviceDomainToDto(servicePublication),
+  metadata: CosmosMetadataDto = {},
+): CosmosServicePublicationDto => ({
+  ...serviceDomainToCosmosDto(servicePublication),
   ...metadata,
   fsm: servicePublication.fsm,
 });

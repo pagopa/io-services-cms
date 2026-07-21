@@ -1,9 +1,12 @@
 import type { ServiceLifecycle } from "@/domain/entities/service-lifecycle.js";
 
-import type { CosmosMetadata } from "../dto/cosmos-metadata.dto.js";
-import type { ServiceLifecycleDto } from "../dto/service-lifecycle.dto.js";
+import type { CosmosMetadataDto } from "../dto/cosmos-metadata.dto.js";
+import type { CosmosServiceLifecycleDto } from "../dto/service-lifecycle.dto.js";
 
-import { serviceDomainToDto, serviceDtoToDomain } from "./service.mapper.js";
+import {
+  cosmosServiceDtoToDomain,
+  serviceDomainToCosmosDto,
+} from "./service.mapper.js";
 
 /**
  * Maps a validated Cosmos DB lifecycle DTO to a domain entity.
@@ -13,10 +16,10 @@ import { serviceDomainToDto, serviceDtoToDomain } from "./service.mapper.js";
  * @param dto - The validated lifecycle persistence DTO.
  * @returns The lifecycle domain entity.
  */
-export const serviceLifecycleDtoToDomain = (
-  dto: ServiceLifecycleDto,
+export const cosmosServiceLifecycleDtoToDomain = (
+  dto: CosmosServiceLifecycleDto,
 ): ServiceLifecycle => ({
-  ...serviceDtoToDomain(dto),
+  ...cosmosServiceDtoToDomain(dto),
   fsm: dto.fsm,
 });
 
@@ -27,11 +30,11 @@ export const serviceLifecycleDtoToDomain = (
  * @param metadata - Optional Cosmos DB system metadata to include.
  * @returns A validated lifecycle persistence DTO.
  */
-export const serviceLifecycleDomainToDto = (
+export const serviceLifecycleDomainToCosmosDto = (
   serviceLifecycle: ServiceLifecycle,
-  metadata: CosmosMetadata = {},
-): ServiceLifecycleDto => ({
-  ...serviceDomainToDto(serviceLifecycle),
+  metadata: CosmosMetadataDto = {},
+): CosmosServiceLifecycleDto => ({
+  ...serviceDomainToCosmosDto(serviceLifecycle),
   ...metadata,
   fsm: serviceLifecycle.fsm,
 });
