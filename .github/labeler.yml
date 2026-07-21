@@ -6,3 +6,4 @@ docs: docs/**/*
 ci: .github/workflows/**/*
 infra: infra/**/*
 changeset: .changeset/**/*
+services-app: apps/services-app/**/*
