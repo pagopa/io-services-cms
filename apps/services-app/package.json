@@ -8,18 +8,16 @@
     "dist/*"
   ],
   "scripts": {
-    "clean": "shx rm -rf dist",
-    "build": "tsc",
-    "build:watch": "tsc -w",
+    "build": "rm -rf ./dist & tsc",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "lint": "pnpm lint:check --fix",
-    "lint:check": "eslint .",
+    "lint": "eslint \"src/**\"",
+    "lint:fix": "eslint --fix \"src/**\"",
     "dev": "tsx --watch --env-file=.env src/main.ts",
     "start": "node dist/main.js",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@azure/cosmos": "^4.0.0",
