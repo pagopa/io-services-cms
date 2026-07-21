@@ -16,13 +16,11 @@ export const createManagedIdentityCosmosClient = (
   });
 
 /**
- * Creates a Cosmos DB client authenticated through an account key.
+ * Creates a Cosmos DB client from a connection string.
  *
- * @param endpoint - The Cosmos DB account endpoint.
- * @param key - The Cosmos DB account key.
- * @returns A Cosmos DB client configured with key-based authentication.
+ * @param connectionString - The Cosmos DB account connection string.
+ * @returns A Cosmos DB client configured from the connection string.
  */
-export const createKeyCosmosClient = (
-  endpoint: string,
-  key: string,
-): CosmosClient => new CosmosClient({ endpoint, key });
+export const createConnectionStringCosmosClient = (
+  connectionString: string,
+): CosmosClient => new CosmosClient(connectionString);
