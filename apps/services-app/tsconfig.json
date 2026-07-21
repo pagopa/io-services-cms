@@ -10,9 +10,6 @@
     "strict": true,
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    },
     "skipLibCheck": true,
     "sourceMap": true
   }
