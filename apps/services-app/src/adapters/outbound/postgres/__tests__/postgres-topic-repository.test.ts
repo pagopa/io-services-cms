@@ -28,6 +28,22 @@ describe("PostgresTopicRepository", () => {
     );
   });
 
+  it("escapes PostgreSQL identifiers before embedding them in the query", async () => {
+    const pool = makePool();
+    vi.mocked(pool.query).mockResolvedValue({ rowCount: 0, rows: [] } as never);
+
+    await new PostgresTopicRepository(
+      pool,
+      'taxonomy".public',
+      'topic" WHERE true; --',
+    ).get(42);
+
+    expect(pool.query).toHaveBeenCalledWith(
+      'SELECT id, name FROM "taxonomy"".public"."topic"" WHERE true; --" WHERE id = $1 AND deleted = false LIMIT 1',
+      [42],
+    );
+  });
+
   it("returns NotFound when the active topic does not exist", async () => {
     const pool = makePool();
     vi.mocked(pool.query).mockResolvedValue({ rowCount: 0, rows: [] } as never);

@@ -5,6 +5,9 @@ import { serviceTopicSchema } from "@/domain/entities/service-topic.js";
 import { GenericError, NotFoundError } from "@pagopa/hexagonal-core";
 import { err, ok } from "neverthrow";
 
+const quoteIdentifier = (identifier: string): string =>
+  `"${identifier.replaceAll('"', '""')}"`;
+
 /**
  * PostgreSQL adapter for service topic persistence.
  *
@@ -12,6 +15,8 @@ import { err, ok } from "neverthrow";
  * translated into application-level errors.
  */
 export class PostgresTopicRepository implements TopicRepository {
+  private readonly relation: string;
+
   /**
    * Creates a topic repository for the configured PostgreSQL relation.
    *
@@ -21,9 +26,11 @@ export class PostgresTopicRepository implements TopicRepository {
    */
   public constructor(
     private readonly pool: Pool,
-    private readonly schema: string,
-    private readonly table: string,
-  ) {}
+    schema: string,
+    table: string,
+  ) {
+    this.relation = `${quoteIdentifier(schema)}.${quoteIdentifier(table)}`;
+  }
 
   /**
    * Retrieves an active topic by identifier and validates the returned row.
@@ -35,7 +42,7 @@ export class PostgresTopicRepository implements TopicRepository {
   public async get(topicId: number) {
     try {
       const result = await this.pool.query(
-        `SELECT id, name FROM "${this.schema}"."${this.table}" WHERE id = $1 AND deleted = false LIMIT 1`,
+        `SELECT id, name FROM ${this.relation} WHERE id = $1 AND deleted = false LIMIT 1`,
         [topicId],
       );
 
