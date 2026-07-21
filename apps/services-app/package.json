@@ -16,20 +16,24 @@
     "typecheck": "tsc --noEmit",
     "lint": "pnpm lint:check --fix",
     "lint:check": "eslint .",
-    "dev": "npx tsx --watch --env-file=.env src/main.ts",
+    "dev": "tsx --watch --env-file=.env src/main.ts",
     "start": "node dist/main.js",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
+    "@azure/cosmos": "^4.0.0",
+    "@azure/identity": "^4.13.0",
     "@pagopa/hexagonal-core": "^0.1.1",
     "@pagopa/hexagonal-fastify": "^0.1.0",
     "fastify": "^5.8.5",
     "neverthrow": "^8.2.0",
+    "pg": "^8.16.3",
     "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/node": "catalog:",
+    "@types/pg": "^8.15.5",
     "@vitest/coverage-v8": "catalog:",
     "@pagopa/eslint-config": "^4.0.6",
     "eslint": "^9.39.4",
