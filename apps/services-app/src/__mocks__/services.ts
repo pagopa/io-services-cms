@@ -1,5 +1,5 @@
-import { serviceLifecycleSchema } from "@/domain/entities/service-lifecycle.js";
-import { servicePublicationSchema } from "@/domain/entities/service-publication.js";
+import { serviceLifecycleSchema } from "../domain/entities/service-lifecycle.js";
+import { servicePublicationSchema } from "../domain/entities/service-publication.js";
 
 export const aService = {
   data: {

@@ -1,9 +1,9 @@
+import { describe, expect, it } from "vitest";
+
 import {
   aLifecycleService,
   aPublicationService,
-} from "@/__mocks__/services.js";
-import { describe, expect, it } from "vitest";
-
+} from "../../../../../__mocks__/services.js";
 import {
   cosmosServiceLifecycleDtoToDomain,
   serviceLifecycleDomainToCosmosDto,

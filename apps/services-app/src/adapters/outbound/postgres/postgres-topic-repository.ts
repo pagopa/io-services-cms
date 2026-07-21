@@ -1,10 +1,11 @@
-import type { TopicRepository } from "@/application/ports/topic-repository.js";
-import type { ServiceTopic } from "@/domain/entities/service-topic.js";
 import type { Result } from "neverthrow";
 import type { Pool } from "pg";
 
 import { GenericError, NotFoundError } from "@pagopa/hexagonal-core";
 import { ResultAsync, err, ok } from "neverthrow";
+
+import type { TopicRepository } from "../../../application/ports/topic-repository.js";
+import type { ServiceTopic } from "../../../domain/entities/service-topic.js";
 
 import { postgresServiceTopicDtoSchema } from "./dto/service-topic.dto.js";
 import { postgresServiceTopicDtoToDomain } from "./mappers/service-topic.mapper.js";

@@ -1,6 +1,7 @@
-import type { ServiceTopic } from "@/domain/entities/service-topic.js";
 import type { GenericError, NotFoundError } from "@pagopa/hexagonal-core";
 import type { Result } from "neverthrow";
+
+import type { ServiceTopic } from "../../domain/entities/service-topic.js";
 
 /**
  * Provides access to the topics associated with services.

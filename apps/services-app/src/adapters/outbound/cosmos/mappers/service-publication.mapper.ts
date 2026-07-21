@@ -1,5 +1,4 @@
-import type { ServicePublication } from "@/domain/entities/service-publication.js";
-
+import type { ServicePublication } from "../../../../domain/entities/service-publication.js";
 import type { CosmosMetadataDto } from "../dto/cosmos-metadata.dto.js";
 import type { CosmosServicePublicationDto } from "../dto/service-publication.dto.js";
 

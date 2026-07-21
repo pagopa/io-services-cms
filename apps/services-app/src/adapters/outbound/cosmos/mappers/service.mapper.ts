@@ -1,5 +1,4 @@
-import type { Service } from "@/domain/entities/service.js";
-
+import type { Service } from "../../../../domain/entities/service.js";
 import type { CosmosServiceDto } from "../dto/service.dto.js";
 
 /**

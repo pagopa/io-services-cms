@@ -1,5 +1,4 @@
-import type { ServiceLifecycle } from "@/domain/entities/service-lifecycle.js";
-
+import type { ServiceLifecycle } from "../../../../domain/entities/service-lifecycle.js";
 import type { CosmosMetadataDto } from "../dto/cosmos-metadata.dto.js";
 import type { CosmosServiceLifecycleDto } from "../dto/service-lifecycle.dto.js";
 

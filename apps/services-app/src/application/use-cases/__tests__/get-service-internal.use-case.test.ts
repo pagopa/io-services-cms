@@ -1,5 +1,3 @@
-import { serviceLifecycleSchema } from "@/domain/entities/service-lifecycle.js";
-import { servicePublicationSchema } from "@/domain/entities/service-publication.js";
 import { GenericError, NotFoundError } from "@pagopa/hexagonal-core";
 import { err, ok } from "neverthrow";
 import { describe, expect, it, vi } from "vitest";
@@ -8,6 +6,8 @@ import type { ServiceLifecycleRepository } from "../../ports/service-lifecycle-r
 import type { ServicePublicationRepository } from "../../ports/service-publication-repository.js";
 import type { TopicRepository } from "../../ports/topic-repository.js";
 
+import { serviceLifecycleSchema } from "../../../domain/entities/service-lifecycle.js";
+import { servicePublicationSchema } from "../../../domain/entities/service-publication.js";
 import { makeGetServiceInternalUseCase } from "../get-service-internal.use-case.js";
 
 const aService = {

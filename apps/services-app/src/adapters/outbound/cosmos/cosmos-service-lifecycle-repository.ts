@@ -1,8 +1,8 @@
-import type { ServiceLifecycleRepository } from "@/application/ports/service-lifecycle-repository.js";
 import type { Container } from "@azure/cosmos";
 
-import { ServiceLifecycle } from "@/domain/entities/service-lifecycle.js";
+import type { ServiceLifecycleRepository } from "../../../application/ports/service-lifecycle-repository.js";
 
+import { ServiceLifecycle } from "../../../domain/entities/service-lifecycle.js";
 import { CosmosServiceRepository } from "./cosmos-service-repository.js";
 import {
   type CosmosServiceLifecycleDto,

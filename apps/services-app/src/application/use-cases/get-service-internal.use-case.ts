@@ -1,12 +1,12 @@
-import type { EnrichedService } from "@/domain/entities/enriched-service.js";
-import type { ServiceLifecycle } from "@/domain/entities/service-lifecycle.js";
-import type { ServicePublication } from "@/domain/entities/service-publication.js";
 import type { NotFoundError, UseCase } from "@pagopa/hexagonal-core";
 import type { Result } from "neverthrow";
 
 import { GenericError } from "@pagopa/hexagonal-core";
 import { err, ok } from "neverthrow";
 
+import type { EnrichedService } from "../../domain/entities/enriched-service.js";
+import type { ServiceLifecycle } from "../../domain/entities/service-lifecycle.js";
+import type { ServicePublication } from "../../domain/entities/service-publication.js";
 import type { ServiceLifecycleRepository } from "../ports/service-lifecycle-repository.js";
 import type { ServicePublicationRepository } from "../ports/service-publication-repository.js";
 import type { TopicRepository } from "../ports/topic-repository.js";
