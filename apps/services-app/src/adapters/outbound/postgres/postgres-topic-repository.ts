@@ -1,9 +1,13 @@
 import type { TopicRepository } from "@/application/ports/topic-repository.js";
+import type { ServiceTopic } from "@/domain/entities/service-topic.js";
+import type { Result } from "neverthrow";
 import type { Pool } from "pg";
 
-import { serviceTopicSchema } from "@/domain/entities/service-topic.js";
 import { GenericError, NotFoundError } from "@pagopa/hexagonal-core";
-import { err, ok } from "neverthrow";
+import { ResultAsync, err, ok } from "neverthrow";
+
+import { postgresServiceTopicDtoSchema } from "./dto/service-topic.dto.js";
+import { postgresServiceTopicDtoToDomain } from "./mappers/service-topic.mapper.js";
 
 const quoteIdentifier = (identifier: string): string =>
   `"${identifier.replaceAll('"', '""')}"`;
@@ -39,27 +43,38 @@ export class PostgresTopicRepository implements TopicRepository {
    * @returns The topic, `NotFoundError` when no active row exists, or
    * `GenericError` when querying or validating the row fails.
    */
-  public async get(topicId: number) {
-    try {
-      const result = await this.pool.query(
+  public async get(
+    topicId: number,
+  ): Promise<Result<ServiceTopic, GenericError | NotFoundError>> {
+    const queryResult = await ResultAsync.fromPromise(
+      this.pool.query<Record<string, unknown>>(
         `SELECT id, name FROM ${this.relation} WHERE id = $1 AND deleted = false LIMIT 1`,
         [topicId],
-      );
-
-      if (result.rowCount !== 1) {
-        return err(new NotFoundError("ServiceTopic", topicId.toString()));
-      }
-
-      const parsedTopic = serviceTopicSchema.safeParse(result.rows[0]);
-      return parsedTopic.success
-        ? ok(parsedTopic.data)
-        : err(new GenericError(parsedTopic.error.message));
-    } catch (error) {
-      return err(
+      ),
+      (error) =>
         new GenericError(
-          error instanceof Error ? error.message : "PostgreSQL query failed",
+          error instanceof Error
+            ? `${error.name}: ${error.message}`
+            : "PostgreSQL query failed",
         ),
-      );
+    );
+
+    if (queryResult.isErr()) {
+      return err(queryResult.error);
     }
+
+    const result = queryResult.value;
+
+    if (result.rowCount !== 1) {
+      return err(new NotFoundError("ServiceTopic", topicId.toString()));
+    }
+
+    const parsedTopic = postgresServiceTopicDtoSchema.safeParse(result.rows[0]);
+
+    if (!parsedTopic.success) {
+      return err(new GenericError(parsedTopic.error.message));
+    }
+
+    return ok(postgresServiceTopicDtoToDomain(parsedTopic.data));
   }
 }

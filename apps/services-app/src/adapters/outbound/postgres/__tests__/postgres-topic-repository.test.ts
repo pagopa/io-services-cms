@@ -57,6 +57,22 @@ describe("PostgresTopicRepository", () => {
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(NotFoundError);
   });
 
+  it("returns GenericError when PostgreSQL returns an invalid topic", async () => {
+    const pool = makePool();
+    vi.mocked(pool.query).mockResolvedValue({
+      rowCount: 1,
+      rows: [{ id: "invalid", name: "Mobility" }],
+    } as never);
+
+    const result = await new PostgresTopicRepository(
+      pool,
+      "taxonomy",
+      "topic",
+    ).get(42);
+
+    expect(result._unsafeUnwrapErr()).toBeInstanceOf(GenericError);
+  });
+
   it("returns GenericError when PostgreSQL fails", async () => {
     const pool = makePool();
     vi.mocked(pool.query).mockRejectedValue(new Error("Connection failed"));
