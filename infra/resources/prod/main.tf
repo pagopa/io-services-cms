@@ -244,9 +244,21 @@ module "container_apps" {
     resource_group_name = data.azurerm_virtual_network.itn_common.resource_group_name
   }
 
-  key_vault = {
+  cms_key_vault = {
     name                = module.key_vault.name
     resource_group_name = module.key_vault.resource_group_name
+  }
+
+  services_postgres = {
+    host                 = module.postgres.pgres_cms.fqdn
+    database             = "reviewer"
+    password_secret_name = module.key_vault.secrets_name.cms_pgres_reviewer_usr_pwd
+    port                 = 6432
+    user                 = "reviewerusr"
+    topic = {
+      schema = "taxonomy"
+      table  = "topic"
+    }
   }
 
   ai_search = {

@@ -21,10 +21,22 @@ module "services_ca" {
       name  = "io-services"
 
       app_settings = {
-        HOST     = "0.0.0.0"
-        NODE_ENV = "production"
-        PORT     = 3000
+        CMS_COSMOSDB_CONTAINER_SERVICES_LIFECYCLE   = "services-lifecycle"
+        CMS_COSMOSDB_CONTAINER_SERVICES_PUBLICATION = "services-publication"
+        CMS_COSMOSDB_ENDPOINT                       = data.azurerm_cosmosdb_account.cosmos.endpoint
+        CMS_COSMOSDB_NAME                           = "db-services-cms"
+        HOST                                        = "0.0.0.0"
+        NODE_ENV                                    = "production"
+        PORT                                        = 3000
+        POSTGRES_DATABASE                           = var.services_postgres.database
+        POSTGRES_HOST                               = var.services_postgres.host
+        POSTGRES_PORT                               = var.services_postgres.port
+        POSTGRES_USER                               = var.services_postgres.user
+        TOPIC_SCHEMA                                = var.services_postgres.topic.schema
+        TOPIC_TABLE                                 = var.services_postgres.topic.table
       }
+
+      secret_names = ["POSTGRES_PASSWORD"]
 
       liveness_probe = {
         path = "/api/info"
@@ -41,6 +53,11 @@ module "services_ca" {
   }
 
   resource_group_name = var.resource_group_name
+
+  secrets = [{
+    name                = "POSTGRES_PASSWORD"
+    key_vault_secret_id = "https://${var.cms_key_vault.name}.vault.azure.net/secrets/${var.services_postgres.password_secret_name}"
+  }]
 
   tags = var.tags
 }
