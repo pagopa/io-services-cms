@@ -39,6 +39,7 @@ services:
 
   services-app:
     image: io-services-app:latest
+    profiles: ['services-app']
     env_file: ./apps/services-app/.env
     ports:
       - 3000:3000
