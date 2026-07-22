@@ -19,6 +19,8 @@ import { SelfcareRoles } from "@/types/auth";
 import { ApimUtils } from "@io-services-cms/external-clients";
 import { NextRequest, NextResponse } from "next/server";
 
+import { getReadPermissionCheckStrategy } from "../factory";
+
 export const getManageSubscriptionAuthorizedCidrsHandler = async (
   _: NextRequest,
   {
@@ -29,31 +31,12 @@ export const getManageSubscriptionAuthorizedCidrsHandler = async (
     params: { subscriptionId: string };
   },
 ): Promise<NextResponse<ResponseError | SubscriptionCIDRs>> => {
-  const groupId = params.subscriptionId.substring(
-    ApimUtils.SUBSCRIPTION_MANAGE_GROUP_PREFIX.length,
+  const permissionCheckStrategy = getReadPermissionCheckStrategy(
+    params.subscriptionId,
   );
-  const userAuthzUtils = userAuthz(backofficeUser);
-  const userRole: SelfcareRoles = backofficeUser.institution.role;
-  switch (userRole) {
-    case SelfcareRoles.admin:
-      if (userAuthzUtils.isAnInstitutionSpecialGroup(groupId)) {
-        return handleForbiddenErrorResponse(
-          "You are not allowed to retrieve CIDRs for 'special' subscriptions",
-        );
-      }
-      break;
-    case SelfcareRoles.adminAggregator:
-    case SelfcareRoles.operator:
-      if (!userAuthzUtils.isUserAllowedOnGroup(groupId)) {
-        return handleForbiddenErrorResponse(
-          "Requested subscription is out of your scope",
-        );
-      }
-      break;
-    default: {
-      const _: never = userRole; // This will make sure that all cases are handled in the switch
-      throw new Error("Invalid user role");
-    }
+  const accessControlError = permissionCheckStrategy(backofficeUser);
+  if (accessControlError) {
+    return accessControlError;
   }
 
   try {

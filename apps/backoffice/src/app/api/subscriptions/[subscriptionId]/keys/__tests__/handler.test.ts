@@ -1,12 +1,12 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { BackOfficeUser } from "../../../../../../../types/next-auth";
-import { SelfcareRoles } from "../../../../../../types/auth";
 import {
   SubscriptionNotFoundError,
   SubscriptionOwnershipError,
 } from "../../../../../../lib/be/errors";
+import { SelfcareRoles } from "../../../../../../types/auth";
 import { getManageSubscriptionKeysHandler } from "../handler";
 
 const backofficeUserMock = {
@@ -14,96 +14,76 @@ const backofficeUserMock = {
   parameters: { userId: "userId" },
   permissions: {},
 } as BackOfficeUser;
-const aBackofficeUserWithRole = (role: SelfcareRoles) =>
-  ({
-    ...backofficeUserMock,
-    institution: { role },
-  }) as BackOfficeUser;
-
 const {
-  userAuthzMock,
-  isAnInstitutionSpecialGroupMock,
-  isUserAllowedOnGroupMock,
+  getReadPermissionCheckStrategyMock,
+  permissionCheckStrategyMock,
   retrieveManageSubscriptionApiKeysMock,
-} = vi.hoisted(() => ({
-  isAnInstitutionSpecialGroupMock: vi.fn(() => false),
-  isUserAllowedOnGroupMock: vi.fn(() => true),
-  userAuthzMock: vi.fn(() => ({
-    isAnInstitutionSpecialGroup: isAnInstitutionSpecialGroupMock,
-    isUserAllowedOnGroup: isUserAllowedOnGroupMock,
-  })),
-  retrieveManageSubscriptionApiKeysMock: vi.fn(),
-}));
+} = vi.hoisted(() => {
+  const permissionCheckStrategyMock = vi.fn();
+  return {
+    getReadPermissionCheckStrategyMock: vi.fn(
+      () => permissionCheckStrategyMock,
+    ),
+    permissionCheckStrategyMock,
+    retrieveManageSubscriptionApiKeysMock: vi.fn(),
+  };
+});
 
-vi.mock("@/lib/be/authz", () => ({
-  userAuthz: userAuthzMock,
+vi.mock("../../factory", () => ({
+  getReadPermissionCheckStrategy: getReadPermissionCheckStrategyMock,
 }));
 vi.mock("@/lib/be/subscriptions/business", () => ({
   retrieveManageSubscriptionApiKeys: retrieveManageSubscriptionApiKeysMock,
 }));
 
 afterEach(() => {
-  vi.restoreAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("Subscription API handlers", () => {
   describe("getManageSubscriptionKeysHandler", () => {
     const SUBSCRIPTION_MANAGE_GROUP_PREFIX = "MANAGE-GROUP-";
-    it.each([
-      {
-        role: SelfcareRoles.admin,
-        setupMock: () =>
-          isAnInstitutionSpecialGroupMock.mockReturnValueOnce(true),
-        expectedDetail:
-          "You are not allowed to retrieve keys for 'special' subscriptions",
-        authMock: isAnInstitutionSpecialGroupMock,
-      },
-      {
-        role: SelfcareRoles.adminAggregator,
-        setupMock: () => isUserAllowedOnGroupMock.mockReturnValueOnce(false),
-        expectedDetail: "Requested subscription is out of your scope",
-        authMock: isUserAllowedOnGroupMock,
-      },
-      {
-        role: SelfcareRoles.operator,
-        setupMock: () => isUserAllowedOnGroupMock.mockReturnValueOnce(false),
-        expectedDetail: "Requested subscription is out of your scope",
-        authMock: isUserAllowedOnGroupMock,
-      },
-    ])(
-      "should return a forbidden response when $role user is not authorized to retrieve keys",
-      async ({ role, setupMock, expectedDetail, authMock }) => {
-        // given
-        setupMock();
-        const nextRequest = new NextRequest("http://localhost");
-        const groupId = "groupId";
-        const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
-        const user = aBackofficeUserWithRole(role);
 
-        // when
-        const result = await getManageSubscriptionKeysHandler(nextRequest, {
-          backofficeUser: user,
-          params: { subscriptionId },
-        });
-
-        // then
-        const jsonBody = await result.json();
-        expect(result.status).toBe(403);
-        expect(jsonBody.detail).toEqual(expectedDetail);
-        expect(userAuthzMock).toHaveBeenCalledOnce();
-        expect(userAuthzMock).toHaveBeenCalledWith(user);
-        expect(authMock).toHaveBeenCalledOnce();
-        expect(authMock).toHaveBeenCalledWith(groupId);
-        expect(retrieveManageSubscriptionApiKeysMock).not.toHaveBeenCalled();
-      },
-    );
-
-    it("should return OK when provided group id is allowed", async () => {
+    it("should return the authorization error from the permission strategy", async () => {
       // given
       const nextRequest = new NextRequest("http://localhost");
-      const groupId = "groupId";
-      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + "groupId";
+      const authorizationError = NextResponse.json(
+        { detail: "Requested subscription is out of your scope" },
+        { status: 403 },
+      );
+      permissionCheckStrategyMock.mockReturnValueOnce(authorizationError);
+
+      // when
+      const result = await getManageSubscriptionKeysHandler(nextRequest, {
+        backofficeUser: backofficeUserMock,
+        params: { subscriptionId },
+      });
+
+      // then
+      const jsonBody = await result.json();
+      expect(result).toBe(authorizationError);
+      expect(result.status).toBe(403);
+      expect(jsonBody.detail).toBe(
+        "Requested subscription is out of your scope",
+      );
+      expect(getReadPermissionCheckStrategyMock).toHaveBeenCalledOnce();
+      expect(getReadPermissionCheckStrategyMock).toHaveBeenCalledWith(
+        subscriptionId,
+      );
+      expect(permissionCheckStrategyMock).toHaveBeenCalledOnce();
+      expect(permissionCheckStrategyMock).toHaveBeenCalledWith(
+        backofficeUserMock,
+      );
+      expect(retrieveManageSubscriptionApiKeysMock).not.toHaveBeenCalled();
+    });
+
+    it("should retrieve and return keys when the permission strategy allows access", async () => {
+      // given
+      const nextRequest = new NextRequest("http://localhost");
+      const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + "groupId";
       const expectedResponse = { foo: "bar" };
+      permissionCheckStrategyMock.mockReturnValue(undefined);
       retrieveManageSubscriptionApiKeysMock.mockResolvedValueOnce(
         expectedResponse,
       );
@@ -118,10 +98,14 @@ describe("Subscription API handlers", () => {
       const jsonBody = await result.json();
       expect(result.status).toBe(200);
       expect(jsonBody).toStrictEqual(expectedResponse);
-      expect(userAuthzMock).toHaveBeenCalledOnce();
-      expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-      expect(isAnInstitutionSpecialGroupMock).toHaveBeenCalledOnce();
-      expect(isAnInstitutionSpecialGroupMock).toHaveBeenCalledWith(groupId);
+      expect(getReadPermissionCheckStrategyMock).toHaveBeenCalledOnce();
+      expect(getReadPermissionCheckStrategyMock).toHaveBeenCalledWith(
+        subscriptionId,
+      );
+      expect(permissionCheckStrategyMock).toHaveBeenCalledOnce();
+      expect(permissionCheckStrategyMock).toHaveBeenCalledWith(
+        backofficeUserMock,
+      );
       expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
       expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
         backofficeUserMock.parameters.userId,
@@ -129,18 +113,35 @@ describe("Subscription API handlers", () => {
       );
     });
 
-    it.each`
-      scenario                        | expectedStatusCode | error                                                    | expectedTitle                  | expectedDetail
-      ${"a generic error"}            | ${500}             | ${new Error()}                                           | ${"ManageKeyRetrieveError"}    | ${"Something went wrong"}
-      ${"SubscriptionNotFoundError"}  | ${404}             | ${new SubscriptionNotFoundError()}                       | ${"SubscriptionNotFoundError"} | ${"Subscription does not exist"}
-      ${"SubscriptionOwnershipError"} | ${403}             | ${new SubscriptionOwnershipError("error from business")} | ${"Forbidden"}                 | ${"You can only handle subscriptions that you own"}
-    `(
-      "should return an error response when retrieveManageSubscriptionApiKeys rejects with ",
-      async ({ error, expectedStatusCode, expectedTitle, expectedDetail }) => {
+    it.each([
+      [
+        "a generic error",
+        new Error(),
+        "Something went wrong",
+        500,
+        "ManageKeyRetrieveError",
+      ],
+      [
+        "SubscriptionNotFoundError",
+        new SubscriptionNotFoundError(),
+        "Subscription does not exist",
+        404,
+        "SubscriptionNotFoundError",
+      ],
+      [
+        "SubscriptionOwnershipError",
+        new SubscriptionOwnershipError("error from business"),
+        "You can only handle subscriptions that you own",
+        403,
+        "Forbidden",
+      ],
+    ])(
+      "should return an error response when retrieveManageSubscriptionApiKeys rejects with %s",
+      async (_, error, expectedDetail, expectedStatusCode, expectedTitle) => {
         // given
         const nextRequest = new NextRequest("http://localhost");
-        const groupId = "groupId";
-        const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + groupId;
+        const subscriptionId = SUBSCRIPTION_MANAGE_GROUP_PREFIX + "groupId";
+        permissionCheckStrategyMock.mockReturnValue(undefined);
         retrieveManageSubscriptionApiKeysMock.mockRejectedValueOnce(error);
 
         // when
@@ -154,10 +155,14 @@ describe("Subscription API handlers", () => {
         expect(result.status).toBe(expectedStatusCode);
         expect(jsonBody.title).toEqual(expectedTitle);
         expect(jsonBody.detail).toEqual(expectedDetail);
-        expect(userAuthzMock).toHaveBeenCalledOnce();
-        expect(userAuthzMock).toHaveBeenCalledWith(backofficeUserMock);
-        expect(isAnInstitutionSpecialGroupMock).toHaveBeenCalledOnce();
-        expect(isAnInstitutionSpecialGroupMock).toHaveBeenCalledWith(groupId);
+        expect(getReadPermissionCheckStrategyMock).toHaveBeenCalledOnce();
+        expect(getReadPermissionCheckStrategyMock).toHaveBeenCalledWith(
+          subscriptionId,
+        );
+        expect(permissionCheckStrategyMock).toHaveBeenCalledOnce();
+        expect(permissionCheckStrategyMock).toHaveBeenCalledWith(
+          backofficeUserMock,
+        );
         expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledOnce();
         expect(retrieveManageSubscriptionApiKeysMock).toHaveBeenCalledWith(
           backofficeUserMock.parameters.userId,
