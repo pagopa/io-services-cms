@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 3.2.0
+
+### Minor Changes
+
+- 965d3961: Added X-user header middleware
+
 ## 3.1.6
 
 ### Patch Changes
