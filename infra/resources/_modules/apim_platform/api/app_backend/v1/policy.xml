@@ -1,6 +1,7 @@
 <policies>
     <inbound>
         <base />
+        <include-fragment fragment-id="ioapp-authenticated-cache" />
         <set-backend-service backend-id="io-services-app-backend-pool" />
         <set-header name="x-functions-key" exists-action="override">
             <value>{{svc-appbe-host-key}}</value>
