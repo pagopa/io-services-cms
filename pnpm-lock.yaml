@@ -468,11 +468,11 @@ importers:
         specifier: ^4.13.0
         version: 4.13.0
       '@pagopa/hexagonal-core':
-        specifier: ^0.1.1
-        version: 0.1.1(@standard-schema/spec@1.1.0)(neverthrow@8.2.0)(zod@4.3.6)
+        specifier: ^0.4.0
+        version: 0.4.0(@standard-schema/spec@1.1.0)(neverthrow@8.2.0)(zod@4.3.6)
       '@pagopa/hexagonal-fastify':
-        specifier: ^0.1.0
-        version: 0.1.0(@standard-schema/spec@1.1.0)(fastify@5.9.0)(neverthrow@8.2.0)(zod@4.3.6)
+        specifier: ^0.2.0
+        version: 0.2.0(@standard-schema/spec@1.1.0)(fastify@5.9.0)(neverthrow@8.2.0)(zod@4.3.6)
       fastify:
         specifier: ^5.8.5
         version: 5.9.0
@@ -3036,15 +3036,19 @@ packages:
   '@pagopa/handler-kit@1.1.0':
     resolution: {integrity: sha512-siLQ96LZ77gXxdiYXYdWiNhS7lao/M6Hj9aO6zxALnVR6BxBjvQm4k1Y3MT71oS9s4gUTFyPoFf672FVMI7UaQ==}
 
-  '@pagopa/hexagonal-core@0.1.1':
-    resolution: {integrity: sha512-bYdSSS7y/3geMiwnG/zSwQU30HWXP9+7UQvtSKOt0cEQE8Dovrd8xJNMRsPDozX5fk9N2hydoXHH1A7PoaIsjA==}
+  '@pagopa/hexagonal-core@0.4.0':
+    resolution: {integrity: sha512-qHXbt1/QvzbW87v6KIZ48m5EJtzh/Flvr7Ii1CRB2tPKJ2iwGNTqZXiGhBTy26Sk2fxk2BDS92RnjdyHY7K9/Q==}
     peerDependencies:
+      '@pagopa/azure-tracing': ^0.5.4
       '@standard-schema/spec': ^1.1.0
       neverthrow: ^8.2.0
       zod: ^4.0.0
+    peerDependenciesMeta:
+      '@pagopa/azure-tracing':
+        optional: true
 
-  '@pagopa/hexagonal-fastify@0.1.0':
-    resolution: {integrity: sha512-OVVISK4MWqEBlPy2sKnLqKMmiU4hI0RVPZel0aIfi0IYvhynjDR2is0QDViJmvivk7QlXUiShmCUrbXS8JUqBg==}
+  '@pagopa/hexagonal-fastify@0.2.0':
+    resolution: {integrity: sha512-Ch9DBIwyjtj6mqB78ftOweDBACkMHh54lKZqavUo9AWVE3UXm8FgEnCufLhp9iWjGKvRzsfdZ7wuzMYZ7qGJKg==}
     peerDependencies:
       '@standard-schema/spec': ^1.1.0
       fastify: ^5.8.4
@@ -12017,19 +12021,21 @@ snapshots:
       - ts-node
       - typescript
 
-  '@pagopa/hexagonal-core@0.1.1(@standard-schema/spec@1.1.0)(neverthrow@8.2.0)(zod@4.3.6)':
+  '@pagopa/hexagonal-core@0.4.0(@standard-schema/spec@1.1.0)(neverthrow@8.2.0)(zod@4.3.6)':
     dependencies:
       '@standard-schema/spec': 1.1.0
       neverthrow: 8.2.0
       zod: 4.3.6
 
-  '@pagopa/hexagonal-fastify@0.1.0(@standard-schema/spec@1.1.0)(fastify@5.9.0)(neverthrow@8.2.0)(zod@4.3.6)':
+  '@pagopa/hexagonal-fastify@0.2.0(@standard-schema/spec@1.1.0)(fastify@5.9.0)(neverthrow@8.2.0)(zod@4.3.6)':
     dependencies:
-      '@pagopa/hexagonal-core': 0.1.1(@standard-schema/spec@1.1.0)(neverthrow@8.2.0)(zod@4.3.6)
+      '@pagopa/hexagonal-core': 0.4.0(@standard-schema/spec@1.1.0)(neverthrow@8.2.0)(zod@4.3.6)
       '@standard-schema/spec': 1.1.0
       fastify: 5.9.0
       neverthrow: 8.2.0
       zod: 4.3.6
+    transitivePeerDependencies:
+      - '@pagopa/azure-tracing'
 
   '@pagopa/io-functions-commons@29.1.2(@azure/functions@4.11.2)(express@4.18.2)(fp-ts@2.16.5)(io-ts@2.2.21(fp-ts@2.16.5))':
     dependencies:

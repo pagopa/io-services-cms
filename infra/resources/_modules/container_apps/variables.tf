@@ -75,13 +75,27 @@ variable "log_analytics_workspace_id" {
   description = "Id of the Log Analytics Workspace to use for Container Apps diagnostics"
 }
 
-variable "key_vault" {
+variable "cms_key_vault" {
   type = object({
     name                = string
     resource_group_name = string
-    use_rbac            = optional(bool, false)
   })
-  description = "KeyVault to use to store Function host keys"
+  description = "Key Vault used by services-app secrets"
+}
+
+variable "services_postgres" {
+  type = object({
+    host                 = string
+    database             = string
+    password_secret_name = string
+    port                 = number
+    user                 = string
+    topic = object({
+      schema = string
+      table  = string
+    })
+  })
+  description = "Shared PostgreSQL connection and schema configuration used by services-app"
 }
 
 variable "appi_connection_string" {

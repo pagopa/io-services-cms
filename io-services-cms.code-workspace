@@ -15,6 +15,10 @@
       "name": "io-services-app-backend",
     },
     {
+      "path": "apps/services-app",
+      "name": "services-app",
+    },
+    {
       "path": "packages/io-services-cms-models",
       "name": "@io-services-cms/models",
     },
