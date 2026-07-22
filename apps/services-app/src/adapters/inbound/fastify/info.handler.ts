@@ -9,7 +9,6 @@ import { InfoOutputSchema } from "./dto/info.dto.js";
 
 const infoContract = defineRoute({
   method: "get",
-  operationId: "getInfo",
   path: "/api/info",
   request: {},
   response: {

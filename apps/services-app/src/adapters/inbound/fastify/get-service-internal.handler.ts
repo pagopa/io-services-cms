@@ -13,7 +13,6 @@ import {
 
 const getServiceInternalContract = defineRoute({
   method: "get",
-  operationId: "getServiceInternal",
   path: "/api/v1/internal/services/{serviceId}",
   request: {
     path: GetServiceInternalPathSchema,
