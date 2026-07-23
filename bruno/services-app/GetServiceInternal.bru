@@ -1,0 +1,20 @@
+meta {
+  name: GetServiceInternal
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{services-app-base-url}}/v1/internal/services/:serviceId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  serviceId: aServiceId
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

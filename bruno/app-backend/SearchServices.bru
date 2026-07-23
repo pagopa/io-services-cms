@@ -1,0 +1,26 @@
+meta {
+  name: SearchServices
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{app-backend-base-url}}/institutions/:institutionId/services
+  body: none
+  auth: inherit
+}
+
+params:query {
+  ~limit: 20
+  ~offset: 20
+  ~sessionId: aSessionId
+}
+
+params:path {
+  institutionId: anOrgFiscalCode
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

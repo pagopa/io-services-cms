@@ -1,0 +1,15 @@
+meta {
+  name: GetFeaturedServices
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{app-backend-base-url}}/services/featured
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}
