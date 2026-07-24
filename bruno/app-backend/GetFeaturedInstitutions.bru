@@ -1,0 +1,15 @@
+meta {
+  name: GetFeaturedInstitutions
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{app-backend-base-url}}/institutions/featured
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+}

@@ -1,0 +1,24 @@
+meta {
+  name: SearchInstitutions
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{app-backend-base-url}}/institutions?search=search&sessionId=aSessionId
+  body: none
+  auth: inherit
+}
+
+params:query {
+  search: search
+  sessionId: aSessionId
+  ~scope: 
+  ~limit: 
+  ~offset: 
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

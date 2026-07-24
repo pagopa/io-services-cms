@@ -1,0 +1,20 @@
+meta {
+  name: GetServiceById
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{app-backend-base-url}}/services/:serviceId
+  body: none
+  auth: inherit
+}
+
+params:path {
+  serviceId: aServiceId
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

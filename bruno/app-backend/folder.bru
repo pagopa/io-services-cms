@@ -1,0 +1,17 @@
+meta {
+  name: app-backend
+}
+
+headers {
+  x-user: {{x-user}}
+}
+
+auth {
+  mode: apikey
+}
+
+auth:apikey {
+  key: x-functions-key
+  value: {{app-backend-function-key}}
+  placement: header
+}
