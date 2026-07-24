@@ -1,0 +1,288 @@
+openapi: 3.0.3
+info:
+  title: IO Services App
+  description: Internal Service API.
+  contact:
+    name: PagoPA S.p.A.
+    url: https://docs.pagopa.it/io-guida-tecnica/
+  version: 0.1.0
+tags:
+  - name: application
+    description: Application runtime information
+  - name: internal-services
+    description: Internal service API
+paths:
+  /api/info:
+    get:
+      tags:
+        - application
+      summary: Retrieve application information
+      description: Retrieve the application name and version.
+      operationId: getInfo
+      responses:
+        '200':
+          description: Application information retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Info'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+  /api/v1/internal/services/{serviceId}:
+    get:
+      tags:
+        - internal-services
+      summary: Retrieve a service for internal consumers
+      description: Retrieve the current lifecycle or publication data for a service.
+      operationId: getServiceInternal
+      parameters:
+        - name: serviceId
+          in: path
+          description: ULID that uniquely identifies the service
+          required: true
+          schema:
+            $ref: '#/components/schemas/Ulid'
+      responses:
+        '200':
+          description: Service retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        '400':
+          description: Invalid service identifier
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '404':
+          description: Service not found
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+        '500':
+          description: Internal server error
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/ProblemJson'
+components:
+  schemas:
+    Info:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - version
+      properties:
+        name:
+          type: string
+          example: services-app
+        version:
+          type: string
+          example: 0.1.0
+    Ulid:
+      type: string
+      pattern: '^[0-9A-HJKMNP-TV-Z]{26}$'
+      example: 01ARZ3NDEKTSV4RRFFQ69G5FAV
+    Service:
+      type: object
+      additionalProperties: false
+      required:
+        - authorized_cidrs
+        - authorized_recipients
+        - description
+        - id
+        - last_update
+        - max_allowed_payment_amount
+        - metadata
+        - name
+        - organization
+        - require_secure_channel
+        - status
+      properties:
+        age:
+          $ref: '#/components/schemas/AgeRange'
+        authorized_cidrs:
+          type: array
+          items:
+            type: string
+            description: An IPv4 address or IPv4 CIDR block
+            example: 192.0.2.0/24
+        authorized_recipients:
+          type: array
+          items:
+            $ref: '#/components/schemas/FiscalCode'
+        description:
+          type: string
+          minLength: 1
+        id:
+          $ref: '#/components/schemas/Ulid'
+        last_update:
+          type: string
+          format: date-time
+        max_allowed_payment_amount:
+          type: integer
+          format: int64
+          minimum: 0
+          maximum: 9999999999
+        metadata:
+          $ref: '#/components/schemas/ServiceMetadata'
+        name:
+          type: string
+          minLength: 1
+        organization:
+          $ref: '#/components/schemas/Organization'
+        require_secure_channel:
+          type: boolean
+        status:
+          $ref: '#/components/schemas/ServiceStatus'
+    AgeRange:
+      type: object
+      additionalProperties: false
+      properties:
+        min:
+          type: integer
+          minimum: 0
+          maximum: 999
+        max:
+          type: integer
+          minimum: 0
+          maximum: 999
+    ServiceMetadata:
+      type: object
+      additionalProperties: false
+      required:
+        - scope
+      properties:
+        address:
+          $ref: '#/components/schemas/NonEmptyString'
+        app_android:
+          $ref: '#/components/schemas/NonEmptyString'
+        app_ios:
+          $ref: '#/components/schemas/NonEmptyString'
+        category:
+          type: string
+          enum:
+            - STANDARD
+            - SPECIAL
+        cta:
+          $ref: '#/components/schemas/NonEmptyString'
+        custom_special_flow:
+          $ref: '#/components/schemas/NonEmptyString'
+        email:
+          $ref: '#/components/schemas/NonEmptyString'
+        group_id:
+          $ref: '#/components/schemas/NonEmptyString'
+        pec:
+          $ref: '#/components/schemas/NonEmptyString'
+        phone:
+          $ref: '#/components/schemas/NonEmptyString'
+        privacy_url:
+          $ref: '#/components/schemas/NonEmptyString'
+        scope:
+          type: string
+          enum:
+            - NATIONAL
+            - LOCAL
+        support_url:
+          $ref: '#/components/schemas/NonEmptyString'
+        token_name:
+          $ref: '#/components/schemas/NonEmptyString'
+        topic:
+          $ref: '#/components/schemas/Topic'
+        tos_url:
+          $ref: '#/components/schemas/NonEmptyString'
+        web_url:
+          $ref: '#/components/schemas/NonEmptyString'
+    Organization:
+      type: object
+      additionalProperties: false
+      required:
+        - fiscal_code
+        - name
+      properties:
+        department_name:
+          $ref: '#/components/schemas/NonEmptyString'
+        fiscal_code:
+          type: string
+          pattern: '^\d{11}$'
+          example: '01234567890'
+        name:
+          type: string
+          minLength: 1
+    Topic:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          minLength: 1
+    ServiceStatus:
+      oneOf:
+        - $ref: '#/components/schemas/StandardServiceStatus'
+        - $ref: '#/components/schemas/RejectedServiceStatus'
+    StandardServiceStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - value
+      properties:
+        value:
+          type: string
+          enum:
+            - draft
+            - submitted
+            - approved
+            - deleted
+            - published
+            - unpublished
+    RejectedServiceStatus:
+      type: object
+      additionalProperties: false
+      required:
+        - reason
+        - value
+      properties:
+        reason:
+          type: string
+        value:
+          type: string
+          enum:
+            - rejected
+    FiscalCode:
+      type: string
+      pattern: '^[A-Z]{6}[0-9LMNPQRSTUV]{2}[ABCDEHLMPRST][0-9LMNPQRSTUV]{2}[A-Za-z][0-9LMNPQRSTUV]{3}[A-Z]$'
+      example: AAABBB00A00A000A
+    NonEmptyString:
+      type: string
+      minLength: 1
+    ProblemJson:
+      type: object
+      description: RFC 7807 Problem Details for HTTP APIs.
+      additionalProperties: false
+      required:
+        - detail
+        - status
+        - title
+        - type
+      properties:
+        detail:
+          type: string
+        status:
+          type: integer
+        title:
+          type: string
+        type:
+          type: string
+          format: uri
