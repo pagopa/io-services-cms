@@ -73,13 +73,21 @@ const checkManagedIdentityHealth = (
       config.CMS_COSMOSDB__accountEndpoint,
       credential,
     );
-    await cosmosClient.getDatabaseAccount();
+    try {
+      await cosmosClient.getDatabaseAccount();
+    } finally {
+      cosmosClient.dispose();
+    }
 
     const legacyCosmosClient = createManagedIdentityCosmosClient(
       config.CMS_LEGACY_COSMOSDB__accountEndpoint,
       credential,
     );
-    await legacyCosmosClient.getDatabaseAccount();
+    try {
+      await legacyCosmosClient.getDatabaseAccount();
+    } finally {
+      legacyCosmosClient.dispose();
+    }
 
     const eventHubProducerClient = new EventHubProducerClient(
       config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
