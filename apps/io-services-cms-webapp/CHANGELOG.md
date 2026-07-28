@@ -1,5 +1,11 @@
 # io-services-cms-webapp
 
+## 2.3.1
+
+### Patch Changes
+
+- 2c5cc1e0: Dispose CosmosClient in Healthcheck
+
 ## 2.3.0
 
 ### Minor Changes
