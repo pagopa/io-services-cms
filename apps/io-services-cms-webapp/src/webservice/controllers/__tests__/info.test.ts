@@ -28,6 +28,7 @@ const mocks = vi.hoisted(() => {
     getProperties: vi.fn().mockResolvedValue(undefined),
   };
   const cosmosClient = {
+    dispose: vi.fn(),
     getDatabaseAccount: vi.fn().mockResolvedValue(undefined),
   };
   const eventHubProducerClient = {
@@ -145,11 +146,26 @@ describe("makeInfoHandler", () => {
       mocks.config.CMS_LEGACY_COSMOSDB__accountEndpoint,
       mocks.credential,
     );
+    expect(mocks.cosmosClient.dispose).toHaveBeenCalledTimes(2);
     expect(mocks.EventHubProducerClient).toHaveBeenCalledWith(
       mocks.config.SERVICES_EVENT_HUB_FULLY_QUALIFIED_NAMESPACE,
       mocks.config.SERVICES_PUBLICATION_EVENT_HUB_NAME,
       mocks.credential,
     );
     expect(mocks.eventHubProducerClient.close).toHaveBeenCalledOnce();
+  });
+
+  it("should dispose the Cosmos client when its health check fails", async () => {
+    mocks.cosmosClient.getDatabaseAccount.mockRejectedValueOnce(
+      new Error("Cosmos unavailable"),
+    );
+    const handler = makeInfoHandler(
+      mocks.credential as unknown as DefaultAzureCredential,
+    );
+
+    const response = await handler();
+
+    expect(response.status).toBe(500);
+    expect(mocks.cosmosClient.dispose).toHaveBeenCalledOnce();
   });
 });
