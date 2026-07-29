@@ -217,6 +217,29 @@ describe("Services API", () => {
         }),
       );
     });
+
+    it("should forward suitable_for_minors", async () => {
+      // given
+      const request = new NextRequest(new URL("http://localhost"));
+      const servicePayload = {
+        ...aValidServicePayload,
+        suitable_for_minors: true,
+      };
+      parseBodyMock.mockResolvedValueOnce(servicePayload);
+      groupPermissionCheckStrategyMock.mockReturnValue(undefined);
+
+      // when
+      const result = await POST(request, {});
+
+      // then
+      expect(result.status).toBe(200);
+      expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
+        "createService",
+        expect.objectContaining({
+          jsonBody: expect.objectContaining({ suitable_for_minors: true }),
+        }),
+      );
+    });
   });
 
   describe("bulkPatchServices", () => {

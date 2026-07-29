@@ -29,7 +29,7 @@ const {
     userAuthzMock: vi.fn(() => ({ isAdmin: isAdminMock })),
     parseBodyMock: vi.fn(),
     groupExistsMock: vi.fn(),
-    forwardIoServicesCmsRequestMock: vi.fn<any[], any>(() =>
+    forwardIoServicesCmsRequestMock: vi.fn(() =>
       NextResponse.json({}, { status: 200 }),
     ),
     withJWTAuthHandlerMock: vi.fn(
@@ -122,6 +122,26 @@ describe("Services API", () => {
           },
           pathParams: params,
         },
+      );
+    });
+
+    it("should forward suitable_for_minors", async () => {
+      // given
+      const servicePayload = { suitable_for_minors: true };
+      parseBodyMock.mockResolvedValueOnce(servicePayload);
+      const params = { serviceId: faker.string.uuid() };
+      const request = new NextRequest(new URL("http://localhost"));
+
+      // when
+      const result = await PUT(request, { params });
+
+      // then
+      expect(result.status).toBe(200);
+      expect(forwardIoServicesCmsRequestMock).toHaveBeenCalledWith(
+        "updateService",
+        expect.objectContaining({
+          jsonBody: expect.objectContaining({ suitable_for_minors: true }),
+        }),
       );
     });
 
