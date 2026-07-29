@@ -342,6 +342,18 @@ components:
             organization_name:
               type: string
               description: Organization Name
+            age:
+              type: object
+              description: Age range (in years) the service is suitable for
+              properties:
+                min:
+                  type: integer
+                  minimum: 0
+                  maximum: 999
+                max:
+                  type: integer
+                  minimum: 0
+                  maximum: 999
     ServiceMetadata:
       description: A set of service metadata properties
       x-one-of: true
