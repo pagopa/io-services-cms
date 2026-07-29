@@ -7,6 +7,7 @@ import { HttpResponse, http } from "msw";
 
 import { aMockErrorResponse } from "../data/common-data";
 import {
+  aMockServiceLifecycleBulkFetchDocuments,
   aMockServicesLifecycleCollection,
   aMockServicesLifecyclePkranges,
   info,
@@ -38,32 +39,45 @@ export const buildHandlers = () => {
           status: 200,
         }),
     ),
-    // bulkFetch
+    http.get(`${baseUrl}dbs/db-services-cms/colls/services-publication`, (_) =>
+      HttpResponse.json({
+        ...aMockServicesLifecycleCollection,
+        id: "services-publication",
+      }),
+    ),
+    http.get(
+      `${baseUrl}dbs/db-services-cms/colls/services-publication/pkranges`,
+      (_) => HttpResponse.json(aMockServicesLifecyclePkranges),
+    ),
     http.post(
       `${baseUrl}dbs/db-services-cms/colls/services-lifecycle/docs`,
       async ({ request }) => {
-        const response = new HttpResponse(
-          JSON.stringify([{ requestCharge: 1, statusCode: 404 }]),
-          {
+        const reqBody = await request.json();
+        if (Array.isArray(reqBody)) {
+          const resBody = reqBody.map((operation) =>
+            aMockServiceLifecycleBulkFetchDocuments(operation.id),
+          );
+          return new HttpResponse(JSON.stringify(resBody), {
             status: 200,
-          },
+          });
+        }
+        return new HttpResponse(JSON.stringify(get500Response()), {
+          status: 500,
+        });
+      },
+    ),
+    http.post(
+      `${baseUrl}dbs/db-services-cms/colls/services-publication/docs`,
+      async ({ request }) => {
+        const reqBody = await request.json();
+        return new HttpResponse(
+          JSON.stringify(
+            Array.isArray(reqBody)
+              ? reqBody.map(() => ({ requestCharge: 1, statusCode: 404 }))
+              : get500Response(),
+          ),
+          { status: Array.isArray(reqBody) ? 200 : 500 },
         );
-        return response;
-        // const reqBody = await request.json();
-        // console.log("bulkFetch", reqBody);
-        // if (Array.isArray(reqBody)) {
-        //   console.log("is array");
-        //   const resBody = reqBody.map((id) =>
-        //     aMockServiceLifecycleBulkFetchDocuments(id),
-        //   );
-        //   console.log("resBody", resBody);
-        //   return new HttpResponse(JSON.stringify(resBody), {
-        //     status: 200,
-        //   });
-        // }
-        // return new HttpResponse(JSON.stringify(get500Response()), {
-        //   status: 500,
-        // });
       },
     ),
   ];

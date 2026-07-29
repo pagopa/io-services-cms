@@ -1,6 +1,13 @@
 import { faker } from "@faker-js/faker/locale/it";
 
 export const info = {};
+
+const getMockAge = () =>
+  faker.helpers.arrayElement([
+    undefined,
+    { min: faker.number.int({ max: 14, min: 0 }) },
+    { min: faker.number.int({ max: 99, min: 18 }) },
+  ]);
 // export const infoResponse = {
 //   _dbs: "//dbs/",
 //   _rid: "io-p-cosmos-services-cms-italynorth.sql.cosmos.azure.com",
@@ -285,6 +292,7 @@ export const aMockServiceLifecycleBulkFetchDocuments = (id?: string) => ({
   eTag: faker.string.uuid(),
   resourceBody: {
     data: {
+      age: getMockAge(),
       authorized_cidrs: ["0.0.0.0/0"],
       authorized_recipients: ["AAAAAA00A00A000A"],
       description: "This is a test service for full sync workflow [EDITED]",
