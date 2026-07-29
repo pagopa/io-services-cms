@@ -1,4 +1,4 @@
-import { FeaturedServices } from "../../generated/definitions/internal/FeaturedServices";
+import { InternalFeaturedServices } from "../featured-services";
 
 export const mockFeaturedServices = {
   services: [
@@ -20,4 +20,4 @@ export const mockFeaturedServices = {
       version: 1,
     },
   ],
-} as unknown as FeaturedServices;
+} as unknown as InternalFeaturedServices;

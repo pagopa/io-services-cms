@@ -5,6 +5,7 @@ import * as O from "fp-ts/lib/Option";
 import * as TE from "fp-ts/lib/TaskEither";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IConfig } from "../../config";
+import { FeaturedServices } from "../../generated/definitions/internal/FeaturedServices";
 import * as blobStorageClientHelper from "../../utils/blob-storage/helper";
 import { mockFeaturedServices } from "../__mocks__/featured-services";
 import { httpHandlerInputMocks } from "../__mocks__/handler-mocks";
@@ -61,16 +62,15 @@ describe("Get Featured Services", () => {
       blobServiceClient: mockBlobServiceClient,
     })();
 
-    expect(result).toEqual(
-      E.right(
-        expect.objectContaining({
-          body: {
-            services: [expect.objectContaining({ id: "s1ServiceId" })],
-          },
-          statusCode: 200,
-        }),
-      ),
-    );
+    expect(E.isRight(result)).toBe(true);
+    if (E.isRight(result)) {
+      expect(result.right.statusCode).toBe(200);
+      const { services } = result.right.body as FeaturedServices;
+      expect(services.map((service) => service.id)).toEqual(["s1ServiceId"]);
+      services.forEach((service) =>
+        expect(service).not.toHaveProperty("age"),
+      );
+    }
   });
 
   it("should return the adults-only services for an adult user when the FF is enabled", async () => {
@@ -80,22 +80,21 @@ describe("Get Featured Services", () => {
       blobServiceClient: mockBlobServiceClient,
     })();
 
-    expect(result).toEqual(
-      E.right(
-        expect.objectContaining({
-          body: {
-            services: [
-              expect.objectContaining({ id: "s2ServiceId" }),
-              expect.objectContaining({ id: "s3ServiceId" }),
-            ],
-          },
-          statusCode: 200,
-        }),
-      ),
-    );
+    expect(E.isRight(result)).toBe(true);
+    if (E.isRight(result)) {
+      expect(result.right.statusCode).toBe(200);
+      const { services } = result.right.body as FeaturedServices;
+      expect(services.map((service) => service.id)).toEqual([
+        "s2ServiceId",
+        "s3ServiceId",
+      ]);
+      services.forEach((service) =>
+        expect(service).not.toHaveProperty("age"),
+      );
+    }
   });
 
-  it("should return the full list unfiltered when the FF is disabled", async () => {
+  it("should return the full list unfiltered (without age) when the FF is disabled", async () => {
     const result = await makeFeaturedServicesHandler(
       mockedConfigurationAgeFilterDisabled,
     )({
@@ -104,14 +103,19 @@ describe("Get Featured Services", () => {
       blobServiceClient: mockBlobServiceClient,
     })();
 
-    expect(result).toEqual(
-      E.right(
-        expect.objectContaining({
-          body: mockFeaturedServices,
-          statusCode: 200,
-        }),
-      ),
-    );
+    expect(E.isRight(result)).toBe(true);
+    if (E.isRight(result)) {
+      expect(result.right.statusCode).toBe(200);
+      const { services } = result.right.body as FeaturedServices;
+      expect(services.map((service) => service.id)).toEqual([
+        "s1ServiceId",
+        "s2ServiceId",
+        "s3ServiceId",
+      ]);
+      services.forEach((service) =>
+        expect(service).not.toHaveProperty("age"),
+      );
+    }
   });
 
   it("should return 401 when the x-user header is missing", async () => {
