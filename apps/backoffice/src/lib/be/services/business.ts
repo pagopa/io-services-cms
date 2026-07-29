@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { getConfiguration } from "@/config";
 import { HTTP_STATUS_NO_CONTENT } from "@/config/constants";
 import { BulkPatchServicePayload } from "@/generated/api/BulkPatchServicePayload";
 import { BulkPatchServiceResponse } from "@/generated/api/BulkPatchServiceResponse";
@@ -146,7 +147,15 @@ export const retrieveServiceList = async (
               )
             : [],
           retrieveLifecycleServices,
-          TE.map(RA.map(toServiceListItem(serviceTopicsMap, groupsMap))),
+          TE.map(
+            RA.map(
+              toServiceListItem(
+                serviceTopicsMap,
+                groupsMap,
+                getConfiguration().FF_SUITABLE_FOR_MINORS_ENABLED,
+              ),
+            ),
+          ),
         ),
     ),
     // get services from services-publication cosmos container
