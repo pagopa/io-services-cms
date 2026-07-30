@@ -1,17 +1,23 @@
-import { FeaturedServices } from "../../generated/definitions/internal/FeaturedServices";
+import { InternalFeaturedServices } from "../featured-services";
 
 export const mockFeaturedServices = {
-  items: [
+  services: [
     {
-      id: "aServiceId",
-      name: "aServiceName",
+      age: { max: 18, min: 14 },
+      id: "s1ServiceId",
+      name: "S1 - suitable for minors",
       version: 1,
     },
     {
-      id: "anotherServiceId",
-      name: "anotherServiceName",
-      organization_name: "anOrganizationName",
+      id: "s2ServiceId",
+      name: "S2 - no age",
+      version: 1,
+    },
+    {
+      age: { max: 999, min: 18 },
+      id: "s3ServiceId",
+      name: "S3 - adults only",
       version: 1,
     },
   ],
-} as unknown as FeaturedServices;
+} as unknown as InternalFeaturedServices;

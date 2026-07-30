@@ -8,7 +8,6 @@ import {
   WithinRangeInteger,
 } from "@pagopa/ts-commons/lib/numbers";
 import { NonEmptyString } from "@pagopa/ts-commons/lib/strings";
-import * as E from "fp-ts/Either";
 import * as O from "fp-ts/Option";
 import { sequenceS } from "fp-ts/lib/Apply";
 import * as RTE from "fp-ts/lib/ReaderTaskEither";
@@ -21,9 +20,8 @@ import { OrganizationFiscalCode } from "../generated/definitions/internal/Organi
 import { ServiceMinified } from "../generated/definitions/internal/ServiceMinified";
 import { PathParamValidatorMiddleware } from "../middleware/path-params-middleware";
 import { OptionalQueryParamMiddleware } from "../middleware/query-params-middlewares";
-import { XUserMiddleware } from "../middleware/x-user-middleware";
-import { computeAgeFromDateOfBirth } from "../utils/age";
 import { AzureSearchClientDependency } from "../utils/azure-search/dependency";
+import { resolveUserAge } from "../utils/user-age";
 
 /**
  * GET /institutions/{institutionId}/services AZF HttpTrigger
@@ -159,14 +157,7 @@ const resolveSearchParams =
   > =>
     pipe(
       TE.Do,
-      TE.apS(
-        "userAge",
-        pipe(
-          XUserMiddleware(request),
-          E.map((user) => computeAgeFromDateOfBirth(user.date_of_birth)),
-          TE.fromEither,
-        ),
-      ),
+      TE.apS("userAge", resolveUserAge(request)),
       TE.apSW("params", extractParams(paginationConfig)(request)),
       TE.map(({ params, userAge }) => ({ ...params, userAge })),
     );
