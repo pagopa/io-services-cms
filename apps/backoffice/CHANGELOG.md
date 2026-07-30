@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.8.0
+
+### Minor Changes
+
+- b7daff7d: Introduced `suitable_for_minors` support in IO Backoffice
+
 ## 2.7.6
 
 ### Patch Changes
