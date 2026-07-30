@@ -1,5 +1,11 @@
 # io-services-app-backend
 
+## 3.3.0
+
+### Minor Changes
+
+- b85c4014: Added x-user header middleware to FeaturedServices and age filtering
+
 ## 3.2.0
 
 ### Minor Changes
