@@ -203,6 +203,7 @@ export const getMockServiceLifecycle = (serviceId?: string) => ({
     name: faker.company.name(),
   },
   require_secure_channel: faker.datatype.boolean(),
+  suitable_for_minors: faker.datatype.boolean(),
   status: {
     reason:
       "Buongiorno,\n\nti informiamo che la richiesta di attivazione del servizio **Servizio A** è stata respinta poiché risulta già attivo il seguente servizio, con le stesse finalità:\n\n**Servizio B**\n\nTi invitiamo a seguire le indicazioni fornite alla scheda 99Z1ABCD0C5EFGH946ILMNOP12 (ovvero la cancellazione del servizio attivo **Servizio A**) e successivamente presentare questo servizio .\n\nPer ulteriori approfondimenti ti suggeriamo di consultare il nuovo manuale dei servizi raggiungibile al seguente [link](https://sample-url.it/).\n\nGrazie per la collaborazione,\n\n \n\nCordiali Saluti\n\n**Team CompanyName**",

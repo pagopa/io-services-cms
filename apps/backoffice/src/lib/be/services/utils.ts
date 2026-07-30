@@ -30,6 +30,12 @@ export const MISSING_SERVICE_DESCRIPTION =
 export const MISSING_SERVICE_ORGANIZATION =
   "Istituzione non disponibile" as NonEmptyString;
 
+const ADULT_AGE = 18;
+
+export const ageToSuitableForMinors = (
+  age: ServiceLifecycle.ItemType["data"]["age"],
+): boolean => age?.min !== undefined && age.min < ADULT_AGE;
+
 export const reducePublicationServicesList = (
   publicationServices: readonly ServicePublication.ItemType[],
 ) =>
@@ -50,6 +56,7 @@ export const toServiceListItem =
   (
     topicsMap: Record<string, ServiceTopic>,
     groupsMap: Map<DomainGroup["id"], DomainGroup>,
+    suitableForMinorsEnabled: boolean,
   ) =>
   ({
     data,
@@ -77,6 +84,9 @@ export const toServiceListItem =
       name: data.name,
       organization: data.organization,
       status: toServiceStatus(fsm),
+      ...(suitableForMinorsEnabled
+        ? { suitable_for_minors: ageToSuitableForMinors(data.age) }
+        : {}),
     };
   };
 

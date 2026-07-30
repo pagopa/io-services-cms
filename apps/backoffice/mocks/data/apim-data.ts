@@ -51,8 +51,10 @@ export const getSubscriptionResponse = ({
   AZURE_SUBSCRIPTION_ID: string;
   subscriptionId?: string;
 }) => ({
+  displayName: faker.word.words({ count: { max: 3, min: 1 } }),
   id: `/subscriptions/${AZURE_SUBSCRIPTION_ID}/resourceGroups/${AZURE_APIM_RESOURCE_GROUP}/providers/Microsoft.ApiManagement/service/${AZURE_APIM}/subscriptions/${subscriptionId}`,
   name: subscriptionId,
+  state: "active",
 });
 
 export const getListByServiceResponse = (

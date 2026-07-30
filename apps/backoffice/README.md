@@ -1,38 +1,89 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# IO Services CMS Backoffice
 
-## Getting Started
+## Local development with MSW
 
-First, run the development server:
+### Prerequisites
 
-```bash
-pnpm run dev
-# or
-pnpm dev
-# or
-pnpm dev
+- Node.js and Corepack
+- dependencies installed from the monorepo root with `pnpm install`
+
+Next.js automatically loads the versioned `.env.development` profile. The
+default configuration runs the BFF and uses MSW on the server to mock Selfcare,
+APIM, Services CMS, Cosmos DB, and subscription migration.
+
+Create `apps/backoffice/.env.local` with the required feature flag:
+
+```dotenv
+FF_SUITABLE_FOR_MINORS_ENABLED=true
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Run the application from the repository root:
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm install
+pnpm --filter io-services-cms-backoffice dev
+```
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+Open [http://localhost:3000](http://localhost:3000). The redirect opens the local
+Selfcare page, where you can select an administrator, operator, or aggregator
+institution profile.
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+### MSW server configuration
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+The main flags in the development profile are:
 
-## Learn More
+```dotenv
+NEXT_PUBLIC_API_BACKEND_MOCKING=false
+API_SERVICES_CMS_MOCKING=true
+API_APIM_MOCKING=true
+SELFCARE_API_MOCKING=true
+COSMOSDB_MOCKING=true
+SUBSCRIPTION_MIGRATION_API_MOCKING=true
+IS_MSW_ENABLED=true
+```
 
-To learn more about Next.js, take a look at the following resources:
+With `NEXT_PUBLIC_API_BACKEND_MOCKING=false`, the BFF APIs run normally and MSW
+intercepts their requests to external services.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The local Cosmos handler generates a `draft` lifecycle document for every
+service returned by the APIM mock. Publication documents are returned as
+missing, so mocked services have no publication visibility.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Fully mocked frontend
 
-## Deploy on Vercel
+To mock the BFF APIs in the browser as well, add these values to `.env.local`:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```dotenv
+NEXT_PUBLIC_API_BACKEND_MOCKING=true
+NEXT_PUBLIC_IS_MSW_ENABLED=true
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Generate the service worker once from the repository root:
+
+```bash
+pnpm --filter io-services-cms-backoffice exec msw init public
+```
+
+Git ignores `public/mockServiceWorker.js`. In this mode, requests to the
+backoffice APIs are handled by `mocks/handlers/backend-handlers.ts`.
+
+Restart the Next.js server after changing any `.env*` file.
+
+### Mock structure
+
+- `mocks/data/backend-data.ts`: Backoffice and Services CMS API responses
+- `mocks/data/cosmos-data.ts`: raw documents returned by Cosmos DB
+- `mocks/handlers/`: handlers selected by the `*_MOCKING` flags
+- `mocks/index.ts`: MSW bootstrap for the browser and server
+
+API mocks expose `suitable_for_minors` directly, while Cosmos lifecycle
+documents use `data.age`, matching production data.
+
+## Checks
+
+```bash
+pnpm --filter io-services-cms-backoffice test:b4f
+pnpm --filter io-services-cms-backoffice test:fe
+pnpm --filter io-services-cms-backoffice lint
+pnpm --filter io-services-cms-backoffice build
+```

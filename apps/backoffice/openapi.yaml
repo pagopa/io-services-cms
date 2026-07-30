@@ -1709,6 +1709,8 @@ components:
           minimum: 0
           maximum: 9999999999
           default: 0
+        suitable_for_minors:
+          type: boolean
         metadata:
           $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/ServicePayloadMetadata'
       required:
@@ -1745,6 +1747,8 @@ components:
           minimum: 0
           maximum: 9999999999
           default: 0
+        suitable_for_minors:
+          type: boolean
         metadata:
           $ref: '../../packages/io-services-cms-models/openapi/services-cms-schemas.yaml#/CreateServicePayloadMetadata'
       required:
