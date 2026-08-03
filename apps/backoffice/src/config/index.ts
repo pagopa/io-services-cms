@@ -37,6 +37,7 @@ export interface Configuration {
   COSMOSDB_URI: string;
   EA_ENABLED: boolean; // BFF & FE feature flag for Aggregator Institution (Ente Aggregatore)
   FF_SUITABLE_FOR_MINORS_ENABLED: boolean; // backend feature flag
+  FRONTEND_SUITABLE_FOR_MINORS_ENABLED: boolean; // frontend feature flag
   GROUP_APIKEY_ENABLED: boolean; // frontend feature flag
 
   GROUP_AUTHZ_ENABLED: boolean; // backend feature flag
@@ -119,6 +120,9 @@ export function getConfiguration(): Configuration {
     EA_ENABLED: process.env.NEXT_PUBLIC_EA_ENABLED?.toLowerCase() === "true",
     FF_SUITABLE_FOR_MINORS_ENABLED:
       process.env.FF_SUITABLE_FOR_MINORS_ENABLED?.toLowerCase() === "true",
+    FRONTEND_SUITABLE_FOR_MINORS_ENABLED:
+      process.env.NEXT_PUBLIC_FF_SUITABLE_FOR_MINORS_ENABLED?.toLowerCase() ===
+      "true",
     GROUP_APIKEY_ENABLED:
       process.env.NEXT_PUBLIC_GROUP_APIKEY_ENABLED?.toLocaleLowerCase() ===
       "true",

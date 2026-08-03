@@ -1,6 +1,7 @@
+import { getConfiguration } from "@/config";
 import { ServiceLifecycleStatusTypeEnum } from "@/generated/api/ServiceLifecycleStatusType";
 import { Service } from "@/types/service";
-import { Category, PrivacyTip } from "@mui/icons-material";
+import { Category, People, PrivacyTip } from "@mui/icons-material";
 import { Box, Stack, Typography } from "@mui/material";
 import { useTranslation } from "next-i18next";
 
@@ -17,6 +18,7 @@ export interface ServiceInfoContentProps {
 // eslint-disable-next-line complexity
 export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
   const { t } = useTranslation();
+  const { FRONTEND_SUITABLE_FOR_MINORS_ENABLED } = getConfiguration();
 
   /** row list for minified/basic information card */
   const buildRowsMin = () => {
@@ -151,7 +153,20 @@ export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
         </Stack>
       );
   };
-
+  const renderSuitableForMinors = () => {
+    if (
+      FRONTEND_SUITABLE_FOR_MINORS_ENABLED &&
+      data?.suitable_for_minors === true
+    )
+      return (
+        <Stack alignContent="center" direction="row" marginTop={3} spacing={1}>
+          <People sx={{ fontSize: "24px" }} />
+          <Typography variant="body2">
+            {t("routes.service.suitable_for_minors")}
+          </Typography>
+        </Stack>
+      );
+  };
   return (
     <DrawerBaseContent
       header={{
@@ -166,6 +181,7 @@ export const ServiceInfoContent = ({ data }: ServiceInfoContentProps) => {
       {renderSectionTitle("routes.service.description")}
       <MarkdownView>{data?.description}</MarkdownView>
       {renderSensitiveService()}
+      {renderSuitableForMinors()}
       {renderSectionTitle("routes.service.linksContacts")}
       <CardRows rows={rowsLinksContacts} />
     </DrawerBaseContent>

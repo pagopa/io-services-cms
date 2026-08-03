@@ -34,7 +34,8 @@ import {
   getValidationSchema as getVs3,
 } from "./service-builder-step-3";
 
-const { GROUP_APIKEY_ENABLED } = getConfiguration();
+const { FRONTEND_SUITABLE_FOR_MINORS_ENABLED, GROUP_APIKEY_ENABLED } =
+  getConfiguration();
 
 export interface ServiceCreateUpdateProps {
   mode: CreateUpdateMode;
@@ -112,6 +113,9 @@ export const ServiceCreateUpdate = ({
       },
       name: "",
       require_secure_channel: false,
+      suitable_for_minors: FRONTEND_SUITABLE_FOR_MINORS_ENABLED
+        ? false
+        : undefined,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [],

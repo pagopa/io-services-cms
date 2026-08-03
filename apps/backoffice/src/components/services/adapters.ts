@@ -38,6 +38,7 @@ const adaptServiceCommonData = (
   max_allowed_payment_amount: service.max_allowed_payment_amount ?? 0,
   name: service.name,
   require_secure_channel: service.require_secure_channel ?? false,
+  suitable_for_minors: service.suitable_for_minors,
   topic: service.metadata.topic,
 });
 
@@ -136,6 +137,7 @@ export const fromServiceLifecycleToServiceCreateUpdatePayload = (
   },
   name: sl.name,
   require_secure_channel: sl.require_secure_channel ?? false,
+  suitable_for_minors: sl.suitable_for_minors,
 });
 
 const buildBaseServicePayload =
@@ -151,6 +153,7 @@ const buildBaseServicePayload =
       ...assistanceChannels,
     },
     require_secure_channel: s.require_secure_channel,
+    suitable_for_minors: s.suitable_for_minors,
   });
 
 const convertAssistanceChannelsArrayToObj = (arr: AssistanceChannel[]) => {
