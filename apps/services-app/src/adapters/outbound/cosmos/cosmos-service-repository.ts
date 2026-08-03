@@ -1,3 +1,4 @@
+import type { Logger } from "@pagopa/hexagonal-core";
 import type { Result } from "neverthrow";
 import type { ZodType } from "zod";
 
@@ -44,6 +45,7 @@ export abstract class CosmosServiceRepository<TDto extends object, TDomain> {
     private readonly entityName: string,
     private readonly schema: ZodType<TDto>,
     private readonly toDomain: (dto: TDto) => TDomain,
+    private readonly logger: Logger,
   ) {}
 
   /**
@@ -57,10 +59,23 @@ export abstract class CosmosServiceRepository<TDto extends object, TDomain> {
   ): Promise<Result<TDomain, GenericError | NotFoundError>> {
     const cosmosResponse = await ResultAsync.fromPromise(
       this.container.item(serviceId, serviceId).read<Record<string, unknown>>(),
-      (error) =>
-        new GenericError(
+      (error) => {
+        const properties = {
+          entityName: this.entityName,
+          operation: "cosmosRead",
+          serviceId,
+        };
+
+        if (error instanceof Error) {
+          this.logger.trackException({ error, properties });
+        } else {
+          this.logger.error("Cosmos read failed", properties);
+        }
+
+        return new GenericError(
           `Unable to read ${this.entityName} '${serviceId}' from Cosmos: ${formatError(error)}`,
-        ),
+        );
+      },
     );
 
     if (cosmosResponse.isErr()) {
@@ -74,6 +89,13 @@ export abstract class CosmosServiceRepository<TDto extends object, TDomain> {
     }
 
     if (response.statusCode !== 200) {
+      this.logger.error("Unexpected Cosmos response", {
+        entityName: this.entityName,
+        operation: "cosmosRead",
+        serviceId,
+        statusCode: response.statusCode,
+      });
+
       return err(
         new GenericError(
           `Unexpected Cosmos response for ${this.entityName} '${serviceId}': ${response.statusCode}`,
@@ -84,6 +106,13 @@ export abstract class CosmosServiceRepository<TDto extends object, TDomain> {
     const parsedService = this.schema.safeParse(response.resource);
 
     if (!parsedService.success) {
+      this.logger.error("Invalid Cosmos document", {
+        entityName: this.entityName,
+        operation: "cosmosDecode",
+        serviceId,
+        validationIssueCount: parsedService.error.issues.length,
+      });
+
       return err(
         new GenericError(
           `Invalid ${this.entityName} document: ${parsedService.error.message}`,

@@ -1,3 +1,4 @@
+import type { Logger } from "@pagopa/hexagonal-core";
 import type { Result } from "neverthrow";
 import type { Pool } from "pg";
 
@@ -33,6 +34,7 @@ export class PostgresTopicRepository implements TopicRepository {
     private readonly pool: Pool,
     schema: string,
     table: string,
+    private readonly logger: Logger,
   ) {
     this.relation = `${quoteIdentifier(schema)}.${quoteIdentifier(table)}`;
   }
@@ -52,12 +54,24 @@ export class PostgresTopicRepository implements TopicRepository {
         `SELECT id, name FROM ${this.relation} WHERE id = $1 AND deleted = false LIMIT 1`,
         [topicId],
       ),
-      (error) =>
-        new GenericError(
+      (error) => {
+        const properties = {
+          operation: "postgresTopicQuery",
+          topicId,
+        };
+
+        if (error instanceof Error) {
+          this.logger.trackException({ error, properties });
+        } else {
+          this.logger.error("PostgreSQL topic query failed", properties);
+        }
+
+        return new GenericError(
           error instanceof Error
             ? `${error.name}: ${error.message}`
             : "PostgreSQL query failed",
-        ),
+        );
+      },
     );
 
     if (queryResult.isErr()) {
@@ -73,6 +87,12 @@ export class PostgresTopicRepository implements TopicRepository {
     const parsedTopic = postgresServiceTopicDtoSchema.safeParse(result.rows[0]);
 
     if (!parsedTopic.success) {
+      this.logger.error("Invalid PostgreSQL topic", {
+        operation: "postgresTopicDecode",
+        topicId,
+        validationIssueCount: parsedTopic.error.issues.length,
+      });
+
       return err(new GenericError(parsedTopic.error.message));
     }
 

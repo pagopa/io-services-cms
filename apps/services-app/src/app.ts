@@ -94,9 +94,11 @@ export const createApp = (
   const database = cosmosClient.database(config.CMS_COSMOSDB_NAME);
   const lifecycleRepository = new CosmosServiceLifecycleRepository(
     database.container(config.CMS_COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
+    logger,
   );
   const publicationRepository = new CosmosServicePublicationRepository(
     database.container(config.CMS_COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
+    logger,
   );
 
   // Postgres initialization
@@ -105,6 +107,7 @@ export const createApp = (
     topicPool,
     config.TOPIC_SCHEMA,
     config.TOPIC_TABLE,
+    logger,
   );
 
   server.addHook("onClose", async () => topicPool.end());
@@ -116,6 +119,7 @@ export const createApp = (
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      logger,
     ),
   );
 
