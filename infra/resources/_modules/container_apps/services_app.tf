@@ -21,6 +21,7 @@ module "services_ca" {
       name  = "io-services"
 
       app_settings = {
+        APPLICATIONINSIGHTS_CONNECTION_STRING       = var.appi_connection_string
         CMS_COSMOSDB_CONTAINER_SERVICES_LIFECYCLE   = "services-lifecycle"
         CMS_COSMOSDB_CONTAINER_SERVICES_PUBLICATION = "services-publication"
         CMS_COSMOSDB_ENDPOINT                       = data.azurerm_cosmosdb_account.cosmos.endpoint
