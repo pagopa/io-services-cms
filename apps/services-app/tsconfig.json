@@ -12,5 +12,6 @@
     "allowSyntheticDefaultImports": true,
     "skipLibCheck": true,
     "sourceMap": true
-  }
+  },
+  "exclude": ["node_modules", "**/__tests__/*", "vitest.config.ts", "dist"]
 }
