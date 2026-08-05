@@ -1,5 +1,11 @@
 # services-app
 
+## 0.1.1
+
+### Patch Changes
+
+- b80bd21e: Added basic logging configuration
+
 ## 0.1.0
 
 ### Minor Changes
