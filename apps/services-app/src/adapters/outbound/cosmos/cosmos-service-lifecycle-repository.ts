@@ -1,4 +1,5 @@
 import type { Container } from "@azure/cosmos";
+import type { Logger } from "@pagopa/hexagonal-core";
 
 import type { ServiceLifecycleRepository } from "../../../application/ports/service-lifecycle-repository.js";
 
@@ -22,12 +23,13 @@ export class CosmosServiceLifecycleRepository
    *
    * @param container - The container storing lifecycle service documents.
    */
-  constructor(container: Container) {
+  constructor(container: Container, logger: Logger) {
     super(
       container,
       "ServiceLifecycle",
       cosmosServiceLifecycleDtoSchema,
       cosmosServiceLifecycleDtoToDomain,
+      logger,
     );
   }
 }

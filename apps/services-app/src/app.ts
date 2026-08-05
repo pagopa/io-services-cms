@@ -1,5 +1,9 @@
+import type { AppInsightsTelemetryClient } from "@pagopa/hexagonal-core/adapters/logger";
 import type { FastifyInstance } from "fastify";
 
+import { SeverityNumber, logs } from "@opentelemetry/api-logs";
+import { emitCustomEvent } from "@pagopa/azure-tracing/logger";
+import { makeApplicationInsightsLogger } from "@pagopa/hexagonal-core/adapters/logger";
 import fastify from "fastify";
 import { Pool } from "pg";
 
@@ -36,8 +40,45 @@ const createTopicPool = (config: AppConfig) =>
 export const createApp = (
   config: AppConfig,
 ): {
+  logger: ReturnType<typeof makeApplicationInsightsLogger>;
   server: FastifyInstance;
 } => {
+  const aiLogger = logs.getLogger("io-services-app");
+  const stringify = (
+    properties?: Record<string, unknown>,
+  ): Record<string, string> =>
+    Object.fromEntries(
+      Object.entries(properties ?? {}).map(([key, value]) => [
+        key,
+        String(value),
+      ]),
+    );
+
+  const client: AppInsightsTelemetryClient = {
+    trackEvent: ({ name, properties }) =>
+      emitCustomEvent(name, stringify(properties))(),
+    trackException: ({ exception, properties }) =>
+      aiLogger.emit({
+        attributes: {
+          ...stringify(properties),
+          "exception.stack": exception.stack ?? "",
+        },
+        body: exception.message,
+        severityNumber: SeverityNumber.ERROR,
+      }),
+    trackTrace: ({ message, properties, severity }) =>
+      aiLogger.emit({
+        attributes: stringify(properties),
+        body: message,
+        severityNumber: severity as unknown as SeverityNumber,
+      }),
+  };
+
+  const logger = makeApplicationInsightsLogger({
+    baseProperties: { service: "io-services-app" },
+    client,
+  });
+
   const server = fastify({
     // We only enable access logs during local development.
     logger: config.NODE_ENV === "development",
@@ -53,9 +94,11 @@ export const createApp = (
   const database = cosmosClient.database(config.CMS_COSMOSDB_NAME);
   const lifecycleRepository = new CosmosServiceLifecycleRepository(
     database.container(config.CMS_COSMOSDB_CONTAINER_SERVICES_LIFECYCLE),
+    logger,
   );
   const publicationRepository = new CosmosServicePublicationRepository(
     database.container(config.CMS_COSMOSDB_CONTAINER_SERVICES_PUBLICATION),
+    logger,
   );
 
   // Postgres initialization
@@ -64,6 +107,7 @@ export const createApp = (
     topicPool,
     config.TOPIC_SCHEMA,
     config.TOPIC_TABLE,
+    logger,
   );
 
   server.addHook("onClose", async () => topicPool.end());
@@ -75,8 +119,9 @@ export const createApp = (
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      logger,
     ),
   );
 
-  return { server };
+  return { logger, server };
 };

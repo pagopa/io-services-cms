@@ -1,4 +1,5 @@
 import { type Container, RestError } from "@azure/cosmos";
+import { noopLogger } from "@pagopa/hexagonal-core/adapters/logger";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -28,9 +29,10 @@ describe("CosmosServiceLifecycleRepository", () => {
       statusCode: 200,
     });
 
-    const result = await new CosmosServiceLifecycleRepository(container).get(
-      aService.id,
-    );
+    const result = await new CosmosServiceLifecycleRepository(
+      container,
+      noopLogger,
+    ).get(aService.id);
 
     expect(result._unsafeUnwrap()).toEqual(aLifecycleService);
     expect(item).toHaveBeenCalledWith(aService.id, aService.id);
@@ -45,9 +47,10 @@ describe("CosmosServicePublicationRepository", () => {
       statusCode: 200,
     });
 
-    const result = await new CosmosServicePublicationRepository(container).get(
-      aService.id,
-    );
+    const result = await new CosmosServicePublicationRepository(
+      container,
+      noopLogger,
+    ).get(aService.id);
 
     expect(result._unsafeUnwrap()).toEqual(aPublicationService);
   });
@@ -56,24 +59,36 @@ describe("CosmosServicePublicationRepository", () => {
     const { container, read } = makeContainer();
     read.mockResolvedValue({ statusCode: 404 });
 
-    const result = await new CosmosServicePublicationRepository(container).get(
-      aService.id,
-    );
+    const result = await new CosmosServicePublicationRepository(
+      container,
+      noopLogger,
+    ).get(aService.id);
 
     expect(result._unsafeUnwrapErr().kind).toBe("NotFoundError");
   });
 
   it("returns GenericError for SDK failures", async () => {
     const { container, read } = makeContainer();
-    read.mockRejectedValue(new Error("Unavailable"));
+    const error = new Error("Unavailable");
+    const logger = { ...noopLogger, trackException: vi.fn() };
+    read.mockRejectedValue(error);
 
-    const result = await new CosmosServicePublicationRepository(container).get(
-      aService.id,
-    );
+    const result = await new CosmosServicePublicationRepository(
+      container,
+      logger,
+    ).get(aService.id);
 
     expect(result._unsafeUnwrapErr()).toMatchObject({
       kind: "GenericError",
       message: `Generic error: Unable to read ServicePublication '${aService.id}' from Cosmos: Error: Unavailable`,
+    });
+    expect(logger.trackException).toHaveBeenCalledWith({
+      error,
+      properties: {
+        entityName: "ServicePublication",
+        operation: "cosmosRead",
+        serviceId: aService.id,
+      },
     });
   });
 
@@ -85,9 +100,10 @@ describe("CosmosServicePublicationRepository", () => {
       }),
     );
 
-    const result = await new CosmosServicePublicationRepository(container).get(
-      aService.id,
-    );
+    const result = await new CosmosServicePublicationRepository(
+      container,
+      noopLogger,
+    ).get(aService.id);
 
     expect(result._unsafeUnwrapErr()).toMatchObject({
       kind: "GenericError",
@@ -97,12 +113,20 @@ describe("CosmosServicePublicationRepository", () => {
 
   it("returns GenericError for an invalid document", async () => {
     const { container, read } = makeContainer();
+    const logger = { ...noopLogger, error: vi.fn() };
     read.mockResolvedValue({ resource: { id: aService.id }, statusCode: 200 });
 
-    const result = await new CosmosServicePublicationRepository(container).get(
-      aService.id,
-    );
+    const result = await new CosmosServicePublicationRepository(
+      container,
+      logger,
+    ).get(aService.id);
 
     expect(result._unsafeUnwrapErr().kind).toBe("GenericError");
+    expect(logger.error).toHaveBeenCalledWith("Invalid Cosmos document", {
+      entityName: "ServicePublication",
+      operation: "cosmosDecode",
+      serviceId: aService.id,
+      validationIssueCount: expect.any(Number),
+    });
   });
 });
