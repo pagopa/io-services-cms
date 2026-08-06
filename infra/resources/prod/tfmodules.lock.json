@@ -103,7 +103,7 @@
   },
   "container_apps.services_ca": {
     "hash": "860b4a28c2ed17b0061483d238aab56f8074a6e4fe0db399b36583423cf145be",
-    "version": "6.0.1",
+    "version": "6.1.0",
     "name": "azure_container_app",
     "source": "https://registry.terraform.io/modules/pagopa-dx/azure-container-app/azurerm/6.1.0"
   },
