@@ -9,6 +9,7 @@ import { Pool } from "pg";
 
 import { AppConfig } from "./adapters/inbound/config/config.js";
 import { mountGetServiceInternalHandler } from "./adapters/inbound/fastify/get-service-internal.handler.js";
+import { mountHealthcheckHandler } from "./adapters/inbound/fastify/healthcheck.handler.js";
 import { mountInfoHandler } from "./adapters/inbound/fastify/info.handler.js";
 import {
   createConnectionStringCosmosClient,
@@ -16,9 +17,12 @@ import {
 } from "./adapters/outbound/cosmos/cosmos-client.js";
 import { CosmosServiceLifecycleRepository } from "./adapters/outbound/cosmos/cosmos-service-lifecycle-repository.js";
 import { CosmosServicePublicationRepository } from "./adapters/outbound/cosmos/cosmos-service-publication-repository.js";
+import { CosmosClientHealthcheckAdapter } from "./adapters/outbound/healthcheckers/cosmos.adapter.js";
+import { PostgresPoolHealthcheckAdapter } from "./adapters/outbound/healthcheckers/postgres.adapter.js";
 import { PackageJsonAppInfoReader } from "./adapters/outbound/package-json/package-json-app-info-reader.js";
 import { PostgresTopicRepository } from "./adapters/outbound/postgres/postgres-topic-repository.js";
 import { makeGetServiceInternalUseCase } from "./application/use-cases/get-service-internal.use-case.js";
+import { makeHealthcheckUseCase } from "./application/use-cases/healthcheck.use-case.js";
 import { makeGetInfoUseCase } from "./application/use-cases/info.use-case.js";
 
 const createCmsCosmosClient = (config: AppConfig) =>
@@ -113,6 +117,13 @@ export const createApp = (
   server.addHook("onClose", async () => topicPool.end());
 
   mountInfoHandler(server, makeGetInfoUseCase(appInfoReader));
+  mountHealthcheckHandler(
+    server,
+    makeHealthcheckUseCase([
+      new CosmosClientHealthcheckAdapter(cosmosClient, "cms"),
+      new PostgresPoolHealthcheckAdapter(topicPool, "topics"),
+    ]),
+  );
   mountGetServiceInternalHandler(
     server,
     makeGetServiceInternalUseCase(
