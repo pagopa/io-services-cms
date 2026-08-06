@@ -16,3 +16,6 @@ overrides:
     /api/v1/manage/services:
       response_time_threshold: 2
       availability_threshold: 0.90
+    /api/v1/manage/services/{serviceId}/keys:
+      response_time_threshold: 2
+      availability_threshold: 0.99
