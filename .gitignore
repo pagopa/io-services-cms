@@ -2,6 +2,11 @@ dist
 .eslintcache
 local.settings.json
 .env
+.env.development
+.env.local
+.env.production
+.env.test
+.env.staging
 .DS_Store
 coverage
 bin
