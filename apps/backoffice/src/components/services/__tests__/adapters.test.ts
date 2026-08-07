@@ -1,11 +1,11 @@
 import * as E from "fp-ts/lib/Either";
 import * as t from "io-ts";
 import { describe, expect, it } from "vitest";
-import { ServicePayload as ApiServicePayload } from "../../../generated/api/ServicePayload";
+import { CreateServicePayload as ApiServicePayload } from "../../../generated/api/CreateServicePayload";
 import { ServiceCreateUpdatePayload } from "../../../types/service";
 import {
   fromServiceCreateUpdatePayloadToApiServicePayload,
-  fromServiceLifecycleToServiceCreateUpdatePayload
+  fromServiceLifecycleToServiceCreateUpdatePayload,
 } from "../adapters";
 import { CTA_PREFIX_URL_SCHEMES } from "../service-create-update/cta-manager/constants";
 
@@ -24,27 +24,29 @@ const aValidServiceCreateUpdatePayload: ServiceCreateUpdatePayload = {
         enabled: true,
         urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
         text: "aCtaText1",
-        url: "aCtaUrl1"
+        url: "aCtaUrl1",
       },
       cta_2: {
         enabled: false,
         urlPrefix: CTA_PREFIX_URL_SCHEMES.EXTERNAL,
         text: "",
-        url: ""
-      }
+        url: "",
+      },
     },
     scope: "LOCAL",
+    topic_id: 1,
     assistanceChannels: [
       { type: "email", value: "aValidEmail" },
       { type: "pec", value: "aValidPec" },
       { type: "phone", value: "aValidPhoneNumber" },
-      { type: "support_url", value: "aValidUrl" }
-    ]
+      { type: "support_url", value: "aValidUrl" },
+    ],
   },
   require_secure_channel: false,
+  suitable_for_minors: true,
   authorized_cidrs: ["0.0.0.0/0"],
   authorized_recipients: [],
-  max_allowed_payment_amount: 0
+  max_allowed_payment_amount: 0,
 };
 
 const aCtaResult = `---
@@ -58,7 +60,7 @@ en:
     action: "${CTA_PREFIX_URL_SCHEMES.EXTERNAL}aCtaUrl1"
 ---`;
 
-const anApiServicePayloadResult = ({
+const anApiServicePayloadResult = {
   name: aValidServiceCreateUpdatePayload.name,
   description: aValidServiceCreateUpdatePayload.description,
   metadata: {
@@ -76,21 +78,23 @@ const anApiServicePayloadResult = ({
     privacy_url: aValidServiceCreateUpdatePayload.metadata.privacy_url,
     address: aValidServiceCreateUpdatePayload.metadata.address,
     cta: aCtaResult,
-    scope: aValidServiceCreateUpdatePayload.metadata.scope
+    scope: aValidServiceCreateUpdatePayload.metadata.scope,
+    topic_id: aValidServiceCreateUpdatePayload.metadata.topic_id,
   },
   require_secure_channel: false,
+  suitable_for_minors: true,
   authorized_cidrs: ["0.0.0.0/0"],
   authorized_recipients: [],
-  max_allowed_payment_amount: 0
-} as unknown) as ApiServicePayload;
+  max_allowed_payment_amount: 0,
+} as unknown as ApiServicePayload;
 
 describe("[Services] Adapters", () => {
   it("should return a valid Api ServicePayload if a valid frontend service payload is provided", () => {
     const result = fromServiceCreateUpdatePayloadToApiServicePayload(
-      aValidServiceCreateUpdatePayload
-    ) as t.Validation<ServiceCreateUpdatePayload>;
+      aValidServiceCreateUpdatePayload,
+    ) as t.Validation<ApiServicePayload>;
 
-    expect(E.isRight(result));
+    expect(E.isRight(result)).toBe(true);
 
     if (E.isRight(result)) {
       expect(result.right).toStrictEqual(anApiServicePayloadResult);
@@ -100,19 +104,43 @@ describe("[Services] Adapters", () => {
   it("should return a Validation error if an invalid frontend service payload is provided", () => {
     const anInvalidServiceCreateUpdatePayload = {
       ...aValidServiceCreateUpdatePayload,
-      name: ""
+      name: "",
     };
 
     const result = fromServiceCreateUpdatePayloadToApiServicePayload(
-      anInvalidServiceCreateUpdatePayload
-    ) as t.Validation<ServiceCreateUpdatePayload>;
+      anInvalidServiceCreateUpdatePayload,
+    ) as t.Validation<ApiServicePayload>;
 
-    expect(E.isLeft(result));
+    expect(E.isLeft(result)).toBe(true);
+  });
+
+  it("should preserve a false suitable_for_minors value in the API payload", () => {
+    const result = fromServiceCreateUpdatePayloadToApiServicePayload({
+      ...aValidServiceCreateUpdatePayload,
+      suitable_for_minors: false,
+    }) as t.Validation<ApiServicePayload>;
+
+    expect(E.isRight(result)).toBe(true);
+    if (E.isRight(result)) {
+      expect(result.right.suitable_for_minors).toBe(false);
+    }
+  });
+
+  it("should omit suitable_for_minors from the API payload when undefined", () => {
+    const result = fromServiceCreateUpdatePayloadToApiServicePayload({
+      ...aValidServiceCreateUpdatePayload,
+      suitable_for_minors: undefined,
+    }) as t.Validation<ApiServicePayload>;
+
+    expect(E.isRight(result)).toBe(true);
+    if (E.isRight(result)) {
+      expect("suitable_for_minors" in result.right).toBe(false);
+    }
   });
 
   it("should return a valid frontend service payload if a valid Api ServiceLifecycle is provided", () => {
     const result = fromServiceLifecycleToServiceCreateUpdatePayload(
-      anApiServicePayloadResult
+      anApiServicePayloadResult,
     );
     const aServiceCreateUpdatePayload = {
       ...aValidServiceCreateUpdatePayload,
@@ -120,8 +148,8 @@ describe("[Services] Adapters", () => {
         ...aValidServiceCreateUpdatePayload.metadata,
         group_id: undefined,
         token_name: "",
-        topic_id: undefined
-      }
+        topic_id: undefined,
+      },
     };
     expect(result).toStrictEqual(aServiceCreateUpdatePayload);
   });
@@ -131,8 +159,8 @@ describe("[Services] Adapters", () => {
       ...anApiServicePayloadResult,
       metadata: {
         ...anApiServicePayloadResult.metadata,
-        topic: { id: 0, name: "Altro" }
-      }
+        topic: { id: 0, name: "Altro" },
+      },
     });
     const aServiceCreateUpdatePayload = {
       ...aValidServiceCreateUpdatePayload,
@@ -140,9 +168,50 @@ describe("[Services] Adapters", () => {
         ...aValidServiceCreateUpdatePayload.metadata,
         group_id: undefined,
         token_name: "",
-        topic_id: 0
-      }
+        topic_id: 0,
+      },
     };
     expect(result).toStrictEqual(aServiceCreateUpdatePayload);
+  });
+
+  it("should preserve a false suitable_for_minors value in the frontend payload", () => {
+    const result = fromServiceLifecycleToServiceCreateUpdatePayload({
+      ...anApiServicePayloadResult,
+      suitable_for_minors: false,
+    });
+
+    expect(result.suitable_for_minors).toBe(false);
+  });
+
+  it.each([true, false])(
+    "should preserve suitable_for_minors=%s through the edit flow",
+    (suitableForMinors) => {
+      const formPayload = fromServiceLifecycleToServiceCreateUpdatePayload({
+        ...anApiServicePayloadResult,
+        metadata: {
+          ...anApiServicePayloadResult.metadata,
+          topic: { id: 1, name: "A topic" },
+        },
+        suitable_for_minors: suitableForMinors,
+      });
+      const result = fromServiceCreateUpdatePayloadToApiServicePayload(
+        formPayload,
+      ) as t.Validation<ApiServicePayload>;
+
+      expect(E.isRight(result)).toBe(true);
+      if (E.isRight(result)) {
+        expect(result.right.suitable_for_minors).toBe(suitableForMinors);
+      }
+    },
+  );
+
+  it("should preserve an absent suitable_for_minors value in the frontend payload", () => {
+    const { suitable_for_minors: _, ...serviceWithoutSuitability } =
+      anApiServicePayloadResult;
+    const result = fromServiceLifecycleToServiceCreateUpdatePayload(
+      serviceWithoutSuitability,
+    );
+
+    expect(result.suitable_for_minors).toBeUndefined();
   });
 });
