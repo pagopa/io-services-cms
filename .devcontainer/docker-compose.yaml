@@ -46,7 +46,7 @@ services:
 
   # "cosmosdb" is the name of the Docker Compose service, and is also used as the hostname for incoming connections
   cosmosdb:
-    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview
+    image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-preview@sha256:a8b93e25520e999d867ed3949e7de7f4ff3ddab23ca95fa6f90230de5dd9729b
     networks:
       - dev-network
     profiles: ['cosmosdb']
@@ -61,7 +61,7 @@ services:
       PROTOCOL: https
 
   azurite:
-    image: mcr.microsoft.com/azure-storage/azurite:latest
+    image: mcr.microsoft.com/azure-storage/azurite:latest@sha256:76b8127d608fab8287a14a4bfeb9a5502cdcffb4bf1e86f09f324ebb0e70edba
     profiles: ['storage', 'eventhub']
     ports:
       - '10000:10000'
