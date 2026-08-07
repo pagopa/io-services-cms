@@ -21,7 +21,7 @@
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.0.0",
+    "@azure/cosmos": "^4.10.0",
     "@azure/identity": "^4.13.0",
     "@opentelemetry/api-logs": "^0.218.0",
     "@pagopa/azure-tracing": "^0.5.5",
@@ -33,10 +33,10 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@pagopa/eslint-config": "^4.0.6",
     "@types/node": "catalog:",
     "@types/pg": "^8.15.5",
     "@vitest/coverage-v8": "catalog:",
-    "@pagopa/eslint-config": "^4.0.6",
     "eslint": "^9.39.4",
     "prettier": "catalog:",
     "typescript": "^5.8.3",

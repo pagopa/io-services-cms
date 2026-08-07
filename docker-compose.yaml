@@ -12,6 +12,7 @@ services:
     image: mcr.microsoft.com/cosmosdb/linux/azure-cosmos-emulator:vnext-latest
     environment:
       ENABLE_INIT_DATA: 'true'
+      GATEWAY_PUBLIC_ENDPOINT: host.docker.internal
       PROTOCOL: http
     healthcheck:
       test: ['CMD', 'curl', '--fail', 'http://localhost:8080/ready']
@@ -71,6 +72,8 @@ services:
     build:
       context: .
       dockerfile: apps/services-app/Dockerfile
+    extra_hosts:
+      - 'host.docker.internal:host-gateway'
     environment:
       CMS_COSMOSDB_CONNECTION_STRING: AccountEndpoint=http://cosmosdb:8081/;AccountKey=C2y6yDjf5/R+ob0N8A7Cgv30VRDJIWEHLM+4QDU5DE2nQ9nDuVTqobD4b8mGGyPMbIZnqyMsEcaGQy67XIw/Jw==;
       CMS_COSMOSDB_CONTAINER_SERVICES_LIFECYCLE: services-lifecycle
@@ -101,7 +104,7 @@ services:
           'wget',
           '--spider',
           '--quiet',
-          'http://localhost:3000/api/health',
+          'http://127.0.0.1:3000/api/health',
         ]
       interval: 10s
       timeout: 5s
