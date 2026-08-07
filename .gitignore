@@ -3,7 +3,6 @@ dist
 local.settings.json
 .env
 .env.development
-.env.local
 .env.production
 .env.test
 .env.staging
