@@ -23,6 +23,11 @@ module "eventhub" {
   action_group_id = var.error_action_group_id
   metric_alerts   = local.evhns.metric_alerts
 
+  diagnostic_settings = {
+    enabled                    = true
+    log_analytics_workspace_id = var.log_analytics_workspace_id
+  }
+
   use_case = local.evhns.use_case
 
   tags = var.tags

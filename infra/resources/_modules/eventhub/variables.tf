@@ -81,3 +81,8 @@ variable "error_action_group_id" {
   description = "Id of the action group to use for error notifications"
   type        = string
 }
+
+variable "log_analytics_workspace_id" {
+  description = "ID of the Log Analytics workspace receiving Event Hubs diagnostic logs and metrics"
+  type        = string
+}
