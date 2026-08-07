@@ -68,7 +68,7 @@ jobs:
           bash ./terraform.sh plan ${{ env.AZURE_ENVIRONMENT }} -lock-timeout=3000s -out=tfplan-${{ env.AZURE_ENVIRONMENT }}-${{ github.sha }} -input=false
 
       - name: Upload plans as artifacts
-        uses: pagopa/dx/actions/terraform-plan-upload@main
+        uses: pagopa/dx/actions/terraform-plan-upload@5dd06bf87a5b37b0c1515b8c4891b53445f723c7 # main
         env:
           ARTIFACT_ENC_KEY: ${{ secrets.ARTIFACT_ENC_KEY }}
         with:
@@ -100,7 +100,7 @@ jobs:
           fetch-depth: 0
 
       - name: Download plans as artifact
-        uses: pagopa/dx/actions/terraform-plan-download@main
+        uses: pagopa/dx/actions/terraform-plan-download@5dd06bf87a5b37b0c1515b8c4891b53445f723c7 # main
         env:
           ARTIFACT_ENC_KEY: ${{ secrets.ARTIFACT_ENC_KEY }}
         with:

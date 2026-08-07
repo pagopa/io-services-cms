@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   drift_detection_itn:
-    uses: pagopa/dx/.github/workflows/infra_drift_detection.yml@main
+    uses: pagopa/dx/.github/workflows/infra_drift_detection.yml@5dd06bf87a5b37b0c1515b8c4891b53445f723c7 # main
     name: Drift Detection Italy North
     secrets: inherit
     with:
@@ -37,11 +37,11 @@ jobs:
       - name: Setup terraform
         id: setup-version
         # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/terraform/terraform-install-action
-        uses: pagopa/eng-github-actions-iac-template/terraform/terraform-install-action@main
+        uses: pagopa/eng-github-actions-iac-template/terraform/terraform-install-action@fa09a2b6def96e72c1b529ade6bd031c18562978 # main
 
       - name: Terraform drift detection
         # from https://github.com/pagopa/eng-github-actions-iac-template/tree/main/azure/terraform-driftdetection-azure-action
-        uses: pagopa/eng-github-actions-iac-template/azure/terraform-driftdetection-azure-action@main
+        uses: pagopa/eng-github-actions-iac-template/azure/terraform-driftdetection-azure-action@fa09a2b6def96e72c1b529ade6bd031c18562978 # main
         with:
           client_id: ${{ secrets.ARM_CLIENT_ID }}
           tenant_id: ${{ secrets.ARM_TENANT_ID }}
