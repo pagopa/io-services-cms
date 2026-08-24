@@ -33,7 +33,7 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_DB: reviewer
-      POSTGRES_PASSWORD: postgres-local
+      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_ADMIN_PASSWORD:-local}
       POSTGRES_USER: postgres
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres -d reviewer']
@@ -52,11 +52,11 @@ services:
     command:
       - -url=jdbc:postgresql://postgres:5432/reviewer
       - -user=postgres
-      - -password=postgres-local
+      - -password=${LOCAL_POSTGRES_ADMIN_PASSWORD:-local}
       - -placeholders.appUser=reviewerusr
-      - -placeholders.appUserPassword=services-app-local
+      - -placeholders.appUserPassword=${LOCAL_POSTGRES_APP_PASSWORD:-local}
       - -placeholders.readonlyUser=local_readonly
-      - -placeholders.readonlyUserPassword=readonly-local
+      - -placeholders.readonlyUserPassword=${LOCAL_POSTGRES_READONLY_PASSWORD:-local}
       - -connectRetries=10
       - migrate
     depends_on:
@@ -84,7 +84,7 @@ services:
       PORT: 3000
       POSTGRES_DATABASE: reviewer
       POSTGRES_HOST: postgres
-      POSTGRES_PASSWORD: services-app-local
+      POSTGRES_PASSWORD: ${LOCAL_POSTGRES_APP_PASSWORD:-local}
       POSTGRES_PORT: 5432
       POSTGRES_SSL_ENABLED: 'false'
       POSTGRES_USER: reviewerusr
@@ -134,7 +134,7 @@ services:
     working_dir: /app
     volumes:
       - ./docker/cms/setup-azurite-containers.js:/app/setup-azurite-containers.js:ro
-    command: sh -c "npm install @azure/storage-blob@^12.28.0 @azure/storage-queue@^12.28.1 @azure/data-tables@^13.3.2 && node setup-azurite-containers.js"
+    command: sh -c "npm install @azure/storage-blob@^12.28.0 @azure/storage-queue@^12.28.1 && node setup-azurite-containers.js"
     networks:
       - local
 
@@ -166,7 +166,7 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: eventhubs:9092
       KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: SASL_PLAINTEXT
       KAFKA_CLUSTERS_0_PROPERTIES_SASL_MECHANISM: PLAIN
-      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="Endpoint=sb://eventhubs;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";'
+      KAFKA_CLUSTERS_0_PROPERTIES_SASL_JAAS_CONFIG: 'org.apache.kafka.common.security.plain.PlainLoginModule required username="$$ConnectionString" password="Endpoint=sb://eventhubs;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";' # NOSONAR: fixed public credential required by the local Event Hubs emulator
     ports:
       - '8002:8080'
     networks:

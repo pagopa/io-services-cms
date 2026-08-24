@@ -1,6 +1,5 @@
 const { BlobServiceClient } = require("@azure/storage-blob");
 const { QueueServiceClient } = require("@azure/storage-queue");
-const { TableServiceClient } = require("@azure/data-tables");
 
 const connectionString =
   "DefaultEndpointsProtocol=http;" +
@@ -14,10 +13,6 @@ const blobServiceClient =
   BlobServiceClient.fromConnectionString(connectionString);
 const queueServiceClient =
   QueueServiceClient.fromConnectionString(connectionString);
-const tableServiceClient = TableServiceClient.fromConnectionString(
-  connectionString,
-  { allowInsecureConnection: true },
-);
 
 const containers = ["services", "activations"];
 const queues = [
@@ -46,8 +41,6 @@ const queues = [
   "request-services-history-ingestion-retry",
   "request-services-history-ingestion-retry-poison",
 ];
-const tables = [];
-
 const createContainerIfNotExists = async (name) => {
   try {
     const containerClient = blobServiceClient.getContainerClient(name);
@@ -68,23 +61,9 @@ const createQueueIfNotExists = async (name) => {
   }
 };
 
-const createTableIfNotExists = async (name) => {
-  try {
-    await tableServiceClient.createTable(name);
-    console.log(`Table ${name} created.`);
-  } catch (error) {
-    if (error.statusCode === 409) {
-      console.log(`Table ${name} already exists.`);
-      return;
-    }
-    console.error(`Error creating table ${name}:`, error);
-  }
-};
-
 (async () => {
   await Promise.all([
     ...containers.map(createContainerIfNotExists),
     ...queues.map(createQueueIfNotExists),
-    ...tables.map(createTableIfNotExists),
   ]);
 })();

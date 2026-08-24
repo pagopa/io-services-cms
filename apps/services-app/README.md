@@ -24,6 +24,9 @@ pnpm --filter services-app dev:local
 The tracked `.env.local` points the application at the exposed localhost ports.
 Personal `.env` files are not used by this command. Azure Monitor is disabled
 outside production, so local telemetry is not sent to Application Insights.
+Compose uses `local` for all PostgreSQL passwords by default. Set
+`LOCAL_POSTGRES_ADMIN_PASSWORD`, `LOCAL_POSTGRES_APP_PASSWORD`, and
+`LOCAL_POSTGRES_READONLY_PASSWORD` before starting Compose to override them.
 
 Run the application and its dependencies entirely in Docker:
 
