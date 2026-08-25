@@ -1,5 +1,11 @@
 # services-app
 
+## 0.2.0
+
+### Minor Changes
+
+- b0e98570: Added Health check endpoint
+
 ## 0.1.1
 
 ### Patch Changes
