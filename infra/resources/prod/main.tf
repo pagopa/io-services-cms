@@ -189,6 +189,8 @@ module "eventhub" {
 
   error_action_group_id = module.monitor.action_group_ids.offcall
 
+  log_analytics_workspace_id = data.azurerm_log_analytics_workspace.common.id
+
   tags = local.tags
 }
 
