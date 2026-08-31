@@ -42,6 +42,10 @@ module "services_ca" {
       liveness_probe = {
         path = "/api/info"
       }
+
+      readiness_probe = {
+        path = "/api/health"
+      }
     },
   ]
 
