@@ -1,6 +1,6 @@
 {
   "name": "io-services-cms",
-  "dockerComposeFile": "docker-compose.yaml",
+  "dockerComposeFile": ["../docker-compose.yaml", "docker-compose.yaml"],
   "service": "devcontainer",
   "workspaceFolder": "/workspace",
   "containerEnv": {
@@ -37,6 +37,7 @@
   // Use 'forwardPorts' to make a list of ports inside the container available locally.
   "forwardPorts": [
     1234, // Cosmos DB Emulator web interface
+    3000, // services-app
     7071 // Azure Functions Core Tools default port
   ],
   "customizations": {

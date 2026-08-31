@@ -1,3 +1,5 @@
 import { initAzureMonitor } from "@pagopa/azure-tracing/azure-monitor";
 
-initAzureMonitor();
+if (process.env.NODE_ENV === "production") {
+  initAzureMonitor();
+}
