@@ -176,6 +176,11 @@
         "label": "Servizio sensibile",
         "placeholder": ""
       },
+      "suitable_for_minors": {
+        "helperText": "I servizi abilitati ai minori possono essere visualizzati anche dai cittadini di età compresa tra i 14 e i 17 anni e sono autorizzati a inviare loro messaggi in app.",
+        "label": "Servizio abilitato ai minori",
+        "title": "Destinatari del servizio"
+      },
       "metadata": {
         "address": {
           "helperText": "",
@@ -494,6 +499,7 @@
       "privacyUrl": "Privacy",
       "sensitive": "Servizio sensibile",
       "serviceId": "ID Servizio",
+      "suitable_for_minors": "Servizio abilitato ai minori",
       "status": "Stato",
       "supportUrl": "Url di supporto",
       "topic": "Argomento",

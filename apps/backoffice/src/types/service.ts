@@ -17,6 +17,7 @@ export interface ServiceCommonData {
   max_allowed_payment_amount: number;
   name: string;
   require_secure_channel: boolean;
+  suitable_for_minors?: boolean;
 }
 
 export interface ServiceMetadata {

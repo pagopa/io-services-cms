@@ -11,11 +11,18 @@ Next.js automatically loads the versioned `.env.development` profile. The
 default configuration runs the BFF and uses MSW on the server to mock Selfcare,
 APIM, Services CMS, Cosmos DB, and subscription migration.
 
-Create `apps/backoffice/.env.local` with the required feature flag:
+Create `apps/backoffice/.env.local` with the required feature flags:
 
 ```dotenv
 FF_SUITABLE_FOR_MINORS_ENABLED=true
+NEXT_PUBLIC_FF_SUITABLE_FOR_MINORS_ENABLED=true
 ```
+
+The server flag exposes suitability in Backoffice responses. The public flag
+renders the field in the browser and is fixed when the application is built.
+Enable the CMS response flag first, then the Backoffice server flag, and enable
+the public flag only after responses include `suitable_for_minors`. Disable the
+flags in reverse order.
 
 Run the application from the repository root:
 
