@@ -1,4 +1,4 @@
-import type { NotFoundError, UseCase } from "@pagopa/hexagonal-core";
+import type { Logger, NotFoundError, UseCase } from "@pagopa/hexagonal-core";
 import type { Result } from "neverthrow";
 
 import { GenericError } from "@pagopa/hexagonal-core";
@@ -33,6 +33,7 @@ export type GetServiceInternalUseCase = UseCase<
 const enrichWithTopic = async (
   service: ServiceLifecycle | ServicePublication,
   topicRepository: TopicRepository,
+  logger: Logger,
 ): Promise<Result<EnrichedService, GenericError | NotFoundError>> => {
   const { topic_id: topicId, ...metadata } = service.data.metadata;
 
@@ -42,13 +43,21 @@ const enrichWithTopic = async (
 
   const topicResult = await topicRepository.get(topicId);
   if (topicResult.isErr()) {
-    return topicResult.error.kind === "NotFoundError"
-      ? err(
-          new GenericError(
-            `Service '${service.id}' references missing topic '${topicId}'`,
-          ),
-        )
-      : err(topicResult.error);
+    if (topicResult.error.kind === "NotFoundError") {
+      logger.warn("Service references missing topic", {
+        operation: "enrichServiceWithTopic",
+        serviceId: service.id,
+        topicId,
+      });
+
+      return err(
+        new GenericError(
+          `Service '${service.id}' references missing topic '${topicId}'`,
+        ),
+      );
+    }
+
+    return err(topicResult.error);
   }
 
   return ok({
@@ -79,6 +88,7 @@ export const makeGetServiceInternalUseCase =
     publicationRepository: ServicePublicationRepository,
     lifecycleRepository: ServiceLifecycleRepository,
     topicRepository: TopicRepository,
+    logger: Logger,
   ): GetServiceInternalUseCase =>
   async ({ serviceId }) => {
     const publicationResult = await publicationRepository.get(serviceId);
@@ -89,11 +99,11 @@ export const makeGetServiceInternalUseCase =
     ) {
       return publicationResult.isErr()
         ? err(publicationResult.error)
-        : enrichWithTopic(publicationResult.value, topicRepository);
+        : enrichWithTopic(publicationResult.value, topicRepository, logger);
     }
 
     const lifecycleResult = await lifecycleRepository.get(serviceId);
     return lifecycleResult.isErr()
       ? err(lifecycleResult.error)
-      : enrichWithTopic(lifecycleResult.value, topicRepository);
+      : enrichWithTopic(lifecycleResult.value, topicRepository, logger);
   };

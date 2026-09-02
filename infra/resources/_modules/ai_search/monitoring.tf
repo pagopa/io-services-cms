@@ -8,14 +8,14 @@ resource "azurerm_monitor_metric_alert" "srch_high_latency" {
   scopes              = [azurerm_search_service.srch.id]
   description         = "The maximum latency is greater than threshold. Runbook: https://pagopa.atlassian.net/wiki/spaces/IOPAE/pages/1119453217"
   severity            = 2
-  window_size         = "PT5M"
+  window_size         = "PT15M"
   frequency           = "PT5M"
   auto_mitigate       = true
 
   criteria {
     metric_namespace = "Microsoft.Search/searchServices"
     metric_name      = "SearchLatency"
-    aggregation      = "Maximum"
+    aggregation      = "Average"
     operator         = "GreaterThan"
     threshold        = 1
   }

@@ -1,6 +1,6 @@
 {
   "name": "services-app",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "type": "module",
   "main": "dist/main.js",
@@ -14,14 +14,17 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"src/**\"",
     "lint:fix": "eslint --fix \"src/**\"",
-    "dev": "tsx --watch --env-file=.env src/main.ts",
-    "start": "node dist/main.js",
+    "dev": "tsx --watch --env-file=.env --import ./src/instrumentation.ts ./src/main.ts",
+    "dev:local": "tsx --watch --env-file=.env.local --import ./src/instrumentation.ts ./src/main.ts",
+    "start": "node --import ./dist/instrumentation.js dist/main.js",
     "test": "vitest run",
     "coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@azure/cosmos": "^4.0.0",
+    "@azure/cosmos": "^4.10.0",
     "@azure/identity": "^4.13.0",
+    "@opentelemetry/api-logs": "^0.218.0",
+    "@pagopa/azure-tracing": "^0.5.5",
     "@pagopa/hexagonal-core": "^0.4.0",
     "@pagopa/hexagonal-fastify": "^0.2.0",
     "fastify": "^5.8.5",
@@ -30,10 +33,10 @@
     "zod": "^4.1.13"
   },
   "devDependencies": {
+    "@pagopa/eslint-config": "^4.0.6",
     "@types/node": "catalog:",
     "@types/pg": "^8.15.5",
     "@vitest/coverage-v8": "catalog:",
-    "@pagopa/eslint-config": "^4.0.6",
     "eslint": "^9.39.4",
     "prettier": "catalog:",
     "typescript": "^5.8.3",

@@ -1,4 +1,5 @@
 import type { Container } from "@azure/cosmos";
+import type { Logger } from "@pagopa/hexagonal-core";
 
 import type { ServicePublicationRepository } from "../../../application/ports/service-publication-repository.js";
 
@@ -25,12 +26,13 @@ export class CosmosServicePublicationRepository
    *
    * @param container - The container storing publication service documents.
    */
-  constructor(container: Container) {
+  constructor(container: Container, logger: Logger) {
     super(
       container,
       "ServicePublication",
       cosmosServicePublicationDtoSchema,
       cosmosServicePublicationDtoToDomain,
+      logger,
     );
   }
 }

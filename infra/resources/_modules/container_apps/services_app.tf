@@ -1,6 +1,6 @@
 module "services_ca" {
   source  = "pagopa-dx/azure-container-app/azurerm"
-  version = "~> 5.0"
+  version = "~> 6.1"
 
   environment = {
     prefix          = var.prefix
@@ -21,6 +21,7 @@ module "services_ca" {
       name  = "io-services"
 
       app_settings = {
+        APPLICATIONINSIGHTS_CONNECTION_STRING       = var.appi_connection_string
         CMS_COSMOSDB_CONTAINER_SERVICES_LIFECYCLE   = "services-lifecycle"
         CMS_COSMOSDB_CONTAINER_SERVICES_PUBLICATION = "services-publication"
         CMS_COSMOSDB_ENDPOINT                       = data.azurerm_cosmosdb_account.cosmos.endpoint
@@ -40,6 +41,10 @@ module "services_ca" {
 
       liveness_probe = {
         path = "/api/info"
+      }
+
+      readiness_probe = {
+        path = "/api/health"
       }
     },
   ]

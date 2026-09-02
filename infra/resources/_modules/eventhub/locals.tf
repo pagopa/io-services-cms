@@ -108,33 +108,32 @@ locals {
 
     metric_alerts = {
       throttled_requests = {
-        aggregation = "Count"
+        aggregation = "Total"
         metric_name = "ThrottledRequests"
-        description = "Too Many Throttled Requests"
+        description = "Event Hubs requests were throttled in the last 15 minutes"
         operator    = "GreaterThan"
-        threshold   = 20 #TODO: FINE TUNING NEEDED
+        threshold   = 0
         frequency   = "PT5M"
         window_size = "PT15M"
       },
-      user_errors = {
-        aggregation = "Count"
-        metric_name = "UserErrors"
-        description = "Too Many User Errors"
+      quota_exceeded_errors = {
+        aggregation = "Total"
+        metric_name = "QuotaExceededErrors"
+        description = "Event Hubs quota was exceeded in the last 15 minutes"
         operator    = "GreaterThan"
-        threshold   = 0 #TODO: FINE TUNING NEEDED
+        threshold   = 0
         frequency   = "PT5M"
         window_size = "PT15M"
       },
-      # active_connections = {
-      #   aggregation = "Average"
-      #   metric_name = "ActiveConnections"
-      #   description = null
-      #   operator    = "LessThanOrEqual"
-      #   threshold   = 0
-      #   frequency   = "PT5M"
-      #   window_size = "PT15M"
-      #   dimension   = [],
-      # }, TODO: Enable when production ready
+      server_errors = {
+        aggregation = "Total"
+        metric_name = "ServerErrors"
+        description = "More than 100 Event Hubs server errors occurred in the last 15 minutes"
+        operator    = "GreaterThan"
+        threshold   = 100
+        frequency   = "PT5M"
+        window_size = "PT15M"
+      },
     }
 
     allowed_sources = {

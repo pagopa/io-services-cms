@@ -1,4 +1,5 @@
 import { GenericError, NotFoundError } from "@pagopa/hexagonal-core";
+import { noopLogger } from "@pagopa/hexagonal-core/adapters/logger";
 import { err, ok } from "neverthrow";
 import { describe, expect, it, vi } from "vitest";
 
@@ -63,6 +64,7 @@ describe("makeGetServiceInternalUseCase", () => {
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      noopLogger,
     )({ serviceId: aService.id });
 
     expect(result._unsafeUnwrap()).toEqual(aPublicationService);
@@ -83,6 +85,7 @@ describe("makeGetServiceInternalUseCase", () => {
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      noopLogger,
     )({ serviceId: aService.id });
 
     expect(result._unsafeUnwrap()).toEqual(aLifecycleService);
@@ -102,6 +105,7 @@ describe("makeGetServiceInternalUseCase", () => {
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      noopLogger,
     )({ serviceId: aService.id });
 
     expect(result._unsafeUnwrapErr()).toBe(lifecycleError);
@@ -119,6 +123,7 @@ describe("makeGetServiceInternalUseCase", () => {
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      noopLogger,
     )({ serviceId: aService.id });
 
     expect(result._unsafeUnwrapErr()).toBe(publicationError);
@@ -138,6 +143,7 @@ describe("makeGetServiceInternalUseCase", () => {
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      noopLogger,
     )({ serviceId: aService.id });
 
     expect(result._unsafeUnwrapErr()).toBe(lifecycleError);
@@ -165,6 +171,7 @@ describe("makeGetServiceInternalUseCase", () => {
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      noopLogger,
     )({ serviceId: aService.id });
 
     expect(result._unsafeUnwrap().data.metadata).toEqual({
@@ -191,13 +198,23 @@ describe("makeGetServiceInternalUseCase", () => {
     vi.mocked(topicRepository.get).mockResolvedValue(
       err(new NotFoundError("ServiceTopic", "42")),
     );
+    const logger = { ...noopLogger, warn: vi.fn() };
 
     const result = await makeGetServiceInternalUseCase(
       publicationRepository,
       lifecycleRepository,
       topicRepository,
+      logger,
     )({ serviceId: aService.id });
 
     expect(result._unsafeUnwrapErr()).toBeInstanceOf(GenericError);
+    expect(logger.warn).toHaveBeenCalledWith(
+      "Service references missing topic",
+      {
+        operation: "enrichServiceWithTopic",
+        serviceId: aService.id,
+        topicId: 42,
+      },
+    );
   });
 });
