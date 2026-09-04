@@ -33,7 +33,7 @@ jobs:
         startsWith(github.event.release.tag_name, 'io-services-app-backend@')
       )
     name: Deploy io-services-app-backend
-    uses: pagopa/dx/.github/workflows/release-azure-appsvc-v1.yaml@main
+    uses: pagopa/dx/.github/workflows/release-azure-appsvc-v1.yaml@723b8233cd9c48bac7cc9e796471d4e12d4f8e5c # main
     with:
       environment: app-prod
       resource_group_name: 'io-p-itn-svc-rg-01'
