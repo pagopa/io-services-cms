@@ -12,7 +12,7 @@ on:
 
 jobs:
   tf_analysis:
-    uses: pagopa/dx/.github/workflows/static_analysis.yaml@main
+    uses: pagopa/dx/.github/workflows/static_analysis.yaml@723b8233cd9c48bac7cc9e796471d4e12d4f8e5c # main
     name: Terraform Validation
     secrets: inherit
     with:
