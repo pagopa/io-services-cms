@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.9.0
+
+### Minor Changes
+
+- e53618f7: Included ui related to minor enabled services
+
 ## 2.8.0
 
 ### Minor Changes
