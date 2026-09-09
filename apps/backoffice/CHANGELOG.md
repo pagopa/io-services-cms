@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.9.1
+
+### Patch Changes
+
+- ee4a61e2: Update @pagopa/azure-tracing
+
 ## 2.9.0
 
 ### Minor Changes
