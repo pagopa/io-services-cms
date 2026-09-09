@@ -6,6 +6,7 @@ catalog:
   axios: ^1.6.5
   prettier: ^3.5.3
   '@pagopa/io-functions-commons': ^30.0.0
+  '@pagopa/azure-tracing': ^0.5.5
   '@azure/functions': ^4.11.2
   '@types/node': ^22
   '@azure/storage-blob': ^12.31.0
