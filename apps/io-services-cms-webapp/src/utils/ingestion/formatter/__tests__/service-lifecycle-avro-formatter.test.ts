@@ -4,6 +4,7 @@ import * as E from "fp-ts/lib/Either";
 import { describe, expect, it } from "vitest";
 import { serviceLifecycle as avroServiceLifecycle } from "../../../../generated/avro/dto/serviceLifecycle";
 import { avroServiceLifecycleFormatter } from "../service-lifecycle-avro-formatter";
+import { Age } from "@io-services-cms/models/service-lifecycle/definitions";
 
 const avroType = avro.Type.forSchema(
   avroServiceLifecycle.schema as avro.Schema,
@@ -62,6 +63,7 @@ describe("Service Lifecycle Avro Formatter", () => {
           require_secure_channel: false,
           max_allowed_payment_amount: 123,
           institution_id: null,
+          age: null,
           organization: {
             name: "anOrganizationName",
             fiscal_code: "12345678901",
@@ -94,6 +96,42 @@ describe("Service Lifecycle Avro Formatter", () => {
         modified_at: aServiceLifecycleCosmosResource.modified_at,
         version: "aServiceEtag",
       });
+    }
+  });
+
+  it("should format age when present", () => {
+    const res = avroServiceLifecycleFormatter({
+      ...aServiceLifecycleCosmosResource,
+      data: {
+        ...aServiceLifecycleCosmosResource.data,
+        age: { min: 14, max: 65 } as unknown as Age,
+      },
+    });
+
+    expect(E.isRight(res)).toBeTruthy();
+
+    if (E.isRight(res)) {
+      const body = avroType.fromBuffer(res.right.body);
+
+      expect(body.data.age).toEqual({ min: 14, max: 65 });
+    }
+  });
+
+  it("should format a partial age range", () => {
+    const res = avroServiceLifecycleFormatter({
+      ...aServiceLifecycleCosmosResource,
+      data: {
+        ...aServiceLifecycleCosmosResource.data,
+        age: { min: 14 } as unknown as Age,
+      },
+    });
+
+    expect(E.isRight(res)).toBeTruthy();
+
+    if (E.isRight(res)) {
+      const body = avroType.fromBuffer(res.right.body);
+
+      expect(body.data.age).toEqual({ min: 14, max: null });
     }
   });
 
