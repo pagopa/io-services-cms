@@ -16,6 +16,7 @@ export const buildAvroServicePublicationObject = (
   servicePublicationCosmosRecord: ServicePublication.CosmosResource,
 ): Omit<avroServicePublication, "schema" | "subject"> => ({
   data: {
+    age: servicePublicationCosmosRecord.data.age,
     authorized_cidrs: servicePublicationCosmosRecord.data.authorized_cidrs,
     authorized_recipients:
       servicePublicationCosmosRecord.data.authorized_recipients,
