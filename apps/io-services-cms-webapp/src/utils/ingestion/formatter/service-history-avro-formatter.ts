@@ -17,6 +17,7 @@ export const buildAvroServiceHistoryObject = (
   // eslint-disable-next-line no-console, no-underscore-dangle
   ({
     data: {
+      age: serviceHistoryCosmosRecord.data.age,
       authorized_cidrs: serviceHistoryCosmosRecord.data.authorized_cidrs,
 
       authorized_recipients:
