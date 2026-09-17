@@ -69,7 +69,7 @@ const getServiceInternalStatusSchema = z.union([
     ]),
   }),
   z.object({
-    reason: z.string(),
+    reason: z.string().optional(),
     value: z.literal("rejected"),
   }),
 ]);

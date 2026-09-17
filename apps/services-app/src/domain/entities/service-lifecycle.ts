@@ -9,16 +9,16 @@ const transitionSchema = z.object({
 const lifecycleFsmSchema = z.discriminatedUnion("state", [
   transitionSchema.extend({ state: z.literal("draft") }),
   transitionSchema.extend({
-    autoPublish: z.boolean(),
+    autoPublish: z.boolean().optional(),
     state: z.literal("submitted"),
   }),
   transitionSchema.extend({
-    approvalDate: z.string(),
-    autoPublish: z.boolean(),
+    approvalDate: z.string().optional(),
+    autoPublish: z.boolean().optional(),
     state: z.literal("approved"),
   }),
   transitionSchema.extend({
-    reason: z.string(),
+    reason: z.string().optional(),
     state: z.literal("rejected"),
   }),
   transitionSchema.extend({ state: z.literal("deleted") }),
