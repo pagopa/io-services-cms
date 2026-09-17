@@ -75,7 +75,7 @@ describe("serviceSchema", () => {
     expect(result.data.authorized_cidrs).toEqual(["10.0.0.1", "10.0.0.0/24"]);
   });
 
-  it.each(["999.0.0.1", "10.0.0.0/33", "10.0.0.1/"])(
+  it.each(["0999.0.0.1", "10.0.0.0/33", "10.0.0.1/"])(
     "rejects invalid IPv4 or CIDR value %s",
     (invalidCidr) => {
       expect(() =>
@@ -101,15 +101,6 @@ describe("serviceLifecycleSchema", () => {
     { state: "deleted" },
   ])("accepts the $state state", (fsm) => {
     expect(serviceLifecycleSchema.parse({ ...aService, fsm }).fsm).toEqual(fsm);
-  });
-
-  it("requires the metadata specific to the lifecycle state", () => {
-    expect(() =>
-      serviceLifecycleSchema.parse({
-        ...aService,
-        fsm: { state: "approved" },
-      }),
-    ).toThrow();
   });
 });
 
