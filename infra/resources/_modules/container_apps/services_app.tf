@@ -52,9 +52,28 @@ module "services_ca" {
   container_port = 3000
   autoscaler = {
     replicas = {
-      minimum = 0
+      minimum = 1
       maximum = 8
     }
+
+    custom_scalers = [
+      {
+        name             = "cpu-scaling-rule"
+        custom_rule_type = "cpu"
+        metadata = {
+          type  = "Utilization"
+          value = "60"
+        }
+      },
+      {
+        name             = "memory-scaling-rule"
+        custom_rule_type = "memory"
+        metadata = {
+          type  = "Utilization"
+          value = "70"
+        }
+      }
+    ]
   }
 
   resource_group_name = var.resource_group_name
