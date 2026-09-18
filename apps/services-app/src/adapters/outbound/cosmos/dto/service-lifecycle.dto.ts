@@ -10,16 +10,16 @@ const cosmosTransitionDtoSchema = z.object({
 const cosmosLifecycleFsmDtoSchema = z.discriminatedUnion("state", [
   cosmosTransitionDtoSchema.extend({ state: z.literal("draft") }),
   cosmosTransitionDtoSchema.extend({
-    autoPublish: z.boolean(),
+    autoPublish: z.boolean().optional(),
     state: z.literal("submitted"),
   }),
   cosmosTransitionDtoSchema.extend({
-    approvalDate: z.string(),
-    autoPublish: z.boolean(),
+    approvalDate: z.string().optional(),
+    autoPublish: z.boolean().optional(),
     state: z.literal("approved"),
   }),
   cosmosTransitionDtoSchema.extend({
-    reason: z.string(),
+    reason: z.string().optional(),
     state: z.literal("rejected"),
   }),
   cosmosTransitionDtoSchema.extend({ state: z.literal("deleted") }),

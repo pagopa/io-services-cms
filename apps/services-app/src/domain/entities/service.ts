@@ -1,6 +1,7 @@
 import { FiscalCodeSchema } from "@pagopa/hexagonal-core";
 import z from "zod";
 
+import { AuthorizedCIDRSchema } from "../value-objects/AuthorizedCIDR.js";
 import { serviceCategorySchema } from "./service-category.js";
 import { serviceScopeSchema } from "./service-scope.js";
 
@@ -42,7 +43,7 @@ export const serviceMetadataSchema = z.object({
 export const serviceSchema = z.object({
   data: z.object({
     age: ageSchema.optional(),
-    authorized_cidrs: z.array(z.ipv4().or(z.cidrv4())).default([]),
+    authorized_cidrs: z.array(AuthorizedCIDRSchema).default([]),
     authorized_recipients: z.array(FiscalCodeSchema).default([]),
     description: z.string().min(1),
     max_allowed_payment_amount: z.int().min(0).max(9_999_999_999).default(0),
@@ -51,7 +52,7 @@ export const serviceSchema = z.object({
     organization: organizationSchema,
     require_secure_channel: z.boolean().default(false),
   }),
-  id: z.ulid(),
+  id: z.string().min(1),
   modified_at: z.int().optional(),
   version: z.string().min(1).optional(),
 });

@@ -145,7 +145,7 @@ describe("mountGetServiceInternalHandler", () => {
 
     const response = await server.inject({
       method: "GET",
-      url: "/api/v1/internal/services/%20",
+      url: "/api/v1/internal/services/",
     });
 
     expect(response.statusCode).toBe(400);

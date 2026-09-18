@@ -3,8 +3,10 @@ import z from "zod";
 
 import type { EnrichedService } from "../../../../domain/entities/enriched-service.js";
 
+import { AuthorizedCIDRSchema } from "../../../../domain/value-objects/AuthorizedCIDR.js";
+
 export const GetServiceInternalPathSchema = z.object({
-  serviceId: z.ulid(),
+  serviceId: z.string().min(1),
 });
 
 const getServiceInternalAgeSchema = z.object({
@@ -45,10 +47,10 @@ const getServiceInternalOrganizationSchema = z.object({
 
 const getServiceInternalOutputSchema = z.object({
   age: getServiceInternalAgeSchema.optional(),
-  authorized_cidrs: z.array(z.ipv4().or(z.cidrv4())),
+  authorized_cidrs: z.array(AuthorizedCIDRSchema),
   authorized_recipients: z.array(FiscalCodeSchema),
   description: z.string().min(1),
-  id: z.ulid(),
+  id: z.string().min(1),
   last_update: z.iso.datetime(),
   max_allowed_payment_amount: z.int().min(0).max(9_999_999_999),
   metadata: getServiceInternalMetadataSchema,
@@ -69,7 +71,7 @@ const getServiceInternalStatusSchema = z.union([
     ]),
   }),
   z.object({
-    reason: z.string(),
+    reason: z.string().optional(),
     value: z.literal("rejected"),
   }),
 ]);

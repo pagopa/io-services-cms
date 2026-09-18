@@ -1,6 +1,8 @@
 import { FiscalCodeSchema } from "@pagopa/hexagonal-core";
 import z from "zod";
 
+import { AuthorizedCIDRSchema } from "../../../../domain/value-objects/AuthorizedCIDR.js";
+
 const cosmosOrganizationFiscalCodeSchema = z.string().regex(/^\d{11}$/);
 const cosmosServiceCategorySchema = z.enum(["STANDARD", "SPECIAL"]);
 const cosmosServiceScopeSchema = z.enum(["NATIONAL", "LOCAL"]);
@@ -38,7 +40,7 @@ export const cosmosServiceDtoSchema = z.object({
         min: z.int().min(0).max(999).optional(),
       })
       .optional(),
-    authorized_cidrs: z.array(z.ipv4().or(z.cidrv4())).default([]),
+    authorized_cidrs: z.array(AuthorizedCIDRSchema).default([]),
     authorized_recipients: z.array(FiscalCodeSchema).default([]),
     description: z.string().min(1),
     max_allowed_payment_amount: z.int().min(0).max(9_999_999_999).default(0),
@@ -52,7 +54,7 @@ export const cosmosServiceDtoSchema = z.object({
     }),
     require_secure_channel: z.boolean().default(false),
   }),
-  id: z.ulid(),
+  id: z.string().min(1),
   modified_at: z.int().optional(),
   version: z.string().min(1).optional(),
 });
