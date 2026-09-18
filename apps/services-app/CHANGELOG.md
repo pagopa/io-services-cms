@@ -1,5 +1,11 @@
 # services-app
 
+## 0.3.0
+
+### Minor Changes
+
+- 9dda108a: Less restrictive ZOD types for serviceId, authorizedCIDRS, and additional FSM metadata
+
 ## 0.2.0
 
 ### Minor Changes
