@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.9.2
+
+### Patch Changes
+
+- d519e23d: updated SVGO to adress CVE-2026-84370
+
 ## 2.9.1
 
 ### Patch Changes
