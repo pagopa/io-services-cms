@@ -58,6 +58,29 @@
             "default": null
           },
           {
+            "name": "age",
+            "type": [
+              "null",
+              {
+                "type": "record",
+                "name": "Age",
+                "fields": [
+                  {
+                    "name": "min",
+                    "type": ["null", "int"],
+                    "default": null
+                  },
+                  {
+                    "name": "max",
+                    "type": ["null", "int"],
+                    "default": null
+                  }
+                ]
+              }
+            ],
+            "default": null
+          },
+          {
             "name": "organization",
             "type": {
               "type": "record",

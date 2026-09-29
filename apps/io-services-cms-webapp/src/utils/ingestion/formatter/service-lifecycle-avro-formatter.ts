@@ -18,6 +18,7 @@ export const buildAvroServiceLifecycleObject = (
   // eslint-disable-next-line no-console, no-underscore-dangle
   ({
     data: {
+      age: serviceLifecycleCosmosRecord.data.age,
       authorized_cidrs: serviceLifecycleCosmosRecord.data.authorized_cidrs,
 
       authorized_recipients:
