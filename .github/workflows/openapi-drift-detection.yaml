@@ -60,7 +60,7 @@ jobs:
       - name: Selfcare OpenAPI drift notification
         if: steps.diff.outputs.has_diff_openapi_selfcare == 'true' && steps.check_slack_webhook.outputs.slack_webhook_set == 'true'
         id: drift_openapi_selfcare_notify
-        uses: pagopa/dx/.github/actions/slack-notification@main
+        uses: pagopa/dx/.github/actions/slack-notification@abb37e552370c4b3e2e5b2601c76a307f421c074 # main
         with:
           id: 'Selfcare OpenAPI drift detected'
           title: ':x: The workflow *OpenAPI Drift Detection* has failed.'
