@@ -1,5 +1,11 @@
 # io-services-cms-backoffice
 
+## 2.9.3
+
+### Patch Changes
+
+- ee87c6b6: updated nextJs to 15.5.26 to adress security issues
+
 ## 2.9.2
 
 ### Patch Changes
