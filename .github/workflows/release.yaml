@@ -15,7 +15,7 @@ jobs:
       contents: write
       id-token: write
       pull-requests: write
-    uses: pagopa/dx/.github/workflows/release-v1.yaml@main
+    uses: pagopa/dx/.github/workflows/release-v1.yaml@8ec64257f46bb8c03509d317b42fbf6a2da2c63a # main
     with:
       environment: release
     secrets:
