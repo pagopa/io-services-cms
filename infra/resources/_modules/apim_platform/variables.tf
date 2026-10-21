@@ -23,3 +23,9 @@ variable "appbe_host_key_for_apim_platform" {
   description = "Services APP Backend Key for APIM Platform"
   sensitive   = true
 }
+
+variable "services_app_hostname" {
+  type        = string
+  description = "Services App Container App ingress hostname, without scheme or path"
+}
+

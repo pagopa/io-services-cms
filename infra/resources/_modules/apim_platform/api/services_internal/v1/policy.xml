@@ -1,0 +1,28 @@
+<policies>
+    <inbound>
+        <base />
+        <!-- Enforce the internal host at API scope, including API-scoped subscriptions. -->
+        <choose>
+            <when condition="@(!context.Request.OriginalUrl.Host.Equals(&quot;{{platform-api-gateway-hostname-internal}}&quot;, StringComparison.OrdinalIgnoreCase))">
+                <return-response>
+                    <set-status code="403" reason="Forbidden" />
+                </return-response>
+            </when>
+        </choose>
+        <set-backend-service backend-id="${backend_id}" />
+        <!-- Replace only the leading services prefix, preserving every operation's suffix. -->
+        <rewrite-uri template="@(System.Text.RegularExpressions.Regex.Replace(context.Request.OriginalUrl.Path, &quot;^/api/services/internal/v1/services(?=/|$)&quot;, &quot;/api/v1/internal/services&quot;, System.Text.RegularExpressions.RegexOptions.IgnoreCase))" copy-unmatched-params="false" />
+        <!-- APIM validates subscriptions before inbound policies; do not forward their keys. -->
+        <set-header name="Ocp-Apim-Subscription-Key" exists-action="delete" />
+        <set-query-parameter name="subscription-key" exists-action="delete" />
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
