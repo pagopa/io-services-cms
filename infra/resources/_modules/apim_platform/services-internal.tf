@@ -35,7 +35,7 @@ resource "azurerm_api_management_product" "services_internal" {
   display_name          = "IO Services Internal"
   description           = "Subscription-protected APIs for internal IO service consumers"
   subscription_required = true
-  approval_required     = true
+  approval_required     = false
   published             = false
 }
 
