@@ -1,0 +1,24 @@
+meta {
+  name: GetServiceInternalAPIM
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{services-internal-base-url}}/services/:serviceId
+  body: none
+  auth: none
+}
+
+headers {
+  Ocp-Apim-Subscription-Key: {{services-internal-subscription-key}}
+}
+
+params:path {
+  serviceId: aServiceId
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -301,4 +301,6 @@ module "apim_platform" {
   app_backend_hostnames            = [module.function_app.app_be_fn_default_hostname]
   app_backend_name                 = module.function_app.app_be_fn_name
   appbe_host_key_for_apim_platform = module.key_vault.secrets_value.appbe_host_key_for_apim_platform
+
+  services_app_hostname = module.container_apps.services_app_hostname
 }
