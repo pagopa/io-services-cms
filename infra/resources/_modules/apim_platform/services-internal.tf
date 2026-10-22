@@ -76,3 +76,14 @@ resource "azurerm_api_management_api_policy" "services_internal" {
     backend_id = azurerm_api_management_backend.services_internal.name
   })
 }
+
+resource "azurerm_api_management_api_operation_policy" "get_service_internal" {
+  api_name            = azurerm_api_management_api.services_internal.name
+  api_management_name = var.api_management.name
+  resource_group_name = var.api_management.resource_group_name
+  operation_id        = "getServiceInternal"
+
+  xml_content = file("${path.module}/api/services_internal/v1/getserviceinternal_policy/policy.xml")
+
+  depends_on = [azurerm_api_management_api_policy.services_internal]
+}
