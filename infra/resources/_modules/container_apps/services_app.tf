@@ -52,7 +52,7 @@ module "services_ca" {
   container_port = 3000
   autoscaler = {
     replicas = {
-      minimum = 1
+      minimum = 3
       maximum = 8
     }
 
