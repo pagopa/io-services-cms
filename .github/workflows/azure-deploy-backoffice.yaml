@@ -33,7 +33,7 @@ jobs:
         startsWith(github.event.release.tag_name, 'io-services-cms-backoffice@')
       )
     name: Deploy io-services-cms-backoffice
-    uses: pagopa/dx/.github/workflows/release-azure-appsvc-v1.yaml@main
+    uses: pagopa/dx/.github/workflows/release-azure-appsvc-v1.yaml@dea3cc35e4d6a26cc8aa3b08ab22d48c0f958f77 # main
     with:
       environment: app-prod
       resource_group_name: 'io-p-itn-svc-rg-01'
