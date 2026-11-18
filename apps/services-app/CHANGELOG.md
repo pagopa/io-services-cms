@@ -1,5 +1,11 @@
 # services-app
 
+## 0.3.1
+
+### Patch Changes
+
+- 3bb1c53c: Update Node image in Dockerfile
+
 ## 0.3.0
 
 ### Minor Changes
